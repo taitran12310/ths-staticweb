@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bài tập buổi 5 — Khảo sát quy trình và hồ sơ biểu mẫu cho ứng dụng theo dõi sức khỏe cá nhân">
+  <title>Bài tập buổi 5 — Khảo sát phát triển phần mềm sức khỏe</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #06141a;
+      --ink: #0c1a22;
+      --muted: #4a6270;
+      --soft: #eef6f4;
+      --line: #d2e3dc;
+      --accent: #0d9488;
+      --accent-2: #b45309;
+      --accent-3: #0369a1;
+      --card: rgba(255, 255, 255, 0.9);
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background:
+        radial-gradient(1100px 680px at 8% -12%, #115e59 0%, transparent 55%),
+        radial-gradient(900px 560px at 100% 0%, #9a3412 0%, transparent 42%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 1rem; top: 1rem; z-index: 99;
+      background: #fff; padding: .5rem .8rem; border-radius: 8px;
+    }
+
+    .stage {
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 1.1rem;
+    }
+
+    .deck {
+      width: min(1320px, 100%);
+      aspect-ratio: 16 / 9;
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      background: #f6fbf9;
+      isolation: isolate;
+    }
+
+    .deck::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(13, 148, 136, 0.08), transparent 40%),
+        linear-gradient(320deg, rgba(180, 83, 9, 0.07), transparent 35%),
+        repeating-linear-gradient(
+          -12deg,
+          transparent,
+          transparent 22px,
+          rgba(15, 23, 42, 0.015) 22px,
+          rgba(15, 23, 42, 0.015) 23px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 2.6rem 3.2rem 4.2rem;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(28px);
+      transition:
+        opacity 0.35s ease,
+        transform 0.35s ease,
+        visibility 0.35s;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateX(0);
+      z-index: 2;
+    }
+
+    .reveal > * {
+      opacity: 0;
+      transform: translateY(18px);
+      transition:
+        opacity 0.45s cubic-bezier(.22, 1, .36, 1),
+        transform 0.55s cubic-bezier(.22, 1, .36, 1);
+    }
+    .slide.active .reveal > *:nth-child(1) { transition-delay: 0.08s; }
+    .slide.active .reveal > *:nth-child(2) { transition-delay: 0.16s; }
+    .slide.active .reveal > *:nth-child(3) { transition-delay: 0.24s; }
+    .slide.active .reveal > *:nth-child(4) { transition-delay: 0.32s; }
+    .slide.active .reveal > *:nth-child(5) { transition-delay: 0.40s; }
+    .slide.active .reveal > *:nth-child(6) { transition-delay: 0.48s; }
+    .slide.active .reveal > *:nth-child(7) { transition-delay: 0.56s; }
+    .slide.active .reveal > * {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.65rem;
+    }
+    .slide-label::before {
+      content: "";
+      width: 1.4rem;
+      height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    h1, h2 {
+      font-family: "Fraunces", Georgia, serif;
+      margin: 0;
+      line-height: 1.12;
+      letter-spacing: -0.025em;
+      color: var(--ink);
+    }
+    h1 { font-size: clamp(2rem, 3.4vw, 2.75rem); }
+    h2 { font-size: clamp(1.55rem, 2.7vw, 2.2rem); max-width: 30ch; }
+
+    .lead {
+      margin: 0.85rem 0 0;
+      font-size: clamp(1.02rem, 1.5vw, 1.22rem);
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 62ch;
+    }
+
+    ul.bullets {
+      margin: 1rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.65rem;
+    }
+    ul.bullets li {
+      position: relative;
+      padding-left: 1.35rem;
+      font-size: clamp(0.98rem, 1.35vw, 1.15rem);
+      line-height: 1.4;
+      max-width: 64ch;
+    }
+    ul.bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #2dd4bf);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.12);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.1rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.25s ease;
+    }
+    .card.has-detail {
+      cursor: help;
+    }
+    .slide.active .card:hover,
+    .slide.active .card.is-open {
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+      z-index: 4;
+    }
+    .card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .card p, .card li {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .card ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.1rem;
+    }
+    .card.cool {
+      background: linear-gradient(160deg, #ecfdf5, #fff);
+      border-color: #99f6e4;
+    }
+    .card.hot {
+      background: linear-gradient(160deg, #fff7ed, #fff);
+      border-color: #fdba74;
+    }
+    .card.blue {
+      background: linear-gradient(160deg, #eff6ff, #fff);
+      border-color: #93c5fd;
+    }
+    .card.ink {
+      background: linear-gradient(145deg, #0f172a, #115e59);
+      color: #ecfeff;
+      border: 0;
+    }
+    .card.ink h3 { color: #5eead4; }
+    .card.ink p, .card.ink li { color: #e2e8f0; }
+    .card.ink .more-hint { color: #5eead4; }
+    .card.ink .detail {
+      background: linear-gradient(160deg, #0f172a, #134e4a);
+      border-color: rgba(94, 234, 212, 0.35);
+      color: #e2e8f0;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+    .card.ink .detail-inner { color: #cbd5e1; }
+    .card.ink .detail-inner strong { color: #99f6e4; }
+    .card.ink .detail-title { color: #5eead4; }
+
+    .more-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.65rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--accent);
+      opacity: 0.7;
+      transition: opacity 0.25s ease, color 0.25s ease;
+    }
+    .more-hint::before {
+      content: "i";
+      display: inline-grid;
+      place-items: center;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      font-size: 0.68rem;
+      font-weight: 800;
+      font-style: italic;
+      background: rgba(13, 148, 136, 0.12);
+    }
+    .has-detail:hover .more-hint,
+    .has-detail:focus-within .more-hint,
+    .has-detail.is-open .more-hint {
+      opacity: 1;
+      color: var(--accent-2);
+    }
+
+    /* Popup overlay trong card — không đẩy layout, không bị clip */
+    .detail {
+      position: absolute;
+      inset: 0.45rem;
+      z-index: 30;
+      margin: 0;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid #99f6e4;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.96);
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(.22, 1, .36, 1),
+        visibility 0.2s;
+    }
+    .has-detail:hover .detail,
+    .has-detail:focus-within .detail,
+    .has-detail.is-open .detail {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+    .detail-title {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .detail-inner {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.4;
+      overflow: auto;
+      max-height: 100%;
+    }
+    .detail-inner strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .detail-inner ul {
+      margin: 0.35rem 0 0;
+      padding-left: 1.05rem;
+    }
+    .detail-inner li + li { margin-top: 0.25rem; }
+
+    .title-slide {
+      justify-content: center;
+      background:
+        radial-gradient(700px 420px at 12% 18%, rgba(45, 212, 191, 0.22), transparent 60%),
+        radial-gradient(560px 380px at 90% 80%, rgba(251, 146, 60, 0.16), transparent 55%),
+        linear-gradient(150deg, #f0fdfa 0%, #fff7ed 48%, #ffffff 100%);
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(2px);
+      opacity: 0.55;
+      animation: float 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .orb.a { width: 180px; height: 180px; background: #99f6e4; top: 8%; right: 10%; }
+    .orb.b { width: 120px; height: 120px; background: #fdba74; bottom: 18%; left: 8%; animation-delay: 1.2s; }
+    .orb.c { width: 70px; height: 70px; background: #7dd3fc; top: 42%; right: 28%; animation-delay: 2s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-18px) scale(1.05); }
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--accent);
+      border: 1px solid rgba(13, 148, 136, 0.18);
+    }
+    .badge.alt {
+      background: rgba(180, 83, 9, 0.1);
+      color: var(--accent-2);
+      border-color: rgba(180, 83, 9, 0.2);
+    }
+
+    .meta {
+      margin-top: 1.4rem;
+      display: grid;
+      gap: 0.35rem;
+      font-size: 1.02rem;
+      color: var(--muted);
+    }
+    .meta strong { color: var(--ink); font-weight: 600; }
+
+    .agenda {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem 1.2rem;
+      margin-top: 1.15rem;
+    }
+    .agenda-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem 0.9rem;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      cursor: pointer;
+    }
+    .agenda-item .n {
+      width: 2rem; height: 2rem;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), #0f766e);
+      font-size: 0.95rem;
+    }
+    .agenda-item:nth-child(even) .n {
+      background: linear-gradient(135deg, var(--accent-2), #ea580c);
+    }
+    .agenda-item strong { display: block; font-size: 1.02rem; }
+    .agenda-item span { font-size: 0.9rem; color: var(--muted); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.55rem;
+      margin-top: 1.15rem;
+      align-items: stretch;
+    }
+    .flow-step {
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem 0.7rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.25s ease;
+    }
+    .flow-step.has-detail { cursor: help; }
+    .slide.active .flow-step:hover,
+    .slide.active .flow-step.is-open {
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+      border-color: #5eead4;
+      z-index: 4;
+    }
+    .flow-step .n {
+      width: 1.7rem;
+      height: 1.7rem;
+      margin: 0 auto 0.45rem;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), #0f766e);
+    }
+    .flow-step strong {
+      display: block;
+      font-size: 0.92rem;
+      line-height: 1.3;
+    }
+    .flow-step > span {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+    .flow-step .detail {
+      inset: 0.3rem;
+      padding: 0.65rem 0.7rem;
+      text-align: left;
+    }
+    .flow-step .detail-inner {
+      font-size: 0.76rem;
+    }
+    .flow-step .more-hint {
+      justify-content: center;
+      margin-top: 0.45rem;
+    }
+
+    .table-wrap {
+      position: relative;
+      margin-top: 1rem;
+      overflow: visible;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th, td {
+      padding: 0.7rem 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      line-height: 1.35;
+    }
+    th {
+      background: #ecfdf5;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    tr:nth-child(even) td { background: #f8fbfa; }
+    tr.has-detail {
+      cursor: help;
+      transition: background 0.25s ease;
+    }
+    tr.has-detail:hover td,
+    tr.has-detail:focus-within td,
+    tr.has-detail.is-open td {
+      background: #ecfdf5;
+    }
+    tr.has-detail td:first-child {
+      position: relative;
+    }
+    .row-detail {
+      position: absolute;
+      left: 0.45rem;
+      right: 0.45rem;
+      top: 0.35rem;
+      bottom: 0.35rem;
+      z-index: 40;
+      width: auto;
+      margin: 0;
+      padding: 0.55rem 0.7rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #99f6e4;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.35;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.97);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    }
+    tr.has-detail:hover .row-detail,
+    tr.has-detail:focus-within .row-detail,
+    tr.has-detail.is-open .row-detail {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+    .row-detail strong { color: var(--ink); }
+
+    .qa-hero {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+    .qa-hero .inner {
+      max-width: 36rem;
+    }
+    .qa-hero strong {
+      display: block;
+      font-family: "Fraunces", Georgia, serif;
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      letter-spacing: -0.03em;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .qa-hero p {
+      margin: 0.9rem 0 0;
+      font-size: 1.15rem;
+      color: var(--muted);
+    }
+
+    .footer-bar {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1.4rem;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--line);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .footer-bar > span:last-child { text-align: right; }
+    .progress-track {
+      width: min(220px, 28vw);
+      height: 4px;
+      border-radius: 99px;
+      background: #dce8e4;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.35s ease;
+    }
+
+    .nav {
+      position: fixed;
+      right: 1.2rem;
+      bottom: 1.2rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 20;
+    }
+    .nav button {
+      width: 2.8rem;
+      height: 2.8rem;
+      border: 0;
+      border-radius: 14px;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(145deg, #0f766e, #115e59);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+    .nav button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .nav button:focus-visible {
+      outline: 2px solid #5eead4;
+      outline-offset: 3px;
+    }
+
+    .hint {
+      position: fixed;
+      left: 1.2rem;
+      bottom: 1.2rem;
+      margin: 0;
+      font-size: 0.78rem;
+      color: rgba(226, 232, 240, 0.65);
+      z-index: 20;
+    }
+    .hint kbd {
+      display: inline-block;
+      padding: 0.1rem 0.35rem;
+      border-radius: 5px;
+      border: 1px solid rgba(226, 232, 240, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 0.72rem;
+    }
+
+    .members {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1.2rem;
+    }
+    .member {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+      text-align: center;
+    }
+    .member strong {
+      display: block;
+      font-size: 1.05rem;
+    }
+    .member span {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.55rem;
+    }
+    .pill {
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #ecfdf5;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+    }
+    .pill.warn {
+      background: #fff7ed;
+      color: #c2410c;
+      border-color: #fdba74;
+    }
+    .pill.blue {
+      background: #eff6ff;
+      color: #0369a1;
+      border-color: #93c5fd;
+    }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .stage { padding: 0.6rem; min-height: auto; }
+      .deck {
+        aspect-ratio: auto;
+        min-height: 100dvh;
+        border-radius: 14px;
+      }
+      .slide { padding: 1.4rem 1.2rem 4.5rem; position: relative; opacity: 1; visibility: visible; transform: none; pointer-events: auto; display: none; }
+      .slide.active { display: flex; }
+      .grid-2, .grid-3, .agenda, .flow, .members { grid-template-columns: 1fr; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+  <main class="stage" id="main-content">
+    <div class="deck" role="region" aria-roledescription="carousel" aria-label="Slide bài tập buổi 5">
+
+      <!-- 1. Title -->
+      <section class="slide title-slide active" aria-label="Trang tiêu đề">
+        <span class="orb a" aria-hidden="true"></span>
+        <span class="orb b" aria-hidden="true"></span>
+        <span class="orb c" aria-hidden="true"></span>
+        <div class="reveal">
+          <div class="badge-row">
+            <span class="badge">CNPM tiên tiến</span>
+            <span class="badge alt">Bài tập buổi 5</span>
+          </div>
+          <h1>Khảo sát quy trình &amp; hồ sơ biểu mẫu</h1>
+          <p class="lead">
+            Phát triển <strong>Ứng dụng hỗ trợ theo dõi sức khỏe cá nhân</strong>:
+            theo dõi chỉ số, cảnh báo nguy cơ bệnh, đề xuất menu ăn uống cá nhân hóa.
+          </p>
+          <div class="meta">
+            <div><strong>Nhóm trình bày:</strong> Nhóm 4</div>
+            <div>Trần Tuấn Tài · La Hoàng Tú · Võ Văn Hải</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Agenda -->
+      <section class="slide" aria-label="Nội dung trình bày">
+        <div class="reveal">
+          <p class="slide-label">Mục lục</p>
+          <h2>Nội dung trình bày</h2>
+          <div class="agenda">
+            <div class="agenda-item" data-goto="3">
+              <span class="n">01</span>
+              <div><strong>Phạm vi ứng dụng</strong><span>Chức năng &amp; đối tượng khảo sát</span></div>
+            </div>
+            <div class="agenda-item" data-goto="4">
+              <span class="n">02</span>
+              <div><strong>Quy trình cần khảo sát</strong><span>5 nhóm quy trình nghiệp vụ</span></div>
+            </div>
+            <div class="agenda-item" data-goto="6">
+              <span class="n">03</span>
+              <div><strong>Hồ sơ / biểu mẫu</strong><span>Tài liệu thu thập khi khảo sát</span></div>
+            </div>
+            <div class="agenda-item" data-goto="8">
+              <span class="n">04</span>
+              <div><strong>Ánh xạ &amp; kết luận</strong><span>Quy trình ↔ biểu mẫu</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. App scope -->
+      <section class="slide" aria-label="Phạm vi ứng dụng">
+        <div class="reveal">
+          <p class="slide-label">Bối cảnh</p>
+          <h2>Ứng dụng theo dõi sức khỏe cá nhân</h2>
+          <p class="lead">Ba trụ cột chức năng cần khảo sát trước khi phát triển.</p>
+          <div class="grid-3">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>1. Theo dõi chỉ số</h3>
+              <p>Thu thập, lưu trữ và trực quan hóa các chỉ số sức khỏe theo thời gian.</p>
+              <div class="pill-list">
+                <span class="pill">BMI</span>
+                <span class="pill">Huyết áp</span>
+                <span class="pill">Đường huyết</span>
+                <span class="pill">Nhịp tim</span>
+              </div>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Cần khảo sát thêm:</strong>
+                  <ul>
+                    <li>Tần suất đo thực tế (ngày/tuần) và nguồn dữ liệu (tay, máy đo, wearables).</li>
+                    <li>Cách người dùng hiện đang ghi chép (sổ, Excel, app khác).</li>
+                    <li>Chỉ số ưu tiên theo nhóm tuổi / bệnh nền.</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+            <article class="card hot has-detail" tabindex="0">
+              <h3>2. Cảnh báo nguy cơ</h3>
+              <p>Phát hiện chỉ số vượt ngưỡng, cảnh báo sớm nguy cơ dẫn đến bệnh.</p>
+              <div class="pill-list">
+                <span class="pill warn">Ngưỡng y khoa</span>
+                <span class="pill warn">Mức độ rủi ro</span>
+              </div>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Cần khảo sát thêm:</strong>
+                  <ul>
+                    <li>Guideline ngưỡng theo WHO/Bộ Y tế và ngoại lệ cá nhân hóa.</li>
+                    <li>Kênh cảnh báo: in-app, push, SMS, email; mức độ khẩn.</li>
+                    <li>Hành động sau cảnh báo (đo lại, lời khuyên, liên hệ bác sĩ).</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+            <article class="card blue has-detail" tabindex="0">
+              <h3>3. Menu cá nhân hóa</h3>
+              <p>Đề xuất thực đơn dựa trên hồ sơ sức khỏe, dị ứng và mục tiêu dinh dưỡng.</p>
+              <div class="pill-list">
+                <span class="pill blue">Calories</span>
+                <span class="pill blue">Dị ứng</span>
+                <span class="pill blue">Mục tiêu</span>
+              </div>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Cần khảo sát thêm:</strong>
+                  <ul>
+                    <li>Ràng buộc: dị ứng, tôn giáo, ăn chay, ngân sách, thói quen địa phương.</li>
+                    <li>Mức độ tự động đề xuất vs. chỉnh tay của người dùng.</li>
+                    <li>Liên kết menu với chỉ số (đường huyết cao → giảm đường/tinh bột).</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Stakeholders -->
+      <section class="slide" aria-label="Đối tượng khảo sát">
+        <div class="reveal">
+          <p class="slide-label">Stakeholder</p>
+          <h2>Ai cần được khảo sát?</h2>
+          <div class="grid-2" style="margin-top:1.15rem">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>Người dùng cuối</h3>
+              <ul>
+                <li>Người theo dõi sức khỏe chủ động</li>
+                <li>Người có bệnh nền / nguy cơ cao</li>
+                <li>Người đang giảm cân / tăng cơ</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Câu hỏi khảo sát gợi ý:</strong>
+                  <ul>
+                    <li>Bạn theo dõi chỉ số nào, bằng công cụ gì, bao lâu một lần?</li>
+                    <li>Khi chỉ số bất thường bạn thường làm gì?</li>
+                    <li>Bạn có sẵn sàng chia sẻ dữ liệu với bác sĩ / người thân không?</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+            <article class="card blue has-detail" tabindex="0">
+              <h3>Chuyên gia &amp; nghiệp vụ</h3>
+              <ul>
+                <li>Bác sĩ / y tá tư vấn</li>
+                <li>Chuyên gia dinh dưỡng</li>
+                <li>Quản trị hệ thống &amp; bảo mật dữ liệu</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Câu hỏi khảo sát gợi ý:</strong>
+                  <ul>
+                    <li>Ngưỡng nào cần cảnh báo? Khi nào bắt buộc tư vấn trực tiếp?</li>
+                    <li>Quy tắc thực đơn an toàn tối thiểu cho từng nhóm bệnh?</li>
+                    <li>Yêu cầu lưu trữ, mã hóa, audit log với dữ liệu sức khỏe?</li>
+                  </ul>
+                </div>
+              </div>
+            </article>
+          </div>
+          <ul class="bullets">
+            <li>Khảo sát cả <strong>hiện trạng (as-is)</strong> và <strong>kỳ vọng (to-be)</strong> để tránh bỏ sót quy trình.</li>
+            <li>Ưu tiên dữ liệu sức khỏe nhạy cảm → khảo sát sớm về <strong>đồng ý &amp; quyền riêng tư</strong>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 5. Survey processes overview -->
+      <section class="slide" aria-label="Tổng quan quy trình khảo sát">
+        <div class="reveal">
+          <p class="slide-label">Quy trình cần khảo sát</p>
+          <h2>5 nhóm quy trình nghiệp vụ</h2>
+          <div class="flow">
+            <div class="flow-step has-detail" tabindex="0">
+              <div class="n">1</div>
+              <strong>Hồ sơ cá nhân</strong>
+              <span>Đăng ký, hồ sơ sức khỏe nền</span>
+              <span class="more-hint">Chi tiết</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Ai tạo hồ sơ? Trường bắt buộc? Cập nhật định kỳ thế nào? Ai được chỉnh sửa?
+                </div>
+              </div>
+            </div>
+            <div class="flow-step has-detail" tabindex="0">
+              <div class="n">2</div>
+              <strong>Thu thập chỉ số</strong>
+              <span>Nhập tay / thiết bị đeo</span>
+              <span class="more-hint">Chi tiết</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Lịch đo, đơn vị, kiểm tra hợp lệ, xử lý khi thiếu dữ liệu hoặc đo sai.
+                </div>
+              </div>
+            </div>
+            <div class="flow-step has-detail" tabindex="0">
+              <div class="n">3</div>
+              <strong>Cảnh báo</strong>
+              <span>Ngưỡng, mức độ, phản hồi</span>
+              <span class="more-hint">Chi tiết</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Rule kích hoạt, độ trễ cảnh báo, escalation khi bỏ qua, ghi log phản hồi.
+                </div>
+              </div>
+            </div>
+            <div class="flow-step has-detail" tabindex="0">
+              <div class="n">4</div>
+              <strong>Dinh dưỡng</strong>
+              <span>Nhật ký ăn &amp; đề xuất menu</span>
+              <span class="more-hint">Chi tiết</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Input khẩu phần, ràng buộc dị ứng, chu kỳ sinh thực đơn, phản hồi “thích/không”.
+                </div>
+              </div>
+            </div>
+            <div class="flow-step has-detail" tabindex="0">
+              <div class="n">5</div>
+              <strong>Bảo mật</strong>
+              <span>Đồng ý, chia sẻ, lưu trữ</span>
+              <span class="more-hint">Chi tiết</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Consent, quyền xem/xóa, chia sẻ báo cáo, thời hạn lưu, xử lý sự cố lộ dữ liệu.
+                </div>
+              </div>
+            </div>
+          </div>
+          <ul class="bullets">
+            <li>Mỗi nhóm quy trình phải làm rõ: <strong>ai làm</strong>, <strong>làm gì</strong>, <strong>dữ liệu vào/ra</strong>, <strong>ngoại lệ</strong>.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 6. Process details 1 -->
+      <section class="slide" aria-label="Chi tiết quy trình 1-3">
+        <div class="reveal">
+          <p class="slide-label">Quy trình · phần 1</p>
+          <h2>Hồ sơ · Chỉ số · Cảnh báo</h2>
+          <div class="grid-3">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>1. Quản lý hồ sơ sức khỏe</h3>
+              <ul>
+                <li>Tạo / cập nhật hồ sơ cá nhân</li>
+                <li>Khai báo bệnh nền, thuốc đang dùng</li>
+                <li>Mục tiêu sức khỏe (giảm cân, kiểm soát đường huyết…)</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Đầu vào / đầu ra:</strong> phiếu hồ sơ, consent → hồ sơ chuẩn hóa.<br>
+                  <strong>Ngoại lệ:</strong> thiếu bệnh nền, đổi thuốc giữa chừng, đa người dùng trên 1 thiết bị.
+                </div>
+              </div>
+            </article>
+            <article class="card blue has-detail" tabindex="0">
+              <h3>2. Theo dõi chỉ số</h3>
+              <ul>
+                <li>Nhập chỉ số định kỳ / theo sự kiện</li>
+                <li>Đồng bộ từ thiết bị đeo (nếu có)</li>
+                <li>Xem xu hướng theo ngày / tuần / tháng</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Đầu vào / đầu ra:</strong> nhật ký đo, API thiết bị → biểu đồ &amp; báo cáo.<br>
+                  <strong>Ngoại lệ:</strong> giá trị bất thường, mất kết nối wearables, đo trùng thời điểm.
+                </div>
+              </div>
+            </article>
+            <article class="card hot has-detail" tabindex="0">
+              <h3>3. Cảnh báo nguy cơ</h3>
+              <ul>
+                <li>So sánh chỉ số với ngưỡng chuẩn</li>
+                <li>Phân mức: theo dõi / cảnh báo / khẩn</li>
+                <li>Gợi ý hành động (tái đo, liên hệ bác sĩ)</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Đầu vào / đầu ra:</strong> chỉ số + bảng ngưỡng → thông báo &amp; checklist hành động.<br>
+                  <strong>Ngoại lệ:</strong> false alarm, người dùng tắt thông báo, cần xác nhận chuyên gia.
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Process details 2 -->
+      <section class="slide" aria-label="Chi tiết quy trình 4-5">
+        <div class="reveal">
+          <p class="slide-label">Quy trình · phần 2</p>
+          <h2>Dinh dưỡng · Bảo mật &amp; tuân thủ</h2>
+          <div class="grid-2">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>4. Đề xuất menu cá nhân hóa</h3>
+              <ul>
+                <li>Ghi nhật ký bữa ăn &amp; khẩu phần</li>
+                <li>Khảo sát sở thích, dị ứng, tôn giáo / chế độ ăn</li>
+                <li>Sinh thực đơn theo mục tiêu calo / macro</li>
+                <li>Điều chỉnh khi chỉ số sức khỏe thay đổi</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Đầu vào / đầu ra:</strong> nhật ký ăn + quy tắc dinh dưỡng → thực đơn ngày/tuần.<br>
+                  <strong>Ngoại lệ:</strong> thiếu dữ liệu calo, xung đột dị ứng, người dùng từ chối món đề xuất.
+                </div>
+              </div>
+            </article>
+            <article class="card ink has-detail" tabindex="0">
+              <h3>5. Đồng ý, chia sẻ &amp; bảo mật</h3>
+              <ul>
+                <li>Xin đồng ý thu thập dữ liệu sức khỏe</li>
+                <li>Chia sẻ báo cáo với bác sĩ / người thân</li>
+                <li>Lưu trữ, sao lưu, quyền xóa dữ liệu</li>
+                <li>Xử lý sự cố lộ thông tin nhạy cảm</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Đầu vào / đầu ra:</strong> form consent, yêu cầu chia sẻ → quyền truy cập &amp; audit log.<br>
+                  <strong>Ngoại lệ:</strong> rút consent, chia sẻ hết hạn, nghi ngờ lộ dữ liệu.
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Forms overview -->
+      <section class="slide" aria-label="Hồ sơ biểu mẫu cần thu thập">
+        <div class="reveal">
+          <p class="slide-label">Hồ sơ &amp; biểu mẫu</p>
+          <h2>Tài liệu cần thu thập khi khảo sát</h2>
+          <div class="grid-3">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>Người dùng</h3>
+              <ul>
+                <li>Phiếu khảo sát nhu cầu</li>
+                <li>Phiếu hồ sơ sức khỏe cá nhân</li>
+                <li>Nhật ký chỉ số mẫu (7–14 ngày)</li>
+                <li>Nhật ký ăn uống mẫu</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Thu thập “as-is”: thói quen đo, mẫu số liệu thật, pain point khi ghi chép thủ công.
+                  Dùng để ưu tiên MVP và thiết kế form nhập liệu.
+                </div>
+              </div>
+            </article>
+            <article class="card hot has-detail" tabindex="0">
+              <h3>Chuyên môn</h3>
+              <ul>
+                <li>Bảng ngưỡng chỉ số / guideline</li>
+                <li>Ma trận mức cảnh báo</li>
+                <li>Quy tắc đề xuất thực đơn</li>
+                <li>Phiếu thẩm định chuyên gia</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Là “nguồn sự thật” cho rule engine. Cần chữ ký / xác nhận của bác sĩ &amp; chuyên gia dinh dưỡng trước khi đưa vào hệ thống.
+                </div>
+              </div>
+            </article>
+            <article class="card blue has-detail" tabindex="0">
+              <h3>Hệ thống &amp; pháp lý</h3>
+              <ul>
+                <li>Biểu mẫu đồng ý (consent)</li>
+                <li>Checklist yêu cầu phi chức năng</li>
+                <li>Mẫu chính sách bảo mật dữ liệu</li>
+                <li>Use case / user journey</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Bao phủ bảo mật, hiệu năng, khả năng dùng trên mobile, và hành trình người dùng từ đăng ký → cảnh báo → menu.
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Forms detail -->
+      <section class="slide" aria-label="Chi tiết biểu mẫu">
+        <div class="reveal">
+          <p class="slide-label">Chi tiết biểu mẫu</p>
+          <h2>Nội dung chính cần có trên từng mẫu</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Biểu mẫu</th>
+                  <th scope="col">Thông tin thu thập</th>
+                  <th scope="col">Mục đích</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    <strong>Phiếu nhu cầu người dùng</strong>
+                    <div class="row-detail"><strong>Chi tiết:</strong> 8–12 câu hỏi đóng/mở; xếp hạng mức độ quan trọng chức năng; kênh nhận cảnh báo.</div>
+                  </td>
+                  <td>Mục tiêu dùng app, tần suất theo dõi, kênh cảnh báo ưa thích</td>
+                  <td>Ưu tiên chức năng MVP</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    <strong>Hồ sơ sức khỏe cá nhân</strong>
+                    <div class="row-detail"><strong>Chi tiết:</strong> trường bắt buộc vs tùy chọn; lịch sử bệnh; người liên hệ khẩn; mục tiêu đo lường được.</div>
+                  </td>
+                  <td>Tuổi, giới tính, chiều cao/cân nặng, bệnh nền, thuốc, dị ứng</td>
+                  <td>Cá nhân hóa cảnh báo &amp; menu</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    <strong>Nhật ký chỉ số</strong>
+                    <div class="row-detail"><strong>Chi tiết:</strong> mẫu 7–14 ngày; đơn vị chuẩn; đánh dấu đo trước/sau ăn, trước/sau vận động.</div>
+                  </td>
+                  <td>Thời điểm đo, giá trị, nguồn (tay/thiết bị), ghi chú</td>
+                  <td>Thiết kế entity &amp; dashboard</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    <strong>Bảng ngưỡng cảnh báo</strong>
+                    <div class="row-detail"><strong>Chi tiết:</strong> tách theo nhóm tuổi/giới; 3 mức rủi ro; action card tương ứng từng mức.</div>
+                  </td>
+                  <td>Ngưỡng thấp/cao theo nhóm tuổi; mức độ rủi ro; hành động</td>
+                  <td>Rule engine cảnh báo</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    <strong>Nhật ký / quy tắc dinh dưỡng</strong>
+                    <div class="row-detail"><strong>Chi tiết:</strong> macro mục tiêu; blacklist thực phẩm; template bữa sáng/trưa/tối theo calo.</div>
+                  </td>
+                  <td>Khẩu phần, calo, hạn chế (đường, muối), sở thích ăn</td>
+                  <td>Thuật toán đề xuất menu</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. Mapping -->
+      <section class="slide" aria-label="Ánh xạ quy trình và biểu mẫu">
+        <div class="reveal">
+          <p class="slide-label">Ánh xạ</p>
+          <h2>Quy trình ↔ Hồ sơ / biểu mẫu</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Quy trình khảo sát</th>
+                  <th scope="col">Hồ sơ / biểu mẫu gắn kèm</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    Quản lý hồ sơ sức khỏe
+                    <div class="row-detail"><strong>Ghi chú:</strong> làm rõ trường bắt buộc, lịch sử bệnh, mục tiêu đo lường được.</div>
+                  </td>
+                  <td>Phiếu hồ sơ cá nhân · Consent đồng ý dữ liệu</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    Theo dõi chỉ số
+                    <div class="row-detail"><strong>Ghi chú:</strong> chuẩn hóa đơn vị, nguồn đo, chu kỳ đồng bộ thiết bị đeo.</div>
+                  </td>
+                  <td>Nhật ký chỉ số · Checklist tích hợp thiết bị đeo</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    Cảnh báo nguy cơ bệnh
+                    <div class="row-detail"><strong>Ghi chú:</strong> cần thẩm định ngưỡng trước khi đưa vào rule engine.</div>
+                  </td>
+                  <td>Bảng ngưỡng guideline · Ma trận mức cảnh báo · Phiếu thẩm định bác sĩ</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    Đề xuất menu cá nhân hóa
+                    <div class="row-detail"><strong>Ghi chú:</strong> liên kết dị ứng/bệnh nền với blacklist thực phẩm.</div>
+                  </td>
+                  <td>Nhật ký ăn uống · Quy tắc dinh dưỡng · Phiếu thẩm định chuyên gia dinh dưỡng</td>
+                </tr>
+                <tr class="has-detail" tabindex="0">
+                  <td>
+                    Bảo mật &amp; chia sẻ
+                    <div class="row-detail"><strong>Ghi chú:</strong> quyền xem/xóa, thời hạn chia sẻ, audit log truy cập.</div>
+                  </td>
+                  <td>Consent · Chính sách bảo mật · Use case chia sẻ báo cáo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. Method -->
+      <section class="slide" aria-label="Phương pháp khảo sát">
+        <div class="reveal">
+          <p class="slide-label">Cách thực hiện</p>
+          <h2>Phương pháp thu thập trong khảo sát</h2>
+          <div class="grid-3">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>Phỏng vấn / quan sát</h3>
+              <p>Phỏng vấn bán cấu trúc người dùng, bác sĩ, chuyên gia dinh dưỡng; quan sát cách họ ghi chỉ số hiện tại.</p>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Output:</strong> ghi chú pain point, sơ đồ as-is, danh sách chỉ số/thói quen thực tế.
+                </div>
+              </div>
+            </article>
+            <article class="card hot has-detail" tabindex="0">
+              <h3>Bảng hỏi &amp; mẫu giấy</h3>
+              <p>Phát phiếu nhu cầu, nhật ký 7–14 ngày; thu bảng ngưỡng từ tài liệu chuyên môn.</p>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Output:</strong> bộ biểu mẫu đã điền, dataset mẫu để thiết kế entity &amp; validate rule.
+                </div>
+              </div>
+            </article>
+            <article class="card blue has-detail" tabindex="0">
+              <h3>Workshop xác nhận</h3>
+              <p>Rà soát use case, rule cảnh báo và quy tắc menu với stakeholder trước khi thiết kế hệ thống.</p>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  <strong>Output:</strong> biên bản xác nhận scope, danh sách rule được duyệt, backlog MVP.
+                </div>
+              </div>
+            </article>
+          </div>
+          <ul class="bullets">
+            <li>Ưu tiên mẫu thật (as-is) trước template hệ thống — tránh thiết kế “đoán” dữ liệu sức khỏe.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 12. Summary -->
+      <section class="slide" aria-label="Tóm tắt">
+        <div class="reveal">
+          <p class="slide-label">Tóm tắt</p>
+          <h2>Kết luận ngắn</h2>
+          <div class="grid-2">
+            <article class="card cool has-detail" tabindex="0">
+              <h3>Quy trình cần khảo sát</h3>
+              <ul>
+                <li>Hồ sơ sức khỏe cá nhân</li>
+                <li>Thu thập &amp; theo dõi chỉ số</li>
+                <li>Cảnh báo nguy cơ bệnh</li>
+                <li>Đề xuất menu dinh dưỡng</li>
+                <li>Đồng ý, chia sẻ &amp; bảo mật</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Mỗi quy trình cần làm rõ actor, bước xử lý, dữ liệu vào/ra và ngoại lệ trước khi chuyển sang thiết kế hệ thống.
+                </div>
+              </div>
+            </article>
+            <article class="card hot has-detail" tabindex="0">
+              <h3>Hồ sơ / biểu mẫu then chốt</h3>
+              <ul>
+                <li>Phiếu nhu cầu &amp; hồ sơ cá nhân</li>
+                <li>Nhật ký chỉ số &amp; ăn uống</li>
+                <li>Bảng ngưỡng / ma trận cảnh báo</li>
+                <li>Quy tắc thực đơn + thẩm định chuyên gia</li>
+                <li>Consent &amp; checklist phi chức năng</li>
+              </ul>
+              <span class="more-hint">Hover để xem thêm</span>
+              <div class="detail">
+                <div class="detail-inner">
+                  Bộ tài liệu này là đầu vào trực tiếp cho SRS, mô hình dữ liệu, rule cảnh báo và thuật toán đề xuất menu.
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13. Team + Q&A -->
+      <section class="slide title-slide" aria-label="Nhóm và hỏi đáp">
+        <span class="orb a" aria-hidden="true"></span>
+        <span class="orb b" aria-hidden="true"></span>
+        <div class="reveal">
+          <div class="badge-row">
+            <span class="badge">Nhóm 4</span>
+            <span class="badge alt">Cảm ơn thầy cô &amp; các bạn</span>
+          </div>
+          <h1>Q &amp; A</h1>
+          <p class="lead">Xin nhận câu hỏi về quy trình khảo sát và hồ sơ biểu mẫu.</p>
+          <div class="members">
+            <div class="member">
+              <strong>Trần Tuấn Tài</strong>
+              <span>Thành viên</span>
+            </div>
+            <div class="member">
+              <strong>La Hoàng Tú</strong>
+              <span>Thành viên</span>
+            </div>
+            <div class="member">
+              <strong>Võ Văn Hải</strong>
+              <span>Thành viên</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer-bar">
+        <span>CNPM tiên tiến · Bài tập buổi 5 · Nhóm 4</span>
+        <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
+        <span id="pageLabel">1 / 13</span>
+      </footer>
+    </div>
+  </main>
+
+  <p class="hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> chuyển slide · <kbd>F</kbd> toàn màn hình · hover card để xem chi tiết</p>
+  <div class="nav" role="group" aria-label="Điều hướng slide">
+    <button type="button" id="prevBtn" aria-label="Slide trước">‹</button>
+    <button type="button" id="nextBtn" aria-label="Slide sau">›</button>
+  </div>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll(".slide")];
+      const pageLabel = document.getElementById("pageLabel");
+      const progressFill = document.getElementById("progressFill");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const total = slides.length;
+      let index = Math.max(0, (parseInt(location.hash.replace("#", ""), 10) || 1) - 1);
+
+      function show(i) {
+        const next = Math.max(0, Math.min(total - 1, i));
+        slides.forEach((slide, n) => {
+          slide.classList.toggle("active", n === next);
+        });
+        index = next;
+        document.querySelectorAll(".has-detail.is-open").forEach((el) => {
+          el.classList.remove("is-open");
+        });
+        if (pageLabel) pageLabel.textContent = `${index + 1} / ${total}`;
+        if (progressFill) progressFill.style.width = `${((index + 1) / total) * 100}%`;
+        if (prevBtn) prevBtn.disabled = index === 0;
+        if (nextBtn) nextBtn.disabled = index === total - 1;
+        try {
+          history.replaceState(null, "", `#${index + 1}`);
+        } catch (_) { /* ignore */ }
+      }
+
+      function next() { show(index + 1); }
+      function prev() { show(index - 1); }
+
+      nextBtn?.addEventListener("click", (e) => { e.preventDefault(); next(); });
+      prevBtn?.addEventListener("click", (e) => { e.preventDefault(); prev(); });
+
+      document.addEventListener("keydown", (e) => {
+        const tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
+          e.preventDefault();
+          next();
+        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp" || e.key === "Backspace") {
+          e.preventDefault();
+          prev();
+        } else if (e.key === "Home") {
+          e.preventDefault();
+          show(0);
+        } else if (e.key === "End") {
+          e.preventDefault();
+          show(total - 1);
+        } else if (e.key === "f" || e.key === "F") {
+          if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+          else document.exitFullscreen?.();
+        }
+      });
+
+      document.querySelectorAll(".agenda-item").forEach((el) => {
+        el.addEventListener("click", () => {
+          const goto = Number(el.dataset.goto || 1) - 1;
+          show(goto);
+        });
+      });
+
+      // Tap/click để mở chi tiết trên thiết bị không có hover
+      document.querySelectorAll(".has-detail").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const open = el.classList.contains("is-open");
+          document.querySelectorAll(".has-detail.is-open").forEach((other) => {
+            if (other !== el) other.classList.remove("is-open");
+          });
+          el.classList.toggle("is-open", !open);
+        });
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            el.click();
+          }
+        });
+      });
+
+      let touchX = null;
+      document.addEventListener("touchstart", (e) => {
+        touchX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      document.addEventListener("touchend", (e) => {
+        if (touchX == null) return;
+        const dx = e.changedTouches[0].screenX - touchX;
+        if (Math.abs(dx) > 55) (dx < 0 ? next : prev)();
+        touchX = null;
+      }, { passive: true });
+
+      document.querySelector(".deck")?.addEventListener("click", (e) => {
+        if (e.target.closest("button, a, .agenda-item, .has-detail")) return;
+        document.querySelectorAll(".has-detail.is-open").forEach((el) => {
+          el.classList.remove("is-open");
+        });
+        const deck = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - deck.left;
+        if (x < deck.width * 0.22) prev();
+        else if (x > deck.width * 0.78) next();
+      });
+
+      show(index);
+    })();
+  </script>
+</body>
+</html>
