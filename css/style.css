@@ -1,0 +1,352 @@
+:root {
+  --bg: #0f1419;
+  --bg-elevated: #1a222c;
+  --surface: #243040;
+  --text: #e8eef4;
+  --text-muted: #93a4b5;
+  --accent: #3d9bfd;
+  --accent-soft: rgba(61, 155, 253, 0.15);
+  --border: rgba(232, 238, 244, 0.1);
+  --radius: 12px;
+  --font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, #1a3a5c 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, #14283a 0%, transparent 50%),
+    var(--bg);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+.container {
+  width: min(920px, 92%);
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+}
+
+.site-header {
+  margin-bottom: 2.5rem;
+}
+
+.site-header__brand {
+  display: inline-block;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.site-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.site-header p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 36rem;
+}
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.menu__item a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.35rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.menu__item a:hover,
+.menu__item a:focus-visible {
+  background: var(--surface);
+  border-color: var(--accent);
+  outline: none;
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.menu__item a:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.menu__title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.menu__desc {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.menu__arrow {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.menu__status {
+  margin: 0;
+  padding: 1.15rem 1.35rem;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.menu__status--error {
+  border-color: rgba(255, 120, 120, 0.45);
+  color: #ffb4b4;
+}
+
+.page-nav {
+  margin-bottom: 1.75rem;
+}
+
+.page-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.page-nav a:hover {
+  color: var(--accent);
+}
+
+.content {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.5rem;
+}
+
+.content h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+}
+
+.content p {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+}
+
+.content p:last-child {
+  margin-bottom: 0;
+}
+
+.site-header--compact {
+  margin-bottom: 1.5rem;
+}
+
+.file-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.file-table thead {
+  background: var(--surface);
+}
+
+.file-table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.file-table td {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.file-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.file-table tbody tr:hover td {
+  background: rgba(61, 155, 253, 0.06);
+}
+
+.file-table__name a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.file-table__name a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.file-table__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.file-table__size,
+.file-table__date {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.file-table__size {
+  width: 6.5rem;
+}
+
+.file-table__date {
+  width: 11rem;
+}
+
+.file-table__empty td {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem 1.15rem;
+}
+
+.error-code {
+  margin: 0 0 0.35rem;
+  font-size: clamp(3rem, 10vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.error-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.error-path {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+  word-break: break-all;
+  color: var(--text-muted);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  border: 1px solid rgba(61, 155, 253, 0.35);
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: rgba(61, 155, 253, 0.25);
+  text-decoration: none;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding-top: 1.75rem;
+  }
+
+  .menu__item a {
+    padding: 1rem 1.1rem;
+  }
+
+  .file-table th:nth-child(2),
+  .file-table td:nth-child(2),
+  .file-table th:nth-child(3),
+  .file-table td:nth-child(3) {
+    display: none;
+  }
+
+  .file-table th,
+  .file-table td {
+    padding: 0.9rem 1rem;
+  }
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trang tổng hợp tài liệu Thạc sĩ HUIT — menu các môn học và đồ án.">
+  <title>ThS HUIT — Menu tài liệu</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+
+  <div class="container">
+    <header class="site-header">
+      <span class="site-header__brand" data-bind="brand">ThS HUIT</span>
+      <h1 data-bind="title">Menu tài liệu</h1>
+      <p data-bind="description">Đang tải danh mục…</p>
+    </header>
+
+    <main id="main-content">
+      <nav aria-label="Danh mục tài liệu">
+        <ul class="menu" id="menu-list">
+          <li class="menu__status" role="status">Đang tải menu…</li>
+        </ul>
+      </nav>
+    </main>
+
+    <footer class="site-footer">
+      <p data-bind="footer">Deploy bằng GitHub Pages — thư mục gốc chứa <code>index.html</code>.</p>
+    </footer>
+  </div>
+
+  <script src="js/menu.js" defer></script>
+</body>
+</html>

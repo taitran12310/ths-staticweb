@@ -1,0 +1,26 @@
+{
+  "brand": "ThS HUIT",
+  "title": "Menu tài liệu",
+  "description": "Chọn mục bên dưới để mở trang tương ứng.",
+  "footer": "Deploy bằng GitHub Pages — thư mục gốc chứa index.html.",
+  "items": [
+    {
+      "id": "giai-thuat-nang-cao",
+      "title": "Giải thuật nâng cao",
+      "description": "Bài tập, slide và đồ án môn học",
+      "path": "giai-thuat-nang-cao/"
+    },
+    {
+      "id": "cong-nghe-phan-mem-tien-tien",
+      "title": "Công nghệ phần mềm tiên tiến",
+      "description": "Đề án và bài tập môn học",
+      "path": "cong-nghe-phan-mem-tien-tien/"
+    },
+    {
+      "id": "phuong-phap-nghien-cuu-khoa-hoc",
+      "title": "Phương pháp nghiên cứu khoa học",
+      "description": "Đề cương, đề án và ghi chú buổi học",
+      "path": "phuong-phap-nghien-cuu-khoa-hoc/"
+    }
+  ]
+}
