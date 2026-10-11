@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    (() => {
+      try {
+        const t = localStorage.getItem("sna-slide-theme");
+        document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+      } catch (_) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <meta name="description" content="Kịch bản thuyết trình và đề xuất đồ án — LLM × GNN trong phân tích mạng xã hội (Trả lời câu hỏi bài tập lớn Buổi 2).">
+  <title>Nội dung trình bày: LLM × GNN trong Phân tích Mạng Xã hội — Đề xuất đồ án</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <style>
+    :root {
+      --bg: #f3f7fb;
+      --text: #0f172a;
+      --heading: #0369a1;
+      --h1: #0f172a;
+      --h3: #0f766e;
+      --muted: #475569;
+      --accent: #0369a1;
+      --amber: #b45309;
+      --coral: #be123c;
+      --line: rgba(14, 116, 144, 0.22);
+      --section-bg: rgba(14, 165, 233, 0.06);
+      --say-bg: rgba(255, 255, 255, 0.72);
+      --code-bg: #e2e8f0;
+      --th-bg: rgba(14, 165, 233, 0.1);
+      --toolbar-bg: rgba(255, 255, 255, 0.82);
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #06101c;
+      --text: #e8f1f8;
+      --heading: #38bdf8;
+      --h1: #e8f1f8;
+      --h3: #2dd4bf;
+      --muted: #9db2c7;
+      --accent: #38bdf8;
+      --amber: #fbbf24;
+      --coral: #fb7185;
+      --line: rgba(125, 211, 252, 0.22);
+      --section-bg: rgba(44, 114, 165, 0.07);
+      --say-bg: rgba(255, 255, 255, 0.04);
+      --code-bg: #21304b;
+      --th-bg: rgba(56, 189, 248, 0.12);
+      --toolbar-bg: rgba(7, 17, 31, 0.82);
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Be Vietnam Pro", Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(900px 520px at 10% -10%, rgba(56, 189, 248, 0.16), transparent 55%),
+        radial-gradient(700px 420px at 95% 5%, rgba(45, 212, 191, 0.12), transparent 50%),
+        var(--bg);
+      color: var(--text);
+      padding: 88px 28px 64px;
+      line-height: 1.75;
+      max-width: 820px;
+      margin: auto;
+      min-height: 100vh;
+    }
+
+    .page-toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1.1rem;
+      background: var(--toolbar-bg);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .page-toolbar__brand {
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-toolbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .back-link,
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      border: 1px solid var(--line);
+      background: var(--say-bg);
+      color: var(--accent);
+      border-radius: 10px;
+      padding: 0.4rem 0.75rem;
+      font: inherit;
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .back-link:hover,
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      text-decoration: none;
+    }
+
+    .theme-toggle {
+      color: var(--text);
+      min-width: 3.6rem;
+    }
+
+    .theme-toggle[aria-pressed="true"] {
+      color: var(--accent);
+    }
+
+    h1, h2, h3 {
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      color: var(--heading);
+      margin: 28px 0 12px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    h1 { color: var(--h1); font-size: 1.65rem; margin-top: 0; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; color: var(--h3); }
+    p { margin: 0 0 14px; }
+    ul, ol { margin: 0 0 18px 28px; }
+    li { margin-bottom: 8px; }
+    .paper-title { color: var(--amber); font-weight: 600; }
+    .slide-section {
+      border-left: 5px solid var(--h3);
+      padding: 8px 0 8px 20px;
+      margin-bottom: 36px;
+      background: var(--section-bg);
+      border-radius: 0 12px 12px 0;
+    }
+    .say {
+      background: var(--say-bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 12px 0 16px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .say::before {
+      content: "Đọc:";
+      display: block;
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+    .cue {
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 24px;
+    }
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: var(--coral);
+      font-size: 0.92em;
+    }
+    a { color: var(--accent); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 12px 0 18px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--th-bg); color: var(--heading); }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    @media (max-width: 560px) {
+      body { padding-top: 96px; }
+      .page-toolbar__brand { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-toolbar">
+    <a class="back-link" href="./index.html">← Back</a>
+    <span class="page-toolbar__brand">ThS HUIT · Kịch bản thuyết trình</span>
+    <div class="page-toolbar__actions">
+      <button type="button" id="themeToggle" class="theme-toggle" aria-pressed="true" aria-label="Chuyển sang theme tối">Dark</button>
+    </div>
+  </header>
+
+  <h1>Kịch bản thuyết trình: Kết hợp LLM và GNN trong phân tích mạng xã hội</h1>
+  <p class="meta">
+    Topic 8 · Bài tập nhóm · Đồng bộ với file
+    <code>Slide_BT_Buoi1_Bai1.html</code>.
+    Mỗi khối <strong>Đọc</strong> là đoạn có thể nói trực tiếp; phần gạch đầu dòng là gợi ý nhấn mạnh / nhìn slide.
+    Mục <a href="#de-xuat-do-an">Đề xuất đồ án</a> trả lời các câu hỏi bài tập lớn Buổi 2.
+  </p>
+
+  <nav class="slide-section toc" aria-label="Mục lục">
+    <h2>Mục lục kịch bản</h2>
+    <ol>
+      <li><a href="#mo-dau">Mở đầu &amp; lộ trình</a></li>
+      <li><a href="#dong-luc">Động lực &amp; Text-Attributed Graph</a></li>
+      <li><a href="#paper1">Paper 1 — Jin et al. (Survey)</a></li>
+      <li><a href="#paper2">Paper 2 — Li et al. (Survey)</a></li>
+      <li><a href="#paper3">Paper 3 — Wang et al. (Survey)</a></li>
+      <li><a href="#paper4">Paper 4 — GLEM (Method)</a></li>
+      <li><a href="#paper5">Paper 5 — GraphAdapter (Method)</a></li>
+      <li><a href="#tong-hop">So sánh, ứng dụng SNA, kết luận &amp; Q&amp;A</a></li>
+      <li><a href="#de-xuat-do-an">Đề xuất đồ án — trả lời câu hỏi Buổi 2</a></li>
+    </ol>
+  </nav>
+
+  <!-- ========== MỞ ĐẦU ========== -->
+  <section class="slide-section" id="mo-dau">
+    <h2>1. Mở đầu (slide: Mở đầu · Mục lục)</h2>
+    <p class="cue">Nhìn tiêu đề slide → chào lớp → nêu topic và số lượng papers.</p>
+    <div class="say">
+      <p>Chào thầy cô và các bạn. Nhóm chúng em trình bày topic: <strong>Kết hợp Large Language Models và Graph Neural Networks trong phân tích mạng xã hội</strong>.</p>
+      <p>Trong khoảng mười phút tới, nhóm sẽ đi từ bức tranh tổng quan — vì sao mạng xã hội cần cả ngôn ngữ lẫn cấu trúc đồ thị — sang ba bài survey dựng “bản đồ” phương pháp, rồi hai phương pháp cụ thể là <strong>GLEM</strong> và <strong>GraphAdapter</strong>. Mục tiêu không phải liệt kê hết mọi paper, mà để cả lớp có khung tư duy: khi nào dùng LLM làm enhancer, khi nào train xen kẽ với GNN, và khi nào chỉ gắn adapter nhẹ lên LLM đóng băng.</p>
+    </div>
+    <ul>
+      <li>Nhấn 5 papers trên hero card (có thể bấm nhảy section trên slide).</li>
+      <li>Lộ trình 4 phần: Động lực → 3 survey → 2 method → Tổng hợp cho SNA.</li>
+    </ul>
+    <div class="say">
+      <p>Về cấu trúc, phần A giải thích vì sao GNN thuần và LLM thuần đều chưa đủ trên mạng xã hội, và khái niệm <strong>Text-Attributed Graph</strong> — gọi tắt TAG — là cầu nối tự nhiên. Phần B là ba survey: Jin và cộng sự, Li và cộng sự, Wang và cộng sự. Phần C đi sâu GLEM ở ICLR 2023 và GraphAdapter ở WWW 2024. Phần D so sánh nhanh và gợi ý pipeline cho đồ án lớp Phân tích mạng xã hội.</p>
+    </div>
+  </section>
+
+  <!-- ========== ĐỘNG LỰ ========== -->
+  <section class="slide-section" id="dong-luc">
+    <h2>2. Động lực &amp; TAG (slide: Động lực · Khái niệm TAG · Tổng quan 5 papers)</h2>
+    <h3>2.1. Vì sao cần kết hợp?</h3>
+    <div class="say">
+      <p>Trên mạng xã hội, mỗi user hay mỗi bài đăng vừa có <strong>nội dung văn bản</strong> — bio, caption, bình luận — vừa nằm trong một <strong>đồ thị tương tác</strong>: follow, reply, mention, share, citation. Graph Neural Network rất mạnh khi lan truyền thông tin theo cạnh, nắm được ai gần ai, cộng đồng nào dính nhau. Nhưng đặc trưng node trong nhiều pipeline cổ điển chỉ là bag-of-words hoặc TF-IDF, nên mất đi ngữ cảnh ngôn ngữ giàu — ví dụ sarcasm, chủ đề ngầm, hay cách diễn đạt tin giả.</p>
+      <p>Ngược lại, Large Language Model hiểu văn bản rất tốt, kể cả few-shot, nhưng nếu chỉ “nhồi” từng post riêng lẻ vào prompt thì mô hình khó thấy hàng xóm, đường lan truyền, hay vị trí của node trong cộng đồng. Nói ngắn gọn: <strong>LLM mang ngữ nghĩa sâu, GNN mang inductive bias cấu trúc</strong>. Bài toán mạng xã hội — phân loại node, dự đoán liên kết, phát hiện cộng đồng, chống misinformation — chính là chỗ hai hướng này bổ trợ nhau.</p>
+    </div>
+    <h3>2.2. Text-Attributed Graph</h3>
+    <div class="say">
+      <p>Khái niệm then chốt xuyên suốt năm papers là <strong>Text-Attributed Graph</strong>, viết tắt TAG. Trong TAG, mỗi node gắn thêm thuộc tính văn bản; cạnh biểu diễn quan hệ, đôi khi cũng kèm text. Ví dụ: user gắn profile và lịch sử đăng; post gắn nội dung; cạnh là follow hoặc reply. Mục tiêu học thường là học được biểu diễn node tốt để làm classification, link prediction, hay xếp hạng ảnh hưởng. Hầu hết bài toán mạng xã hội trong lớp này đều có thể mô hình hoá như một TAG trước khi chọn kiến trúc cụ thể.</p>
+    </div>
+    <h3>2.3. Bản đồ năm papers</h3>
+    <div class="say">
+      <p>Ba survey giúp chúng ta định vị: Jin và cộng sự phân loại theo kịch bản đồ thị và vai trò của LLM; Li và cộng sự đưa taxonomy thiết kế pipeline — Enhancer, Predictor, Alignment; Wang và cộng sự nhấn hai chiều tương tác: không chỉ LLM hỗ trợ Graph Machine Learning, mà Graph và Knowledge Graph cũng hỗ trợ lại LLM, ví dụ giảm hallucination. Hai method còn lại cho thấy triển khai thực tế: GLEM scale trên TAG rất lớn bằng Variational EM; GraphAdapter giữ LLM đóng băng và dùng GNN như adapter nhẹ. Tiếp theo nhóm đi lần lượt từng paper.</p>
+    </div>
+  </section>
+
+  <!-- ========== PAPER 1 ========== -->
+  <section class="slide-section" id="paper1">
+    <h2>3. Paper 1 — Jin et al.</h2>
+    <p class="paper-title">Large Language Models on Graphs: A Comprehensive Survey</p>
+    <p class="meta">arxiv:2312.02783 · Bowen Jin, Gang Liu, Chi Han, Meng Jiang, Heng Ji, Jiawei Han</p>
+    <div class="say">
+      <p>Paper đầu tiên là survey toàn diện của Jin và cộng sự: <em>Large Language Models on Graphs</em>. Đóng góp lớn nhất là dựng một taxonomy hai trục, giúp người đọc không bị lạc trong hàng trăm paper LLM-plus-graph.</p>
+      <p>Trục thứ nhất là <strong>ba kịch bản đồ thị</strong>. Một là pure graph — lý luận chủ yếu trên cấu trúc. Hai là <strong>Text-Attributed Graph</strong> — node hoặc cạnh kèm text; đây là trọng tâm với mạng xã hội. Ba là paired graph, ví dụ phân tử gắn mô tả ngôn ngữ tự nhiên. Với SNA, chúng ta gần như luôn đứng ở ô TAG.</p>
+      <p>Trục thứ hai là <strong>ba vai trò của LLM</strong>. <strong>Predictor</strong>: LLM trả lời trực tiếp câu hỏi trên đồ thị, thường qua prompt. <strong>Encoder</strong>: LLM biến text thành feature, rồi GNN học cấu trúc. <strong>Aligner</strong>: đồng bộ không gian biểu diễn giữa LLM và GNN. Takeaway thực dụng: pipeline SNA thường bắt đầu từ Encoder hoặc Enhancer, rồi mới cân nhắc Predictor thuần prompt hay Aligner phức tạp hơn.</p>
+    </div>
+    <ul>
+      <li>Nhìn slide taxonomy 3×3 và sơ đồ “ba cách cắm LLM vào đồ thị”.</li>
+      <li>Nhắc: hầu hết MXH = TAG → chọn family method trước khi code.</li>
+    </ul>
+  </section>
+
+  <!-- ========== PAPER 2 ========== -->
+  <section class="slide-section" id="paper2">
+    <h2>4. Paper 2 — Li et al.</h2>
+    <p class="paper-title">A Survey of Graph Meets Large Language Model: Progress and Future Directions</p>
+    <p class="meta">arxiv:2311.12399 · Yuhan Li, Zhixun Li, Peisong Wang, Jia Li, Xiangguo Sun, Hong Cheng, Jeffrey Xu Yu</p>
+    <div class="say">
+      <p>Survey thứ hai của Li và cộng sự thiên về <strong>thiết kế hệ thống</strong>. Thay vì chỉ liệt kê paper, họ hỏi: LLM đóng vai trò gì trong pipeline graph learning?</p>
+      <p>Nhánh <strong>Enhancer</strong> dùng LLM để nâng chất lượng feature cho GNN. Có hai hướng phổ biến. Thứ nhất, LLM sinh giải thích, entity hoặc pseudo-label — ví dụ dòng TAPE dùng ChatGPT tạo explanation rồi fine-tune một language model nhỏ làm feature đầu vào cho GNN; hướng này dùng được cả LLM đóng qua API. Thứ hai, lấy embedding trực tiếp từ LLM mở, có thể fine-tune kèm tín hiệu cấu trúc như link prediction. Với đồ án SNA, Enhancer thường là <strong>baseline nhanh và ổn định</strong>.</p>
+      <p>Nhánh <strong>Predictor</strong> để LLM suy luận và đưa ra nhãn hoặc câu trả lời. Cách đơn giản là flatten hàng xóm thành text trong prompt. Cách này hợp demo và reasoning quy mô nhỏ, nhưng trên mạng Reddit hay social graph lớn thì dễ đắt và dễ mất topology. Vì vậy trên MXH lớn, Enhancer cộng GNN thường thực dụng hơn Predictor thuần.</p>
+      <p>Nhánh <strong>Alignment</strong> và nhóm Others bàn về đồng bộ biểu diễn, instruction tuning trên graph task, và các hướng còn mở. Takeaway của nhóm: trước khi viết code, hãy chọn rõ mình đang làm Enhancer, Predictor hay Alignment — taxonomy này chính là checklist thiết kế.</p>
+    </div>
+  </section>
+
+  <!-- ========== PAPER 3 ========== -->
+  <section class="slide-section" id="paper3">
+    <h2>5. Paper 3 — Wang et al.</h2>
+    <p class="paper-title">Graph Machine Learning in the Era of Large Language Models (LLMs)</p>
+    <p class="meta">arxiv:2404.14928 · Shijie Wang và cộng sự</p>
+    <div class="say">
+      <p>Survey thứ ba của Wang và cộng sự mở rộng góc nhìn: không chỉ hỏi LLM giúp Graph Machine Learning thế nào, mà còn hỏi <strong>Graph và Knowledge Graph giúp LLM thế nào</strong>.</p>
+      <p>Chiều LLM sang Graph bao gồm các hướng đã thấy ở hai survey trước — dùng LLM để tăng cường feature, suy luận trên đồ thị, hoặc xây foundation model cho graph task. Chiều ngược lại rất quan trọng với ứng dụng thực tế: đưa cấu trúc và tri thức có kiểm chứng vào LLM để giảm hallucination, hỗ trợ fact-checking, và làm grounding cho câu trả lời. Trên mạng xã hội, điều này gợi ý kết hợp đồ thị lan truyền tin đồn với tri thức ngoài, thay vì tin hoàn toàn vào sinh văn bản của LLM.</p>
+      <p>Paper cũng nhấn các rủi ro: chi phí suy luận, bias, privacy khi đưa dữ liệu người dùng vào mô hình lớn, và nhu cầu benchmark đáng tin cho graph reasoning. Với lớp SNA, đây là chỗ nối sang topic misinformation và ảnh hưởng lan truyền mà thầy đã nêu trong buổi học.</p>
+    </div>
+  </section>
+
+  <!-- ========== PAPER 4 ========== -->
+  <section class="slide-section" id="paper4">
+    <h2>6. Paper 4 — GLEM</h2>
+    <p class="paper-title">Learning on Large-Scale Text-Attributed Graphs via Variational Inference (GLEM)</p>
+    <p class="meta">arxiv:2210.14709 · ICLR 2023 · Jianan Zhao, Meng Qu, Chaozhuo Li và cộng sự</p>
+    <div class="say">
+      <p>Sang phần method. <strong>GLEM</strong> giải pain point rất thực tế: làm sao train language model lớn cùng GNN trên TAG hàng triệu node mà không nổ bộ nhớ?</p>
+      <p>Ý tưởng cốt lõi là khung <strong>Variational EM</strong>. Thay vì nhồi LM và GNN vào một bước forward khổng lồ, GLEM huấn luyện xen kẽ. Ở một pha, language model học từ tín hiệu văn bản và pseudo-label đến từ phía đồ thị. Ở pha kia, GNN học cấu trúc với pseudo-label từ phía ngôn ngữ. Hai mô hình “nói chuyện” qua nhãn giả và phân phối, chứ không bắt buộc đồng thời load toàn bộ pipeline nặng trên mọi node.</p>
+      <p>Kết quả nổi bật được báo cáo trên các benchmark OGB như ogbn-arxiv, ogbn-products, thậm chí ogbn-papers100M. Đáng chú ý, biến thể GLEM-LM đôi khi đạt hiệu năng cạnh tranh dù lúc suy luận không message-passing theo kiểu GNN cổ điển — cho thấy tín hiệu cấu trúc đã được “thấm” vào quá trình học qua vòng EM.</p>
+      <p>Với SNA: khi nhóm lấy dataset lớn kiểu citation hoặc social graph quy mô lớn và cần SOTA node classification trên TAG, GLEM là mẫu thiết kế đáng tham khảo — mạnh về scale, nhưng phức tạp triển khai hơn enhancer đơn giản.</p>
+    </div>
+    <ul>
+      <li>Chỉ slide vòng lặp E-step / M-step khi nói “huấn luyện xen kẽ”.</li>
+      <li>Nhấn: train tách, tương tác qua pseudo-label.</li>
+    </ul>
+  </section>
+
+  <!-- ========== PAPER 5 ========== -->
+  <section class="slide-section" id="paper5">
+    <h2>7. Paper 5 — GraphAdapter</h2>
+    <p class="paper-title">Can GNN be Good Adapter for LLMs?</p>
+    <p class="meta">arxiv:2402.12984 · WWW 2024 · Xuanwen Huang, Kaiqiao Han, Yang Yang và cộng sự</p>
+    <div class="say">
+      <p>Method thứ hai là <strong>GraphAdapter</strong>. Câu hỏi nghiên cứu rất rõ: liệu GNN có thể đóng vai trò <strong>adapter tốt cho LLM</strong> hay không?</p>
+      <p>Khác GLEM, GraphAdapter <strong>không dùng vòng EM xen kẽ</strong>. Họ giữ LLM lớn — ví dụ họ Llama — ở trạng thái đóng băng, chỉ huấn luyện phần GNN adapter tương đối nhẹ. Cấu trúc đồ thị được “cắm” vào luồng biểu diễn của LLM qua adapter; quá trình pretrain có thể dựa trên mục tiêu next-token prediction quen thuộc của language model, kết hợp tín hiệu graph.</p>
+      <p>Lợi ích thực dụng: tận dụng năng lực ngôn ngữ của LLM tỷ lệ tham số lớn mà không fine-tune toàn bộ; chi phí và rủi ro quên kiến thức cũ thấp hơn. Số liệu trong paper cho thấy hướng GNN-as-adapter cạnh tranh tốt trên các task liên quan text-graph. Takeaway cho SNA: nếu nhóm đã có LLM mạnh và muốn thêm cấu trúc follow hay interaction graph với ngân sách hạn chế, GraphAdapter là hướng rất đáng thử — song song với baseline Enhancer.</p>
+    </div>
+  </section>
+
+  <!-- ========== TỔNG HỢP ========== -->
+  <section class="slide-section" id="tong-hop">
+    <h2>8. Tổng hợp, ứng dụng SNA, kết luận &amp; Q&amp;A</h2>
+
+    <h3>8.1. Bảng so sánh nhanh</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Paper</th>
+          <th>Loại</th>
+          <th>Ý tưởng then chốt</th>
+          <th>Khi nào dùng?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jin et al.</td>
+          <td>Survey</td>
+          <td>3 scenarios × 3 roles</td>
+          <td>Định vị bài toán</td>
+        </tr>
+        <tr>
+          <td>Li et al.</td>
+          <td>Survey</td>
+          <td>Enhancer / Predictor / Alignment</td>
+          <td>Thiết kế pipeline TAG</td>
+        </tr>
+        <tr>
+          <td>Wang et al.</td>
+          <td>Survey</td>
+          <td>Hai chiều LLM ↔ Graph; KG</td>
+          <td>Hệ thống lớn &amp; rủi ro LLM</td>
+        </tr>
+        <tr>
+          <td>GLEM</td>
+          <td>Method</td>
+          <td>Variational EM xen kẽ</td>
+          <td>TAG cực lớn, cần scale</td>
+        </tr>
+        <tr>
+          <td>GraphAdapter</td>
+          <td>Method</td>
+          <td>GNN adapter, LLM đóng băng</td>
+          <td>LLM lớn, chi phí fine-tune thấp</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="say">
+      <p>Tóm lại bảng so sánh: ba survey cho bản đồ; GLEM chọn khi đồ thị và text attribute rất lớn; GraphAdapter chọn khi muốn giữ LLM lớn và chỉ train phần cấu trúc nhẹ. Không có một method “thắng tuyệt đối” — phụ thuộc quy mô dữ liệu, ngân sách GPU, và mục tiêu task.</p>
+    </div>
+
+    <h3>8.2. Áp vào phân tích mạng xã hội</h3>
+    <div class="say">
+      <p>Ánh xạ sang bài học và đồ án: nhóm chọn bài toán <strong>phân loại node trên Text-Attributed Graph</strong> (user/post/paper) làm trọng tâm, có thể mở rộng sang phát hiện misinformation kèm đồ thị lan truyền. Pipeline thực tế: lấy dataset công khai tin cậy (SNAP / Network Repository / OGB); xây TAG rõ node–text–cạnh; chạy baseline GNN thuần và LLM thuần; rồi Enhancer — LLM embedding rồi GNN. Chi tiết đề xuất, metric và sản phẩm cuối kỳ nằm ở mục <a href="#de-xuat-do-an">Đề xuất đồ án</a>.</p>
+    </div>
+
+    <h3>8.3. Khoảng trống nghiên cứu</h3>
+    <div class="say">
+      <p>Năm papers cùng chỉ ra vài khoảng trống: chi phí query LLM trên mọi node; graph reasoning chuẩn để LLM không “ảo tưởng cấu trúc”; mạng động và đa lớp theo thời gian còn ít được gắn LLM; vấn đề trust, bias và privacy; và nhu cầu foundation model cho graph đa domain. Đây chính là chỗ nhóm có thể chọn hướng đào sâu cho bài cuối kỳ — survey sâu hơn, hoặc prototype nhỏ trên một dataset MXH tiếng Việt / tiếng Anh công khai.</p>
+    </div>
+
+    <h3>8.4. Ba điều cần nhớ &amp; kết thúc</h3>
+    <div class="say">
+      <p>Trước khi sang câu hỏi, nhóm nhấn ba điểm. Một: hãy luôn mô hình hoá mạng xã hội như Text-Attributed Graph trước khi chọn model. Hai: chọn đúng vai trò của LLM — Enhancer, Predictor, Aligner hoặc Adapter — trước khi viết code. Ba: quy mô dữ liệu quyết định method — đồ thị nhỏ có thể prompt; đồ thị lớn cần enhancer, GLEM hoặc GraphAdapter để kiểm soát chi phí.</p>
+      <p>Xin cảm ơn thầy cô và các bạn đã lắng nghe. Nhóm rất mong nhận câu hỏi và góp ý.</p>
+    </div>
+
+    <h3>8.5. Gợi ý trả lời Q&amp;A</h3>
+    <p class="cue">Câu gợi ý trên slide: Nếu lấy data Twitter/Reddit để phân loại chủ đề + cộng đồng, nên bắt đầu hướng nào?</p>
+    <div class="say">
+      <p>Em/nhóm sẽ bắt đầu bằng <strong>Enhancer</strong>: dùng LLM tạo embedding hoặc explanation cho post và profile, rồi để GNN học trên đồ thị follow hoặc reply. Cách này dễ triển khai, dễ so với GNN thuần, phù hợp prototype. Nếu sau đó đồ thị quá lớn và cần học xen kẽ ngôn ngữ–cấu trúc mạnh hơn, mới cân nhắc tư duy kiểu <strong>GLEM</strong>. Nếu đã có sẵn LLM lớn và muốn giữ nguyên trọng số, chỉ bổ sung cấu trúc với chi phí thấp, thì hướng <strong>GraphAdapter</strong> hợp lý hơn.</p>
+    </div>
+  </section>
+
+  <!-- ========== ĐỀ XUẤT ĐỒ ÁN (Buổi 2) ========== -->
+  <section class="slide-section" id="de-xuat-do-an">
+    <h2>9. Đề xuất đồ án — trả lời câu hỏi bài tập lớn (Buổi 2)</h2>
+    <p class="meta">
+      Các câu hỏi cần trả lời khi làm bài tập lớn:
+      <em>problem → data → how → algorithms → evaluate → submit</em>.
+      Nội dung dưới đây là phương án cụ thể của nhóm Topic 8.
+    </p>
+
+    <h3>9.1. What is the problem you are solving?</h3>
+    <div class="say">
+      <p>Nhóm giải quyết bài toán: <strong>phân loại node trên mạng xã hội được mô hình hoá như Text-Attributed Graph (TAG)</strong> — mỗi node vừa có văn bản (bio, caption, abstract, bình luận), vừa nằm trong cấu trúc quan hệ (follow, reply, citation, share).</p>
+      <p>Pain point cụ thể: GNN thuần nắm cấu trúc tốt nhưng feature text thường nông (bag-of-words / TF-IDF), nên mất ngữ nghĩa sâu; LLM thuần hiểu text tốt nhưng khó “nhìn” hàng xóm và đường lan truyền. Mục tiêu đồ án là kết hợp LLM + GNN để nâng hiệu năng phân loại so với baseline chỉ dùng cấu trúc hoặc chỉ dùng text.</p>
+      <p>Ứng dụng minh họa trong SNA: phân loại chủ đề / cộng đồng của user hoặc post; có thể mở rộng sang phát hiện nội dung sai lệch kèm đồ thị lan truyền nếu thời gian cho phép.</p>
+    </div>
+    <ul>
+      <li>Bài toán chính: <strong>Node classification trên TAG</strong>.</li>
+      <li>Bài toán phụ (optional): link prediction hoặc misinformation + propagation graph.</li>
+      <li>Không làm “chatbot thuần” — luôn có cạnh và cấu trúc mạng.</li>
+    </ul>
+
+    <h3>9.2. What data will you use (how will you get it)?</h3>
+    <div class="say">
+      <p>Nhóm ưu tiên <strong>dataset công khai, tin cậy</strong> (không lấy scrap ẩn danh thiếu kiểm chứng). Nguồn chính theo gợi ý môn học:</p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nguồn</th>
+          <th>Dataset / cách dùng</th>
+          <th>Vai trò trong đồ án</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="https://snap.stanford.edu">SNAP (Stanford)</a></td>
+          <td>Mạng xã hội / citation có cấu trúc cạnh rõ</td>
+          <td>Xây đồ thị quan hệ, phân tích network</td>
+        </tr>
+        <tr>
+          <td><a href="https://networkrepository.com/soc.php">Network Repository</a></td>
+          <td>Social graphs quy mô vừa</td>
+          <td>Prototype nhanh, visualize</td>
+        </tr>
+        <tr>
+          <td>OGB (Open Graph Benchmark)</td>
+          <td><code>ogbn-arxiv</code> (paper + abstract + citation)</td>
+          <td>TAG chuẩn để so GNN vs LLM-Enhancer+GNN</td>
+        </tr>
+        <tr>
+          <td>Tự xây (nếu cần)</td>
+          <td>Thu thập có kiểm chứng từ nguồn mở / API công khai; ghi rõ license &amp; quy trình làm sạch</td>
+          <td>Case study tiếng Việt hoặc domain cụ thể</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="say">
+      <p><strong>Cách lấy và xử lý:</strong> tải từ trang chính thức → chuẩn hoá thành TAG: <code>nodes</code> (id, text, label), <code>edges</code> (src, dst, type) → thống kê bậc, cộng đồng sơ bộ (NetworkX / Gephi) → chia train/val/test theo chuẩn dataset (hoặc stratified split nếu tự xây). Kaggle chỉ dùng khi không còn nguồn tin cậy hơn.</p>
+      <p><strong>Phương án chính đề xuất:</strong> dùng <code>ogbn-arxiv</code> làm benchmark chính (TAG rõ ràng, có nhãn), và một social graph từ SNAP/Network Repository để chứng minh pipeline áp dụng được sang SNA thực tế.</p>
+    </div>
+
+    <h3>9.3. How will you do the project?</h3>
+    <div class="say">
+      <p>Nhóm chia dự án thành 6 giai đoạn có thể kiểm soát tiến độ:</p>
+    </div>
+    <ol>
+      <li><strong>Survey &amp; định vị</strong> — dựa 5 papers đã trình bày; chốt taxonomy Enhancer / Predictor / Adapter.</li>
+      <li><strong>Network construction</strong> — dựng TAG, thống kê cấu trúc (phân bố bậc, density, cộng đồng sơ bộ).</li>
+      <li><strong>Baseline</strong> — (A) GNN thuần với TF-IDF/BoW; (B) LLM/text embedding thuần, không message-passing.</li>
+      <li><strong>Phương pháp đề xuất</strong> — LLM-as-Enhancer: sinh embedding (hoặc explanation rút gọn) → đưa vào GNN (GCN / GraphSAGE / GAT).</li>
+      <li><strong>So sánh mở rộng</strong> — nếu đủ thời gian/GPU: thử tư duy GraphAdapter (LLM đóng băng + GNN adapter) hoặc PEFT nhẹ; ghi nhận vì sao không full-repro GLEM nếu thiếu tài nguyên.</li>
+      <li><strong>Báo cáo &amp; đóng gói</strong> — code tái lập được, README, report, slide/poster, đẩy kết quả theo yêu cầu lớp (GitHub môn học).</li>
+    </ol>
+    <div class="say">
+      <p>Công cụ dự kiến: Python, PyTorch / PyTorch Geometric, Hugging Face transformers (hoặc embedding API mở), NetworkX, Gephi để minh họa. Mọi thí nghiệm ghi lại seed, hyperparameter, và bảng kết quả đối chứng.</p>
+    </div>
+
+    <h3>9.4. Which algorithms / techniques / models will you use or develop?</h3>
+    <div class="say">
+      <p>Nhóm sẽ <strong>cụ thể hoá</strong> như sau — không chỉ nói “dùng LLM và GNN” chung chung:</p>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Thành phần</th>
+          <th>Lựa chọn cụ thể</th>
+          <th>Lý do</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Text encoder (Enhancer)</td>
+          <td>Sentence embedding từ LM mở (vd. sentence-transformers / MiniLM hoặc tương đương); optional: explanation ngắn kiểu TAPE nếu dùng được API</td>
+          <td>Rẻ, tái lập được, đúng nhánh Enhancer trong survey Li et al.</td>
+        </tr>
+        <tr>
+          <td>GNN backbone</td>
+          <td>GCN, GraphSAGE (bắt buộc); GAT (tuỳ chọn)</td>
+          <td>Baseline chuẩn node classification; GraphSAGE inductive tốt hơn khi đồ thị lớn</td>
+        </tr>
+        <tr>
+          <td>Pipeline chính</td>
+          <td><strong>LLM embedding → GNN classifier</strong></td>
+          <td>Prototype ổn định cho đồ án lớp; dễ so với GNN thuần</td>
+        </tr>
+        <tr>
+          <td>Hướng nâng cao</td>
+          <td>GraphAdapter-style (GNN adapter, LLM đóng băng) hoặc PEFT + structure</td>
+          <td>Giảm chi phí fine-tune LLM lớn (WWW 2024)</td>
+        </tr>
+        <tr>
+          <td>Tham chiếu scale</td>
+          <td>Tư duy Variational EM của GLEM (không bắt buộc full re-implement)</td>
+          <td>Khi TAG rất lớn / cần học xen kẽ LM–GNN</td>
+        </tr>
+        <tr>
+          <td>Phân tích mạng</td>
+          <td>Degree distribution, community detection sơ bộ (Louvain / label propagation), PageRank trên subgraph minh họa</td>
+          <td>Nối với nội dung SNA buổi học, không chỉ “train model”</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="say">
+      <p><strong>Đóng góp dự kiến của nhóm:</strong> không claim SOTA tuyệt đối; mà (1) pipeline tái lập rõ trên TAG cho SNA, (2) ablation chứng minh LLM feature giúp gì so với TF-IDF, (3) phân tích lỗi / cộng đồng nơi mô hình còn yếu, (4) khuyến nghị khi nào nên Enhancer vs Adapter trong điều kiện tài nguyên sinh viên.</p>
+    </div>
+
+    <h3>9.5. How will you evaluate / measure success?</h3>
+    <div class="say">
+      <p>Đánh giá theo cả <strong>hiệu năng học máy</strong> và <strong>chất lượng phân tích mạng</strong>:</p>
+    </div>
+    <ul>
+      <li><strong>Metric chính:</strong> Accuracy, Macro-F1, Precision, Recall (Macro-F1 là chỉ số then chốt khi lớp mất cân bằng).</li>
+      <li><strong>Đối chứng bắt buộc:</strong> GNN + TF-IDF/BoW; text embedding thuần (MLP trên embedding, không graph); LLM-Enhancer + GNN (phương án chính).</li>
+      <li><strong>Thiết lập thí nghiệm:</strong> cùng split train/val/test; báo cáo trung bình ± độ lệch (nếu chạy nhiều seed); cố định random seed trong README.</li>
+      <li><strong>Phân tích bổ sung:</strong> confusion matrix theo lớp; hiệu năng theo bậc node (hub vs leaf); thời gian train/infer và ước lượng chi phí LLM.</li>
+      <li><strong>Tiêu chí “thành công” của đồ án:</strong> (a) Enhancer+GNN vượt rõ baseline GNN thuần trên Macro-F1; (b) code chạy lại được từ README; (c) có biện luận khoảng trống / hạn chế trung thực (privacy, bias, chi phí).</li>
+    </ul>
+    <div class="say">
+      <p>Nếu mở rộng misinformation: bổ sung F1 theo lớp “fake/real” và phân tích trên subgraph lan truyền; vẫn giữ cùng nguyên tắc so baseline.</p>
+    </div>
+
+    <h3>9.6. What do you expect to submit / accomplish by the end of the course?</h3>
+    <div class="say">
+      <p>Cuối học phần, nhóm kỳ vọng nộp và hoàn thành các sản phẩm sau (bám yêu cầu bài nhóm cuối kỳ):</p>
+    </div>
+    <ol>
+      <li><strong>Báo cáo / bài viết</strong> (~cấu trúc survey + method + experiment): cơ sở lý thuyết LLM×GNN, related work từ 5 papers, phương pháp đề xuất, thực nghiệm, kết luận &amp; hướng phát triển.</li>
+      <li><strong>Code + README</strong>: pipeline dựng TAG, train/eval baselines và mô hình chính; lệnh chạy tái lập; không commit secret/API key.</li>
+      <li><strong>Presentation + Poster</strong>: thuyết trình ~20 phút; poster tóm tắt problem–method–result.</li>
+      <li><strong>Kết quả thực nghiệm</strong>: bảng số liệu, biểu đồ so sánh, vài visualize mạng (Gephi/NetworkX).</li>
+      <li><strong>Upload theo yêu cầu lớp</strong>: đẩy kết quả lên repo môn học (<code>github.com/phuongpnh/sna</code>) và kênh Classroom/Zalo nếu thầy yêu cầu thêm.</li>
+    </ol>
+    <div class="say">
+      <p><strong>Mức độ hoàn thành tối thiểu (must-have):</strong> TAG + 2 baseline + Enhancer+GNN + báo cáo số liệu Macro-F1. <strong>Stretch goal:</strong> GraphAdapter-style hoặc case study dữ liệu MXH tiếng Việt tự xây có kiểm chứng; phân tích misinformation + propagation.</p>
+      <p>Tóm lại một câu cho thầy cô: <em>Nhóm sẽ xây pipeline LLM-Enhancer + GNN cho node classification trên Text-Attributed Graph, đánh giá bằng Macro-F1 so với GNN/text thuần, và nộp code–report–slide–poster có thể tái lập.</em></p>
+    </div>
+
+    <h3>9.7. Bản tóm tắt “elevator pitch” (đọc nhanh 60 giây)</h3>
+    <div class="say">
+      <p>Problem: phân loại node trên mạng xã hội dạng TAG — cần cả ngữ nghĩa text lẫn cấu trúc cạnh. Data: chủ yếu <code>ogbn-arxiv</code> và một social graph tin cậy từ SNAP/Network Repository; tự xây chỉ khi có quy trình kiểm chứng rõ. How: survey → dựng TAG → baseline → LLM embedding + GNN → ablation. Models: GCN/GraphSAGE + sentence embedding; optional GraphAdapter-style. Success: Macro-F1 vượt GNN thuần, code tái lập được. Submit: report, code, presentation, poster, kết quả lên repo lớp.</p>
+    </div>
+  </section>
+
+  <section class="slide-section">
+    <h2>10. Tài liệu tham khảo (đọc nếu được hỏi nguồn)</h2>
+    <ol>
+      <li>Jin et al. — <em>Large Language Models on Graphs: A Comprehensive Survey</em> — <a href="https://arxiv.org/abs/2312.02783">arxiv.org/abs/2312.02783</a></li>
+      <li>Li et al. — <em>A Survey of Graph Meets Large Language Model</em> — <a href="https://arxiv.org/abs/2311.12399">arxiv.org/abs/2311.12399</a></li>
+      <li>Wang et al. — <em>Graph Machine Learning in the Era of Large Language Models</em> — <a href="https://arxiv.org/abs/2404.14928">arxiv.org/abs/2404.14928</a></li>
+      <li>Zhao et al. — GLEM — <a href="https://arxiv.org/abs/2210.14709">arxiv.org/abs/2210.14709</a></li>
+      <li>Huang et al. — GraphAdapter — <a href="https://arxiv.org/abs/2402.12984">arxiv.org/abs/2402.12984</a></li>
+      <li>Slide trình bày: <code>Slide_BT_Buoi1_Bai1.html</code></li>
+    </ol>
+    <p class="cue">Mẹo trình bày: mỗi block “Đọc” khoảng 45–90 giây; nhìn slide tương ứng, tránh đọc bullet máy móc. Phím trên slide: ← → đổi slide trong mục, ↑ ↓ đổi mục menu, T đổi theme, M thu/mở sidebar. Trang này cũng dùng phím T để đổi theme.</p>
+  </section>
+
+  <script src="./slide-theme.js" defer></script>
+</body>
+</html>

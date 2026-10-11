@@ -8,11 +8,13 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 MENU_JSON = ROOT / "data" / "menu.json"
 SKIP_NAMES = {"index.html", ".DS_Store", "files.json"}
 SKIP_DIRS = {".git", "css", "js", "scripts", ".github", "data"}
+DISPLAY_TZ = ZoneInfo("Asia/Ho_Chi_Minh")  # UTC+7
 
 
 def format_size(num: int) -> str:
@@ -26,7 +28,7 @@ def format_size(num: int) -> str:
 
 
 def format_mtime(ts: float) -> str:
-    return datetime.fromtimestamp(ts).strftime("%d/%m/%y, %H:%M:%S")
+    return datetime.fromtimestamp(ts, tz=DISPLAY_TZ).strftime("%d/%m/%y, %H:%M:%S")
 
 
 def collect_entries(folder: Path) -> list[dict]:
