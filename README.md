@@ -17,7 +17,8 @@ ths-staticweb/
 ├── .github/workflows/deploy-pages.yml  # Auto deploy Pages
 ├── giai-thuat-nang-cao/index.html
 ├── cong-nghe-phan-mem-tien-tien/index.html
-└── phuong-phap-nghien-cuu-khoa-hoc/index.html
+├── phuong-phap-nghien-cuu-khoa-hoc/index.html
+└── phan-tich-mang-xa-hoi/index.html
 ```
 
 Menu ở `index.html` load từ `data/menu.json`. Link tới `folder/` — GitHub Pages mặc định mở `index.html`.

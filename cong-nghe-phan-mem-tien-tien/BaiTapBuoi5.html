@@ -604,6 +604,24 @@
       color: var(--muted);
     }
 
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.7rem;
+      border-radius: 10px;
+      border: 1px solid rgba(13, 148, 136, 0.28);
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .back-link:hover {
+      border-color: rgba(13, 148, 136, 0.5);
+      text-decoration: none;
+    }
     .footer-bar {
       position: absolute;
       left: 0; right: 0; bottom: 0;
@@ -620,6 +638,17 @@
       color: var(--muted);
     }
     .footer-bar > span:last-child { text-align: right; }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+    .footer-left .label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .progress-track {
       width: min(220px, 28vw);
       height: 4px;
@@ -1375,7 +1404,10 @@
       </section>
 
       <footer class="footer-bar">
-        <span>CNPM tiên tiến · Bài tập buổi 5 · Nhóm 4</span>
+        <div class="footer-left">
+          <a class="back-link" href="./index.html">← Back</a>
+          <span class="label">CNPM tiên tiến · Bài tập buổi 5 · Nhóm 4</span>
+        </div>
         <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
         <span id="pageLabel">1 / 13</span>
       </footer>

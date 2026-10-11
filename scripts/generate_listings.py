@@ -96,7 +96,7 @@ def build_page(title: str, folder_label: str, back_href: str, css_href: str, row
 
   <div class="container">
     <nav class="page-nav" aria-label="Điều hướng">
-      <a href="{back_href}">← Về menu</a>
+      <a href="{back_href}index.html">← Back</a>
     </nav>
 
     <header class="site-header site-header--compact">

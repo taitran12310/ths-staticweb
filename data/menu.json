@@ -21,6 +21,12 @@
       "title": "Phương pháp nghiên cứu khoa học",
       "description": "Đề cương, đề án và ghi chú buổi học",
       "path": "phuong-phap-nghien-cuu-khoa-hoc/"
+    },
+    {
+      "id": "phan-tich-mang-xa-hoi",
+      "title": "Phân tích mạng xã hội",
+      "description": "Bài tập, slide và ghi chú môn học",
+      "path": "phan-tich-mang-xa-hoi/"
     }
   ]
 }
