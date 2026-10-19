@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Slide trình bày và PDF gốc bài Source Code Summarization in the Era of Large Language Models, ICSE 2025. Nhóm 4.">
+  <title>Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0b2545;
+      --blue: #13508f;
+      --sky: #1e88e5;
+      --cyan: #00b4d8;
+      --ice: #e6f1fb;
+      --mist: #f3f7fc;
+      --ink: #0f1c2e;
+      --muted: #50607a;
+      --line: #d5e2f0;
+      --amber: #c2410c;
+      --grad: linear-gradient(135deg, #0b2545 0%, #13508f 55%, #1e88e5 100%);
+      --grad-cyan: linear-gradient(135deg, #1e88e5 0%, #00b4d8 100%);
+      --grad-amber: linear-gradient(150deg, #7c2d12 0%, #c2410c 55%, #ea8a12 100%);
+      --shadow: 0 24px 70px rgba(11, 37, 69, 0.28);
+      --c-ref: #9aa8b8;
+      --c-cl: #00a6c7;
+      --c-sc: #f2a516;
+      --c-g3: #1e88e5;
+      --c-g4: #0b2545;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100dvh;
+      color: var(--ink);
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      line-height: 1.6;
+      background:
+        radial-gradient(900px 480px at 0% -10%, rgba(30, 136, 229, 0.16), transparent 55%),
+        radial-gradient(800px 420px at 100% 0%, rgba(0, 180, 216, 0.14), transparent 50%),
+        #e9eff7;
+    }
+    body.mode-slide,
+    body.mode-pdf {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .skip { position: absolute; left: -9999px; }
+    .skip:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 80;
+      background: #fff;
+      color: var(--ink);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+    }
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #fbbf24;
+      outline-offset: 2px;
+    }
+
+    /* ---------- Thanh trên ---------- */
+    .appbar {
+      position: relative;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      padding: 0.7rem 1.1rem;
+      background: rgba(11, 37, 69, 0.96);
+      color: #f8fafc;
+    }
+    .appbar a { color: #7dd3fc; text-decoration: none; font-weight: 600; }
+    .appbar a:hover { text-decoration: underline; }
+    .brand { display: flex; flex-direction: column; gap: 0.1rem; min-width: 12rem; }
+    .brand strong { font-size: 0.95rem; }
+    .brand span { color: #cbd5e1; font-size: 0.78rem; }
+    .modes {
+      display: flex;
+      padding: 0.2rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .modes button {
+      border: 0;
+      background: transparent;
+      color: #e2e8f0;
+      font: inherit;
+      font-weight: 700;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .modes button[aria-pressed="true"] { background: #fff; color: var(--navy); }
+
+    /* ---------- PDF ---------- */
+    .pdf-view[hidden] { display: none !important; }
+    body.mode-pdf .pdf-view {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+      margin: 0.75rem;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .pdf-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.4rem 1rem;
+      margin: 0;
+      padding: 0.55rem 0.9rem;
+      background: var(--navy);
+      color: #e2e8f0;
+      font-size: 0.82rem;
+    }
+    .pdf-bar a { color: #7dd3fc; font-weight: 700; }
+    .pdf-view iframe { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; background: #fff; }
+
+    /* ---------- Sân khấu: slide luôn 16:9 và co giãn theo khung ---------- */
+    .stage { display: none; }
+    body.mode-slide .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 0.6rem 0.9rem 0.5rem;
+    }
+    .deck-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      display: grid;
+      place-items: center;
+      container-type: size;
+    }
+    .deck {
+      position: relative;
+      width: min(100cqw, calc(100cqh * 16 / 9));
+      aspect-ratio: 16 / 9;
+      container-type: inline-size;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 6;
+      height: 4px;
+      width: 0;
+      background: var(--grad-cyan);
+      transition: width 0.4s ease;
+    }
+
+    .deck-tools {
+      display: none;
+      width: min(1280px, 100%);
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+    }
+    body.mode-slide .deck-tools { display: flex; }
+    .nav { display: flex; gap: 0.4rem; }
+    .nav button,
+    .note-toggle {
+      border: 0;
+      border-radius: 999px;
+      background: var(--navy);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .nav button {
+      display: grid;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.4rem;
+    }
+    .nav button svg { width: 1.1rem; height: 1.1rem; }
+    .nav button:disabled { opacity: 0.35; }
+    .note-toggle { padding: 0.45rem 0.9rem; }
+    .note-toggle[aria-pressed="true"] { background: var(--sky); }
+    .hint { margin: 0; color: var(--muted); font-size: 0.8rem; }
+    .notes {
+      display: none;
+      width: min(1280px, 100%);
+      max-height: 9rem;
+      flex: none;
+      overflow: auto;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--sky);
+      border-radius: 12px;
+      padding: 0.55rem 0.9rem 0.65rem;
+      font-size: 0.84rem;
+    }
+    .notes p, .notes li { margin: 0.12rem 0; }
+    .notes ul { margin: 0.1rem 0 0.25rem; padding-left: 1.1rem; }
+    .notes h3 { margin: 0.15rem 0 0.2rem; font-size: 0.86rem; color: var(--blue); }
+    body.show-notes .notes { display: block; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .notes .speaker-note { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+
+    /* ---------- Toàn màn hình: ẩn mọi thứ trừ slide ---------- */
+    body.is-fullscreen .appbar,
+    body.is-fullscreen .note-toggle,
+    body.is-fullscreen .hint,
+    body.is-fullscreen .notes { display: none !important; }
+    body.is-fullscreen .stage { padding: 0; gap: 0; background: #050c18; }
+    body.is-fullscreen .deck { border-radius: 0; box-shadow: none; }
+    body.is-fullscreen .deck-tools {
+      position: fixed;
+      right: 1.1rem;
+      bottom: 1.1rem;
+      z-index: 60;
+      width: auto;
+      padding: 0.35rem;
+      border-radius: 999px;
+      background: rgba(5, 12, 24, 0.55);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    body.is-fullscreen.show-tools .deck-tools,
+    body.is-fullscreen .deck-tools:focus-within { opacity: 1; pointer-events: auto; }
+
+    /* ---------- Khung slide chung (mọi kích thước tính theo bề ngang slide) ---------- */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 2.6em 3.2em 3.6em;
+      overflow: hidden;
+      background: #fff;
+      color: var(--ink);
+      font-size: 1.42cqw;
+      line-height: 1.45;
+    }
+    .slide[hidden] { display: none !important; }
+    .slide h2, .slide h3, .slide p, .slide ul, .slide ol,
+    .slide figure, .slide blockquote { margin: 0; }
+    .slide ul, .slide ol { padding: 0; list-style: none; }
+    .slide h2 {
+      max-width: 40ch;
+      font-size: 2.1em;
+      font-weight: 800;
+      line-height: 1.14;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+      text-wrap: balance;
+    }
+    .slide h3 { font-size: 1.05em; font-weight: 800; line-height: 1.3; color: var(--navy); }
+    .slide p { font-size: 0.94em; color: var(--muted); }
+    .slide code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.88em;
+      background: var(--ice);
+      color: var(--navy);
+      padding: 0.05em 0.35em;
+      border-radius: 0.3em;
+    }
+
+    .s-head {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45em;
+      margin-bottom: 1.5em;
+    }
+    .slide .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.65em;
+      font-size: 0.76em;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sky);
+    }
+    .slide .eyebrow::before {
+      content: "";
+      width: 2.4em;
+      height: 0.3em;
+      border-radius: 1em;
+      background: var(--grad-cyan);
+    }
+    .who {
+      display: inline-block;
+      padding: 0.2em 0.75em;
+      border-radius: 999px;
+      background: var(--c, var(--sky));
+      color: #fff;
+      letter-spacing: 0.06em;
+    }
+    .m1 { --c: #0891b2; }
+    .m2 { --c: #d97706; }
+    .m3 { --c: #1e88e5; }
+    .k-cl { --c: var(--c-cl); }
+    .k-sc { --c: var(--c-sc); --fg: #3b2200; }
+    .k-g3 { --c: var(--c-g3); }
+    .k-g4 { --c: var(--c-g4); }
+    .k-ref { --c: var(--c-ref); }
+
+    .slide .label {
+      font-size: 0.76em;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    .on-dark { color: #fff; }
+    .on-dark h2, .on-dark h3 { color: #fff; }
+    .on-dark p, .on-dark li { color: #d4e4f5; }
+    .on-dark .eyebrow, .on-dark .label { color: #7dd3fc; }
+
+    .deco::before,
+    .deco::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: none;
+    }
+    .deco::before {
+      width: 17em;
+      height: 8.5em;
+      background: var(--grad);
+      clip-path: polygon(38% 0, 100% 0, 100% 100%);
+    }
+    .deco::after {
+      width: 9em;
+      height: 13em;
+      background: var(--grad-cyan);
+      clip-path: polygon(55% 0, 100% 0, 100% 100%);
+      opacity: 0.9;
+    }
+
+    .slide .footer-bar {
+      position: absolute;
+      left: 3.2em;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      height: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1em;
+      border-top: 1px solid var(--line);
+      font-size: 1em;
+    }
+    .footer-bar > span:first-child { font-size: 0.74em; font-weight: 600; color: var(--muted); }
+    .pg {
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      padding: 0 2.2em 0 2.8em;
+      background: var(--grad);
+      color: #fff;
+      font-size: 0.78em;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      clip-path: polygon(1.4em 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .slide .tip {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      padding: 0.8em 1.2em;
+      background: var(--ice);
+      border-left: 0.3em solid var(--sky);
+      border-radius: 0 0.6em 0.6em 0;
+      color: var(--ink);
+    }
+    .tip b {
+      flex: none;
+      font-size: 0.85em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    /* ---------- Biểu đồ ---------- */
+    .chart { display: flex; flex-direction: column; gap: 0.6em; min-width: 0; min-height: 0; }
+    .slide figcaption { font-size: 0.85em; font-weight: 800; color: var(--navy); }
+    .slide .legend { display: flex; flex-wrap: wrap; gap: 0.3em 1.1em; font-size: 0.78em; }
+    .legend i {
+      display: inline-block;
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: 0.35em;
+      border-radius: 0.2em;
+      vertical-align: -0.05em;
+    }
+    .sw-ref { background: var(--c-ref); }
+    .sw-cl { background: var(--c-cl); }
+    .sw-sc { background: var(--c-sc); }
+    .sw-g3 { background: var(--c-g3); }
+    .sw-g4 { background: var(--c-g4); }
+    .groups {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 1.2em;
+    }
+    .group { display: flex; flex-direction: column; min-height: 0; }
+    .cols {
+      flex: 1 1 auto;
+      min-height: 8em;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.28em;
+      padding: 1.4em 0.4em 0;
+      border-bottom: 2px solid var(--navy);
+      background: repeating-linear-gradient(to top, transparent 0 calc(20% - 1px), var(--line) calc(20% - 1px) 20%);
+      background-origin: content-box;
+      background-clip: content-box;
+    }
+    .col {
+      position: relative;
+      flex: 1 1 0;
+      min-height: 2px;
+      border-radius: 0.3em 0.3em 0 0;
+      font-style: normal;
+      transform-origin: bottom;
+    }
+    .col b {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.25em);
+      transform: translateX(-50%);
+      font-size: 0.66em;
+      font-weight: 800;
+      color: var(--navy);
+      white-space: nowrap;
+    }
+    .slide .group > p { margin-top: 0.45em; text-align: center; font-size: 0.85em; font-weight: 800; color: var(--navy); }
+    .slide .axis-note { font-size: 0.78em; }
+
+    .range-chart { flex: 1; display: grid; align-content: center; gap: 1.1em; }
+    .range-row { display: grid; grid-template-columns: 11em 1fr; gap: 1em; align-items: center; }
+    .range-row > span:first-child { font-size: 0.88em; font-weight: 700; color: var(--navy); }
+    .range-track { position: relative; height: 1.9em; background: #dfe9f5; border-radius: 999px; }
+    .range-zero { position: absolute; top: -0.3em; bottom: -0.3em; width: 2px; background: var(--navy); }
+    .range-span { position: absolute; top: 0.25em; bottom: 0.25em; border-radius: 999px; transform-origin: left; }
+    .range-axis { position: relative; height: 1.2em; }
+    .range-axis span {
+      position: absolute;
+      transform: translateX(-50%);
+      font-size: 0.72em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .line-chart { flex: 1 1 auto; width: 100%; min-height: 0; }
+    .line-chart text { font-family: inherit; font-size: 10px; fill: var(--muted); }
+    .line-chart .grid line { stroke: var(--line); }
+
+    /* ---------- 1. Bìa ---------- */
+    .l-cover { flex-direction: row; padding: 0; }
+    .cover-panel {
+      position: relative;
+      flex: 0 0 58%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.1em;
+      padding: 4em 8em 4em 4em;
+      background: var(--grad);
+      clip-path: polygon(0 0, 100% 0, 84% 100%, 0 100%);
+      overflow: hidden;
+    }
+    .cover-panel::after {
+      content: "";
+      position: absolute;
+      left: -7em;
+      bottom: -9em;
+      width: 22em;
+      height: 22em;
+      border-radius: 50%;
+      border: 2.6em solid rgba(255, 255, 255, 0.06);
+    }
+    .cover-panel h2 { max-width: 15ch; font-size: 3.1em; }
+    .cover-panel .en { max-width: 34ch; font-size: 1.05em; font-style: italic; color: #cfe3f7; }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.5em; margin-top: 0.4em !important; }
+    .tags li {
+      padding: 0.3em 0.95em;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      font-size: 0.8em;
+      font-weight: 700;
+      color: #fff;
+    }
+    .cover-side {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2em;
+      padding: 4em 4em 4em 1em;
+    }
+    .cover-side::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 12em;
+      height: 12em;
+      background: var(--grad-cyan);
+      clip-path: polygon(40% 0, 100% 0, 100% 60%);
+    }
+    .member-list { display: grid; gap: 0.8em; }
+    .member-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.9em;
+      padding: 0.7em 1em;
+      background: var(--mist);
+      border-left: 0.3em solid var(--sky);
+      border-radius: 0 0.6em 0.6em 0;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .avatar {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2.6em;
+      height: 2.6em;
+      border-radius: 50%;
+      background: var(--c, var(--grad));
+      color: var(--fg, #fff);
+      font-weight: 800;
+    }
+    .l-cover .footer-bar { left: 58%; }
+
+    /* ---------- 2. Tóm tắt điều hành ---------- */
+    .l-exec { flex-direction: row; padding: 0; }
+    .exec-panel {
+      position: relative;
+      flex: 0 0 36%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2em;
+      padding: 3.4em 3em 4em 3.2em;
+      background: var(--grad);
+    }
+    .exec-panel::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: -3.2em;
+      width: 3.2em;
+      height: 9em;
+      background: var(--grad-cyan);
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .exec-panel h2 { font-size: 2.3em; }
+    .exec-panel .panel-note { padding-top: 1em; border-top: 1px solid rgba(255, 255, 255, 0.25); }
+    .exec-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.6em;
+      padding: 3em 3.4em 3.8em 5em;
+    }
+    .num-rows { display: grid; gap: 1.1em; }
+    .num-rows li {
+      display: grid;
+      grid-template-columns: 3.6em 1fr;
+      gap: 1em;
+      padding-bottom: 1.1em;
+      border-bottom: 1px solid var(--line);
+    }
+    .num {
+      font-size: 1.9em;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--grad-cyan);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .roles ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7em; margin-top: 0.6em; }
+    .roles li {
+      padding: 0.7em 0.9em;
+      background: var(--mist);
+      border-top: 0.28em solid var(--c);
+      border-radius: 0 0 0.6em 0.6em;
+    }
+    .roles li b {
+      display: block;
+      font-size: 0.78em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--c);
+    }
+    .roles li span { font-size: 0.88em; font-weight: 600; color: var(--ink); }
+    .l-exec .footer-bar { left: calc(36% + 5em); }
+
+    /* ---------- 3. Dòng thời gian ---------- */
+    .steps { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; }
+    .steps li {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6em;
+      padding-bottom: 1.2em;
+      background: var(--mist);
+      border-radius: 0.8em;
+      overflow: hidden;
+    }
+    .steps li > :not(.step-tag) { padding: 0 1.3em; }
+    .slide .step-tag {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 1em 0.4em 0;
+      padding: 0.8em 2.4em 0.8em 1.6em;
+      background: var(--grad);
+      color: #fff;
+      font-size: 0.82em;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, calc(100% - 1.6em) 0, 100% 50%, calc(100% - 1.6em) 100%, 0 100%);
+    }
+    .step-tag span { font-weight: 600; letter-spacing: 0.04em; text-transform: none; opacity: 0.85; }
+    .steps li:nth-child(2) .step-tag { background: linear-gradient(135deg, #13508f, #1e88e5); }
+    .steps li:nth-child(3) .step-tag { background: var(--grad-cyan); }
+    .steps h3 { font-size: 1.25em; }
+    .steps p { font-size: 1em; }
+    .steps li .out { min-height: 5.4em; margin-top: auto; padding-top: 0.8em; border-top: 1px dashed #b9cde3; }
+    .out b {
+      display: block;
+      font-size: 0.8em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+    .banner {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 2.2em;
+      margin-top: 1.2em;
+      padding: 1em 1.8em;
+      background: var(--navy);
+      border-radius: 0.8em;
+    }
+    .vs { text-align: center; }
+    .vs .big { display: block; font-size: 2.3em; font-weight: 800; line-height: 1; color: #fff; }
+    .vs:last-child .big { color: #7dd3fc; }
+    .vs small { font-size: 0.72em; color: #a9c3df; }
+
+    /* ---------- 4. Khoảng trống → câu hỏi ---------- */
+    .obj-grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 2.4em 1.2fr;
+      gap: 1.4em;
+    }
+    .obj-col { display: flex; flex-direction: column; gap: 0.8em; min-height: 0; }
+    .gaps { flex: 1; display: flex; flex-direction: column; gap: 0.8em; }
+    .gap {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 2.6em 1fr;
+      align-items: center;
+      gap: 1em;
+      padding: 0.9em 1.1em;
+      background: var(--mist);
+      border-radius: 0.8em;
+    }
+    .gap-n {
+      display: grid;
+      place-items: center;
+      width: 2.6em;
+      height: 2.6em;
+      border-radius: 0.6em;
+      background: var(--grad);
+      color: #fff;
+      font-weight: 800;
+    }
+    .arrow {
+      align-self: center;
+      width: 2.4em;
+      height: 6em;
+      background: var(--grad-cyan);
+      clip-path: polygon(0 0, 100% 50%, 0 100%, 40% 50%);
+    }
+    .rq-list { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 0.6em; }
+    .rq-list li {
+      display: grid;
+      grid-template-columns: 3.4em 1fr auto;
+      align-items: center;
+      gap: 1em;
+      padding: 0.35em 1.2em 0.35em 0.35em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 0.4em 1.2em rgba(11, 37, 69, 0.07);
+    }
+    .badge {
+      display: grid;
+      place-items: center;
+      width: 4em;
+      height: 4em;
+      border-radius: 50%;
+      background: var(--grad-cyan);
+      color: #fff;
+      font-size: 0.85em;
+      font-weight: 800;
+    }
+    .rq-list li:nth-child(odd) .badge { background: var(--grad); }
+    .rq-list h3 { font-size: 0.98em; }
+    .from {
+      padding: 0.25em 0.75em;
+      border-radius: 999px;
+      background: var(--ice);
+      color: var(--blue);
+      font-size: 0.72em;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* ---------- 5. Quy trình ---------- */
+    .phase { display: flex; flex-direction: column; gap: 0.7em; }
+    .phase + .phase { flex: 1; min-height: 0; margin-top: 1.5em; }
+    .slide .phase-label { display: flex; align-items: center; gap: 0.7em; font-weight: 700; color: var(--navy); }
+    .phase-label b {
+      padding: 0.2em 0.8em;
+      border-radius: 999px;
+      background: var(--ice);
+      color: var(--blue);
+      font-size: 0.8em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .chevrons { display: flex; }
+    .chevrons li {
+      flex: 1;
+      margin-left: -1.1em;
+      padding: 1.1em 0.6em 1.1em 2.1em;
+      background: var(--seg);
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+      clip-path: polygon(0 0, calc(100% - 1.4em) 0, 100% 50%, calc(100% - 1.4em) 100%, 0 100%, 1.4em 50%);
+    }
+    .chevrons li:first-child {
+      margin-left: 0;
+      padding-left: 1.2em;
+      clip-path: polygon(0 0, calc(100% - 1.4em) 0, 100% 50%, calc(100% - 1.4em) 100%, 0 100%);
+    }
+    .chevrons li:nth-child(1) { --seg: #0b2545; }
+    .chevrons li:nth-child(2) { --seg: #13508f; }
+    .chevrons li:nth-child(3) { --seg: #1565c0; }
+    .chevrons li:nth-child(4) { --seg: #1e88e5; }
+    .chevrons li:nth-child(5) { --seg: #00a5cf; }
+    .judge-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1em; }
+    .judge {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+      padding: 1.3em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 0.9em;
+    }
+    .icon {
+      display: grid;
+      place-items: center;
+      width: 2.6em;
+      height: 2.6em;
+      margin-bottom: 0.3em;
+      border-radius: 0.7em;
+      background: var(--ice);
+      color: var(--blue);
+      font-weight: 800;
+    }
+    .judge h3 { font-size: 1.2em; }
+    .judge p { font-size: 1em; }
+    .judge.pick { background: var(--grad); border: 0; box-shadow: 0 1em 2em rgba(19, 80, 143, 0.3); }
+    .judge.pick .icon { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .flag {
+      position: absolute;
+      top: 1.3em;
+      right: 1.3em;
+      padding: 0.3em 0.8em;
+      border-radius: 999px;
+      background: #7dd3fc;
+      color: var(--navy);
+      font-size: 0.7em;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ---------- 6. Vòng cung năm prompt ---------- */
+    .l-radial { flex-direction: row; padding: 0; }
+    .radial-left { position: relative; flex: 0 0 33%; }
+    .ring {
+      position: absolute;
+      left: -10em;
+      top: 50%;
+      width: 31em;
+      height: 31em;
+      margin-top: -15.5em;
+      border-radius: 50%;
+      background: conic-gradient(from 30deg, #0b2545 0 20%, #13508f 0 40%, #1e88e5 0 60%, #00b4d8 0 80%, #0891b2 0 100%);
+    }
+    .ring::before {
+      content: "";
+      position: absolute;
+      inset: 3.2em;
+      border-radius: 50%;
+      background: #fff;
+    }
+    .ring-core {
+      position: absolute;
+      inset: 5em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-left: 6em;
+      border-radius: 50%;
+      background: var(--grad);
+      color: #fff;
+      text-align: center;
+    }
+    .ring-core b { font-size: 5em; line-height: 1; }
+    .ring-core span { font-size: 0.85em; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #9be7ff; }
+    .radial-right { flex: 1; display: flex; flex-direction: column; padding: 2.6em 3.2em 3.6em 1em; }
+    .arc-list { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 0.9em; }
+    .arc-list li { display: grid; grid-template-columns: 2.8em 1fr; align-items: center; gap: 1.1em; }
+    .arc-list li:nth-child(1) { --seg: #0b2545; }
+    .arc-list li:nth-child(2) { --seg: #13508f; margin-left: 2.6em; }
+    .arc-list li:nth-child(3) { --seg: #1e88e5; margin-left: 3.6em; }
+    .arc-list li:nth-child(4) { --seg: #00b4d8; margin-left: 2.6em; }
+    .arc-list li:nth-child(5) { --seg: #0891b2; }
+    .arc-n {
+      display: grid;
+      place-items: center;
+      width: 2.8em;
+      height: 2.8em;
+      border-radius: 50%;
+      background: var(--seg);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 0 0.3em #fff, 0 0 0 0.42em var(--seg);
+    }
+    .l-radial .tip { margin-top: 1em; }
+    .l-radial .footer-bar { left: 33%; }
+
+    /* ---------- 7. Bốn mô hình ---------- */
+    .team { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.1em; }
+    .member {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45em;
+      padding: 1.3em 1.2em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-top: 0.32em solid var(--c);
+      border-radius: 0.8em;
+      box-shadow: 0 0.7em 1.8em rgba(11, 37, 69, 0.08);
+    }
+    .member .avatar { width: 3em; height: 3em; margin-bottom: 0.4em; }
+    .slide .tagline { font-size: 0.8em; font-weight: 700; color: var(--blue); }
+    .band {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.6em;
+      margin-top: 1.1em;
+      padding: 1.2em 1.6em;
+      background: var(--grad);
+      border-radius: 0.9em;
+    }
+    .band > div { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 0.9em; }
+    .band .stat { font-size: 2.3em; font-weight: 800; line-height: 1; color: #7dd3fc; }
+    .band b { display: block; color: #fff; }
+
+    /* ---------- 8, 12. Biểu đồ + panel bên phải ---------- */
+    .l-chart-panel { flex-direction: row; padding: 0; }
+    .cp-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 2.6em 2.6em 3.6em 3.2em;
+    }
+    .cp-main .chart { flex: 1; }
+    .cp-panel {
+      flex: 0 0 30%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1em;
+      padding: 2.6em 2.4em 2.6em 4.4em;
+      background: var(--grad);
+      clip-path: polygon(2.8em 0, 100% 0, 100% 100%, 0 100%);
+    }
+    .kpi { padding-bottom: 0.9em; border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+    .kpi span { display: block; font-size: 2em; font-weight: 800; line-height: 1.15; color: #fff; }
+    .slide .quote {
+      padding: 0.8em 1em;
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 0.25em solid #7dd3fc;
+      border-radius: 0 0.6em 0.6em 0;
+      font-size: 0.84em;
+      font-style: italic;
+      color: #d4e4f5;
+    }
+    .l-chart-panel .footer-bar { right: 30%; }
+    .cp-panel.spot { background: var(--grad-amber); }
+    .spot .label { color: #fde68a; }
+    .spot p, .spot li { color: #ffedd5; }
+    .slide .spot-name { font-size: 2.9em; font-weight: 800; line-height: 1; color: #fff; }
+    .spot-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.8em;
+      padding: 0.55em 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 0.9em;
+    }
+    .spot-list b { min-width: 3.4em; font-size: 1.5em; color: #fff; }
+
+    /* ---------- 9. Khoảng tương quan + thẻ số ---------- */
+    .range-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.35fr 1fr; gap: 1.8em; }
+    .range-card { padding: 1.6em 1.8em; background: var(--mist); border-radius: 1em; }
+    .stat-stack { display: grid; gap: 0.9em; }
+    .stat-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.4em;
+      padding: 1em 1.2em;
+      border: 1px solid var(--line);
+      border-left: 0.32em solid var(--sky);
+      border-radius: 0.4em 0.8em 0.8em 0.4em;
+    }
+    .stat-card.hl { background: var(--grad); border: 0; }
+    .pair { display: flex; gap: 1.8em; }
+    .pair span { font-size: 0.78em; font-weight: 600; color: var(--muted); }
+    .pair b { display: block; font-size: 2em; line-height: 1.1; color: var(--navy); }
+    .pair span:last-child b { color: var(--sky); }
+
+    /* ---------- 10. Biểu đồ + danh sách bên ---------- */
+    .cs-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.75fr 1fr; gap: 2em; }
+    .best { display: flex; flex-direction: column; gap: 0.8em; }
+    .best ul { display: grid; gap: 0.6em; }
+    .best li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8em;
+      padding: 0.75em 1em;
+      background: var(--mist);
+      border-left: 0.35em solid var(--c);
+      border-radius: 0 0.6em 0.6em 0;
+    }
+    .best li b { font-size: 0.92em; color: var(--navy); }
+    .best li em {
+      padding: 0.25em 0.75em;
+      border-radius: 999px;
+      background: var(--c);
+      color: var(--fg, #fff);
+      font-size: 0.8em;
+      font-style: normal;
+      font-weight: 800;
+    }
+    .slide .note-box {
+      margin-top: auto;
+      padding: 0.9em 1.1em;
+      border: 1px dashed var(--sky);
+      border-radius: 0.7em;
+      font-size: 0.84em;
+    }
+
+    /* ---------- 11. Xu hướng ---------- */
+    .trend-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.8em; }
+    .line-card { padding: 1.3em 1.5em; background: var(--mist); border-radius: 1em; }
+    .trend-cards { display: grid; gap: 0.8em; }
+    .trend {
+      display: grid;
+      grid-template-columns: 3em 1fr;
+      align-items: center;
+      gap: 1em;
+      padding: 0.9em 1.1em;
+      border: 1px solid var(--line);
+      border-radius: 0.8em;
+    }
+    .trend .ico {
+      display: grid;
+      place-items: center;
+      width: 2.6em;
+      height: 2.6em;
+      border-radius: 50%;
+      background: var(--c);
+      color: var(--fg, #fff);
+      font-size: 1.1em;
+      font-weight: 800;
+    }
+    .slide .seq { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
+    .l-trend .tip { margin-top: 1.1em; }
+
+    /* ---------- 13. So kè từng cặp ---------- */
+    .duel-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.55fr 1fr; gap: 2em; }
+    .duel-rows { flex: 1; display: grid; align-content: center; gap: 0.9em; }
+    .duel-row {
+      display: grid;
+      grid-template-columns: 7em 1fr 6.5em;
+      align-items: center;
+      gap: 1em;
+      padding-bottom: 0.9em;
+      border-bottom: 1px solid var(--line);
+    }
+    .duel-name { font-size: 0.95em; font-weight: 800; color: var(--navy); }
+    .duel-bars { display: grid; gap: 0.3em; }
+    .bar {
+      position: relative;
+      display: block;
+      width: var(--v);
+      height: 1.15em;
+      border-radius: 0 999px 999px 0;
+      transform-origin: left;
+    }
+    .bar b {
+      position: absolute;
+      left: calc(100% + 0.4em);
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75em;
+      color: var(--navy);
+    }
+    .win {
+      justify-self: start;
+      padding: 0.25em 0.75em;
+      border-radius: 999px;
+      background: var(--c);
+      color: #fff;
+      font-size: 0.72em;
+      font-weight: 800;
+    }
+    .verdict {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1em;
+      padding: 1.8em;
+      background: var(--grad);
+      border-radius: 1em;
+      overflow: hidden;
+    }
+    .verdict::after {
+      content: "";
+      position: absolute;
+      top: -3em;
+      right: -3em;
+      width: 9em;
+      height: 9em;
+      border-radius: 50%;
+      border: 1.4em solid rgba(255, 255, 255, 0.08);
+    }
+    .verdict-big b { display: block; font-size: 3.2em; line-height: 1; color: #7dd3fc; }
+    .verdict ul { display: grid; gap: 0.35em; }
+    .verdict li { position: relative; padding-left: 1.1em; font-size: 0.92em; }
+    .verdict li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 0.45em; height: 0.45em; border-radius: 50%; background: #7dd3fc; }
+    .verdict .caveat { padding-top: 0.8em; border-top: 1px solid rgba(255, 255, 255, 0.25); font-size: 0.82em; }
+
+    /* ---------- 14. Cột kiểu SWOT ---------- */
+    .swot { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+    .swot-group { display: flex; flex-direction: column; gap: 0.8em; min-height: 0; }
+    .cons .label { color: var(--amber); }
+    .swot-cols { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6em; }
+    .swot-cols article {
+      display: flex;
+      flex-direction: column;
+      background: var(--mist);
+      border-radius: 0.6em;
+      overflow: hidden;
+    }
+    .swot-cols h3 {
+      padding: 1em 1em 1.7em;
+      background: var(--grad);
+      color: #fff;
+      font-size: 0.9em;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, 100% 0, 100% calc(100% - 0.8em), 50% 100%, 0 calc(100% - 0.8em));
+    }
+    .pros article:nth-child(2) h3 { background: linear-gradient(135deg, #13508f, #1e88e5); }
+    .pros article:nth-child(3) h3 { background: var(--grad-cyan); }
+    .cons .swot-cols h3 { background: var(--grad-amber); }
+    .idx { padding: 0.25em 0.5em 0; font-size: 2.4em; font-weight: 800; line-height: 1; color: var(--line); }
+    .swot-cols p { padding: 0.4em 1.1em 1.2em; font-size: 1em; }
+    .l-swot .tip { margin-top: 1.1em; }
+
+    /* ---------- 15. Hỏi đáp ---------- */
+    .l-qa { flex-direction: row; padding: 0; }
+    .qa-main { flex: 1; display: flex; flex-direction: column; padding: 2.6em 2.4em 3.6em 3.2em; }
+    .faq { flex: 1; display: grid; align-content: center; gap: 1em; }
+    .faq li {
+      display: grid;
+      grid-template-columns: 2.6em 1fr;
+      gap: 1em;
+      padding: 1em 1.2em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 0.8em;
+      box-shadow: 0 0.5em 1.4em rgba(11, 37, 69, 0.06);
+    }
+    .q {
+      display: grid;
+      place-items: center;
+      width: 2.6em;
+      height: 2.6em;
+      border-radius: 50%;
+      background: var(--grad-cyan);
+      color: #fff;
+      font-weight: 800;
+    }
+    .qa-panel {
+      flex: 0 0 40%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2em;
+      padding: 3em 3em 3.6em 7em;
+      background: var(--grad);
+      clip-path: polygon(5em 0, 100% 0, 100% 100%, 5em 100%, 0 50%);
+    }
+    .slide .thanks { font-size: 2.5em; font-weight: 800; line-height: 1.05; color: #fff; }
+    .thanks span { display: block; color: #7dd3fc; }
+    .qa-roles li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.7em;
+      padding: 0.6em 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 0.9em;
+    }
+    .qa-roles .who { flex: none; font-size: 0.78em; }
+    .l-qa .footer-bar { right: 40%; }
+
+    .l-thanks {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.4em;
+      padding: 0 2.2em 3.6em 4.2em;
+      background: var(--grad);
+      overflow: hidden;
+    }
+    .thanks-copy {
+      position: relative;
+      flex: 1 1 52%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7em;
+      z-index: 1;
+    }
+    .l-thanks h2 {
+      max-width: 11em;
+      font-size: 2.55em;
+      line-height: 1.18;
+      color: #fff;
+      text-shadow: 0 0.08em 0.4em rgba(6, 24, 48, 0.45);
+    }
+    .fireworks {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .thanks-group {
+      font-size: 1.08em;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #d4e4f5;
+      white-space: nowrap;
+    }
+    .l-thanks .footer-bar { border-top-color: rgba(255, 255, 255, 0.22); }
+    .l-thanks .footer-bar > span:first-child { color: #d4e4f5; }
+
+    .cmp {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.4em;
+    }
+    .cmp article {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8em;
+      padding: 1.5em 1.6em;
+      border-radius: 0.9em;
+      background: var(--mist);
+    }
+    .cmp article.pick { background: var(--grad); }
+    .cmp ul { display: grid; gap: 0.6em; align-content: start; }
+    .cmp li { position: relative; padding-left: 1.15em; font-size: 0.95em; color: var(--ink); }
+    .cmp article.pick li { color: #d4e4f5; }
+    .cmp li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 0.45em;
+      height: 0.45em;
+      border-radius: 50%;
+      background: var(--sky);
+    }
+    .cmp article.pick li::before { background: #7dd3fc; }
+
+    /* ---------- Chuyển động ---------- */
+    @keyframes rise { from { opacity: 0; transform: translateY(0.9em); } to { opacity: 1; transform: none; } }
+    @keyframes slide-in { from { opacity: 0; transform: translateX(-1.5em); } to { opacity: 1; transform: none; } }
+    @keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes dash { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+    .slide.active .s-head { animation: rise 0.5s ease both; }
+    .slide.active :is(.cover-panel, .exec-panel, .cp-panel, .qa-panel, .radial-left) { animation: slide-in 0.6s ease both; }
+    .stagger > :nth-child(1) { --n: 0; }
+    .stagger > :nth-child(2) { --n: 1; }
+    .stagger > :nth-child(3) { --n: 2; }
+    .stagger > :nth-child(4) { --n: 3; }
+    .stagger > :nth-child(5) { --n: 4; }
+    .stagger > :nth-child(6) { --n: 5; }
+    .slide.active .stagger > * { animation: rise 0.5s ease both; animation-delay: calc(0.18s + var(--n, 0) * 0.08s); }
+    .slide.active .col { animation: grow-y 0.7s 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    .slide.active :is(.range-span, .bar) { animation: grow-x 0.7s 0.3s ease both; }
+    .slide.active .line-chart polyline { stroke-dasharray: 400; animation: dash 1s 0.3s ease both; }
+    @media (prefers-reduced-motion: reduce) {
+      .slide *, .slide *::before, .slide *::after { animation: none !important; transition: none !important; }
+    }
+
+    /* ---------- Điện thoại dọc: bỏ khung 16:9, cho cuộn ---------- */
+    @media (max-width: 720px) and (orientation: portrait) {
+      .hint { display: none; }
+      .deck-wrap { display: block; container-type: normal; }
+      .deck { width: 100%; height: 100%; aspect-ratio: auto; }
+      .slide { font-size: 14px; overflow-y: auto; padding: 1.6em 1.2em 3.6em; }
+      .l-cover, .l-exec, .l-radial, .l-chart-panel, .l-qa, .l-thanks { flex-direction: column; padding: 0 0 3.6em; }
+      .cover-panel, .exec-panel, .cp-panel, .qa-panel { flex: none; clip-path: none; padding: 2em 1.2em; }
+      .cover-side, .exec-body, .radial-right, .cp-main, .qa-main { padding: 1.6em 1.2em; }
+      .exec-panel::after, .cover-side::before, .deco::before, .deco::after, .radial-left, .arrow { display: none; }
+      .steps, .obj-grid, .judge-grid, .team, .band, .range-layout, .cs-grid, .trend-grid,
+      .duel-grid, .swot, .swot-cols, .roles ul, .banner, .cmp { grid-template-columns: 1fr; }
+      .chevrons { flex-direction: column; gap: 0.3em; }
+      .chevrons li, .chevrons li:first-child { margin: 0; padding: 0.7em; clip-path: none; border-radius: 0.5em; }
+      .arc-list li { margin-left: 0 !important; }
+      .groups { min-height: 16em; }
+      .range-row { grid-template-columns: 1fr; }
+      .slide .footer-bar, .l-cover .footer-bar, .l-exec .footer-bar, .l-radial .footer-bar { left: 0; right: 0; }
+      .l-chart-panel .footer-bar, .l-qa .footer-bar { right: 0; }
+    }
+  </style>
+</head>
+<body class="mode-slide">
+  <a class="skip" href="#slide-deck">Bỏ qua đến nội dung chính</a>
+  <header class="appbar">
+    <div class="brand">
+      <a href="./index.html">← Công nghệ phần mềm tiên tiến</a>
+      <strong>Tiểu luận · Nhóm 4</strong>
+      <span>Trần Tuấn Tài · La Hoàng Tú · Võ Văn Hải</span>
+    </div>
+    <nav class="modes" aria-label="Chuyển giữa slide và PDF">
+      <button type="button" id="modeSlide" aria-pressed="true">Slide trình bày</button>
+      <button type="button" id="modePdf" aria-pressed="false">PDF gốc</button>
+    </nav>
+  </header>
+
+  <div class="pdf-view" id="pdfView" hidden>
+    <p class="pdf-bar">
+      <a href="assets/2407.07959v2.pdf">Mở hoặc tải PDF gốc</a>
+      <span>arXiv:2407.07959v2 · 13 trang</span>
+    </p>
+    <iframe id="pdfFrame" title="PDF gốc: Source Code Summarization in the Era of Large Language Models"></iframe>
+  </div>
+
+  <main class="stage" id="slide-deck" aria-label="Slide trình bày">
+    <div class="deck-wrap">
+    <div class="deck">
+      <span class="progress" id="deckProgress" aria-hidden="true"></span>
+
+      <!-- 1 · Bìa -->
+      <section class="slide l-cover active" aria-label="Bìa">
+        <div class="cover-panel on-dark">
+          <p class="eyebrow">Công nghệ phần mềm tiên tiến · Tiểu luận</p>
+          <h2>Tóm tắt mã nguồn trong kỷ nguyên mô hình ngôn ngữ lớn</h2>
+          <p class="en">Source Code Summarization in the Era of Large Language Models</p>
+          <ul class="tags">
+            <li>ICSE 2025</li>
+            <li>Ottawa</li>
+            <li>Sun và cộng sự</li>
+          </ul>
+        </div>
+        <div class="cover-side">
+          <p class="label">Nhóm 4 trình bày</p>
+          <ul class="member-list stagger">
+            <li><span class="avatar">T</span>Trần Tuấn Tài</li>
+            <li><span class="avatar">T</span>La Hoàng Tú</li>
+            <li><span class="avatar">H</span>Võ Văn Hải</li>
+          </ul>
+          <p>Một phân tích thực nghiệm về cách LLM viết comment cho mã nguồn.</p>
+        </div>
+        <p class="footer-bar"><span>ICSE 2025 · trang 1882–1894</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Mở lời</h3>
+          <ul>
+            <li>Comment là bản đồ khi đọc hệ thống. Viết comment tốt tốn thời gian, nên comment thường thiếu, cũ, hoặc lệch code.</li>
+            <li>Bài không đề xuất mô hình mới. Bài khảo sát năm khía cạnh khi dùng LLM để tóm tắt code, và chỉ ra vài kết quả trái với cách nghĩ thông thường.</li>
+            <li>Member 1 nói nội dung bài báo: tổng quan, thiết kế thực nghiệm, RQ1 và RQ2. Member 2 nói RQ3, RQ4, RQ5 và kết luận. Member 3 nói cách nhóm chạy lại và phần cải tiến.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 2 · Tóm tắt -->
+      <section class="slide l-exec" aria-label="Mở đầu">
+        <div class="exec-panel on-dark">
+          <p class="eyebrow"><span class="who m1">Member 1</span> Tổng quan</p>
+          <h2>Hiểu chương trình tốn công. Comment tự động là lối tắt.</h2>
+          <p class="panel-note">Bài không đề xuất mô hình mới. Bài đo lại năm khía cạnh khi dùng LLM để viết comment.</p>
+        </div>
+        <div class="exec-body">
+          <ol class="num-rows stagger">
+            <li><span class="num">01</span><div><h3>Bài toán</h3><p>Sinh một câu ngôn ngữ tự nhiên mô tả một hàm Java, một hàm Python hoặc một thủ tục C.</p></div></li>
+            <li><span class="num">02</span><div><h3>Vì sao bây giờ</h3><p>LLM viết câu tự nhiên, giàu ngữ cảnh, và thích ứng bằng prompt, không tinh chỉnh lại trên từng dự án.</p></div></li>
+            <li><span class="num">03</span><div><h3>Bài này làm gì</h3><p>So cách chấm, cách prompt, tham số sinh, họ ngôn ngữ và loại ý định của comment.</p></div></li>
+          </ol>
+          <div class="roles">
+            <p class="label">Phân công trình bày</p>
+            <ul class="stagger">
+              <li class="m1"><b>Member 1</b><span>Bài báo · RQ1 · RQ2</span></li>
+              <li class="m2"><b>Member 2</b><span>RQ3 · RQ4 · RQ5</span></li>
+              <li class="m3"><b>Member 3</b><span>Chạy lại · cải tiến</span></li>
+            </ul>
+          </div>
+        </div>
+        <p class="footer-bar"><span>ICSE 2025 · Ottawa · 71 tài liệu tham khảo</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Phần mở</h3>
+          <ul>
+            <li>Hiểu chương trình chiếm phần lớn thời gian bảo trì. Tóm tắt mã nguồn là viết comment ngắn, đúng chức năng.</li>
+            <li>Nguồn là Sun và cộng sự, công bố hội nghị ICSE 2025, không phải tạp chí. Kỷ yếu trang 1882–1894, 13 trang, 71 tài liệu. DOI 10.1109/ICSE55347.2025.00034.</li>
+            <li>Bản đọc đủ 12 mục nằm ở file đọc hiểu. Slide này chỉ giữ lập luận để nói.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 3 · Dòng thời gian -->
+      <section class="slide deco" aria-label="Ba giai đoạn">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> Bối cảnh</p>
+          <h2>Ba đời kỹ thuật, rồi LLM đổi cả thước đo</h2>
+        </header>
+        <ol class="steps stagger">
+          <li>
+            <p class="step-tag">Đời 1 <span>khoảng 2010</span></p>
+            <h3>Trích xuất văn bản</h3>
+            <p>Mang cách tóm tắt văn bản sang mã nguồn.</p>
+            <p class="out"><b>Câu sinh ra</b>Ngắn, bám các từ đã có trong code.</p>
+          </li>
+          <li>
+            <p class="step-tag">Đời 2 <span>tinh chỉnh</span></p>
+            <h3>Mô hình code nhỏ</h3>
+            <p>Encoder–decoder như CodeT5, InCoder. Phải tinh chỉnh trên dữ liệu từng tác vụ.</p>
+            <p class="out"><b>Câu sinh ra</b>Rập khuôn, sát comment mẫu. BLEU và ROUGE đo được kiểu câu này.</p>
+          </li>
+          <li>
+            <p class="step-tag">Đời 3 <span>prompt</span></p>
+            <h3>Mô hình ngôn ngữ lớn</h3>
+            <p>GPT-3.5, GPT-4, CodeLlama, StarChat-β. Đổi việc bằng prompt, không huấn luyện lại.</p>
+            <p class="out"><b>Câu sinh ra</b>Dài hơn, tự nhiên, nêu đủ đối tượng và mục đích.</p>
+          </li>
+        </ol>
+        <div class="banner on-dark">
+          <p><b class="label">Hệ quả</b> Thước đếm từ trùng với mẫu không còn đo đúng chất lượng câu do LLM viết.</p>
+          <div class="vs"><span class="big">2,8</span><small>comment mẫu setPeople</small></div>
+          <div class="vs"><span class="big">4,4</span><small>câu GPT-4 viết</small></div>
+        </div>
+        <p class="footer-bar"><span>Không fine-tune · câu ra giàu ngữ cảnh hơn mẫu</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Ba giai đoạn</h3>
+          <ul>
+            <li>Đời một: trích xuất văn bản, khoảng 2010.</li>
+            <li>Đời hai: mô hình ngôn ngữ lập trình nhỏ, kiến trúc encoder–decoder, cần fine-tune.</li>
+            <li>Đời ba: LLM, thích ứng bằng in-context learning. Câu ra diễn đạt tự nhiên hơn, nên BLEU và ROUGE-L không còn là thước hợp.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4 · Khoảng trống → RQ -->
+      <section class="slide deco" aria-label="Ba khoảng trống">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> Động lực</p>
+          <h2>Ba khoảng trống dẫn tới năm câu hỏi</h2>
+        </header>
+        <div class="obj-grid">
+          <div class="obj-col">
+            <p class="label">Ba khoảng trống</p>
+            <div class="gaps stagger">
+              <div class="gap"><span class="gap-n">1</span><div><h3>Chỉ một kiểu prompt</h3><p>Có bài chỉ zero-shot, có bài chỉ few-shot. Chưa so chain-of-thought, critique, expert cùng mặt bằng.</p></div></div>
+              <div class="gap"><span class="gap-n">2</span><div><h3>Bỏ qua tham số sinh</h3><p>Chưa có bằng chứng về ảnh hưởng của temperature và top-p lên chất lượng comment.</p></div></div>
+              <div class="gap"><span class="gap-n">3</span><div><h3>Thước đo cũ</h3><p>BLEU, METEOR, ROUGE-L, Sentence-BERT so với mẫu, trong khi LLM viết khác lời và chi tiết hơn.</p></div></div>
+            </div>
+          </div>
+          <span class="arrow" aria-hidden="true"></span>
+          <div class="obj-col">
+            <p class="label">Năm câu hỏi nghiên cứu</p>
+            <ol class="rq-list stagger">
+              <li><span class="badge">RQ1</span><h3>Thước đo nào còn hợp?</h3><span class="from">khoảng trống 3</span></li>
+              <li><span class="badge">RQ2</span><h3>Năm kiểu prompt hiệu quả đến đâu?</h3><span class="from">khoảng trống 1</span></li>
+              <li><span class="badge">RQ3</span><h3>Top-p và temperature đổi điều gì?</h3><span class="from">khoảng trống 2</span></li>
+              <li><span class="badge">RQ4</span><h3>Mười ngôn ngữ, năm họ ngôn ngữ</h3><span class="from">mở rộng</span></li>
+              <li><span class="badge">RQ5</span><h3>Năm loại ý định của comment</h3><span class="from">mở rộng</span></li>
+            </ol>
+          </div>
+        </div>
+        <p class="footer-bar"><span>Comment mẫu trong dữ liệu cũ không còn là chuẩn vàng</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Ba lỗ hổng</h3>
+          <ul>
+            <li>Sun và cộng sự trước đó chủ yếu zero-shot. Ahmed, Gao chủ yếu few-shot.</li>
+            <li>Chưa khảo temperature và top-p.</li>
+            <li>Ép câu dài của GPT-4 khớp từ với comment mẫu rất ngắn sẽ ra kết luận sai.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 5 · Quy trình -->
+      <section class="slide deco" aria-label="Quy trình">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> Hình 1 của bài</p>
+          <h2>Hai giai đoạn: viết câu, rồi chấm câu</h2>
+        </header>
+        <div class="phase">
+          <p class="phase-label"><b>Giai đoạn 1</b> Sinh câu</p>
+          <ol class="chevrons stagger">
+            <li>Đoạn code</li>
+            <li>Loại comment</li>
+            <li>Bộ sinh prompt</li>
+            <li>LLM</li>
+            <li>Lấy câu đầu</li>
+          </ol>
+        </div>
+        <div class="phase">
+          <p class="phase-label"><b>Giai đoạn 2</b> Chấm câu theo ba lối</p>
+          <div class="judge-grid stagger">
+            <article class="judge"><span class="icon">A</span><h3>Giống comment mẫu</h3><p>BLEU, ROUGE-L, BERTScore. Cách chấm cũ, và là cách bài này đem ra kiểm lại.</p></article>
+            <article class="judge"><span class="icon">B</span><h3>Giống chính đoạn code</h3><p>SIDE so vector của câu với vector của code. Không cần mẫu, mới có cho Java.</p></article>
+            <article class="judge pick on-dark"><span class="icon">C</span><span class="flag">Dùng từ RQ2</span><h3>LLM làm giám khảo</h3><p>GPT-4 cho điểm 1 đến 5 theo bốn tiêu chí: đúng, rõ, đủ ý, gọn.</p></article>
+          </div>
+        </div>
+        <p class="footer-bar"><span>Tiếp theo thiết kế thực nghiệm của bài báo, vẫn Member 1</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Quy trình</h3>
+          <ul>
+            <li>Đầu vào là code và loại comment mong muốn. Bộ sinh prompt gắn kỹ thuật và tham số, rồi đưa vào LLM.</li>
+            <li>Ba lối chấm: giống mẫu, giống code bằng SIDE, hoặc GPT-4 làm giám khảo.</li>
+            <li>Câu trả lời thường là cả đoạn. Nhóm tác giả lấy câu đầu làm comment cuối.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 13 · Năm prompt -->
+      <section class="slide l-radial" aria-label="Năm prompt">
+        <div class="radial-left" aria-hidden="true">
+          <div class="ring"><div class="ring-core"><b>5</b><span>cách ra lệnh</span></div></div>
+        </div>
+        <div class="radial-right">
+          <header class="s-head">
+            <p class="eyebrow"><span class="who m1">Member 1</span> Thực nghiệm của bài báo</p>
+            <h2>Năm cách ra lệnh cho LLM</h2>
+          </header>
+          <ol class="arc-list stagger">
+            <li><span class="arc-n">1</span><div><h3>Zero-shot</h3><p>Một câu chỉ thị “hãy viết comment một câu cho hàm sau”, rồi đưa code. Không có ví dụ.</p></div></li>
+            <li><span class="arc-n">2</span><div><h3>Few-shot</h3><p>Bốn cặp code–comment đứng trước câu chỉ thị. Cả bài giữ đúng bốn ví dụ.</p></div></li>
+            <li><span class="arc-n">3</span><div><h3>Chain-of-thought</h3><p>Đưa code cùng năm câu hỏi, nhận lời giải, rồi bảo gộp thành một câu comment.</p></div></li>
+            <li><span class="arc-n">4</span><div><h3>Critique</h3><p>Ba lượt: viết comment, tự tìm lỗi, rồi sửa theo các lỗi vừa nêu.</p></div></li>
+            <li><span class="arc-n">5</span><div><h3>Expert</h3><p>Mô hình tự viết đoạn mô tả chuyên gia, dùng làm system prompt, rồi làm như zero-shot.</p></div></li>
+          </ol>
+          <p class="tip"><b>Hai tham số sinh</b> Temperature cao thì câu ngẫu nhiên hơn. Top-p càng lớn càng nhiều từ hiếm.</p>
+        </div>
+        <p class="footer-bar"><span>Cùng một đoạn code, chỉ đổi cách ra lệnh</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Năm prompt và hai tham số</h3>
+          <ul>
+            <li>Zero-shot không có ví dụ. Few-shot có 4 ví dụ.</li>
+            <li>CoT đi năm câu hỏi rồi mới gộp. Critique là ba lượt: viết, tìm lỗi, sửa. Expert thay system prompt bằng đoạn mô tả chuyên gia do chính mô hình viết.</li>
+            <li>Temperature gần 0 thì câu ổn định. Top-p 0,1 chỉ giữ nhóm từ chiếm 10% xác suất cao nhất.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 14 · Bốn mô hình -->
+      <section class="slide deco" aria-label="Thiết kế">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> Thực nghiệm của bài báo</p>
+          <h2>Bốn mô hình, mười ngôn ngữ, một cấu hình mặc định</h2>
+        </header>
+        <div class="team stagger">
+          <article class="member k-cl"><span class="avatar">CL</span><h3>CodeLlama</h3><p class="tagline">7B · mã mở · chuyên code</p><p>Bản 70B chỉ được thử ở vai trò giám khảo trong RQ1.</p></article>
+          <article class="member k-sc"><span class="avatar">SC</span><h3>StarChat-β</h3><p class="tagline">16B · mã mở · hội thoại</p><p>Tinh chỉnh từ StarCoder thành trợ lý lập trình dạng hội thoại.</p></article>
+          <article class="member k-g3"><span class="avatar">3.5</span><h3>GPT-3.5</h3><p class="tagline"><code>gpt-3.5-turbo</code></p><p>Mô hình đa năng, dùng để sinh câu và để đối chiếu cách chấm.</p></article>
+          <article class="member k-g4"><span class="avatar">4</span><h3>GPT-4</h3><p class="tagline"><code>gpt-4-1106-preview</code></p><p>Vừa sinh câu, vừa làm giám khảo từ RQ2 đến RQ5.</p></article>
+        </div>
+        <div class="band on-dark">
+          <div><span class="stat">10</span><p><b>ngôn ngữ</b>Java, Python, C cho RQ1–RQ3. RQ4 thêm Go, Ruby, PHP, JavaScript, Erlang, Haskell, Prolog. RQ5 chỉ Java.</p></div>
+          <div><span class="stat">50</span><p><b>repository nhiều sao nhất</b>Nguồn dữ liệu mới cho Erlang, Haskell, Prolog. Prolog còn 1.547 cặp.</p></div>
+          <div><span class="stat">0,1</span><p><b>temperature khi sinh câu</b>Trừ RQ3. GPT-4 chấm điểm ở temperature 0.</p></div>
+        </div>
+        <p class="footer-bar"><span>Tiếp theo RQ1 và RQ2, vẫn Member 1</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Thiết kế của bài báo</h3>
+          <ul>
+            <li>Đây là thực nghiệm của Sun và cộng sự, Member 1 nói trước khi vào kết quả.</li>
+            <li>RQ1 thước nào hợp. RQ2 prompt nào hợp. RQ3 temperature và top-p. RQ4 họ ngôn ngữ. RQ5 loại ý định.</li>
+            <li>Erlang, Haskell, Prolog do nhóm tác giả thu từ 50 repository nhiều sao nhất. Prolog chỉ 1.547 cặp.</li>
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- 6 · RQ1 người chấm -->
+      <section class="slide l-chart-panel" aria-label="RQ1 người chấm">
+        <div class="cp-main">
+          <header class="s-head">
+            <p class="eyebrow"><span class="who m1">Member 1</span> RQ1 · đánh giá của người</p>
+            <h2>Người đọc chấm LLM cao hơn comment mẫu</h2>
+          </header>
+          <figure class="chart">
+            <figcaption>15 người chấm mù, thang 1–5, mỗi ngôn ngữ 50 mẫu</figcaption>
+            <p class="legend"><span><i class="sw-ref"></i>Mẫu gốc</span><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+            <div class="groups"><div class="group"><div class="cols"><i class="col sw-ref" style="height:63.8%"><b>3,19</b></i><i class="col sw-cl" style="height:78.6%"><b>3,93</b></i><i class="col sw-sc" style="height:63.6%"><b>3,18</b></i><i class="col sw-g3" style="height:80.0%"><b>4,00</b></i><i class="col sw-g4" style="height:83.4%"><b>4,17</b></i></div><p>Java</p></div><div class="group"><div class="cols"><i class="col sw-ref" style="height:71.2%"><b>3,56</b></i><i class="col sw-cl" style="height:77.6%"><b>3,88</b></i><i class="col sw-sc" style="height:62.8%"><b>3,14</b></i><i class="col sw-g3" style="height:83.2%"><b>4,16</b></i><i class="col sw-g4" style="height:81.2%"><b>4,06</b></i></div><p>Python</p></div><div class="group"><div class="cols"><i class="col sw-ref" style="height:61.0%"><b>3,05</b></i><i class="col sw-cl" style="height:83.0%"><b>4,15</b></i><i class="col sw-sc" style="height:69.8%"><b>3,49</b></i><i class="col sw-g3" style="height:81.2%"><b>4,06</b></i><i class="col sw-g4" style="height:85.0%"><b>4,25</b></i></div><p>C</p></div></div>
+          </figure>
+        </div>
+        <aside class="cp-panel on-dark">
+          <p class="label">Điểm chính</p>
+          <div class="kpi"><span>3,05–3,56</span><p>Khoảng điểm của comment mẫu gốc trên ba ngôn ngữ.</p></div>
+          <div class="kpi"><span>4,25</span><p>GPT-4 trên C, cao nhất bảng. GPT-4 cũng dẫn ở Java với 4,17.</p></div>
+          <div class="kpi"><span>4,16</span><p>GPT-3.5 trên Python, nhỉnh hơn GPT-4 (4,06).</p></div>
+          <blockquote class="quote">setPeople: mẫu “Sets FROM REPLY-TO and recipients” được 2,8. GPT-4 nêu đủ sender, reply-to, recipients, được 4,4.</blockquote>
+        </aside>
+        <p class="footer-bar"><span>Comment mẫu không còn là chuẩn vàng</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Người chấm</h3>
+          <ul>
+            <li>15 người: 1 nghiên cứu sinh, 5 thạc sĩ, 9 đại học, mỗi người trên 3 năm lập trình. Chấm mù, trộn mẫu với bốn câu của bốn LLM.</li>
+            <li>Java: mẫu 3,19; CodeLlama 3,93; StarChat 3,18; GPT-3.5 4,00; GPT-4 4,17.</li>
+            <li>Python: mẫu 3,56; GPT-3.5 4,16 cao hơn GPT-4 4,06. C: mẫu 3,05; GPT-4 4,25.</li>
+            <li>Ví dụ setPeople: mẫu “Sets FROM REPLY-TO and recipients” được 2,8. GPT-4 viết đủ sender, reply-to và recipients, được 4,4.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 7 · RQ1 tương quan -->
+      <section class="slide deco" aria-label="RQ1 tương quan">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> RQ1 · thước nào hợp</p>
+          <h2>GPT-4 chấm đi cùng người. BLEU thì không.</h2>
+        </header>
+        <div class="range-layout">
+          <figure class="chart range-card">
+            <figcaption>Khoảng tương quan Spearman với điểm người chấm</figcaption>
+            <div class="range-chart">
+              <div class="range-row"><span>BLEU / ROUGE-L</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-sc" style="left:14.3%;width:21.4%"></i></span></div>
+              <div class="range-row"><span>Sentence-BERT / SIDE</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-g3" style="left:35.7%;width:14.3%"></i></span></div>
+              <div class="range-row"><span>GPT-3.5 chấm</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-cl" style="left:57.1%;width:14.3%"></i></span></div>
+              <div class="range-row"><span>GPT-4 chấm</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-g4" style="left:78.6%;width:10.7%"></i></span></div>
+              <div class="range-row" aria-hidden="true"><span></span><span class="range-axis"><span style="left:0">−0,4</span><span style="left:28.6%">0</span><span style="left:64.3%">0,5</span><span style="left:100%">1</span></span></div>
+            </div>
+            <p class="axis-note">Vạch đậm là 0. Đây là khoảng báo cáo nêu, không phải một hệ số đo lại.</p>
+          </figure>
+          <div class="stat-stack stagger">
+            <article class="stat-card">
+              <p class="label">Java · BLEU đảo chiều</p>
+              <div class="pair"><span><b>18,95</b>BLEU StarChat</span><span><b>9,46</b>BLEU GPT-4</span></div>
+              <p>Người chấm lại cho GPT-4 4,17 và StarChat 3,18.</p>
+            </article>
+            <article class="stat-card">
+              <p class="label">SIDE cũng bám mẫu</p>
+              <div class="pair"><span><b>80,46</b>SIDE StarChat</span><span><b>36,12</b>SIDE GPT-4</span></div>
+              <p>SIDE vẫn học từ comment mẫu.</p>
+            </article>
+            <article class="stat-card hl on-dark">
+              <p class="label">Quyết định cho RQ2–RQ5</p>
+              <p>Dùng GPT-4 làm giám khảo: thước duy nhất tương quan thuận, có ý nghĩa thống kê trên cả ba ngôn ngữ.</p>
+            </article>
+          </div>
+        </div>
+        <p class="footer-bar"><span>Khoảng trên hình là khoảng bài nêu, không phải một hệ số đo lại</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Vì sao BLEU hỏng</h3>
+          <ul>
+            <li>Trên Java, BLEU cho StarChat-β 18,95 và GPT-4 chỉ 9,46. Người chấm thì ngược: GPT-4 4,17 và StarChat 3,18.</li>
+            <li>SIDE của StarChat trên Java cũng cao, 80,46, trong khi GPT-4 chỉ 36,12. SIDE vẫn học từ comment mẫu.</li>
+            <li>Ba tiêu chí GPT-4 nhắc khi chấm: đúng, rõ, đủ ý. Cụm “FROM REPLY-TO” bị trừ vì khó đọc.</li>
+            <li>Khoảng Spearman trên hình là khoảng báo cáo nêu, không phải một số đo lại từ mã nguồn.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 8 · RQ2 -->
+      <section class="slide deco" aria-label="RQ2">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m1">Member 1</span> RQ2 · prompt</p>
+          <h2>Prompt phức tạp không mặc định thắng</h2>
+        </header>
+        <div class="cs-grid">
+          <figure class="chart">
+            <figcaption>Java, GPT-4 chấm, thang 1–5</figcaption>
+            <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+            <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:68.4%"><b>3,42</b></i><i class="col sw-sc" style="height:54.2%"><b>2,71</b></i><i class="col sw-g3" style="height:78.0%"><b>3,90</b></i><i class="col sw-g4" style="height:90.0%"><b>4,50</b></i></div><p>Zero-shot</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:75.6%"><b>3,78</b></i><i class="col sw-sc" style="height:52.0%"><b>2,60</b></i><i class="col sw-g3" style="height:71.2%"><b>3,56</b></i><i class="col sw-g4" style="height:93.2%"><b>4,66</b></i></div><p>Few-shot</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:64.2%"><b>3,21</b></i><i class="col sw-sc" style="height:57.2%"><b>2,86</b></i><i class="col sw-g3" style="height:67.2%"><b>3,36</b></i><i class="col sw-g4" style="height:91.4%"><b>4,57</b></i></div><p>CoT</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:43.0%"><b>2,15</b></i><i class="col sw-sc" style="height:47.2%"><b>2,36</b></i><i class="col sw-g3" style="height:61.8%"><b>3,09</b></i><i class="col sw-g4" style="height:88.2%"><b>4,41</b></i></div><p>Critique</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:62.6%"><b>3,13</b></i><i class="col sw-sc" style="height:53.2%"><b>2,66</b></i><i class="col sw-g3" style="height:54.4%"><b>2,72</b></i><i class="col sw-g4" style="height:90.4%"><b>4,52</b></i></div><p>Expert</p></div></div>
+          </figure>
+          <aside class="best">
+            <p class="label">Prompt hợp nhất theo mô hình</p>
+            <ul class="stagger">
+              <li class="k-cl"><b>CodeLlama</b><em>Few-shot</em></li>
+              <li class="k-sc"><b>StarChat-β</b><em>Chain-of-thought</em></li>
+              <li class="k-g3"><b>GPT-3.5</b><em>Zero-shot</em></li>
+              <li class="k-g4"><b>GPT-4</b><em>CoT · TB 4,54</em></li>
+            </ul>
+            <p class="note-box">Biểu đồ là Java: few-shot 4,66 là ô cao nhất của GPT-4. Trên C, expert 4,50 cao nhất. Critique kéo CodeLlama xuống 2,15.</p>
+          </aside>
+        </div>
+        <p class="footer-bar"><span>Member 1 bàn giao cho Member 2 từ tham số sinh</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>RQ2, theo Bảng IV của bài</h3>
+          <ul>
+            <li>600 mẫu: 200 Java, 200 Python, 200 C. Slide vẽ Java. Python và C nằm trong bản đọc.</li>
+            <li>GPT-3.5 zero-shot cao nhất ở Java 3,90 và C 3,93. Trên Python, few-shot 3,97 nhỉnh hơn zero-shot 3,96.</li>
+            <li>CodeLlama few-shot: Java 3,78, Python 3,75, C 3,91. Critique rơi còn 2,15 / 2,02 / 2,13.</li>
+            <li>Bài viết: với GPT-4, chain-of-thought tốt nhất khi nhìn chung. Trung bình ba ngôn ngữ, tính từ Bảng IV: chain-of-thought 4,54, zero-shot 4,49, expert 4,42, critique 4,40, few-shot 4,33.</li>
+            <li>Ô cao nhất từng ngôn ngữ của GPT-4: Java few-shot 4,66, Python chain-of-thought 4,60, C expert 4,50. Expert thắng cột C, trung bình vẫn dưới chain-of-thought.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 9 · RQ3 -->
+      <section class="slide deco l-trend" aria-label="RQ3">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">Member 2</span> RQ3 · tham số sinh</p>
+          <h2>Temperature và top-p không đi một chiều</h2>
+        </header>
+        <div class="trend-grid">
+          <figure class="chart line-card">
+            <figcaption>GPT-4, few-shot, top-p = 0,5: điểm khi tăng temperature</figcaption>
+            <svg class="line-chart" viewBox="0 0 360 170" role="img" aria-labelledby="rq3cap">
+              <title id="rq3cap">Điểm GPT-4 theo temperature 0,1, 0,5 và 1,0 ở Java, Python và C</title>
+              <g class="grid">
+                <line x1="40" y1="16" x2="340" y2="16"/>
+                <line x1="40" y1="54.7" x2="340" y2="54.7"/>
+                <line x1="40" y1="93.3" x2="340" y2="93.3"/>
+                <line x1="40" y1="132" x2="340" y2="132" stroke="#0b2545"/>
+              </g>
+              <text x="32" y="19" text-anchor="end">4,6</text>
+              <text x="32" y="58" text-anchor="end">4,4</text>
+              <text x="32" y="96" text-anchor="end">4,2</text>
+              <text x="32" y="135" text-anchor="end">4,0</text>
+              <text x="78" y="148" text-anchor="middle">0,1</text>
+              <text x="196" y="148" text-anchor="middle">0,5</text>
+              <text x="314" y="148" text-anchor="middle">1,0</text>
+              <text x="196" y="164" text-anchor="middle">temperature</text>
+              <polyline fill="none" stroke="#0b2545" stroke-width="2.8" points="78,47 196,41.1 314,45"/>
+              <polyline fill="none" stroke="#00a6c7" stroke-width="2.8" points="78,83.7 196,74 314,72.1"/>
+              <polyline fill="none" stroke="#f2a516" stroke-width="2.8" points="78,68.2 196,72.1 314,75.9"/>
+              <g fill="#fff" stroke-width="2.2">
+                <circle cx="78" cy="47" r="3.6" stroke="#0b2545"/><circle cx="196" cy="41.1" r="3.6" stroke="#0b2545"/><circle cx="314" cy="45" r="3.6" stroke="#0b2545"/>
+                <circle cx="78" cy="83.7" r="3.6" stroke="#00a6c7"/><circle cx="196" cy="74" r="3.6" stroke="#00a6c7"/><circle cx="314" cy="72.1" r="3.6" stroke="#00a6c7"/>
+                <circle cx="78" cy="68.2" r="3.6" stroke="#f2a516"/><circle cx="196" cy="72.1" r="3.6" stroke="#f2a516"/><circle cx="314" cy="75.9" r="3.6" stroke="#f2a516"/>
+              </g>
+            </svg>
+            <p class="legend"><span><i class="sw-g4"></i>Java</span><span><i class="sw-cl"></i>Python</span><span><i class="sw-sc"></i>C</span></p>
+            <p class="axis-note">Trục tung cắt từ 4,0 đến 4,6 để thấy hướng đi.</p>
+          </figure>
+          <div class="trend-cards stagger">
+            <article class="trend k-g4"><span class="ico" aria-hidden="true">→</span><div><h3>Java gần phẳng</h3><p class="seq">4,44 · 4,47 · 4,45</p><p>Đổi temperature gần như không đổi điểm.</p></div></article>
+            <article class="trend k-cl"><span class="ico" aria-hidden="true">↗</span><div><h3>Python đi lên</h3><p class="seq">4,25 · 4,30 · 4,31</p><p>Temperature cao hơn làm câu Python tốt lên.</p></div></article>
+            <article class="trend k-sc"><span class="ico" aria-hidden="true">↘</span><div><h3>C đi xuống</h3><p class="seq">4,33 · 4,31 · 4,29</p><p>Cùng hướng chỉnh đó, điểm C lại giảm.</p></div></article>
+          </div>
+        </div>
+        <p class="tip"><b>Ý thực hành</b> Không có một mức đúng cho mọi ngôn ngữ. Hai tham số cùng chỉnh độ ngẫu nhiên, nên chỉ chỉnh một tham số.</p>
+        <p class="footer-bar"><span>Few-shot · ba mức temperature 0,1 / 0,5 / 1,0</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>RQ3</h3>
+          <ul>
+            <li>Top-p thử 0,5, 0,75 và 1. Temperature thử 0,1, 0,5 và 1. Prompt là few-shot.</li>
+            <li>Với GPT-4 và top-p 0,5: Java 4,44 rồi 4,47 rồi 4,45. Python 4,25 rồi 4,30 rồi 4,31. C 4,33 rồi 4,31 rồi 4,29.</li>
+            <li>Cùng một hướng chỉnh, Python tốt lên còn C đi xuống. Không có một mức đúng cho mọi ngôn ngữ.</li>
+            <li>Tài liệu OpenAI khuyên chỉnh temperature hoặc top-p, không chỉnh cả hai. Bài này cho kết quả cùng hướng.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 10 · RQ4 -->
+      <section class="slide l-chart-panel" aria-label="RQ4">
+        <div class="cp-main">
+          <header class="s-head">
+            <p class="eyebrow"><span class="who m2">Member 2</span> RQ4 · họ ngôn ngữ</p>
+            <h2>Prolog là chỗ thấp nhất của cả bốn mô hình</h2>
+          </header>
+          <figure class="chart">
+            <figcaption>Năm ngôn ngữ đại diện cho năm họ, few-shot, GPT-4 chấm</figcaption>
+            <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+            <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:75.6%"><b>3,78</b></i><i class="col sw-sc" style="height:52.0%"><b>2,60</b></i><i class="col sw-g3" style="height:71.2%"><b>3,56</b></i><i class="col sw-g4" style="height:93.2%"><b>4,66</b></i></div><p>Java</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.2%"><b>3,86</b></i><i class="col sw-sc" style="height:59.4%"><b>2,97</b></i><i class="col sw-g3" style="height:82.8%"><b>4,14</b></i><i class="col sw-g4" style="height:87.2%"><b>4,36</b></i></div><p>Go</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.6%"><b>3,88</b></i><i class="col sw-sc" style="height:54.6%"><b>2,73</b></i><i class="col sw-g3" style="height:79.8%"><b>3,99</b></i><i class="col sw-g4" style="height:86.2%"><b>4,31</b></i></div><p>PHP</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:71.6%"><b>3,58</b></i><i class="col sw-sc" style="height:57.6%"><b>2,88</b></i><i class="col sw-g3" style="height:68.8%"><b>3,44</b></i><i class="col sw-g4" style="height:84.4%"><b>4,22</b></i></div><p>Haskell</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:64.6%"><b>3,23</b></i><i class="col sw-sc" style="height:46.8%"><b>2,34</b></i><i class="col sw-g3" style="height:68.4%"><b>3,42</b></i><i class="col sw-g4" style="height:81.0%"><b>4,05</b></i></div><p>Prolog</p></div></div>
+            <p class="axis-note">GPT-4 đứng đầu từng cột. Đủ mười ngôn ngữ nằm trong bản đọc.</p>
+          </figure>
+        </div>
+        <aside class="cp-panel spot on-dark">
+          <p class="label">Điểm yếu chung</p>
+          <p class="spot-name">Prolog</p>
+          <ul class="spot-list stagger">
+            <li><b>4,05</b>GPT-4, thấp nhất trong năm cột của chính nó</li>
+            <li><b>2,34</b>StarChat-β, thấp nhất cả biểu đồ</li>
+            <li><b>1.547</b>cặp dữ liệu Prolog thu được</li>
+          </ul>
+          <p>Prolog khai báo quan hệ, không viết vòng lặp tuần tự như phần lớn code mà LLM đã học.</p>
+        </aside>
+        <p class="footer-bar"><span>Mỗi ngôn ngữ 200 mẫu</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>RQ4</h3>
+          <ul>
+            <li>Mỗi ngôn ngữ 200 mẫu. GPT-4: Java 4,66, Go 4,36, PHP 4,31, Haskell 4,22, Prolog 4,05.</li>
+            <li>Cả bốn mô hình làm PHP tốt hơn Python. CodeLlama hơn GPT-3.5 trên Ruby 3,98 so với 3,64 và trên JavaScript 4,03 so với 3,53.</li>
+            <li>Prolog: CodeLlama 3,23, StarChat 2,34, GPT-3.5 3,42, GPT-4 4,05. Tập Prolog nhóm tác giả thu được chỉ 1.547 cặp.</li>
+            <li>Prolog khai báo quan hệ, không viết vòng lặp tuần tự. Tokenizer và attention của LLM học chủ yếu code mệnh lệnh.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 11 · RQ5 -->
+      <section class="slide deco" aria-label="RQ5">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">Member 2</span> RQ5 · loại ý định</p>
+          <h2>Mô hình 7B viết Why và Property sát, hoặc hơn, GPT-4</h2>
+        </header>
+        <div class="duel-grid">
+          <figure class="chart">
+            <figcaption>Few-shot trên Java, mỗi loại 180 mẫu, GPT-4 chấm</figcaption>
+            <p class="legend"><span><i class="sw-cl"></i>CodeLlama 7B</span><span><i class="sw-g4"></i>GPT-4</span></p>
+            <div class="duel-rows stagger">
+              <div class="duel-row"><span class="duel-name">What</span><div class="duel-bars"><span class="bar sw-cl" style="--v:76.7%"><b>4,15</b></span><span class="bar sw-g4" style="--v:93.3%"><b>4,40</b></span></div><span class="win k-g4">GPT-4</span></div>
+              <div class="duel-row"><span class="duel-name">Why</span><div class="duel-bars"><span class="bar sw-cl" style="--v:86%"><b>4,29</b></span><span class="bar sw-g4" style="--v:85.3%"><b>4,28</b></span></div><span class="win k-cl">CodeLlama</span></div>
+              <div class="duel-row"><span class="duel-name">How</span><div class="duel-bars"><span class="bar sw-cl" style="--v:56.7%"><b>3,85</b></span><span class="bar sw-g4" style="--v:87.3%"><b>4,31</b></span></div><span class="win k-g4">GPT-4</span></div>
+              <div class="duel-row"><span class="duel-name">Property</span><div class="duel-bars"><span class="bar sw-cl" style="--v:79.3%"><b>4,19</b></span><span class="bar sw-g4" style="--v:70.7%"><b>4,06</b></span></div><span class="win k-cl">CodeLlama</span></div>
+              <div class="duel-row"><span class="duel-name">How-to-use</span><div class="duel-bars"><span class="bar sw-cl" style="--v:64%"><b>3,96</b></span><span class="bar sw-g4" style="--v:81.3%"><b>4,22</b></span></div><span class="win k-g4">GPT-4</span></div>
+            </div>
+            <p class="axis-note">Trục ngang bắt đầu ở 3,0 để thấy chênh lệch.</p>
+          </figure>
+          <aside class="verdict on-dark">
+            <p class="verdict-big"><b>2 / 5</b> loại ý định CodeLlama 7B ngang hoặc hơn GPT-4</p>
+            <ul>
+              <li>Why: hơn 0,01 điểm, gần như hòa.</li>
+              <li>Property: hơn 0,13 điểm.</li>
+              <li>What, How, How-to-use: GPT-4 vẫn dẫn.</li>
+            </ul>
+            <p>Ý thực hành: nhóm ít GPU có thể tự chạy mô hình 7B cho comment Why và Property.</p>
+            <p class="caveat">Chỉ đúng với few-shot trên Java. Không khái quát thành “7B hơn GPT-4”.</p>
+          </aside>
+        </div>
+        <p class="footer-bar"><span>Few-shot là đỉnh của CodeLlama. Với GPT-4, CoT cao nhất khi cộng ba ngôn ngữ</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>RQ5, đừng nói 7B hơn GPT-4 ở mọi việc</h3>
+          <ul>
+            <li>Năm ý định: What, Why, How-it-is-done, Property, How-to-use. Bộ phân loại COIN, mỗi loại rút 180 mẫu Java.</li>
+            <li>CodeLlama Why 4,29 và Property 4,19. GPT-4 là 4,28 và 4,06.</li>
+            <li>GPT-4 vẫn cao hơn ở What 4,40, How-it-is-done 4,31, How-to-use 4,22.</li>
+            <li>Bài giải thích kết quả này bằng nhận định few-shot không phải prompt tối ưu của GPT-4 khi xét chung. Bảng IV: trung bình chain-of-thought 4,54 cao nhất, few-shot 4,33 thấp nhất. Riêng Java, few-shot 4,66 lại là ô cao nhất, và RQ5 chạy trên Java.</li>
+            <li>Ý thực hành: nhóm ít GPU có thể tự chạy mô hình 7B để viết comment Why và Property.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 12 · Đóng góp và hạn chế -->
+      <section class="slide deco l-swot" aria-label="Đóng góp">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">Member 2</span> Chốt</p>
+          <h2>Ba đóng góp, ba hạn chế</h2>
+        </header>
+        <div class="swot">
+          <div class="swot-group pros">
+            <p class="label">Đóng góp</p>
+            <div class="swot-cols stagger">
+              <article><h3>Thước đo</h3><span class="idx">01</span><p>GPT-4 làm giám khảo hợp với người hơn BLEU, ROUGE-L và BERTScore.</p></article>
+              <article><h3>Bức tranh đủ</h3><span class="idx">02</span><p>Năm prompt, hai tham số, mười ngôn ngữ thuộc năm họ, năm loại ý định.</p></article>
+              <article><h3>Dữ liệu mới</h3><span class="idx">03</span><p>Erlang, Haskell và Prolog được công bố thêm cho cộng đồng.</p></article>
+            </div>
+          </div>
+          <div class="swot-group cons">
+            <p class="label">Hạn chế</p>
+            <div class="swot-cols stagger">
+              <article><h3>Ngẫu nhiên</h3><span class="idx">01</span><p>CodeLlama và StarChat không đặt temperature về 0, nên cả bài sinh câu ở 0,1, trừ RQ3.</p></article>
+              <article><h3>Câu đầu</h3><span class="idx">02</span><p>Lấy câu đầu giúp comment gọn, nhưng có thể bỏ chi tiết ở câu sau.</p></article>
+              <article><h3>Chi phí</h3><span class="idx">03</span><p>Gọi GPT-4 đắt. Chỉ RQ4 chạy đủ mười ngôn ngữ, RQ5 chỉ Java.</p></article>
+            </div>
+          </div>
+        </div>
+        <p class="tip"><b>Áp dụng</b> Bỏ BLEU khi kiểm thử nội bộ, chọn prompt theo mô hình, và có thể tự chạy CodeLlama 7B cho comment Why và Property.</p>
+        <p class="footer-bar"><span>Member 3 nhận phần chạy lại của nhóm</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Năm kết luận</h3>
+          <ul>
+            <li>Thước đo: GPT-4 chấm hợp người hơn BLEU và ROUGE.</li>
+            <li>Prompt phức tạp không mặc định thắng zero-shot. Không có một prompt cho mọi mô hình.</li>
+            <li>Temperature và top-p ảnh hưởng cùng kiểu, mức đổi theo mô hình và ngôn ngữ.</li>
+            <li>Prolog là chỗ yếu chung. CodeLlama 7B viết Why và Property tốt trong thí nghiệm few-shot trên Java.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 16 · Chạy lại -->
+      <section class="slide deco" aria-label="Chạy lại">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m3">Member 3</span> Phần của nhóm</p>
+          <h2>Chạy lại lát cắt Java bằng CodeLlama 7B</h2>
+        </header>
+        <div class="phase">
+          <p class="phase-label"><b>Giữ từ bài báo</b> Cùng một đường sinh câu</p>
+          <ol class="chevrons stagger">
+            <li>Hàm Java</li>
+            <li>Few-shot, 4 ví dụ</li>
+            <li>CodeLlama 7B</li>
+            <li>Temperature 0,1</li>
+            <li>Lấy câu đầu</li>
+          </ol>
+        </div>
+        <div class="phase">
+          <p class="phase-label"><b>Thu hẹp để nhóm chạy được</b> Không gọi API GPT-4</p>
+          <div class="judge-grid stagger">
+            <article class="judge"><span class="icon">1</span><h3>Một mô hình mở</h3><p>Chỉ CodeLlama-Instruct 7B. Bỏ StarChat, GPT-3.5 và GPT-4 lúc sinh câu.</p></article>
+            <article class="judge"><span class="icon">2</span><h3>Một ngôn ngữ</h3><p>Chỉ Java. Không chạy mười ngôn ngữ và không thu Prolog, Haskell, Erlang.</p></article>
+            <article class="judge"><span class="icon">3</span><h3>Nhóm tự chấm</h3><p>Đọc comment theo bốn tiêu chí của bài: đúng, rõ, đủ ý, gọn. Thang vẫn 1 đến 5.</p></article>
+          </div>
+        </div>
+        <p class="footer-bar"><span>Lát cắt này là few-shot trên Java, đúng chỗ bài so CodeLlama với GPT-4</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Cách chạy lại</h3>
+          <ul>
+            <li>Không tuyên bố đã đo lại toàn bộ bài. Nhóm chỉ chạy một lát cắt máy nhóm chịu được.</li>
+            <li>Giữ few-shot bốn ví dụ, temperature 0,1 và luật lấy câu đầu.</li>
+            <li>Không có bảng điểm của nhóm trên slide. Nếu được hỏi số, nói phần này đang trình bày cách chạy, chưa đưa kết quả đo.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 17 · Cải tiến -->
+      <section class="slide deco" aria-label="Cải tiến">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m3">Member 3</span> Cải tiến</p>
+          <h2>Why và Property được giữ thêm câu thứ hai</h2>
+        </header>
+        <div class="cmp">
+          <article>
+            <p class="label">Bài báo</p>
+            <h3>Luôn cắt còn câu đầu</h3>
+            <ul>
+              <li>Mọi loại comment đều lấy đúng một câu.</li>
+              <li>Comment gọn, nhưng lý do thiết kế và ràng buộc nằm ở câu sau thì bị bỏ.</li>
+              <li>Hạn chế này bài ghi nhận, và vẫn dùng cho cả năm loại ý định.</li>
+            </ul>
+          </article>
+          <article class="pick on-dark">
+            <p class="label">Nhóm</p>
+            <h3>Chỉ nới với hai loại cần chi tiết</h3>
+            <ul>
+              <li>What, How và How-to-use vẫn một câu.</li>
+              <li>Why và Property: nếu câu đầu chưa nêu lý do hoặc ràng buộc, ghép thêm câu thứ hai.</li>
+              <li>Cùng mẫu Java, cùng bốn tiêu chí, để so với câu đầu đơn.</li>
+            </ul>
+          </article>
+        </div>
+        <p class="tip"><b>Vì sao hai loại này</b> Trong bài, đây là chỗ CodeLlama 7B sát hoặc hơn GPT-4, và cũng là chỗ một câu dễ thiếu ý.</p>
+        <p class="footer-bar"><span>Xong phần nhóm, mời câu hỏi</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Cải tiến</h3>
+          <ul>
+            <li>Không nói cải tiến này đã thắng bài báo. Slide chỉ mô tả thay đổi.</li>
+            <li>What, How, How-to-use giữ luật câu đầu. Why và Property mới được thêm câu hai khi câu đầu thiếu lý do hoặc ràng buộc.</li>
+            <li>So trên cùng hàm Java, người trong nhóm chấm bốn tiêu chí.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 15 · Cảm ơn -->
+      <section class="slide l-thanks on-dark" aria-label="Cảm ơn">
+        <canvas class="fireworks" id="fireworks" aria-hidden="true"></canvas>
+        <div class="thanks-copy">
+          <h2>Cảm ơn cô và các bạn đã lắng nghe.</h2>
+          <p class="thanks-group">Nhóm 4: Trần&nbsp;Tuấn&nbsp;Tài, La&nbsp;Hoàng&nbsp;Tú, Võ&nbsp;Văn&nbsp;Hải</p>
+        </div>
+        <p class="footer-bar"><span>ICSE 2025 · Ottawa · trang 1882–1894</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <p>Kết thúc. Cảm ơn cô và các bạn đã lắng nghe.</p>
+        </div>
+      </section>
+    </div>
+    </div>
+    <div class="notes" id="notePanel" hidden></div>
+    <div class="deck-tools">
+      <button type="button" class="note-toggle" id="noteToggle" aria-pressed="false" aria-controls="notePanel">Chi tiết</button>
+      <p class="hint">← → hoặc Space để chuyển slide · N chi tiết · F toàn màn hình</p>
+      <div class="nav" role="group" aria-label="Điều hướng slide">
+        <button type="button" id="prevBtn" aria-label="Slide trước">‹</button>
+        <button type="button" id="nextBtn" aria-label="Slide sau">›</button>
+        <button type="button" id="fsBtn" aria-label="Toàn màn hình" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        </button>
+      </div>
+    </div>
+  </main>
+  <p class="sr" id="slideStatus" role="status"></p>
+
+  <script type="module">
+    const body = document.body;
+    const modeSlideBtn = document.getElementById("modeSlide");
+    const modePdfBtn = document.getElementById("modePdf");
+    const pdfView = document.getElementById("pdfView");
+    const pdfFrame = document.getElementById("pdfFrame");
+    const slides = [...document.querySelectorAll(".slide")];
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const fsBtn = document.getElementById("fsBtn");
+    const noteToggle = document.getElementById("noteToggle");
+    const notePanel = document.getElementById("notePanel");
+    const slideStatus = document.getElementById("slideStatus");
+    const progress = document.getElementById("deckProgress");
+    const total = slides.length;
+    let index = 0;
+
+    const pad = (n) => String(n).padStart(2, "0");
+    slides.forEach((slide, i) => {
+      const pg = slide.querySelector(".pg");
+      if (pg) pg.textContent = `${pad(i + 1)} / ${pad(total)}`;
+    });
+
+    function ensurePdf() {
+      if (!pdfFrame.getAttribute("src")) pdfFrame.src = "assets/2407.07959v2.pdf";
+    }
+
+    const fireworks = createFireworks(document.getElementById("fireworks"));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function syncFireworks() {
+      const onThanks = slides[index]?.classList.contains("l-thanks");
+      const slideMode = body.classList.contains("mode-slide");
+      if (onThanks && slideMode && !reduceMotion.matches) fireworks.start();
+      else fireworks.stop();
+    }
+
+    reduceMotion.addEventListener("change", syncFireworks);
+    document.addEventListener("visibilitychange", syncFireworks);
+
+    function createFireworks(canvas) {
+      const noop = { start() {}, stop() {} };
+      if (!canvas) return noop;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return noop;
+
+      const colors = ["#ffe08a", "#ffd166", "#7dd3fc", "#ffffff", "#ffb4a2", "#c4b5fd"];
+      const rockets = [];
+      const sparks = [];
+      let frame = 0;
+      let running = false;
+      let nextLaunch = 0;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = Math.max(1, Math.floor(rect.width * dpr));
+        const height = Math.max(1, Math.floor(rect.height * dpr));
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function launch() {
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        if (w < 2 || h < 2) return;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        rockets.push({
+          x: w * (0.42 + Math.random() * 0.5),
+          y: h * 0.92,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: -(6.4 + Math.random() * 2.6),
+          targetY: h * (0.08 + Math.random() * 0.38),
+          color,
+        });
+      }
+
+      function burst(x, y, color) {
+        const count = 72 + Math.floor(Math.random() * 36);
+        for (let i = 0; i < count; i += 1) {
+          const angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+          const speed = 1.6 + Math.random() * 4.8;
+          sparks.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: 0.005 + Math.random() * 0.007,
+            color,
+            size: 2.2 + Math.random() * 2.4,
+          });
+        }
+      }
+
+      function tick(now) {
+        if (!running) return;
+        resize();
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+        if (document.hidden) {
+          frame = requestAnimationFrame(tick);
+          return;
+        }
+        if (now >= nextLaunch) {
+          launch();
+          launch();
+          nextLaunch = now + 520 + Math.random() * 480;
+        }
+        ctx.shadowBlur = 14;
+        for (let i = rockets.length - 1; i >= 0; i -= 1) {
+          const rocket = rockets[i];
+          const prevX = rocket.x;
+          const prevY = rocket.y;
+          rocket.x += rocket.vx;
+          rocket.y += rocket.vy;
+          rocket.vy += 0.05;
+          ctx.globalAlpha = 0.95;
+          ctx.strokeStyle = rocket.color;
+          ctx.shadowColor = rocket.color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(prevX, prevY + 10);
+          ctx.lineTo(rocket.x, rocket.y);
+          ctx.stroke();
+          if (rocket.y <= rocket.targetY || rocket.vy >= -0.2) {
+            burst(rocket.x, rocket.y, rocket.color);
+            rockets.splice(i, 1);
+          }
+        }
+        if (sparks.length > 700) sparks.splice(0, sparks.length - 700);
+        for (let i = sparks.length - 1; i >= 0; i -= 1) {
+          const spark = sparks[i];
+          spark.x += spark.vx;
+          spark.y += spark.vy;
+          spark.vy += 0.028;
+          spark.vx *= 0.99;
+          spark.life -= spark.decay;
+          if (spark.life <= 0) {
+            sparks.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = Math.max(spark.life, 0);
+          ctx.fillStyle = spark.color;
+          ctx.shadowColor = spark.color;
+          ctx.beginPath();
+          ctx.arc(spark.x, spark.y, spark.size * (0.45 + spark.life * 0.55), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        frame = requestAnimationFrame(tick);
+      }
+
+      return {
+        start() {
+          if (running) return;
+          running = true;
+          nextLaunch = 900;
+          resize();
+          const w = canvas.clientWidth;
+          const h = canvas.clientHeight;
+          if (w > 2 && h > 2) {
+            burst(w * 0.68, h * 0.32, colors[1]);
+            burst(w * 0.84, h * 0.2, colors[2]);
+            burst(w * 0.76, h * 0.48, colors[4]);
+          }
+          frame = requestAnimationFrame(tick);
+        },
+        stop() {
+          running = false;
+          cancelAnimationFrame(frame);
+          rockets.length = 0;
+          sparks.length = 0;
+          const w = canvas.clientWidth;
+          const h = canvas.clientHeight;
+          if (w && h) ctx.clearRect(0, 0, w, h);
+        },
+      };
+    }
+
+    function setMode(mode, { replace = true } = {}) {
+      const slideMode = mode === "slide";
+      const pdfMode = mode === "pdf";
+      body.classList.toggle("mode-slide", slideMode);
+      body.classList.toggle("mode-pdf", pdfMode);
+      pdfView.hidden = !pdfMode;
+      if (pdfMode) ensurePdf();
+      modeSlideBtn.setAttribute("aria-pressed", String(slideMode));
+      modePdfBtn.setAttribute("aria-pressed", String(pdfMode));
+      if (!slideMode) {
+        notePanel.hidden = true;
+      } else if (noteToggle.getAttribute("aria-pressed") === "true") {
+        notePanel.hidden = false;
+      }
+      const hash = pdfMode ? "#pdf" : `#s${index + 1}`;
+      if (replace) history.replaceState(null, "", hash);
+      try { localStorage.setItem("tieuLuanMode", mode); } catch { /* bỏ qua */ }
+      syncFireworks();
+    }
+
+    function show(next) {
+      index = Math.max(0, Math.min(total - 1, next));
+      slides.forEach((slide, i) => {
+        const on = i === index;
+        slide.classList.toggle("active", on);
+        slide.hidden = !on;
+      });
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === total - 1;
+      progress.style.width = `${((index + 1) / total) * 100}%`;
+      notePanel.replaceChildren();
+      const note = slides[index].querySelector(".speaker-note");
+      if (note) {
+        const copy = note.cloneNode(true);
+        copy.classList.remove("sr");
+        copy.removeAttribute("aria-hidden");
+        notePanel.append(copy);
+      }
+      slideStatus.textContent = `Slide ${index + 1} trên ${total}`;
+      if (body.classList.contains("mode-slide")) {
+        history.replaceState(null, "", `#s${index + 1}`);
+      }
+      syncFireworks();
+    }
+
+    function goNext() { show(index + 1); }
+    function goPrev() { show(index - 1); }
+
+    const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+    function toggleFullscreen() {
+      const root = document.documentElement;
+      if (!fullscreenElement()) (root.requestFullscreen || root.webkitRequestFullscreen)?.call(root);
+      else (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+    }
+
+    function syncFullscreen() {
+      const browserFull = window.innerHeight >= screen.height - 2 && window.innerWidth >= screen.width - 2;
+      const on = Boolean(fullscreenElement()) || browserFull;
+      body.classList.toggle("is-fullscreen", on);
+      fsBtn.setAttribute("aria-pressed", String(on));
+      fsBtn.setAttribute("aria-label", on ? "Thoát toàn màn hình" : "Toàn màn hình");
+    }
+
+    modeSlideBtn.addEventListener("click", () => setMode("slide"));
+    modePdfBtn.addEventListener("click", () => setMode("pdf"));
+    prevBtn.addEventListener("click", goPrev);
+    nextBtn.addEventListener("click", goNext);
+    fsBtn.addEventListener("click", toggleFullscreen);
+
+    noteToggle.addEventListener("click", () => {
+      const on = noteToggle.getAttribute("aria-pressed") !== "true";
+      noteToggle.setAttribute("aria-pressed", String(on));
+      body.classList.toggle("show-notes", on);
+      notePanel.hidden = !on;
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const tag = event.target?.tagName || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (event.key === "2") {
+        setMode("slide");
+        return;
+      }
+      if (event.key === "3") {
+        setMode("pdf");
+        return;
+      }
+      if (!body.classList.contains("mode-slide")) return;
+      if (event.key === "ArrowRight" || event.key === "ArrowDown" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        goNext();
+      } else if (event.key === "ArrowLeft" || event.key === "ArrowUp" || event.key === "PageUp" || event.key === "Backspace") {
+        event.preventDefault();
+        goPrev();
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        show(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        show(total - 1);
+      } else if (event.key === "n" || event.key === "N") {
+        noteToggle.click();
+      } else if (event.key === "f" || event.key === "F") {
+        toggleFullscreen();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", syncFullscreen);
+    document.addEventListener("webkitfullscreenchange", syncFullscreen);
+    window.addEventListener("resize", syncFullscreen);
+    syncFullscreen();
+
+    let toolsTimer;
+    document.addEventListener("pointermove", () => {
+      if (!body.classList.contains("is-fullscreen")) return;
+      body.classList.add("show-tools");
+      clearTimeout(toolsTimer);
+      toolsTimer = setTimeout(() => body.classList.remove("show-tools"), 2200);
+    });
+
+    let touchX = null;
+    document.addEventListener("touchstart", (event) => {
+      if (!body.classList.contains("mode-slide")) return;
+      touchX = event.changedTouches[0].screenX;
+    }, { passive: true });
+    document.addEventListener("touchend", (event) => {
+      if (!body.classList.contains("mode-slide") || touchX == null) return;
+      const delta = event.changedTouches[0].screenX - touchX;
+      if (Math.abs(delta) > 55) (delta < 0 ? goNext : goPrev)();
+      touchX = null;
+    }, { passive: true });
+
+    document.querySelector(".deck")?.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      if (x < rect.width * 0.22) goPrev();
+      else if (x > rect.width * 0.78) goNext();
+    });
+
+    function applyHash() {
+      const match = /^#s(\d+)$/.exec(location.hash);
+      if (match) {
+        setMode("slide");
+        show(Number(match[1]) - 1);
+        return;
+      }
+      if (location.hash === "#pdf") {
+        setMode("pdf");
+        return;
+      }
+      let saved = "slide";
+      try { saved = localStorage.getItem("tieuLuanMode") || "slide"; } catch { /* bỏ qua */ }
+      if (saved !== "pdf") saved = "slide";
+      setMode(saved);
+      show(index);
+    }
+
+    window.addEventListener("hashchange", applyHash);
+    applyHash();
+  </script>
+</body>
+</html>

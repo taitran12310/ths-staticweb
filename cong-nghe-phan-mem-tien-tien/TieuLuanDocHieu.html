@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bản đọc hiểu tiếng Việt bài Source Code Summarization in the Era of Large Language Models, ICSE 2025. Nhóm 4.">
+  <title>Đọc hiểu tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,560;9..144,680;9..144,760&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ebe4d8;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --soft: #f7f1e7;
+      --card: #fffdf8;
+      --line: #e3d6c4;
+      --accent: #9a3412;
+      --teal: #0f766e;
+      --navy: #10233a;
+      --gold: #b45309;
+      --blue: #1d4ed8;
+      --shadow: 0 24px 70px rgba(16, 35, 58, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100dvh;
+      color: var(--ink);
+      font-family: "Be Vietnam Pro", system-ui, sans-serif;
+      background:
+        radial-gradient(900px 480px at 0% -10%, rgba(154, 52, 18, 0.16), transparent 55%),
+        radial-gradient(800px 420px at 100% 0%, rgba(15, 118, 110, 0.16), transparent 50%),
+        var(--bg);
+      background-attachment: fixed;
+      line-height: 1.65;
+    }
+    body.mode-slide {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    body.mode-slide .appbar { position: relative; top: auto; }
+    :fullscreen .appbar,
+    :fullscreen .note-toggle,
+    :fullscreen .hint,
+    :-webkit-full-screen .appbar,
+    :-webkit-full-screen .note-toggle,
+    :-webkit-full-screen .hint,
+    body.is-fullscreen .appbar,
+    body.is-fullscreen .note-toggle,
+    body.is-fullscreen .hint {
+      display: none !important;
+    }
+    :fullscreen .deck-tools,
+    :-webkit-full-screen .deck-tools,
+    body.is-fullscreen .deck-tools { justify-content: flex-end; }
+
+    .skip {
+      position: absolute;
+      left: -9999px;
+    }
+    .skip:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 80;
+      background: #fff;
+      color: var(--ink);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+    }
+
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      padding: 0.7rem 1.1rem;
+      background: rgba(16, 35, 58, 0.94);
+      color: #f8fafc;
+      backdrop-filter: blur(10px);
+    }
+    .appbar a {
+      color: #fde68a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .appbar a:hover { text-decoration: underline; }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 12rem;
+    }
+    .brand strong { font-size: 0.95rem; }
+    .brand span { color: #cbd5e1; font-size: 0.78rem; }
+    .modes {
+      display: flex;
+      padding: 0.2rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .modes a,
+    .modes button {
+      border: 0;
+      background: transparent;
+      color: #e2e8f0;
+      font: inherit;
+      font-weight: 700;
+      padding: 0.45rem 0.95rem;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .modes a[aria-current="page"],
+    .modes button[aria-pressed="true"] {
+      background: #fffdf8;
+      color: var(--navy);
+    }
+    .modes a:hover { text-decoration: none; }
+    .modes button:focus-visible,
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #fbbf24;
+      outline-offset: 2px;
+    }
+
+    .read {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 1.5rem;
+      width: min(1180px, calc(100% - 2rem));
+      margin: 1.25rem auto 3rem;
+      align-items: start;
+    }
+    body.mode-slide .read,
+    body.mode-pdf .read,
+    body.mode-pdf .stage { display: none; }
+    body.mode-pdf {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .pdf-view[hidden] { display: none !important; }
+    body.mode-pdf .pdf-view {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+      margin: 0.75rem;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .pdf-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.4rem 1rem;
+      margin: 0;
+      padding: 0.55rem 0.9rem;
+      background: var(--navy);
+      color: #e2e8f0;
+      font-size: 0.82rem;
+    }
+    .pdf-bar a { color: #fde68a; font-weight: 700; }
+    .pdf-view iframe {
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: 0;
+      border: 0;
+      background: #fff;
+    }
+    .toc {
+      position: sticky;
+      top: 7rem;
+      align-self: start;
+      max-height: calc(100dvh - 8rem);
+      overflow: auto;
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 253, 248, 0.9);
+    }
+    .toc p {
+      margin: 0 0 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .toc a {
+      display: block;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.86rem;
+      padding: 0.28rem 0;
+    }
+    .toc a:hover { color: var(--accent); }
+
+    article h1, article h2, .slide h2, .cover h2 {
+      font-family: Fraunces, Georgia, serif;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    article { min-width: 0; }
+    article h1 {
+      margin: 0 0 0.4rem;
+      font-size: clamp(1.8rem, 3vw, 2.55rem);
+    }
+    .lede {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    .kicker {
+      margin: 0 0 0.45rem;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .intro,
+    article > section {
+      margin-top: 1.35rem;
+      padding: 1.15rem 1.25rem 1.3rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      min-width: 0;
+      scroll-margin-top: 7.2rem;
+    }
+    .intro { margin-top: 0; }
+    article > section h2 {
+      margin: 0 0 0.55rem;
+      font-size: 1.45rem;
+    }
+    article > section h3 {
+      margin: 1.1rem 0 0.35rem;
+      font-size: 1.05rem;
+    }
+    p { margin: 0.45rem 0; }
+    ul, ol { margin: 0.4rem 0; padding-left: 1.2rem; }
+    li + li { margin-top: 0.25rem; }
+    .flow li + li,
+    .authors li + li { margin-top: 0; }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+      gap: 0.7rem;
+      margin: 0.8rem 0;
+    }
+    .fact, .callout, .say {
+      border-radius: 14px;
+      padding: 0.75rem 0.85rem;
+    }
+    .fact {
+      min-width: 0;
+      background: var(--soft);
+      border: 1px solid var(--line);
+    }
+    .fact b, .fact strong { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 700; }
+    .fact span {
+      display: block;
+      margin-top: 0.15rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+    @media (min-width: 760px) {
+      .facts .fact:first-child { grid-column: span 2; }
+    }
+    .callout {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+    }
+    .say {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+    }
+    .say strong { color: var(--teal); }
+    .table-scroll {
+      overflow-x: auto;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin: 0.7rem 0 0.2rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 0.7rem 0;
+    }
+    .table-scroll table { margin: 0; width: 100%; }
+    .table-scroll.wide table { min-width: 56rem; }
+    .table-scroll caption { padding: 0.45rem 0.6rem; }
+    caption {
+      text-align: left;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 0.38rem 0.45rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f6f1e8; }
+    .best { font-weight: 800; color: var(--teal); }
+    .who {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 0.05rem 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .m1 { background: var(--teal); }
+    .m2 { background: var(--gold); }
+    .m3 { background: var(--blue); }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      list-style: none;
+      padding: 0;
+    }
+    .flow li {
+      background: var(--navy);
+      color: #fff;
+      border-radius: 999px;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.86em;
+      background: #f5f0e8;
+      padding: 0.05rem 0.28rem;
+      border-radius: 5px;
+    }
+    .authors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem 1.4rem;
+      margin: 0.55rem 0 0.2rem;
+      padding: 0;
+      list-style: none;
+      counter-reset: author;
+    }
+    .authors li {
+      position: relative;
+      padding-left: 1.7rem;
+      counter-increment: author;
+    }
+    .authors li::before {
+      content: counter(author) ".";
+      position: absolute;
+      left: 0;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .stage { display: none; }
+    body.mode-slide .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      height: auto;
+      padding: 0.45rem 0.75rem 0.35rem;
+    }
+    .deck {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: auto;
+      max-width: min(1280px, 100%);
+      height: calc(100% - 3rem);
+      aspect-ratio: 16 / 9;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #f7f3ec;
+      box-shadow: var(--shadow);
+    }
+    .deck::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(154, 52, 18, 0.07), transparent 36%),
+        linear-gradient(320deg, rgba(15, 118, 110, 0.08), transparent 32%);
+      pointer-events: none;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 1.15rem 1.45rem 2.5rem;
+      overflow: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(24px);
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+    }
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .slide[hidden] { display: none !important; }
+    .slide h2 { margin: 0.1rem 0 0.45rem; font-size: clamp(1.22rem, 2vw, 1.7rem); }
+    .low { font-weight: 800; color: var(--accent); }
+    .eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .grid-2, .grid-3, .grid-4 {
+      display: grid;
+      gap: 0.65rem;
+      min-height: 0;
+    }
+    .grid-2 { grid-template-columns: 1.1fr 0.9fr; }
+    .stack { margin-top: 0.7rem; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .card {
+      background: rgba(255, 253, 248, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.7rem 0.8rem;
+    }
+    .card h3 { margin: 0 0 0.3rem; font-size: 0.98rem; }
+    .card p, .card li { font-size: 0.9rem; }
+    .card ul, .card ol { margin: 0.2rem 0 0; }
+    .cover {
+      justify-content: space-between;
+      background:
+        linear-gradient(160deg, rgba(16, 35, 58, 0.94), rgba(15, 118, 110, 0.88)),
+        #10233a;
+      color: #f8fafc;
+    }
+    .cover .eyebrow { color: #fde68a; }
+    .cover h2 { font-size: clamp(1.8rem, 3.2vw, 2.8rem); max-width: 18ch; }
+    .cover .en { margin: 0.3rem 0 0; color: #e2e8f0; font-size: 1.05rem; }
+    .people { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .people span, .chip {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 0.28rem 0.7rem;
+      font-weight: 700;
+    }
+    .stat {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.55rem;
+      line-height: 1;
+      color: var(--navy);
+    }
+    .stat small {
+      display: block;
+      margin-top: 0.25rem;
+      font-family: "Be Vietnam Pro", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .slide table { font-size: 0.72rem; background: #fff; border-radius: 10px; margin: 0.28rem 0; }
+    .slide table th, .slide table td { padding: 0.26rem 0.32rem; }
+    .slide table th { font-size: 0.66rem; }
+    .slide table.matrix { font-size: 0.64rem; }
+    .slide table.matrix th, .slide table.matrix td { padding: 0.2rem 0.22rem; white-space: nowrap; text-align: center; }
+    .slide table.matrix td:first-child, .slide table.matrix th:first-child { text-align: left; }
+    .slide caption { font-size: 0.75rem; }
+    .footer-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.45rem 1.1rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .cover .footer-bar { color: #cbd5e1; }
+    .deck-tools {
+      display: none;
+      width: min(1280px, 100%);
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin-top: 0.4rem;
+    }
+    body.mode-slide .deck-tools { display: flex; }
+    .nav {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .nav button, .note-toggle {
+      border: 0;
+      border-radius: 999px;
+      background: var(--navy);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .nav button {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.4rem;
+    }
+    .nav button:disabled { opacity: 0.35; }
+    .note-toggle { padding: 0.45rem 0.8rem; }
+    .notes {
+      display: none;
+      width: min(1280px, 100%);
+      max-height: 8.5rem;
+      overflow: auto;
+      margin-top: 0.35rem;
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.55rem 0.8rem 0.65rem;
+      font-size: 0.82rem;
+    }
+    .notes p, .notes li { margin: 0.12rem 0; }
+    .notes ul { margin: 0.1rem 0 0.25rem; padding-left: 1.1rem; }
+    .notes h3 { margin: 0.15rem 0 0.2rem; font-size: 0.84rem; }
+    .notes .speaker-note { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+    body.show-notes .notes { display: block; }
+    body.show-notes .deck { height: calc(100% - 11.5rem); }
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+    @media (max-width: 860px) {
+      .read { grid-template-columns: 1fr; width: min(100% - 1.2rem, 820px); }
+      .toc { position: static; max-height: none; }
+      .authors { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .slide { padding: 1rem 1rem 2.6rem; overflow: auto; }
+      .deck-tools { align-items: flex-start; }
+    }
+    .chart { margin: 0.55rem 0 0.15rem; min-width: 0; }
+    .chart figcaption { font-weight: 800; font-size: 0.88rem; margin: 0 0 0.3rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: 0.25rem 0.7rem; margin: 0 0 0.35rem; font-size: 0.72rem; color: var(--muted); }
+    .legend i { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 2px; margin-right: 0.22rem; vertical-align: -1px; }
+    .sw-ref { background: #a8a29e; }
+    .sw-cl { background: var(--teal); }
+    .sw-sc { background: var(--gold); }
+    .sw-g3 { background: var(--blue); }
+    .sw-g4 { background: var(--navy); }
+    .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.55rem; }
+    .cols {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.22rem;
+      height: 8.2rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .col { flex: 1 1 0; border-radius: 5px 5px 0 0; position: relative; min-height: 2px; }
+    .col b {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 1px);
+      transform: translateX(-50%);
+      font-size: 0.58rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .group > p { margin: 0.2rem 0 0; text-align: center; font-size: 0.75rem; font-weight: 700; }
+    .hbar { display: grid; gap: 0.32rem; }
+    .hbar-row {
+      display: grid;
+      grid-template-columns: minmax(6.5rem, 10rem) minmax(0, 1fr) auto;
+      gap: 0.4rem;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+    .track { height: 0.62rem; background: #efe6d8; border-radius: 999px; overflow: hidden; }
+    .fill { display: block; height: 100%; border-radius: 999px; }
+    .range-chart { display: grid; gap: 0.38rem; }
+    .range-row { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: 0.45rem; align-items: center; font-size: 0.78rem; }
+    .range-track { position: relative; height: 0.8rem; background: #efe6d8; border-radius: 999px; }
+    .range-zero { position: absolute; top: -0.12rem; bottom: -0.12rem; width: 2px; background: var(--ink); }
+    .range-span { position: absolute; top: 0.14rem; height: 0.52rem; border-radius: 999px; }
+    .axis-note { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.75rem; }
+    .finding {
+      margin: 0.65rem 0 0;
+      padding: 0.65rem 0.8rem;
+      border-left: 4px solid var(--teal);
+      background: #f0fdfa;
+      border-radius: 0 12px 12px 0;
+    }
+    pre.code {
+      overflow: auto;
+      margin: 0.5rem 0;
+      background: var(--navy);
+      color: #f8fafc;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+    .line-chart { width: 100%; height: auto; display: block; }
+    .slide .line-chart { width: min(100%, 28rem); margin-inline: auto; }
+    .slide .cols { height: 6.1rem; }
+    .slide .chart figcaption, .slide .axis-note { font-size: 0.75rem; }
+    @media (max-width: 860px) {
+      .groups { grid-template-columns: 1fr; }
+      .hbar-row, .range-row { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .slide { transition: none; }
+    }
+
+    mark.user-hl {
+      background: #fde68a;
+      color: inherit;
+      border-radius: 0.15em;
+      padding: 0 0.05em;
+      cursor: pointer;
+    }
+    mark.user-hl:hover { background: #f6c453; }
+    .hl-clear {
+      border: 0;
+      border-radius: 999px;
+      background: #fde68a;
+      color: var(--navy);
+      font: inherit;
+      font-weight: 700;
+      padding: 0.45rem 0.95rem;
+      cursor: pointer;
+    }
+    .hl-clear[hidden] { display: none; }
+    .hl-pop {
+      position: fixed;
+      z-index: 50;
+      transform: translate(-50%, calc(-100% - 8px));
+    }
+    .hl-pop[hidden] { display: none; }
+    .hl-pop button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--navy);
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      padding: 0.4rem 0.85rem;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(16, 35, 58, 0.28);
+    }
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Bỏ qua đến nội dung chính</a>
+  <header class="appbar">
+    <div class="brand">
+      <a href="./index.html">← Công nghệ phần mềm tiên tiến</a>
+      <strong>Tiểu luận · Nhóm 4</strong>
+      <span>Trần Tuấn Tài · La Hoàng Tú · Võ Văn Hải</span>
+    </div>
+    <nav class="modes" aria-label="Mở slide hoặc PDF">
+      <a href="TieuLuan.html">Slide trình bày</a>
+      <a href="TieuLuan.html#pdf">PDF gốc</a>
+    </nav>
+    <button type="button" id="clearHighlights" class="hl-clear" hidden>Xóa tô sáng</button>
+  </header>
+
+
+  <div class="read">
+    <nav class="toc" aria-label="Mục lục bài đọc">
+      <p>Mục lục</p>
+      <a href="#mo-dau">Mở đầu</a>
+      <a href="#boi-canh">Bối cảnh</a>
+      <a href="#khai-niem">Khái niệm</a>
+      <a href="#thiet-ke">Thiết kế thí nghiệm</a>
+      <a href="#rq1">RQ1 — Cách đánh giá</a>
+      <a href="#rq2">RQ2 — Prompt</a>
+      <a href="#rq3">RQ3 — Tham số</a>
+      <a href="#rq4">RQ4 — Ngôn ngữ</a>
+      <a href="#rq5">RQ5 — Loại comment</a>
+      <a href="#dong-gop">Đóng góp và hạn chế</a>
+      <a href="#chay-lai">Chạy lại và cải tiến</a>
+      <a href="#tai-lieu">Tài liệu</a>
+      <a href="#hoi-dap">Hỏi đáp</a>
+    </nav>
+    <article id="main-content">
+      <header class="intro">
+        <p class="kicker">ICSE 2025 · Ottawa · Nhóm 4</p>
+        <h1>Tóm tắt mã nguồn trong kỷ nguyên mô hình ngôn ngữ lớn</h1>
+        <p class="lede">Bản đọc đi theo thứ tự đứng nói. Member 1 nói bài báo đến hết RQ2. Member 2 nói RQ3, RQ4, RQ5 rồi đóng góp và hạn chế. Member 3 nói cách nhóm chạy lại và phần cải tiến. Biểu đồ để nhìn chiều của số liệu trước khi đọc bảng.</p>
+      </header>
+
+      <section id="mo-dau">
+        <h2>1. Mở đầu</h2>
+        <p><span class="who m1">Member 1</span> Nói từ mục này đến hết RQ2, gồm thiết kế thực nghiệm của bài báo.</p>
+        <p>Hiểu chương trình chiếm phần lớn thời gian và chi phí của người lập trình. Tóm tắt mã nguồn là viết một câu ngôn ngữ tự nhiên, ngắn và đúng, cho một hàm Java, một hàm Python hoặc một thủ tục C. LLM mới đây viết được câu đó mà không cần huấn luyện lại trên từng dự án.</p>
+        <p>Bản này bám công trình của Sun và cộng sự, công bố tại hội nghị ICSE 2025 ở Ottawa, không phải tạp chí. Trong kỷ yếu, bài chiếm trang 1882–1894, tức 13 trang: 11 trang nội dung và 2 trang tài liệu, 71 references. DOI 10.1109/ICSE55347.2025.00034. Bản PDF nhóm đọc là arXiv:2407.07959v2.</p>
+        <p>Bài không đề xuất mô hình mới. Bài hỏi năm việc: thước nào đáng tin, prompt nào thật sự hơn, temperature và top-p đổi kết quả ra sao, họ ngôn ngữ nào khó, và loại comment nào mô hình nhỏ viết nổi.</p>
+        <div class="say"><strong>Khi nói.</strong> Thưa cô và các bạn, comment giống bản đồ khi đọc hệ thống. Viết comment tốt bị xem nhẹ vì tốn thời gian, nên comment thiếu, cũ, hoặc lệch code. Member 1 nói bài báo đến hết RQ2. Member 2 nhận từ RQ3. Member 3 nói sau phần kết luận, về cách nhóm chạy lại.</div>
+      </section>
+
+      <section id="boi-canh">
+        <h2>2. Bối cảnh và động lực</h2>
+        <p>Comment giúp đọc code và giảm áp lực bảo trì. Viết comment tốt tốn công, nên trong đời sống của phần mềm comment thường thiếu, lệch, hoặc đã cũ.</p>
+        <p>Kỹ thuật tóm tắt code đi qua ba giai đoạn. Năm 2010, người ta mang cách tóm tắt văn bản sang mã nguồn. Sau đó là mô hình code nhỏ, kiến trúc encoder–decoder của dịch máy, như CodeT5, InCoder, Codex: phải tinh chỉnh trên dữ liệu riêng, câu ra ngắn và bám tập huấn luyện. Giai đoạn hiện nay là LLM: GPT-3.5, GPT-4, CodeLlama, StarChat-β, thích ứng bằng prompt, không fine-tune.</p>
+        <div class="table-scroll">
+          <table>
+            <caption>Mô hình code nhỏ và LLM không chỉ khác cách chạy, mà khác cả thước đo hợp.</caption>
+            <thead>
+              <tr><th scope="col">Tiêu chí</th><th scope="col">CodeT5, InCoder</th><th scope="col">GPT-3.5, GPT-4, CodeLlama, StarChat-β</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Cách dùng</td><td>Fine-tune hoặc huấn luyện lại</td><td>Prompt, học trong ngữ cảnh, không fine-tune</td></tr>
+              <tr><td>Câu ra</td><td>Ngắn, khuôn, bám dữ liệu huấn luyện</td><td>Tự nhiên hơn, nhiều chi tiết về mục đích</td></tr>
+              <tr><td>Thước hợp</td><td>BLEU, ROUGE-L so với mẫu</td><td>Cần chấm ngữ nghĩa, hoặc chính LLM làm giám khảo</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Ba khoảng trống</h3>
+        <ol>
+          <li>Phần lớn bài chỉ một kiểu prompt. Sun và cộng sự xét zero-shot. Ahmed, Gao xét few-shot. Chain-of-thought, critique và expert chưa được so cùng mặt bằng.</li>
+          <li>Chưa có bằng chứng temperature và top-p giữ chất lượng comment ổn định.</li>
+          <li>Người ta vẫn chấm LLM bằng BLEU, METEOR, ROUGE-L hoặc Sentence-BERT so với comment mẫu. Câu LLM viết khác lời và chi tiết hơn mẫu, nên thước trùng từ cho điểm sai chiều.</li>
+        </ol>
+        <h3>Quy trình, theo Hình 1 của bài</h3>
+        <p>Giai đoạn viết: đoạn code và loại comment đi vào bộ sinh prompt, prompt đó vào LLM, ra một câu tóm tắt. Giai đoạn chấm có ba lối: giống mẫu (BLEU, ROUGE-L, BERTScore), giống chính đoạn code (SIDE), và LLM chấm (GPT-4 cho điểm). Mọi thí nghiệm lấy câu đầu của câu trả lời, vì các câu sau thường chỉ giải thích thêm.</p>
+        <div class="say"><strong>Khi nói.</strong> Các bài trước ép câu dài của GPT-4 khớp từng từ với comment mẫu rất ngắn. Nghiên cứu này kiểm lại cả thước đo, cả prompt nâng cao, cả tham số mô hình.</div>
+      </section>
+
+      <section id="khai-niem">
+        <h2>3. Khái niệm cần thống nhất</h2>
+        <h3>LLM và tóm tắt mã nguồn</h3>
+        <p>LLM là mô hình Transformer rất lớn, học trên chữ và code, để hiểu và sinh câu hoặc lệnh. Bài so hai nhóm: mô hình đa năng GPT-3.5 và GPT-4, với mô hình chuyên code CodeLlama-Instruct và StarChat-β.</p>
+        <p>Tóm tắt mã nguồn là biến đoạn code thành một câu mô tả chức năng. Bài lấy câu đầu trong lời LLM làm comment cuối.</p>
+        <pre class="code"><code>private void setPeople(final Email emailWithData, final MimeMessage msgToSet) throws MessagingException {
+    msgToSet.setFrom(emailWithData.from().toInternetAddress());
+    msgToSet.setReplyTo(EmailAddress.convert(emailWithData.replyTo()));
+    setRecipients(emailWithData, msgToSet);
+}</code></pre>
+        <p>Mẫu gốc: “Sets FROM REPLY-TO and recipients.” Người chấm cho 2,8. GPT-4: “Sets the sender, reply-to address, and recipients on a MimeMessage using data from an Email object.” Người chấm cho 4,4. Câu sau dài hơn nhưng đủ ba việc hàm làm.</p>
+        <h3>Năm chiến lược prompt</h3>
+        <ul>
+          <li><strong>Zero-shot.</strong> “Please generate a short comment in one sentence for the following function”, rồi đưa code. Không có ví dụ.</li>
+          <li><strong>Few-shot.</strong> Bốn cặp code–comment, rồi cùng câu lệnh đó. Cả bài giữ bốn ví dụ.</li>
+          <li><strong>Chain-of-thought.</strong> Đưa code cùng năm câu hỏi, nhận lời, rồi bảo gộp thành một câu comment.</li>
+          <li><strong>Critique.</strong> Viết comment, bảo mô hình tự tìm lỗi, rồi sửa theo các lỗi vừa nêu. Ba lượt.</li>
+          <li><strong>Expert.</strong> Bảo mô hình viết một đoạn mô tả chuyên gia, dùng đoạn đó làm system prompt, rồi làm như zero-shot.</li>
+        </ul>
+        <h3>Temperature, top-p, và các thước</h3>
+        <p>Temperature từ 0 đến 1 làm phân bố xác suất phẳng hơn, câu ngẫu nhiên hơn. Temperature 0 cho câu gần như cố định. Top-p giữ nhóm từ có tổng xác suất đạt ngưỡng. Top-p 0,1 chỉ xét nhóm từ chiếm 10% xác suất cao nhất. Ngưỡng càng lớn, càng nhiều từ hiếm được xét.</p>
+        <p>BLEU, METEOR và ROUGE-L đếm từ trùng. BLEU còn phạt câu dài hơn mẫu. BERTScore và các độ đo câu (Sentence-BERT, Universal Sentence Encoder) so nghĩa với mẫu, nên vẫn kéo theo chất lượng của mẫu. SIDE so vector của code Java với vector của câu tóm tắt, không cần mẫu, nhưng mới có cho Java. GPT-4 hoặc GPT-3.5 chấm thang 1–5 theo bốn tiêu chí: đúng, rõ, đủ ý, gọn.</p>
+        <p>Spearman ρ đo hai cách xếp hạng có đi cùng nhau không. ρ dương là cùng chiều, âm là ngược chiều, 0 là không liên quan. p-value dưới 0,05 thì mối liên quan được xem là có ý nghĩa thống kê.</p>
+        <div class="say"><strong>Khi nói.</strong> Hàm làm ba việc: người gửi, người nhận, địa chỉ trả lời. Mẫu chỉ ghi hai việc. BLEU phạt câu dài hơn mẫu. GPT-4 khi ngồi ghế giám khảo thấy mẫu thiếu ý và cho điểm cao cho câu đủ việc. Vì vậy phải nói rõ đang dùng thước nào.</div>
+      </section>
+
+      <section id="thiet-ke">
+        <h2>4. Thiết kế thí nghiệm của bài báo</h2>
+        <p>Mục này là thiết kế của Sun và cộng sự. Cách nhóm thu hẹp để tự chạy nằm ở mục chạy lại, do Member 3 nói sau phần kết luận.</p>
+        <ol>
+          <li><strong>RQ1.</strong> Cách đánh giá tự động nào hợp để chấm comment do LLM viết?</li>
+          <li><strong>RQ2.</strong> Năm kỹ thuật prompt hiệu quả đến đâu?</li>
+          <li><strong>RQ3.</strong> Top-p và temperature đổi chất lượng ra sao?</li>
+          <li><strong>RQ4.</strong> LLM tóm tắt các họ ngôn ngữ khác nhau thế nào?</li>
+          <li><strong>RQ5.</strong> LLM viết các loại comment khác nhau thế nào?</li>
+        </ol>
+        <div class="table-scroll">
+          <table>
+            <caption>Mười ngôn ngữ, năm họ. Erlang, Haskell và Prolog do nhóm tác giả thu từ 50 repository nhiều sao nhất.</caption>
+            <thead>
+              <tr><th scope="col">Họ</th><th scope="col">Ngôn ngữ</th><th scope="col">Nguồn</th><th scope="col">Dùng cho</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Hướng đối tượng</td><td>Java</td><td>CodeSearchNet</td><td>RQ1–RQ5</td></tr>
+              <tr><td>Thủ tục</td><td>C</td><td>CCSD</td><td>RQ1–RQ4</td></tr>
+              <tr><td>Thủ tục</td><td>Go</td><td>CodeSearchNet</td><td>RQ4</td></tr>
+              <tr><td>Script</td><td>Python, Ruby, PHP, JavaScript</td><td>CodeSearchNet</td><td>Python: RQ1–RQ4. Ba ngôn ngữ kia: RQ4</td></tr>
+              <tr><td>Hàm</td><td>Erlang, Haskell</td><td>Tự thu thập</td><td>RQ4</td></tr>
+              <tr><td>Logic</td><td>Prolog</td><td>Tự thu thập</td><td>RQ4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>CodeLlama-Instruct 7B và StarChat-β 16B là mô hình mở, chuyên code. GPT-3.5 (<code>gpt-3.5-turbo</code>) và GPT-4 (<code>gpt-4-1106-preview</code>) là mô hình đa năng. Bản CodeLlama 70B chỉ được thử làm giám khảo ở RQ1, không dùng để sinh comment.</p>
+        <p>Trừ RQ3, mọi lần sinh câu đặt temperature 0,1. Khi GPT-4 chấm ở RQ2–RQ5, temperature đặt 0. Ở RQ1, khi cần GPT-4 viết lời giải thích, temperature đặt 1.</p>
+        <div class="say"><strong>Khi nói.</strong> Temperature 0,1 lúc viết và 0 lúc GPT-4 chấm để các prompt và các ngôn ngữ được so trên cùng một mức ngẫu nhiên.</div>
+      </section>
+
+      <section id="rq1">
+        <h2>5. RQ1 — Thước nào hợp</h2>
+        <p>Mười lăm người chấm mù: 1 nghiên cứu sinh, 5 thạc sĩ, 9 sinh viên đại học, mỗi người trên 3 năm lập trình. Mỗi ngôn ngữ 50 mẫu, tổng 150. Thang 1–5. Mẫu gốc được trộn với bốn câu của bốn LLM.</p>
+        <figure class="chart">
+          <figcaption>Điểm người chấm. Trục là thang 1–5.</figcaption>
+          <p class="legend"><span><i class="sw-ref"></i>Mẫu gốc</span><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+          <div class="groups"><div class="group"><div class="cols"><i class="col sw-ref" style="height:63.8%"><b>3,19</b></i><i class="col sw-cl" style="height:78.6%"><b>3,93</b></i><i class="col sw-sc" style="height:63.6%"><b>3,18</b></i><i class="col sw-g3" style="height:80.0%"><b>4,00</b></i><i class="col sw-g4" style="height:83.4%"><b>4,17</b></i></div><p>Java</p></div><div class="group"><div class="cols"><i class="col sw-ref" style="height:71.2%"><b>3,56</b></i><i class="col sw-cl" style="height:77.6%"><b>3,88</b></i><i class="col sw-sc" style="height:62.8%"><b>3,14</b></i><i class="col sw-g3" style="height:83.2%"><b>4,16</b></i><i class="col sw-g4" style="height:81.2%"><b>4,06</b></i></div><p>Python</p></div><div class="group"><div class="cols"><i class="col sw-ref" style="height:61.0%"><b>3,05</b></i><i class="col sw-cl" style="height:83.0%"><b>4,15</b></i><i class="col sw-sc" style="height:69.8%"><b>3,49</b></i><i class="col sw-g3" style="height:81.2%"><b>4,06</b></i><i class="col sw-g4" style="height:85.0%"><b>4,25</b></i></div><p>C</p></div></div>
+          <p class="axis-note">Mẫu gốc chỉ 3,05 đến 3,56. GPT-4 cao nhất ở Java và C. GPT-3.5 cao nhất ở Python.</p>
+        </figure>
+        <div class="table-scroll">
+          <table>
+            <caption>Java: BLEU thưởng câu giống mẫu, người chấm thì không. SIDE chỉ có cho Java.</caption>
+            <thead>
+              <tr><th scope="col">Nguồn</th><th scope="col">BLEU</th><th scope="col">ROUGE-L</th><th scope="col">SIDE</th><th scope="col">GPT-4 chấm</th><th scope="col">Người chấm</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Mẫu gốc</td><td>—</td><td>—</td><td>86,15</td><td>2,80</td><td>3,19</td></tr>
+              <tr><td>CodeLlama</td><td>13,00</td><td>32,21</td><td>46,62</td><td>3,64</td><td>3,93</td></tr>
+              <tr><td>StarChat-β</td><td class="best">18,95</td><td class="best">38,43</td><td class="best">80,46</td><td>2,50</td><td>3,18</td></tr>
+              <tr><td>GPT-3.5</td><td>12,49</td><td>31,87</td><td>62,04</td><td>3,82</td><td>4,00</td></tr>
+              <tr><td>GPT-4</td><td>9,46</td><td>28,36</td><td>36,12</td><td class="best">4,50</td><td class="best">4,17</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Trên Python, BLEU của StarChat-β vẫn cao (18,35) trong khi người cho StarChat 3,14 và GPT-3.5 4,16. Trên C, BLEU của StarChat 15,58, cao hơn GPT-4 (10,07), còn người cho GPT-4 4,25 và StarChat 3,49.</p>
+        
+<figure class="chart">
+  <figcaption>Khoảng tương quan Spearman với điểm người chấm</figcaption>
+  <div class="range-chart">
+    <div class="range-row"><span>BLEU / ROUGE-L</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-sc" style="left:14.3%;width:21.4%"></i></span></div>
+    <div class="range-row"><span>Sentence-BERT / SIDE</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-g3" style="left:35.7%;width:14.3%"></i></span></div>
+    <div class="range-row"><span>GPT-3.5 chấm</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-cl" style="left:57.1%;width:14.3%"></i></span></div>
+    <div class="range-row"><span>GPT-4 chấm</span><span class="range-track"><i class="range-zero" style="left:28.6%"></i><i class="range-span sw-g4" style="left:78.6%;width:10.7%"></i></span></div>
+  </div>
+  <p class="axis-note">Trục từ −0,4 đến 1. Vạch đen là 0. BLEU/ROUGE nằm quanh −0,2 đến 0,1. GPT-4 chấm nằm ở 0,7 đến 0,85. Đây là khoảng báo cáo nêu, không phải một hệ số đo lại.</p>
+</figure>
+
+        <p>Chỉ cách chấm bằng GPT-4 có tương quan thuận, có ý nghĩa thống kê, với người chấm trên cả ba ngôn ngữ. BLEU và ROUGE-L tương quan yếu hoặc âm. Khi giải thích điểm, GPT-4 lặp lại ba ý: không sai chức năng, diễn đạt dễ đọc, và đủ đối tượng chính. Cụm “FROM REPLY-TO” bị trừ vì khó đọc.</p>
+        <p class="finding">BLEU, ROUGE-L và BERTScore không còn hợp để chấm comment do LLM viết, vì chúng bám mẫu chất lượng trung bình. GPT-4 làm giám khảo hợp người hơn. Từ RQ2, bài dùng thước này.</p>
+        <div class="say"><strong>Khi nói.</strong> BLEU sinh ra cho dịch máy và phạt câu dài hơn mẫu. Người đọc lại muốn câu đủ ngữ cảnh. GPT-4 đọc được code, nên chấm câu có đúng và đủ hay không mà không bị câu mẫu kéo đi.</div>
+      </section>
+
+      <section id="rq2">
+        <h2>6. RQ2 — Năm kiểu prompt</h2>
+        <p>Sáu trăm mẫu: 200 Java, 200 Python, 200 C. Điểm dưới đây là điểm GPT-4 chấm. Ô đậm là mức cao nhất của mô hình đó trên ngôn ngữ đó.</p>
+        <figure class="chart">
+          <figcaption>Java. Critique của CodeLlama tụt rõ so với few-shot.</figcaption>
+          <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+          <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:68.4%"><b>3,42</b></i><i class="col sw-sc" style="height:54.2%"><b>2,71</b></i><i class="col sw-g3" style="height:78.0%"><b>3,90</b></i><i class="col sw-g4" style="height:90.0%"><b>4,50</b></i></div><p>Zero-shot</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:75.6%"><b>3,78</b></i><i class="col sw-sc" style="height:52.0%"><b>2,60</b></i><i class="col sw-g3" style="height:71.2%"><b>3,56</b></i><i class="col sw-g4" style="height:93.2%"><b>4,66</b></i></div><p>Few-shot</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:64.2%"><b>3,21</b></i><i class="col sw-sc" style="height:57.2%"><b>2,86</b></i><i class="col sw-g3" style="height:67.2%"><b>3,36</b></i><i class="col sw-g4" style="height:91.4%"><b>4,57</b></i></div><p>CoT</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:43.0%"><b>2,15</b></i><i class="col sw-sc" style="height:47.2%"><b>2,36</b></i><i class="col sw-g3" style="height:61.8%"><b>3,09</b></i><i class="col sw-g4" style="height:88.2%"><b>4,41</b></i></div><p>Critique</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:62.6%"><b>3,13</b></i><i class="col sw-sc" style="height:53.2%"><b>2,66</b></i><i class="col sw-g3" style="height:54.4%"><b>2,72</b></i><i class="col sw-g4" style="height:90.4%"><b>4,52</b></i></div><p>Expert</p></div></div>
+        </figure>
+        <div class="table-scroll">
+          <table>
+            <caption>Điểm GPT-4 chấm, thang 1–5.</caption>
+            <thead>
+              <tr><th scope="col">Mô hình</th><th scope="col">Prompt</th><th scope="col">Java</th><th scope="col">Python</th><th scope="col">C</th></tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="5">CodeLlama</td><td>Zero-shot</td><td>3,42</td><td>2,98</td><td>3,41</td></tr>
+              <tr><td>Few-shot</td><td class="best">3,78</td><td class="best">3,75</td><td class="best">3,91</td></tr>
+              <tr><td>Chain-of-thought</td><td>3,21</td><td>3,14</td><td>3,37</td></tr>
+              <tr><td>Critique</td><td>2,15</td><td>2,02</td><td>2,13</td></tr>
+              <tr><td>Expert</td><td>3,13</td><td>3,35</td><td>1,70</td></tr>
+              <tr><td rowspan="5">StarChat-β</td><td>Zero-shot</td><td>2,71</td><td>2,85</td><td>2,86</td></tr>
+              <tr><td>Few-shot</td><td>2,60</td><td>2,37</td><td>2,68</td></tr>
+              <tr><td>Chain-of-thought</td><td class="best">2,86</td><td>2,77</td><td class="best">3,06</td></tr>
+              <tr><td>Critique</td><td>2,36</td><td>2,57</td><td>2,60</td></tr>
+              <tr><td>Expert</td><td>2,66</td><td class="best">3,02</td><td>3,01</td></tr>
+              <tr><td rowspan="5">GPT-3.5</td><td>Zero-shot</td><td class="best">3,90</td><td>3,96</td><td class="best">3,93</td></tr>
+              <tr><td>Few-shot</td><td>3,56</td><td class="best">3,97</td><td>3,56</td></tr>
+              <tr><td>Chain-of-thought</td><td>3,36</td><td>3,47</td><td>3,36</td></tr>
+              <tr><td>Critique</td><td>3,09</td><td>3,21</td><td>3,31</td></tr>
+              <tr><td>Expert</td><td>2,72</td><td>3,43</td><td>3,49</td></tr>
+              <tr><td rowspan="5">GPT-4</td><td>Zero-shot</td><td>4,50</td><td>4,55</td><td>4,42</td></tr>
+              <tr><td>Few-shot</td><td class="best">4,66</td><td>4,16</td><td>4,18</td></tr>
+              <tr><td>Chain-of-thought</td><td>4,57</td><td class="best">4,60</td><td>4,44</td></tr>
+              <tr><td>Critique</td><td>4,41</td><td>4,44</td><td>4,34</td></tr>
+              <tr><td>Expert</td><td>4,52</td><td>4,23</td><td class="best">4,50</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Bài đọc Bảng IV theo từng mô hình. CodeLlama thắng ổn định với few-shot và thua rõ với critique. StarChat-β hợp chain-of-thought trên Java và C, hợp expert trên Python. GPT-3.5 gần như không cần ví dụ: zero-shot cao nhất ở Java và C, và chỉ kém few-shot trên Python, 3,96 so với 3,97.</p>
+        <p>Với GPT-4, bài viết rằng chain-of-thought tốt nhất khi nhìn chung. Trung bình ba ngôn ngữ, tính từ chính Bảng IV: chain-of-thought 4,54, zero-shot 4,49, expert 4,42, critique 4,40, few-shot 4,33. Ô cao nhất từng ngôn ngữ thì tách ra: Java few-shot 4,66, Python chain-of-thought 4,60, C expert 4,50. Expert thắng cột C. Trung bình của expert vẫn là 4,42, dưới chain-of-thought.</p>
+        <p>Các bước tự phê hoặc năm câu hỏi trung gian có thể kéo sự chú ý khỏi việc viết một câu. Mô hình bị phân tán vào lập luận, thay vì chốt comment.</p>
+        <p class="finding">Không có một prompt thắng mọi mô hình và mọi ngôn ngữ. Prompt phức tạp hơn không mặc định hơn zero-shot. Chọn prompt theo mô hình nền.</p>
+        <div class="say"><strong>Khi nói.</strong> Nếu dùng GPT-3.5, ra lệnh thẳng. Nếu dùng CodeLlama, đưa bốn ví dụ. Đừng mặc định bật critique: trên CodeLlama điểm rơi xuống khoảng 2,1.</div>
+      </section>
+
+      <section id="rq3">
+        <h2>7. RQ3 — Temperature và top-p</h2>
+        <p><span class="who m2">Member 2</span> Nhận từ đây đến hết đóng góp và hạn chế.</p>
+        <p>RQ3, RQ4 và RQ5 dùng few-shot để so được với các bài trước. Top-p thử 0,5, 0,75 và 1. Temperature thử 0,1, 0,5 và 1.</p>
+        
+<figure class="chart">
+  <figcaption>GPT-4, top-p = 0,5: điểm khi tăng temperature</figcaption>
+  <svg class="line-chart" viewBox="0 0 360 168" role="img" aria-labelledby="rq3cap">
+    <title id="rq3cap">Điểm GPT-4 theo temperature 0,1, 0,5 và 1,0 ở Java, Python và C</title>
+    <line x1="40" y1="16" x2="40" y2="132" stroke="#e3d6c4"/>
+    <line x1="40" y1="132" x2="340" y2="132" stroke="#e3d6c4"/>
+    <text x="6" y="20" font-size="11">4,6</text>
+    <text x="6" y="134" font-size="11">4,0</text>
+    <text x="62" y="152" font-size="11">0,1</text>
+    <text x="178" y="152" font-size="11">0,5</text>
+    <text x="294" y="152" font-size="11">1,0</text>
+    <polyline fill="none" stroke="#10233a" stroke-width="2.6" points="78,47 196,42 314,46"/>
+    <polyline fill="none" stroke="#0f766e" stroke-width="2.6" points="78,82 196,73 314,71"/>
+    <polyline fill="none" stroke="#b45309" stroke-width="2.6" points="78,68 196,71 314,75"/>
+  </svg>
+  <p class="legend"><span><i class="sw-g4"></i>Java</span><span><i class="sw-cl"></i>Python</span><span><i class="sw-sc"></i>C</span></p>
+  <p class="axis-note">Trục tung cắt từ 4,0 đến 4,6 để thấy hướng đi. Java gần như phẳng, Python đi lên, C đi xuống.</p>
+</figure>
+
+        <div class="table-scroll wide">
+          <table>
+            <caption>Điểm GPT-4 chấm, thứ tự Java / Python / C.</caption>
+            <thead>
+              <tr><th scope="col">Mô hình</th><th scope="col">Top-p</th><th scope="col">Temp 0,1</th><th scope="col">Temp 0,5</th><th scope="col">Temp 1,0</th></tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="3">CodeLlama</td><td>0,5</td><td>3,81 / 3,83 / 4,10</td><td>3,72 / 3,85 / 4,08</td><td>3,91 / 3,81 / 4,11</td></tr>
+              <tr><td>0,75</td><td>3,76 / 3,87 / 4,02</td><td>3,91 / 3,73 / 4,01</td><td>3,80 / 3,79 / 3,88</td></tr>
+              <tr><td>1</td><td>3,78 / 3,75 / 3,91</td><td>3,91 / 3,75 / 3,99</td><td>3,73 / 3,59 / 3,60</td></tr>
+              <tr><td rowspan="3">StarChat-β</td><td>0,5</td><td>2,49 / 2,42 / 2,72</td><td>2,47 / 2,36 / 2,70</td><td>2,49 / 2,29 / 2,75</td></tr>
+              <tr><td>0,75</td><td>2,50 / 2,35 / 2,66</td><td>2,45 / 2,47 / 2,80</td><td>2,48 / 2,37 / 2,71</td></tr>
+              <tr><td>1</td><td>2,60 / 2,37 / 2,68</td><td>2,53 / 2,45 / 2,77</td><td>2,54 / 2,38 / 2,69</td></tr>
+              <tr><td rowspan="3">GPT-3.5</td><td>0,5</td><td>3,41 / 3,60 / 3,40</td><td>3,45 / 3,73 / 3,38</td><td>3,52 / 3,68 / 3,42</td></tr>
+              <tr><td>0,75</td><td>3,54 / 3,66 / 3,35</td><td>3,55 / 3,65 / 3,24</td><td>3,46 / 3,64 / 3,41</td></tr>
+              <tr><td>1</td><td>3,56 / 3,97 / 3,56</td><td>3,55 / 3,71 / 3,42</td><td>3,41 / 3,72 / 3,52</td></tr>
+              <tr><td rowspan="3">GPT-4</td><td>0,5</td><td>4,44 / 4,25 / 4,33</td><td>4,47 / 4,30 / 4,31</td><td>4,45 / 4,31 / 4,29</td></tr>
+              <tr><td>0,75</td><td>4,48 / 4,27 / 4,31</td><td>4,46 / 4,34 / 4,36</td><td>4,47 / 4,33 / 4,36</td></tr>
+              <tr><td>1</td><td>4,66 / 4,16 / 4,18</td><td>4,43 / 4,27 / 4,33</td><td>4,40 / 4,18 / 4,33</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Với GPT-4 và top-p 0,5, tăng temperature làm comment Python tốt lên và comment C đi xuống. Java gần như đứng yên. GPT-4 biến ít hơn CodeLlama và StarChat. Top-p và temperature cùng chỉnh độ ngẫu nhiên, và ảnh hưởng cùng kiểu.</p>
+        <p class="finding">Không có một mức temperature đúng cho mọi mô hình và mọi ngôn ngữ. Nên chỉnh một trong hai tham số, không chỉnh cả hai cùng lúc.</p>
+        <div class="say"><strong>Khi nói.</strong> Top-p 0,9 nghĩa là cắt các từ hiếm nằm ngoài 90% xác suất cộng dồn. Temperature làm đường xác suất phẳng hơn. Tài liệu của OpenAI khuyên chỉnh một trong hai. Bảng này cho thấy lời khuyên đó hợp với bài toán comment.</div>
+      </section>
+
+      <section id="rq4">
+        <h2>8. RQ4 — Họ ngôn ngữ</h2>
+        <p>Mỗi ngôn ngữ 200 mẫu, few-shot, GPT-4 chấm.</p>
+        <figure class="chart">
+          <figcaption>Năm ngôn ngữ đại diện. Prolog thấp nhất ở cả bốn mô hình.</figcaption>
+          <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
+          <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:75.6%"><b>3,78</b></i><i class="col sw-sc" style="height:52.0%"><b>2,60</b></i><i class="col sw-g3" style="height:71.2%"><b>3,56</b></i><i class="col sw-g4" style="height:93.2%"><b>4,66</b></i></div><p>Java</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.2%"><b>3,86</b></i><i class="col sw-sc" style="height:59.4%"><b>2,97</b></i><i class="col sw-g3" style="height:82.8%"><b>4,14</b></i><i class="col sw-g4" style="height:87.2%"><b>4,36</b></i></div><p>Go</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.6%"><b>3,88</b></i><i class="col sw-sc" style="height:54.6%"><b>2,73</b></i><i class="col sw-g3" style="height:79.8%"><b>3,99</b></i><i class="col sw-g4" style="height:86.2%"><b>4,31</b></i></div><p>PHP</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:71.6%"><b>3,58</b></i><i class="col sw-sc" style="height:57.6%"><b>2,88</b></i><i class="col sw-g3" style="height:68.8%"><b>3,44</b></i><i class="col sw-g4" style="height:84.4%"><b>4,22</b></i></div><p>Haskell</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:64.6%"><b>3,23</b></i><i class="col sw-sc" style="height:46.8%"><b>2,34</b></i><i class="col sw-g3" style="height:68.4%"><b>3,42</b></i><i class="col sw-g4" style="height:81.0%"><b>4,05</b></i></div><p>Prolog</p></div></div>
+        </figure>
+        <figure class="chart">
+          <figcaption>Điểm GPT-4 trên đủ 10 ngôn ngữ. Trục cắt từ 3,9 đến 4,8 để thấy chênh lệch.</figcaption>
+          <div class="hbar"><div class="hbar-row"><span>Java · OOP</span><span class="track"><i class="fill sw-g4" style="width:84.4%"></i></span><b>4,66</b></div><div class="hbar-row"><span>Go · thủ tục</span><span class="track"><i class="fill sw-g4" style="width:51.1%"></i></span><b>4,36</b></div><div class="hbar-row"><span>PHP · script</span><span class="track"><i class="fill sw-g4" style="width:45.6%"></i></span><b>4,31</b></div><div class="hbar-row"><span>C · thủ tục</span><span class="track"><i class="fill sw-g4" style="width:31.1%"></i></span><b>4,18</b></div><div class="hbar-row"><span>Ruby · script</span><span class="track"><i class="fill sw-g4" style="width:52.2%"></i></span><b>4,37</b></div><div class="hbar-row"><span>Python · script</span><span class="track"><i class="fill sw-g4" style="width:28.9%"></i></span><b>4,16</b></div><div class="hbar-row"><span>JavaScript</span><span class="track"><i class="fill sw-g4" style="width:43.3%"></i></span><b>4,29</b></div><div class="hbar-row"><span>Erlang · hàm</span><span class="track"><i class="fill sw-g4" style="width:36.7%"></i></span><b>4,23</b></div><div class="hbar-row"><span>Haskell · hàm</span><span class="track"><i class="fill sw-g4" style="width:35.6%"></i></span><b>4,22</b></div><div class="hbar-row"><span>Prolog · logic</span><span class="track"><i class="fill sw-g4" style="width:16.7%"></i></span><b>4,05</b></div></div>
+          <p class="axis-note">Java cao nhất, 4,66. Prolog thấp nhất, 4,05. Khoảng cách không lớn, nhưng Prolog đứng cuối.</p>
+        </figure>
+        <div class="table-scroll">
+          <table>
+            <caption>Điểm GPT-4 chấm, few-shot.</caption>
+            <thead>
+              <tr><th scope="col">Họ</th><th scope="col">Ngôn ngữ</th><th scope="col">CodeLlama</th><th scope="col">StarChat-β</th><th scope="col">GPT-3.5</th><th scope="col">GPT-4</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Hướng đối tượng</td><td>Java</td><td>3,78</td><td>2,60</td><td>3,56</td><td class="best">4,66</td></tr>
+              <tr><td>Thủ tục</td><td>C</td><td>3,91</td><td>2,68</td><td>3,56</td><td>4,18</td></tr>
+              <tr><td>Thủ tục</td><td>Go</td><td>3,86</td><td>2,97</td><td>4,14</td><td>4,36</td></tr>
+              <tr><td>Script</td><td>Python</td><td>3,75</td><td>2,37</td><td>3,97</td><td>4,16</td></tr>
+              <tr><td>Script</td><td>Ruby</td><td>3,98</td><td>2,79</td><td>3,64</td><td>4,37</td></tr>
+              <tr><td>Script</td><td>PHP</td><td>3,88</td><td>2,73</td><td>3,99</td><td>4,31</td></tr>
+              <tr><td>Script</td><td>JavaScript</td><td>4,03</td><td>2,67</td><td>3,53</td><td>4,29</td></tr>
+              <tr><td>Hàm</td><td>Erlang</td><td>3,51</td><td>2,68</td><td>3,57</td><td>4,23</td></tr>
+              <tr><td>Hàm</td><td>Haskell</td><td>3,58</td><td>2,88</td><td>3,44</td><td>4,22</td></tr>
+              <tr><td>Logic</td><td>Prolog</td><td class="low">3,23</td><td class="low">2,34</td><td class="low">3,42</td><td class="low">4,05</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>GPT-4 đứng đầu cả năm họ. Trong họ thủ tục, Go tốt hơn C với StarChat, GPT-3.5 và GPT-4. CodeLlama ngược lại: C 3,91 và Go 3,86. Cả bốn mô hình làm PHP tốt hơn Python. CodeLlama hơn GPT-3.5 trên Ruby và JavaScript. Ở họ hàm, hai mô hình chuyên code mạnh hơn trên Haskell. Hai mô hình đa năng mạnh hơn trên Erlang.</p>
+        <p>Prolog thấp nhất với cả bốn. Prolog không chạy theo vòng lặp và nhánh if, mà theo sự kiện, luật và hợp nhất. Tokenizer cùng cơ chế attention của LLM học chủ yếu code mệnh lệnh, nên suy ra quan hệ lùi của Prolog rất khó. Tập Prolog thu được cũng nhỏ nhất, 1.547 cặp.</p>
+        <p class="finding">GPT-4 áp đảo trên cả 10 ngôn ngữ. Lập trình logic, đại diện là Prolog, là chỗ khó nhất vì ít dữ liệu và vì cách viết khai báo khác code tuần tự.</p>
+        <div class="say"><strong>Khi nói.</strong> Nếu được hỏi LLM dở nhất ở ngôn ngữ nào, câu trả lời của bài này là Prolog. Người viết Prolog nêu quan hệ là gì, không viết từng bước làm thế nào. Đó là gợi ý cho hướng tinh chỉnh hoặc bổ sung tri thức với ngôn ngữ khai báo ít dữ liệu.</div>
+      </section>
+
+      <section id="rq5">
+        <h2>9. RQ5 — Năm loại ý định</h2>
+        <p>Bộ phân loại COIN chia comment Java thành năm ý định. Mỗi loại rút 180 mẫu. Thí nghiệm dùng few-shot.</p>
+        <ul>
+          <li><strong>What:</strong> chức năng là gì. Ví dụ đẩy một phần tử lên đỉnh stack.</li>
+          <li><strong>Why:</strong> vì sao thiết kế vậy.</li>
+          <li><strong>How-it-is-done:</strong> làm bằng cách nào. Ví dụ dịch các phần tử phía sau sang trái.</li>
+          <li><strong>Property:</strong> tính chất, điều kiện trước hoặc sau. Ví dụ không chạy trong thời gian hằng số.</li>
+          <li><strong>How-to-use:</strong> cách gọi, phiên bản. Ví dụ chỉ được gọi một lần trong mỗi lần gọi next().</li>
+        </ul>
+        <figure class="chart">
+          <figcaption>CodeLlama 7B so với GPT-4. Why và Property là hai cột CodeLlama không thua.</figcaption>
+          <p class="legend"><span><i class="sw-cl"></i>CodeLlama 7B</span><span><i class="sw-g4"></i>GPT-4</span></p>
+          <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:83.0%"><b>4,15</b></i><i class="col sw-g4" style="height:88.0%"><b>4,40</b></i></div><p>What</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:85.8%"><b>4,29</b></i><i class="col sw-g4" style="height:85.6%"><b>4,28</b></i></div><p>Why</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.0%"><b>3,85</b></i><i class="col sw-g4" style="height:86.2%"><b>4,31</b></i></div><p>How</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:83.8%"><b>4,19</b></i><i class="col sw-g4" style="height:81.2%"><b>4,06</b></i></div><p>Property</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:79.2%"><b>3,96</b></i><i class="col sw-g4" style="height:84.4%"><b>4,22</b></i></div><p>How-to-use</p></div></div>
+        </figure>
+        <div class="table-scroll">
+          <table>
+            <caption>Điểm GPT-4 chấm, few-shot, Java.</caption>
+            <thead>
+              <tr><th scope="col">Mô hình</th><th scope="col">What</th><th scope="col">Why</th><th scope="col">How-it-is-done</th><th scope="col">Property</th><th scope="col">How-to-use</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CodeLlama 7B</td><td>4,15</td><td class="best">4,29</td><td>3,85</td><td class="best">4,19</td><td>3,96</td></tr>
+              <tr><td>StarChat-β</td><td>2,68</td><td>2,78</td><td>2,77</td><td>2,94</td><td>2,52</td></tr>
+              <tr><td>GPT-3.5</td><td>3,61</td><td>3,54</td><td>3,97</td><td>3,54</td><td>4,17</td></tr>
+              <tr><td>GPT-4</td><td>4,40</td><td>4,28</td><td>4,31</td><td>4,06</td><td>4,22</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>CodeLlama hơn GPT-4 ở Why, 4,29 so với 4,28, và hơn rõ hơn ở Property, 4,19 so với 4,06. GPT-4 vẫn cao hơn ở What, How-it-is-done và How-to-use. GPT-3.5 và GPT-4 đều yếu tương đối ở Property so với các loại còn lại của chính chúng. StarChat thấp nhất ở How-to-use.</p>
+        <p>RQ5 dùng few-shot trên Java. Bài giải thích CodeLlama hơn ở Why và Property vì few-shot không phải prompt tối ưu của GPT-4 khi xét chung: trung bình chain-of-thought 4,54, few-shot 4,33. Riêng cột Java của Bảng IV, few-shot 4,66 lại là ô cao nhất của GPT-4. Kết quả Why và Property vì vậy gắn với few-shot và với Java.</p>
+        <p class="finding">Với few-shot trên Java, CodeLlama-Instruct 7B viết comment Why và Property sát hoặc hơn GPT-4. Nhóm không có nhiều GPU vẫn có thể tự chạy mô hình mở cỡ nhỏ cho hai loại comment này.</p>
+        <div class="say"><strong>Khi nói.</strong> Đây là ý có giá trị thực hành nhất. Không bắt buộc gọi API GPT-4 cho mọi comment thiết kế. Mô hình 7B, nếu được bốn ví dụ đúng loại, làm được phần Why và Property.</div>
+      </section>
+
+      <section id="dong-gop">
+        <h2>10. Đóng góp và hạn chế</h2>
+        <ol>
+          <li>Chỉ ra GPT-4 làm giám khảo hợp với người hơn BLEU, và đề nghị dùng thước này cho các nghiên cứu sau.</li>
+          <li>Khảo sát cùng lúc năm prompt, hai tham số, mười ngôn ngữ thuộc năm họ, và năm loại ý định.</li>
+          <li>Công bố thêm dữ liệu Erlang, Haskell và Prolog.</li>
+        </ol>
+        <p><strong>Ngẫu nhiên.</strong> StarChat-β và CodeLlama không đặt temperature về 0 được, nên lúc sinh câu cả bài dùng 0,1, trừ RQ3. Lúc GPT-4 chấm ở RQ2–RQ5, temperature đặt 0.</p>
+        <p><strong>Luật lấy câu đầu.</strong> Lời LLM thường là một đoạn. Lấy câu đầu giúp comment gọn, nhưng có thể bỏ chi tiết ở câu sau.</p>
+        <p><strong>Chi phí.</strong> Gọi GPT-4 đắt, nên không phải câu hỏi nào cũng chạy đủ mười ngôn ngữ. RQ4 là câu hỏi dùng đủ mười ngôn ngữ. RQ5 chỉ Java.</p>
+        <div class="say"><strong>Khi nói.</strong> Hạn chế đáng nhắc là luật lấy câu đầu. Câu đầu của GPT-4 và CodeLlama vẫn được người chấm và GPT-4 chấm cao hơn mẫu gốc. Xong phần bài báo, Member 3 nói cách nhóm chạy lại và chỗ nhóm nới luật câu đầu.</div>
+      </section>
+
+      <section id="chay-lai">
+        <h2>11. Phần của nhóm: chạy lại và cải tiến</h2>
+        <p><span class="who m3">Member 3</span> Phần này không phải kết quả của bài báo. Nhóm chưa có bảng điểm riêng, nên không đưa số đo của nhóm.</p>
+        <h3>Chạy lại lát cắt Java</h3>
+        <p>Nhóm không đo lại mười ngôn ngữ và bốn mô hình. Lát cắt giữ đúng đường sinh câu của bài, rồi bỏ phần máy nhóm không gọi được.</p>
+        <ul class="flow">
+          <li>Hàm Java</li>
+          <li>Few-shot, 4 ví dụ</li>
+          <li>CodeLlama 7B</li>
+          <li>Temperature 0,1</li>
+          <li>Lấy câu đầu</li>
+        </ul>
+        <ol>
+          <li><strong>Một mô hình mở.</strong> Chỉ CodeLlama-Instruct 7B. Không dùng StarChat, GPT-3.5 hay GPT-4 để sinh câu.</li>
+          <li><strong>Một ngôn ngữ.</strong> Chỉ Java. Không chạy mười ngôn ngữ, và không thu Prolog, Haskell, Erlang.</li>
+          <li><strong>Nhóm tự chấm.</strong> Đọc comment theo bốn tiêu chí của bài: đúng, rõ, đủ ý, gọn. Thang vẫn 1 đến 5.</li>
+        </ol>
+        <p>Lát cắt này trùng chỗ bài so CodeLlama với GPT-4: few-shot trên Java. Nếu được hỏi điểm của nhóm, nói rõ đang trình bày cách chạy, chưa có bảng kết quả.</p>
+        <h3>Cải tiến: câu thứ hai cho Why và Property</h3>
+        <p>Bài báo luôn cắt còn câu đầu. Comment gọn, nhưng lý do thiết kế và ràng buộc nằm ở câu sau thì bị bỏ. Bài ghi nhận hạn chế này và vẫn áp cho cả năm loại ý định.</p>
+        <p>Nhóm chỉ nới hai loại cần chi tiết. What, How và How-to-use vẫn một câu. Với Why và Property, nếu câu đầu chưa nêu lý do hoặc ràng buộc thì ghép thêm câu thứ hai. Hai bản được so trên cùng mẫu Java, cùng bốn tiêu chí.</p>
+        <p>Hai loại này được chọn vì trong bài, CodeLlama 7B sát hoặc hơn GPT-4 đúng ở Why và Property, và cũng vì một câu dễ thiếu ý ở hai loại đó. Thay đổi này chưa được chấm là hơn bài báo.</p>
+        <div class="say"><strong>Khi nói.</strong> Không tuyên bố đã đo lại cả bài, và không nói câu thứ hai đã thắng luật câu đầu. Nói xong thì mời câu hỏi.</div>
+      </section>
+
+      <section id="tai-lieu">
+        <h2>12. Tài liệu được báo cáo nêu</h2>
+        <ol>
+          <li>Sun và cộng sự — Source Code Summarization in the Era of Large Language Models. Bài gốc, ICSE 2025.</li>
+          <li>Husain và cộng sự, 2019 — CodeSearchNet.</li>
+          <li>Liu và cộng sự, 2021 — bộ CCSD, ICLR 2021.</li>
+          <li>Rozière và cộng sự, 2023 — Code Llama.</li>
+          <li>BigCode, 2023 — StarChat-β.</li>
+          <li>Liu và cộng sự, 2023 — G-Eval, dùng GPT-4 để chấm câu sinh.</li>
+          <li>Papineni và cộng sự, 2002 — BLEU.</li>
+          <li>Mastropaolo và cộng sự, 2024 — thước SIDE.</li>
+          <li>Mu và cộng sự, 2023 — bộ phân loại COIN, ICSE 2023.</li>
+          <li>Ahmed và cộng sự, 2022 — few-shot cho tóm tắt code theo dự án. Báo cáo ghi Ahmad và cộng sự.</li>
+        </ol>
+        <p>Danh sách đầy đủ của bài gốc đánh số từ [1] đến [71], nằm ở trang 12 và 13 của PDF.</p>
+      </section>
+
+      <section id="hoi-dap">
+        <h2>13. Câu cô có thể hỏi</h2>
+        <ul>
+          <li><strong>Vì sao BLEU không còn đúng?</strong> Mẫu trong CodeSearchNet ngắn và thiếu ý. LLM viết dài, dùng từ khác. BLEU đếm từ trùng và phạt câu dài, nên trừ điểm một câu mà người đọc lại cho cao.</li>
+          <li><strong>Vì sao zero-shot của GPT-3.5 đôi khi hơn few-shot và chain-of-thought?</strong> GPT-3.5 đã hiểu chỉ thị tốt. Bốn ví dụ lấy từ dữ liệu có comment mẫu trung bình, hoặc năm câu hỏi trung gian, có thể đưa chi tiết thừa vào ngữ cảnh.</li>
+          <li><strong>Vì sao CodeLlama 7B hơn GPT-4 ở Why và Property?</strong> Thí nghiệm đó dùng few-shot trên Java. Bài nói few-shot hợp CodeLlama, còn với GPT-4 thì chain-of-thought cao nhất khi cộng ba ngôn ngữ. Trên riêng Java, Bảng IV cho few-shot 4,66 là ô cao nhất của GPT-4. CodeLlama được tinh chỉnh trên code và chỉ thị, nên khi có bốn ví dụ cùng loại thì bắt được ràng buộc và lý do thiết kế.</li>
+          <li><strong>Mang vào việc làm phần mềm thì sao?</strong> Bỏ BLEU trong bộ kiểm thử nội bộ, dùng GPT-4 hoặc GPT-3.5 để chấm. Chọn prompt theo mô hình: zero-shot cho GPT-3.5, few-shot cho mô hình mở. Có thể tự chạy CodeLlama 7B cho comment Why và Property.</li>
+          <li><strong>Chỉ lấy câu đầu có làm lệch độ gọn và độ đủ ý không?</strong> Lời gốc thường có câu dẫn. Bài lấy câu đầu để comment dùng được trong code, và câu đầu của GPT-4 cùng CodeLlama vẫn được người và GPT-4 chấm cao hơn cả đoạn mẫu gốc. Nhóm giữ luật đó cho What, How và How-to-use. Với Why và Property, nếu câu đầu chưa nêu lý do hoặc ràng buộc thì ghép thêm câu thứ hai. Phần này chưa có điểm đo của nhóm.</li>
+          <li><strong>Bài đăng tạp chí nào?</strong> Không phải tạp chí. Hội nghị ICSE 2025, kỷ yếu IEEE/ACM, trang 1882–1894.</li>
+        </ul>
+        <h3>Phân công khi đứng nói</h3>
+        <ul>
+          <li><span class="who m1">Member 1</span> Nội dung bài báo: tổng quan, thiết kế thực nghiệm, RQ1 và RQ2.</li>
+          <li><span class="who m2">Member 2</span> RQ3, RQ4, RQ5, rồi đóng góp và hạn chế.</li>
+          <li><span class="who m3">Member 3</span> Cách nhóm chạy lại lát cắt Java bằng CodeLlama 7B, và cải tiến giữ câu thứ hai cho Why và Property.</li>
+        </ul>
+        <div class="say"><strong>Khi trả lời.</strong> Nói hết câu hỏi rồi mới trả lời, và chỉ vào số trên biểu đồ hoặc trong bảng, ví dụ điểm Java của BLEU và của người chấm.</div>
+      </section>
+    </article>
+  </div>
+  <div id="hlPop" class="hl-pop" hidden>
+    <button type="button" id="hlApply">Tô sáng</button>
+  </div>
+  <p id="hlStatus" class="sr" role="status"></p>
+  <script>
+    const article = document.getElementById("main-content");
+    const pop = document.getElementById("hlPop");
+    const applyBtn = document.getElementById("hlApply");
+    const clearBtn = document.getElementById("clearHighlights");
+    const status = document.getElementById("hlStatus");
+    const storageKey = "tieuLuanDocHieuHighlights";
+
+    function textNodes() {
+      const walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      return nodes;
+    }
+
+    function startOf(mark) {
+      let cursor = 0;
+      for (const node of textNodes()) {
+        if (mark.contains(node)) return cursor;
+        cursor += node.textContent.length;
+      }
+      return cursor;
+    }
+
+    function paint(start, end, id) {
+      if (end <= start) return;
+      const slices = [];
+      let cursor = 0;
+      for (const node of textNodes()) {
+        const len = node.textContent.length;
+        const from = Math.max(start, cursor);
+        const to = Math.min(end, cursor + len);
+        if (from < to && !node.parentElement?.closest("mark.user-hl")) {
+          slices.push({ node, localStart: from - cursor, localEnd: to - cursor });
+        }
+        cursor += len;
+      }
+      for (let i = slices.length - 1; i >= 0; i -= 1) {
+        const { node, localStart, localEnd } = slices[i];
+        const text = node.textContent;
+        const before = text.slice(0, localStart);
+        const mid = text.slice(localStart, localEnd);
+        const after = text.slice(localEnd);
+        if (!mid) continue;
+        const mark = document.createElement("mark");
+        mark.className = "user-hl";
+        mark.dataset.hl = id;
+        mark.title = "Bấm để bỏ tô sáng chỗ này";
+        mark.textContent = mid;
+        const parent = node.parentNode;
+        const next = node.nextSibling;
+        if (before) node.textContent = before;
+        else node.remove();
+        const ref = before ? node.nextSibling : next;
+        parent.insertBefore(mark, ref);
+        if (after) parent.insertBefore(document.createTextNode(after), mark.nextSibling);
+      }
+    }
+
+    function unwrap(id) {
+      for (const mark of [...article.querySelectorAll(`mark.user-hl[data-hl="${CSS.escape(id)}"]`)]) {
+        const parent = mark.parentNode;
+        while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+        mark.remove();
+        parent.normalize();
+      }
+    }
+
+    function collect() {
+      const map = new Map();
+      for (const mark of article.querySelectorAll("mark.user-hl")) {
+        const start = startOf(mark);
+        const end = start + mark.textContent.length;
+        const prev = map.get(mark.dataset.hl);
+        if (!prev) map.set(mark.dataset.hl, { id: mark.dataset.hl, start, end });
+        else {
+          prev.start = Math.min(prev.start, start);
+          prev.end = Math.max(prev.end, end);
+        }
+      }
+      return [...map.values()];
+    }
+
+    function save() {
+      const items = collect();
+      try {
+        if (items.length) localStorage.setItem(storageKey, JSON.stringify(items));
+        else localStorage.removeItem(storageKey);
+      } catch { /* trình duyệt chặn lưu */ }
+      clearBtn.hidden = items.length === 0;
+      clearBtn.textContent = items.length > 1 ? `Xóa tô sáng (${items.length})` : "Xóa tô sáng";
+    }
+
+    function restore() {
+      let items = [];
+      try { items = JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch { items = []; }
+      if (!Array.isArray(items)) return;
+      const total = textNodes().reduce((sum, node) => sum + node.textContent.length, 0);
+      for (const item of items) {
+        if (!item || typeof item.start !== "number" || typeof item.end !== "number") continue;
+        if (item.start < 0 || item.end > total || item.end <= item.start) continue;
+        paint(item.start, item.end, String(item.id || crypto.randomUUID()));
+      }
+      save();
+    }
+
+    function selectionRange() {
+      const selection = document.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+      const range = selection.getRangeAt(0);
+      if (!article.contains(range.commonAncestorContainer)) return null;
+      if (!range.toString().trim()) return null;
+      return range;
+    }
+
+    function rangeOffsets(range) {
+      const before = document.createRange();
+      before.setStart(article, 0);
+      before.setEnd(range.startContainer, range.startOffset);
+      const through = document.createRange();
+      through.setStart(article, 0);
+      through.setEnd(range.endContainer, range.endOffset);
+      return { start: before.toString().length, end: through.toString().length };
+    }
+
+    function hidePop() { pop.hidden = true; }
+
+    function showPop() {
+      const range = selectionRange();
+      if (!range) {
+        hidePop();
+        return;
+      }
+      const inside = [...textNodes()].some((node) => range.intersectsNode(node) && node.parentElement?.closest("mark.user-hl"));
+      const fresh = [...textNodes()].some((node) => range.intersectsNode(node) && !node.parentElement?.closest("mark.user-hl") && node.textContent.trim());
+      applyBtn.textContent = fresh ? "Tô sáng" : "Bỏ tô";
+      applyBtn.dataset.mode = fresh || !inside ? "add" : "remove";
+      if (!fresh && !inside) {
+        hidePop();
+        return;
+      }
+      const rect = range.getBoundingClientRect();
+      if (!rect.width && !rect.height) {
+        hidePop();
+        return;
+      }
+      pop.hidden = false;
+      pop.style.left = `${rect.left + rect.width / 2}px`;
+      pop.style.top = `${Math.max(rect.top, 8)}px`;
+    }
+
+    applyBtn.addEventListener("mousedown", (event) => event.preventDefault());
+    applyBtn.addEventListener("click", () => {
+      const range = selectionRange();
+      const offsets = range && rangeOffsets(range);
+      if (!range || !offsets || offsets.end <= offsets.start) return;
+      if (applyBtn.dataset.mode === "remove") {
+        const ids = new Set();
+        for (const node of textNodes()) {
+          if (!range.intersectsNode(node)) continue;
+          const mark = node.parentElement?.closest("mark.user-hl");
+          if (mark) ids.add(mark.dataset.hl);
+        }
+        for (const id of ids) unwrap(id);
+        status.textContent = "Đã bỏ tô sáng.";
+      } else {
+        paint(offsets.start, offsets.end, crypto.randomUUID());
+        status.textContent = "Đã tô sáng đoạn vừa chọn.";
+      }
+      document.getSelection()?.removeAllRanges();
+      hidePop();
+      save();
+    });
+
+    article.addEventListener("click", (event) => {
+      const mark = event.target.closest("mark.user-hl");
+      if (!mark || !article.contains(mark)) return;
+      unwrap(mark.dataset.hl);
+      status.textContent = "Đã bỏ tô sáng chỗ này.";
+      save();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      const count = article.querySelectorAll("mark.user-hl").length;
+      if (!count) return;
+      if (!window.confirm("Xóa hết chỗ đã tô sáng trên trang này?")) return;
+      for (const id of new Set([...article.querySelectorAll("mark.user-hl")].map((mark) => mark.dataset.hl))) {
+        unwrap(id);
+      }
+      status.textContent = "Đã xóa hết tô sáng.";
+      save();
+    });
+
+    document.addEventListener("selectionchange", () => {
+      if (pop.contains(document.activeElement)) return;
+      showPop();
+    });
+    document.addEventListener("scroll", hidePop, true);
+    restore();
+  </script>
+</body>
+</html>
