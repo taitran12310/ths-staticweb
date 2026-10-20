@@ -725,16 +725,18 @@
       <header class="intro">
         <p class="kicker">ICSE 2025 · Ottawa · Nhóm 4</p>
         <h1>Tóm tắt mã nguồn trong kỷ nguyên mô hình ngôn ngữ lớn</h1>
-        <p class="lede">Bản đọc đi theo thứ tự đứng nói. Member 1 nói bài báo đến hết RQ2. Member 2 nói RQ3, RQ4, RQ5 rồi đóng góp và hạn chế. Member 3 nói cách nhóm chạy lại và phần cải tiến. Biểu đồ để nhìn chiều của số liệu trước khi đọc bảng.</p>
+        <p class="lede">Bản đọc đi theo thứ tự đứng nói. Trần Tuấn Tài nói bài báo đến hết RQ2. La Hoàng Tú nói RQ3, RQ4, RQ5 rồi đóng góp và hạn chế. Võ Văn Hải nói cách nhóm chạy lại và phần cải tiến. Biểu đồ để nhìn chiều của số liệu trước khi đọc bảng.</p>
       </header>
 
       <section id="mo-dau">
         <h2>1. Mở đầu</h2>
-        <p><span class="who m1">Member 1</span> Nói từ mục này đến hết RQ2, gồm thiết kế thực nghiệm của bài báo.</p>
+        <p><span class="who m1">Trần Tuấn Tài</span> Nói từ mục này đến hết RQ2, gồm thiết kế thực nghiệm của bài báo.</p>
         <p>Hiểu chương trình chiếm phần lớn thời gian và chi phí của người lập trình. Tóm tắt mã nguồn là viết một câu ngôn ngữ tự nhiên, ngắn và đúng, cho một hàm Java, một hàm Python hoặc một thủ tục C. LLM mới đây viết được câu đó mà không cần huấn luyện lại trên từng dự án.</p>
-        <p>Bản này bám công trình của Sun và cộng sự, công bố tại hội nghị ICSE 2025 ở Ottawa, không phải tạp chí. Trong kỷ yếu, bài chiếm trang 1882–1894, tức 13 trang: 11 trang nội dung và 2 trang tài liệu, 71 references. DOI 10.1109/ICSE55347.2025.00034. Bản PDF nhóm đọc là arXiv:2407.07959v2.</p>
+        <h3>Nguồn bài</h3>
+        <p>Bài của Weisong Sun và cộng sự, chín tác giả theo thứ tự: Weisong Sun (NTU Singapore), Yun Miao (Nanjing), Yuekang Li (UNSW), Hongyu Zhang (Chongqing), Chunrong Fang (Nanjing, tác giả liên hệ), Yi Liu, Gelei Deng, Yang Liu (NTU Singapore) và Zhenyu Chen (Nanjing).</p>
+        <p>Công bố trong kỷ yếu IEEE/ACM của hội nghị ICSE 2025 tại Ottawa, từ 26 tháng 4 đến 6 tháng 5 năm 2025. Trong kỷ yếu, bài chiếm trang 1882–1894: 13 trang, gồm 11 trang nội dung và 2 trang tài liệu, 71 references đánh số [1] đến [71]. DOI 10.1109/ICSE55347.2025.00034. Bản PDF nhóm đọc là arXiv:2407.07959v2. Bài trên IEEE Xplore: <a href="https://ieeexplore.ieee.org/document/11029737">https://ieeexplore.ieee.org/document/11029737</a>.</p>
         <p>Bài không đề xuất mô hình mới. Bài hỏi năm việc: thước nào đáng tin, prompt nào thật sự hơn, temperature và top-p đổi kết quả ra sao, họ ngôn ngữ nào khó, và loại comment nào mô hình nhỏ viết nổi.</p>
-        <div class="say"><strong>Khi nói.</strong> Thưa cô và các bạn, comment giống bản đồ khi đọc hệ thống. Viết comment tốt bị xem nhẹ vì tốn thời gian, nên comment thiếu, cũ, hoặc lệch code. Member 1 nói bài báo đến hết RQ2. Member 2 nhận từ RQ3. Member 3 nói sau phần kết luận, về cách nhóm chạy lại.</div>
+        <div class="say"><strong>Khi nói.</strong> Thưa cô và các bạn, comment giống bản đồ khi đọc hệ thống. Viết comment tốt bị xem nhẹ vì tốn thời gian, nên comment thiếu, cũ, hoặc lệch code. Trần Tuấn Tài nói bài báo đến hết RQ2. La Hoàng Tú nhận từ RQ3. Võ Văn Hải nói sau phần kết luận, về cách nhóm chạy lại.</div>
       </section>
 
       <section id="boi-canh">
@@ -761,7 +763,7 @@
           <li>Người ta vẫn chấm LLM bằng BLEU, METEOR, ROUGE-L hoặc Sentence-BERT so với comment mẫu. Câu LLM viết khác lời và chi tiết hơn mẫu, nên thước trùng từ cho điểm sai chiều.</li>
         </ol>
         <h3>Quy trình, theo Hình 1 của bài</h3>
-        <p>Giai đoạn viết: đoạn code và loại comment đi vào bộ sinh prompt, prompt đó vào LLM, ra một câu tóm tắt. Giai đoạn chấm có ba lối: giống mẫu (BLEU, ROUGE-L, BERTScore), giống chính đoạn code (SIDE), và LLM chấm (GPT-4 cho điểm). Mọi thí nghiệm lấy câu đầu của câu trả lời, vì các câu sau thường chỉ giải thích thêm.</p>
+        <p>Hình có hai phần. Phần (a) sinh câu: bốn đầu vào cùng đi vào bộ sinh prompt, gồm đoạn code, loại comment, cách prompt và tham số mô hình. Bộ sinh prompt tạo ra prompt, prompt vào LLM, LLM ra câu tóm tắt. Phần (b) chấm câu theo hai lối trên hình: so với comment tham chiếu (BLEU, ROUGE-L, BERTScore) và so với chính đoạn code (SIDE). GPT-4 làm giám khảo là cách chấm thêm, dùng từ RQ2, không nằm trong hình này. Mọi thí nghiệm lấy câu đầu của câu trả lời, vì các câu sau thường chỉ giải thích thêm. Bước lấy câu đầu cũng không được vẽ trên hình.</p>
         <div class="say"><strong>Khi nói.</strong> Các bài trước ép câu dài của GPT-4 khớp từng từ với comment mẫu rất ngắn. Nghiên cứu này kiểm lại cả thước đo, cả prompt nâng cao, cả tham số mô hình.</div>
       </section>
 
@@ -775,25 +777,41 @@
     msgToSet.setReplyTo(EmailAddress.convert(emailWithData.replyTo()));
     setRecipients(emailWithData, msgToSet);
 }</code></pre>
-        <p>Mẫu gốc: “Sets FROM REPLY-TO and recipients.” Người chấm cho 2,8. GPT-4: “Sets the sender, reply-to address, and recipients on a MimeMessage using data from an Email object.” Người chấm cho 4,4. Câu sau dài hơn nhưng đủ ba việc hàm làm.</p>
+        <p>Hàm làm đúng ba việc: đặt người gửi (<code>setFrom</code>), đặt địa chỉ trả lời (<code>setReplyTo</code>) và đặt người nhận (<code>setRecipients</code>). Đây là ví dụ Hình 3 của bài. Điểm là điểm người chấm.</p>
+        <div class="table-scroll">
+          <table>
+            <caption>Năm câu tóm tắt cho hàm setPeople, Hình 3.</caption>
+            <thead>
+              <tr><th scope="col">Nguồn</th><th scope="col">Người chấm</th><th scope="col">Câu tóm tắt</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Mẫu gốc</td><td>2,8</td><td>Sets FROM REPLY-TO and recipients.</td></tr>
+              <tr><td>CodeLlama</td><td>3,8</td><td>Set the "from" and "reply-to" fields of the email message.</td></tr>
+              <tr><td>StarChat-β</td><td>3,4</td><td>Sets the To, Cc, and Bcc recipients for an email.</td></tr>
+              <tr><td>GPT-3.5</td><td>4,0</td><td>Sets the sender, reply-to, and recipients of the email message.</td></tr>
+              <tr><td>GPT-4</td><td class="best">4,4</td><td>Sets the sender, reply-to address, and recipients on a MimeMessage using data from an Email object.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Mẫu gốc nhắc đủ ba việc, nhưng cụm “FROM REPLY-TO” viết dính liền nên khó hiểu, và được điểm thấp nhất. CodeLlama sót người nhận. StarChat-β chỉ nói To, Cc, Bcc, tức là chỉ phần người nhận. GPT-3.5 nêu đủ ba việc. GPT-4 nêu đủ ba việc và nói rõ dữ liệu lấy từ đối tượng Email để đặt lên MimeMessage. Câu của GPT-4 dài hơn, nhưng người đọc hiểu hàm làm gì mà không cần mở code.</p>
         <h3>Năm chiến lược prompt</h3>
         <ul>
           <li><strong>Zero-shot.</strong> “Please generate a short comment in one sentence for the following function”, rồi đưa code. Không có ví dụ.</li>
-          <li><strong>Few-shot.</strong> Bốn cặp code–comment, rồi cùng câu lệnh đó. Cả bài giữ bốn ví dụ.</li>
-          <li><strong>Chain-of-thought.</strong> Đưa code cùng năm câu hỏi, nhận lời, rồi bảo gộp thành một câu comment.</li>
-          <li><strong>Critique.</strong> Viết comment, bảo mô hình tự tìm lỗi, rồi sửa theo các lỗi vừa nêu. Ba lượt.</li>
-          <li><strong>Expert.</strong> Bảo mô hình viết một đoạn mô tả chuyên gia, dùng đoạn đó làm system prompt, rồi làm như zero-shot.</li>
+          <li><strong>Few-shot.</strong> Đưa trước bốn cặp code–comment để mô hình bắt chước, rồi mới đưa code cần tóm tắt. Cả bài giữ bốn ví dụ.</li>
+          <li><strong>Chain-of-thought.</strong> Hỏi năm câu về đoạn code trước, nhận lời, rồi bảo: “Let's integrate the above information and generate a short comment in one sentence for the function.”</li>
+          <li><strong>Critique.</strong> Viết comment, rồi “Review your previous answer and find problems with your answer.”, rồi “Based on the problems you found, improve your answer.” Ba lượt.</li>
+          <li><strong>Expert.</strong> Mô hình tự viết một đoạn mô tả chuyên gia viết comment một câu cho một hàm. Đoạn đó thay system prompt mặc định, rồi hỏi như zero-shot.</li>
         </ul>
         <h3>Temperature, top-p, và các thước</h3>
         <p>Temperature từ 0 đến 1 làm phân bố xác suất phẳng hơn, câu ngẫu nhiên hơn. Temperature 0 cho câu gần như cố định. Top-p giữ nhóm từ có tổng xác suất đạt ngưỡng. Top-p 0,1 chỉ xét nhóm từ chiếm 10% xác suất cao nhất. Ngưỡng càng lớn, càng nhiều từ hiếm được xét.</p>
         <p>BLEU, METEOR và ROUGE-L đếm từ trùng. BLEU còn phạt câu dài hơn mẫu. BERTScore và các độ đo câu (Sentence-BERT, Universal Sentence Encoder) so nghĩa với mẫu, nên vẫn kéo theo chất lượng của mẫu. SIDE so vector của code Java với vector của câu tóm tắt, không cần mẫu, nhưng mới có cho Java. GPT-4 hoặc GPT-3.5 chấm thang 1–5 theo bốn tiêu chí: đúng, rõ, đủ ý, gọn.</p>
         <p>Spearman ρ đo hai cách xếp hạng có đi cùng nhau không. ρ dương là cùng chiều, âm là ngược chiều, 0 là không liên quan. p-value dưới 0,05 thì mối liên quan được xem là có ý nghĩa thống kê.</p>
-        <div class="say"><strong>Khi nói.</strong> Hàm làm ba việc: người gửi, người nhận, địa chỉ trả lời. Mẫu chỉ ghi hai việc. BLEU phạt câu dài hơn mẫu. GPT-4 khi ngồi ghế giám khảo thấy mẫu thiếu ý và cho điểm cao cho câu đủ việc. Vì vậy phải nói rõ đang dùng thước nào.</div>
+        <div class="say"><strong>Khi nói.</strong> Hàm làm ba việc: người gửi, địa chỉ trả lời, người nhận. Mẫu gốc nêu đủ nhưng viết khó hiểu. CodeLlama sót người nhận. StarChat chỉ nói người nhận. BLEU phạt câu dài hơn mẫu. GPT-4 khi ngồi ghế giám khảo cho điểm cao cho câu đủ việc và dễ đọc. Vì vậy phải nói rõ đang dùng thước nào.</div>
       </section>
 
       <section id="thiet-ke">
         <h2>4. Thiết kế thí nghiệm của bài báo</h2>
-        <p>Mục này là thiết kế của Sun và cộng sự. Cách nhóm thu hẹp để tự chạy nằm ở mục chạy lại, do Member 3 nói sau phần kết luận.</p>
+        <p>Mục này là thiết kế của Sun và cộng sự. Cách nhóm thu hẹp để tự chạy nằm ở mục chạy lại, do Võ Văn Hải nói sau phần kết luận.</p>
         <ol>
           <li><strong>RQ1.</strong> Cách đánh giá tự động nào hợp để chấm comment do LLM viết?</li>
           <li><strong>RQ2.</strong> Năm kỹ thuật prompt hiệu quả đến đâu?</li>
@@ -859,14 +877,36 @@
   <p class="axis-note">Trục từ −0,4 đến 1. Vạch đen là 0. BLEU/ROUGE nằm quanh −0,2 đến 0,1. GPT-4 chấm nằm ở 0,7 đến 0,85. Đây là khoảng báo cáo nêu, không phải một hệ số đo lại.</p>
 </figure>
 
-        <p>Chỉ cách chấm bằng GPT-4 có tương quan thuận, có ý nghĩa thống kê, với người chấm trên cả ba ngôn ngữ. BLEU và ROUGE-L tương quan yếu hoặc âm. Khi giải thích điểm, GPT-4 lặp lại ba ý: không sai chức năng, diễn đạt dễ đọc, và đủ đối tượng chính. Cụm “FROM REPLY-TO” bị trừ vì khó đọc.</p>
+        <p>Chỉ cách chấm bằng GPT-4 có tương quan thuận, có ý nghĩa thống kê, với người chấm trên cả ba ngôn ngữ. BLEU và ROUGE-L tương quan yếu hoặc âm. Thanh trên biểu đồ đọc thế này: càng gần 1 thì thước đó xếp hạng các câu càng giống người chấm. Dưới 0 là người khen câu nào thì thước lại chê câu đó.</p>
+        <p>Bài hỏi GPT-4 vì sao chấm như vậy, đó là Hình 4, vẫn trên hàm setPeople. GPT-4 nhìn ba tiêu chí: đúng, rõ, đủ ý.</p>
+        <div class="table-scroll">
+          <table>
+            <caption>Cùng hàm setPeople: điểm người chấm và điểm GPT-4 chấm, kèm lý do GPT-4 nêu ở Hình 4.</caption>
+            <thead>
+              <tr><th scope="col">Câu tóm tắt</th><th scope="col">Người</th><th scope="col">GPT-4 chấm</th><th scope="col">GPT-4 giải thích</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Sets FROM REPLY-TO and recipients.</td><td>2,8</td><td>3</td><td>“FROM REPLY-TO” không phải cách gọi chuẩn, nhưng nêu đủ ba việc.</td></tr>
+              <tr><td>Sets the To, Cc, and Bcc recipients for an email.</td><td>3,4</td><td>1</td><td>Gây hiểu sai: hàm đặt from và reply-to, chứ không chỉ To, Cc, Bcc.</td></tr>
+              <tr><td>Sets the sender, reply-to address, and recipients on a MimeMessage using data from an Email object.</td><td class="best">4,4</td><td class="best">5</td><td>Rõ và đủ ý. BLEU lại phạt vì câu dài 16 từ trong khi mẫu chỉ 5 từ.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Thứ tự này giống người chấm: câu của GPT-4 cao nhất, mẫu gốc và StarChat thấp hơn. BLEU chỉ đếm chữ trùng với mẫu gốc 5 từ, nên câu dài bị phạt dù người đọc thấy tốt hơn. Bài báo không báo điểm BLEU riêng cho mẫu setPeople.</p>
         <p class="finding">BLEU, ROUGE-L và BERTScore không còn hợp để chấm comment do LLM viết, vì chúng bám mẫu chất lượng trung bình. GPT-4 làm giám khảo hợp người hơn. Từ RQ2, bài dùng thước này.</p>
         <div class="say"><strong>Khi nói.</strong> BLEU sinh ra cho dịch máy và phạt câu dài hơn mẫu. Người đọc lại muốn câu đủ ngữ cảnh. GPT-4 đọc được code, nên chấm câu có đúng và đủ hay không mà không bị câu mẫu kéo đi.</div>
       </section>
 
       <section id="rq2">
         <h2>6. RQ2 — Năm kiểu prompt</h2>
-        <p>Sáu trăm mẫu: 200 Java, 200 Python, 200 C. Điểm dưới đây là điểm GPT-4 chấm. Ô đậm là mức cao nhất của mô hình đó trên ngôn ngữ đó.</p>
+        <p>Sáu trăm mẫu: 200 Java, 200 Python, 200 C. Điểm dưới đây là điểm GPT-4 chấm. Ô đậm là mức cao nhất của mô hình đó trên ngôn ngữ đó. Bốn kiểu sau zero-shot đều công phu hơn. Câu hỏi là công phu hơn có cho câu tốt hơn không.</p>
+        <ul>
+          <li><strong>Zero-shot, ra lệnh thẳng.</strong> “Please generate a short comment in one sentence for the following function”, kèm đoạn code.</li>
+          <li><strong>Few-shot, kèm 4 ví dụ.</strong> Đưa trước 4 cặp code và comment mẫu, rồi mới đưa code cần tóm tắt.</li>
+          <li><strong>Chain-of-thought, hỏi rồi gộp.</strong> Hỏi 5 câu về code trước, sau đó “Let's integrate the above information…”.</li>
+          <li><strong>Critique, tự soát lỗi.</strong> Viết comment, rồi “Review your previous answer and find problems”, rồi sửa lại.</li>
+          <li><strong>Expert, đóng vai.</strong> Mô hình tự mô tả một chuyên gia viết comment, dùng làm system prompt, rồi hỏi như zero-shot.</li>
+        </ul>
         <figure class="chart">
           <figcaption>Java. Critique của CodeLlama tụt rõ so với few-shot.</figcaption>
           <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
@@ -911,7 +951,7 @@
 
       <section id="rq3">
         <h2>7. RQ3 — Temperature và top-p</h2>
-        <p><span class="who m2">Member 2</span> Nhận từ đây đến hết đóng góp và hạn chế.</p>
+        <p><span class="who m2">La Hoàng Tú</span> Nhận từ đây đến hết đóng góp và hạn chế.</p>
         <p>RQ3, RQ4 và RQ5 dùng few-shot để so được với các bài trước. Top-p thử 0,5, 0,75 và 1. Temperature thử 0,1, 0,5 và 1.</p>
         
 <figure class="chart">
@@ -1044,12 +1084,12 @@
         <p><strong>Ngẫu nhiên.</strong> StarChat-β và CodeLlama không đặt temperature về 0 được, nên lúc sinh câu cả bài dùng 0,1, trừ RQ3. Lúc GPT-4 chấm ở RQ2–RQ5, temperature đặt 0.</p>
         <p><strong>Luật lấy câu đầu.</strong> Lời LLM thường là một đoạn. Lấy câu đầu giúp comment gọn, nhưng có thể bỏ chi tiết ở câu sau.</p>
         <p><strong>Chi phí.</strong> Gọi GPT-4 đắt, nên không phải câu hỏi nào cũng chạy đủ mười ngôn ngữ. RQ4 là câu hỏi dùng đủ mười ngôn ngữ. RQ5 chỉ Java.</p>
-        <div class="say"><strong>Khi nói.</strong> Hạn chế đáng nhắc là luật lấy câu đầu. Câu đầu của GPT-4 và CodeLlama vẫn được người chấm và GPT-4 chấm cao hơn mẫu gốc. Xong phần bài báo, Member 3 nói cách nhóm chạy lại và chỗ nhóm nới luật câu đầu.</div>
+        <div class="say"><strong>Khi nói.</strong> Hạn chế đáng nhắc là luật lấy câu đầu. Câu đầu của GPT-4 và CodeLlama vẫn được người chấm và GPT-4 chấm cao hơn mẫu gốc. Xong phần bài báo, Võ Văn Hải nói cách nhóm chạy lại và chỗ nhóm nới luật câu đầu.</div>
       </section>
 
       <section id="chay-lai">
         <h2>11. Phần của nhóm: chạy lại và cải tiến</h2>
-        <p><span class="who m3">Member 3</span> Phần này không phải kết quả của bài báo. Nhóm chưa có bảng điểm riêng, nên không đưa số đo của nhóm.</p>
+        <p><span class="who m3">Võ Văn Hải</span> Phần này không phải kết quả của bài báo. Nhóm chưa có bảng điểm riêng, nên không đưa số đo của nhóm.</p>
         <h3>Chạy lại lát cắt Java</h3>
         <p>Nhóm không đo lại mười ngôn ngữ và bốn mô hình. Lát cắt giữ đúng đường sinh câu của bài, rồi bỏ phần máy nhóm không gọi được.</p>
         <ul class="flow">
@@ -1097,13 +1137,13 @@
           <li><strong>Vì sao CodeLlama 7B hơn GPT-4 ở Why và Property?</strong> Thí nghiệm đó dùng few-shot trên Java. Bài nói few-shot hợp CodeLlama, còn với GPT-4 thì chain-of-thought cao nhất khi cộng ba ngôn ngữ. Trên riêng Java, Bảng IV cho few-shot 4,66 là ô cao nhất của GPT-4. CodeLlama được tinh chỉnh trên code và chỉ thị, nên khi có bốn ví dụ cùng loại thì bắt được ràng buộc và lý do thiết kế.</li>
           <li><strong>Mang vào việc làm phần mềm thì sao?</strong> Bỏ BLEU trong bộ kiểm thử nội bộ, dùng GPT-4 hoặc GPT-3.5 để chấm. Chọn prompt theo mô hình: zero-shot cho GPT-3.5, few-shot cho mô hình mở. Có thể tự chạy CodeLlama 7B cho comment Why và Property.</li>
           <li><strong>Chỉ lấy câu đầu có làm lệch độ gọn và độ đủ ý không?</strong> Lời gốc thường có câu dẫn. Bài lấy câu đầu để comment dùng được trong code, và câu đầu của GPT-4 cùng CodeLlama vẫn được người và GPT-4 chấm cao hơn cả đoạn mẫu gốc. Nhóm giữ luật đó cho What, How và How-to-use. Với Why và Property, nếu câu đầu chưa nêu lý do hoặc ràng buộc thì ghép thêm câu thứ hai. Phần này chưa có điểm đo của nhóm.</li>
-          <li><strong>Bài đăng tạp chí nào?</strong> Không phải tạp chí. Hội nghị ICSE 2025, kỷ yếu IEEE/ACM, trang 1882–1894.</li>
+          <li><strong>Bài công bố ở đâu?</strong> Kỷ yếu IEEE/ACM của hội nghị ICSE 2025 tại Ottawa, 26 tháng 4 đến 6 tháng 5 năm 2025, trang 1882–1894. DOI 10.1109/ICSE55347.2025.00034. <a href="https://ieeexplore.ieee.org/document/11029737">IEEE Xplore</a>.</li>
         </ul>
         <h3>Phân công khi đứng nói</h3>
         <ul>
-          <li><span class="who m1">Member 1</span> Nội dung bài báo: tổng quan, thiết kế thực nghiệm, RQ1 và RQ2.</li>
-          <li><span class="who m2">Member 2</span> RQ3, RQ4, RQ5, rồi đóng góp và hạn chế.</li>
-          <li><span class="who m3">Member 3</span> Cách nhóm chạy lại lát cắt Java bằng CodeLlama 7B, và cải tiến giữ câu thứ hai cho Why và Property.</li>
+          <li><span class="who m1">Trần Tuấn Tài</span> Nội dung bài báo: tổng quan, thiết kế thực nghiệm, RQ1 và RQ2.</li>
+          <li><span class="who m2">La Hoàng Tú</span> RQ3, RQ4, RQ5, rồi đóng góp và hạn chế.</li>
+          <li><span class="who m3">Võ Văn Hải</span> Cách nhóm chạy lại lát cắt Java bằng CodeLlama 7B, và cải tiến giữ câu thứ hai cho Why và Property.</li>
         </ul>
         <div class="say"><strong>Khi trả lời.</strong> Nói hết câu hỏi rồi mới trả lời, và chỉ vào số trên biểu đồ hoặc trong bảng, ví dụ điểm Java của BLEU và của người chấm.</div>
       </section>
