@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Bản đọc hiểu bài báo DRAG — Distilling RAG for SLMs from LLMs (ACL 2025): phương pháp, thuật toán, kết quả, quyền riêng tư và phản biện">
+  <title>DRAG — Bản đọc hiểu bài báo</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0b1220;
+      --muted: #4b5b70;
+      --line: #d5e0ea;
+      --paper: #fbfdfe;
+      --teal: #0f766e;
+      --teal-2: #14b8a6;
+      --orange: #c2410c;
+      --orange-2: #f97316;
+      --blue: #1d4ed8;
+      --violet: #7c3aed;
+      --red: #dc2626;
+      --green: #16a34a;
+      --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+    body {
+      margin: 0; color: var(--ink); background: var(--paper);
+      font-family: "Be Vietnam Pro", system-ui, sans-serif; font-size: 17px; line-height: 1.72;
+      background-image:
+        radial-gradient(900px 500px at 0% -10%, rgba(45,212,191,.13), transparent 60%),
+        radial-gradient(800px 500px at 100% 0%, rgba(251,146,60,.1), transparent 55%);
+      background-repeat: no-repeat;
+    }
+    .skip { position: absolute; left: -9999px; }
+    .skip:focus { left: 1rem; top: 1rem; z-index: 99; background: #fff; padding: .5rem .8rem; border-radius: 8px; }
+    a { color: var(--teal); }
+
+    /* Appbar + progress */
+    .appbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 12px 28px; background: rgba(255,255,255,.88); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+    .brand a { font-weight: 700; text-decoration: none; font-size: 14px; }
+    .brand strong { font-family: "Fraunces", Georgia, serif; font-size: 19px; }
+    .brand span { font-size: 13px; color: var(--muted); }
+    .modes { display: flex; gap: 8px; }
+    .modes a {
+      padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; text-decoration: none;
+      border: 1px solid rgba(15,118,110,.3); background: rgba(15,118,110,.07); transition: .2s;
+    }
+    .modes a:hover { background: var(--teal); color: #fff; }
+    .modes a.alt { border-color: rgba(194,65,12,.3); background: rgba(194,65,12,.07); color: var(--orange); }
+    .modes a.alt:hover { background: var(--orange); color: #fff; }
+    .readbar { position: absolute; left: 0; bottom: -1px; height: 3px; width: 0; background: linear-gradient(90deg, var(--teal), var(--orange)); transition: width .1s linear; }
+
+    /* Layout */
+    .read { display: grid; grid-template-columns: 250px minmax(0, 860px); gap: 48px; max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px; }
+    .toc { position: sticky; top: 84px; align-self: start; max-height: calc(100vh - 100px); overflow: auto; font-size: 14px; padding-right: 6px; }
+    .toc p { margin: 0 0 10px; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .toc a {
+      display: block; padding: 6px 12px; border-left: 3px solid var(--line); color: var(--muted);
+      text-decoration: none; line-height: 1.4; transition: .2s;
+    }
+    .toc a.sub { padding-left: 26px; font-size: 13px; }
+    .toc a:hover { color: var(--ink); border-color: #94a3b8; }
+    .toc a.on { color: var(--teal); border-color: var(--teal); font-weight: 700; background: linear-gradient(90deg, rgba(20,184,166,.1), transparent); }
+
+    article { min-width: 0; }
+    .intro { padding: 34px 36px; border-radius: 24px; position: relative; overflow: hidden;
+      background: radial-gradient(500px 300px at 90% 10%, rgba(251,146,60,.2), transparent 60%), linear-gradient(150deg, #f0fdfa, #fff7ed 60%, #fff);
+      border: 1px solid var(--line); }
+    .intro::after { content: ""; position: absolute; right: -60px; top: -60px; width: 200px; height: 200px; border-radius: 50%; background: #99f6e4; opacity: .35; animation: float 8s ease-in-out infinite; }
+    @keyframes float { 50% { transform: translateY(18px) scale(1.06); } }
+    .kicker { margin: 0 0 8px; font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); }
+    h1, h2, h3 { font-family: "Fraunces", Georgia, serif; letter-spacing: -.015em; line-height: 1.2; }
+    h1 { margin: 0; font-size: 40px; position: relative; z-index: 1; }
+    h2 { margin: 56px 0 14px; font-size: 30px; display: flex; align-items: baseline; gap: 12px; }
+    h2 .no { font-size: 15px; font-family: "Be Vietnam Pro", sans-serif; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--teal), var(--teal-2)); padding: 3px 10px; border-radius: 9px; transform: translateY(-4px); }
+    h3 { margin: 30px 0 10px; font-size: 22px; color: #134e4a; }
+    h4 { margin: 18px 0 6px; font-size: 17px; }
+    .lede { font-size: 18.5px; color: var(--muted); position: relative; z-index: 1; margin-bottom: 0; }
+    p { margin: 0 0 14px; }
+    .grad { background: linear-gradient(90deg, var(--teal), #0891b2 45%, var(--orange)); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200% 100%; animation: shine 6s linear infinite; }
+    @keyframes shine { to { background-position: 200% 0; } }
+    .mark { background: linear-gradient(120deg, rgba(253,186,116,.8), rgba(253,224,71,.65)) no-repeat 0 88% / 0% 40%; transition: background-size 1s cubic-bezier(.22,1,.36,1) .2s; padding: 0 2px; border-radius: 3px; }
+    .mark.teal { background-image: linear-gradient(120deg, rgba(94,234,212,.8), rgba(153,246,228,.65)); }
+    .in .mark, .mark.in { background-size: 100% 40%; }
+    .t-teal { color: var(--teal); } .t-orange { color: var(--orange); } .t-red { color: var(--red); } .t-green { color: var(--green); } .t-blue { color: var(--blue); }
+    .muted { color: var(--muted); }
+
+    /* Scroll reveal */
+    .rv { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+    .rv.in { opacity: 1; transform: none; }
+
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; position: relative; z-index: 1; }
+    .badge { padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: rgba(15,118,110,.1); color: var(--teal); border: 1px solid rgba(15,118,110,.2); }
+    .badge.alt { background: rgba(194,65,12,.1); color: var(--orange); border-color: rgba(194,65,12,.22); }
+    .badge.blue { background: rgba(29,78,216,.08); color: var(--blue); border-color: rgba(29,78,216,.2); }
+
+    /* Cards */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; box-shadow: 0 8px 22px rgba(15,23,42,.04); transition: transform .3s, box-shadow .3s; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(15,23,42,.09); }
+    .card h4 { margin: 0 0 6px; color: var(--teal); font-family: "Be Vietnam Pro", sans-serif; font-weight: 800; }
+    .card p:last-child { margin-bottom: 0; }
+    .card.hot { background: linear-gradient(160deg, #fff7ed, #fff); border-color: #fdba74; } .card.hot h4 { color: var(--orange); }
+    .card.cool { background: linear-gradient(160deg, #ecfeff, #fff); border-color: #99f6e4; }
+    .card.blue { background: linear-gradient(160deg, #eff6ff, #fff); border-color: #93c5fd; } .card.blue h4 { color: var(--blue); }
+    .card.violet { background: linear-gradient(160deg, #f5f3ff, #fff); border-color: #c4b5fd; } .card.violet h4 { color: var(--violet); }
+
+    .stat { text-align: center; padding: 18px 12px; border-radius: 16px; background: #fff; border: 1px solid var(--line); position: relative; overflow: hidden; }
+    .stat::before { content: ""; position: absolute; inset: auto 0 0 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--orange)); }
+    .stat .value { font-family: "Fraunces", Georgia, serif; font-size: 38px; font-weight: 800; color: var(--teal); line-height: 1; }
+    .stat.o .value { color: var(--orange); } .stat.b .value { color: var(--blue); }
+    .stat .label { margin-top: 8px; font-size: 14px; color: var(--muted); line-height: 1.4; }
+
+    /* Callouts */
+    .key { display: flex; gap: 14px; align-items: flex-start; margin: 18px 0; padding: 14px 18px; border-radius: 14px;
+      background: linear-gradient(100deg, #0f172a, #134e4a 70%, #0f766e); color: #ecfeff; position: relative; overflow: hidden;
+      box-shadow: 0 12px 30px rgba(15,118,110,.2); }
+    .key::after { content: ""; position: absolute; top: 0; bottom: 0; width: 120px; left: -140px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.16), transparent); animation: sweep 5s ease-in-out infinite 1s; }
+    @keyframes sweep { 40%, 100% { left: 110%; } }
+    .key .ico { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(94,234,212,.18); font-size: 18px; }
+    .key b { color: #fde68a; }
+    .note { margin: 18px 0; padding: 14px 18px; border-radius: 14px; border: 1px solid #93c5fd; border-left: 5px solid var(--blue); background: #eff6ff; }
+    .warn { margin: 18px 0; padding: 14px 18px; border-radius: 14px; border: 1px solid #fdba74; border-left: 5px solid var(--orange); background: #fff7ed; }
+    .say { margin: 18px 0; padding: 14px 18px; border-radius: 14px; background: #f8fafc; border: 1px dashed #94a3b8; font-size: 16px; }
+    .say strong:first-child { color: var(--teal); }
+    .note > :last-child, .warn > :last-child { margin-bottom: 0; }
+
+    .formula { margin: 14px 0; padding: 14px 18px; border-radius: 12px; background: #0f172a; color: #e2e8f0; font-family: var(--mono); font-size: 15px; line-height: 1.7; overflow-x: auto; }
+    .formula .c { color: #5eead4; } .formula .o { color: #fdba74; } .formula .b { color: #93c5fd; } .formula .g { color: #64748b; }
+
+    .algo { margin: 14px 0; background: #0b1220; color: #cbd5e1; border-radius: 14px; padding: 16px 20px; font-family: var(--mono); font-size: 14px; line-height: 1.7; overflow-x: auto; border: 1px solid #1e293b; }
+    .algo .ln { display: block; padding-left: 30px; position: relative; white-space: nowrap; }
+    .algo .ln[data-n]::before { content: attr(data-n); position: absolute; left: 0; width: 20px; text-align: right; color: #475569; }
+    .algo .kw { color: #f472b6; } .algo .fn { color: #5eead4; } .algo .cm { color: #64748b; font-style: italic; } .algo .st { color: #fde68a; font-weight: 600; }
+    .algo .ln.step { margin-top: 6px; }
+    .algo .ln.err { background: rgba(220,38,38,.2); box-shadow: inset 3px 0 0 #f87171; }
+    .algo .ln.fix { background: rgba(22,163,74,.2); box-shadow: inset 3px 0 0 #4ade80; }
+    .algo .ln.new { color: #e9d5ff; }
+    .algo .file { display: block; color: #94a3b8; font-size: 12.5px; margin-bottom: 4px; }
+    .imp-n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 800; margin-right: 6px; background: linear-gradient(135deg, var(--violet), #a78bfa); font-family: "Be Vietnam Pro", sans-serif; }
+    .tag-new { display: inline-block; padding: 2px 9px; border-radius: 999px; background: linear-gradient(90deg, var(--violet), #db2777); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .06em; font-family: "Be Vietnam Pro", sans-serif; align-self: center; }
+    .imp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 16px 0; }
+    @media (max-width: 1000px) { .imp-grid { grid-template-columns: 1fr; } }
+
+    /* Tables */
+    .table-scroll { overflow-x: auto; margin: 16px 0; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    caption { caption-side: top; text-align: left; padding: 12px 14px 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
+    th, td { padding: 9px 12px; border-bottom: 1px solid #e8eef4; text-align: left; vertical-align: top; }
+    th { background: #0f172a; color: #ecfeff; font-size: 13.5px; font-weight: 700; }
+    tbody tr { transition: background .2s; }
+    tbody tr:hover { background: #f0fdfa; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    tr.ours td { background: rgba(204,251,241,.45); font-weight: 600; }
+    tr.sep td { border-top: 2px solid #0f172a; }
+    th.grp { text-align: center; background: #134e4a; }
+    .up { color: var(--green); font-weight: 800; font-size: .85em; margin-left: 2px; }
+    .best { background: #fef3c7; box-shadow: inset 0 0 0 2px #f59e0b; border-radius: 5px; padding: 0 4px; font-weight: 800; }
+    .yes { color: var(--green); font-weight: 800; } .no { color: var(--red); font-weight: 800; }
+
+    /* Figures */
+    figure { margin: 18px 0; }
+    figure img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--line); background: #fff; cursor: zoom-in; transition: transform .3s, box-shadow .3s; }
+    figure img:hover { transform: scale(1.01); box-shadow: 0 18px 40px rgba(15,23,42,.16); }
+    figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); text-align: center; }
+    .diagram { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+    .diagram svg { width: 100%; height: auto; display: block; }
+    .kg { background: linear-gradient(160deg, #0f172a, #134e4a 70%, #0f766e); border-radius: 16px; padding: 10px; position: relative; }
+    .kg svg { width: 100%; height: auto; display: block; }
+    .kg .tag { position: absolute; top: 10px; left: 12px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #5eead4; }
+    .flow-line { stroke-dasharray: 7 6; animation: dash 1.1s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -26; } }
+    .breathe { animation: breathe 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes breathe { 50% { transform: scale(1.05); } }
+
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+    .stepc { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; position: relative; }
+    .stepc:not(:last-child)::after { content: "➜"; position: absolute; right: -13px; top: 40%; color: var(--teal); z-index: 2; }
+    .stepc .n { width: 30px; height: 30px; border-radius: 999px; display: grid; place-items: center; color: #fff; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, #0f766e, #14b8a6); animation: pulse 2.4s ease-in-out infinite; }
+    .stepc:nth-child(2) .n { background: linear-gradient(135deg, #1d4ed8, #3b82f6); animation-delay: .3s; }
+    .stepc:nth-child(3) .n { background: linear-gradient(135deg, #c2410c, #f97316); animation-delay: .6s; }
+    .stepc:nth-child(4) .n { background: linear-gradient(135deg, #7c3aed, #a78bfa); animation-delay: .9s; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(15,118,110,0); } 0%, 100% { box-shadow: 0 0 0 0 rgba(15,118,110,.3); } }
+    .stepc strong { display: block; line-height: 1.3; margin-bottom: 4px; }
+    .stepc span { font-size: 14px; color: var(--muted); line-height: 1.45; display: block; }
+
+    .bubble { padding: 12px 15px; border-radius: 14px; font-size: 15.5px; line-height: 1.5; margin: 8px 0; }
+    .bubble .who { display: block; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 3px; }
+    .bubble.q { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .bubble.wrong { background: #fef2f2; border: 1px solid #fecaca; }
+    .bubble.right { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .pii { background: #fee2e2; color: #b91c1c; border-radius: 4px; padding: 0 3px; text-decoration: line-through; text-decoration-thickness: 2px; }
+
+    .pv { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+    .pv-step { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 10px; text-align: center; position: relative; font-size: 13.5px; line-height: 1.4; }
+    .pv-step:not(:last-child)::after { content: "➜"; position: absolute; right: -12px; top: 38%; color: var(--teal); z-index: 2; }
+    .pv-step b { display: block; font-size: 14.5px; margin-bottom: 2px; }
+    .pv-step.alert { background: #fff7ed; border-color: #fdba74; }
+    .pv-step.safe { background: #ecfeff; border-color: #99f6e4; }
+    .pv-step.cloud { background: linear-gradient(160deg, #0f172a, #134e4a); color: #ecfeff; border: 0; }
+
+    /* Bars & charts */
+    .hbar { display: grid; grid-template-columns: 160px 1fr 62px; gap: 10px; align-items: center; font-size: 14.5px; margin-bottom: 9px; }
+    .hbar .track { height: 20px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+    .hbar .fillbar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--teal), #2dd4bf); transition: width 1.2s cubic-bezier(.22,1,.36,1) .2s; }
+    .hbar .fillbar.o { background: linear-gradient(90deg, var(--orange), #fb923c); }
+    .hbar .fillbar.g { background: linear-gradient(90deg, #64748b, #94a3b8); }
+    .hbar .fillbar.b { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+    .in .hbar .fillbar { width: var(--w); }
+    .hbar b { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .tabs { display: inline-flex; gap: 4px; padding: 4px; background: #e2e8f0; border-radius: 999px; flex-wrap: wrap; }
+    .tabs button { appearance: none; border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); cursor: pointer; transition: .2s; }
+    .tabs button.on { background: #0f172a; color: #fff; }
+    .legend { display: flex; gap: 14px; font-size: 13px; font-weight: 600; color: var(--muted); flex-wrap: wrap; }
+    .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; }
+    .chart-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .gchart { display: flex; align-items: flex-end; gap: 16px; height: 250px; padding: 30px 8px 0; border-bottom: 2px solid #0f172a; }
+    .gchart .grp { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 100%; }
+    .gchart .bar { width: 40%; max-width: 44px; border-radius: 8px 8px 0 0; position: relative; height: 0; transition: height .9s cubic-bezier(.22,1,.36,1); }
+    .gchart .bar.mini { background: linear-gradient(180deg, #94a3b8, #64748b); }
+    .gchart .bar.drag { background: linear-gradient(180deg, #2dd4bf, #0f766e); }
+    .gchart .bar span { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .gchart .delta { position: absolute; top: -42px; left: 50%; transform: translateX(-50%); background: #16a34a; color: #fff; font-size: 11.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px; font-style: normal; white-space: nowrap; }
+    .glabels { display: flex; gap: 16px; padding: 8px 8px 0; }
+    .glabels div { flex: 1; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+    .lchart svg { width: 100%; height: auto; display: block; }
+    .lchart .ln-path { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .lchart.on .ln-path { animation: draw 1.3s cubic-bezier(.22,1,.36,1) forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0; }
+    .chip { padding: 4px 11px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
+    .chip i { font-style: normal; font-size: 11.5px; color: var(--muted); }
+
+    details { margin: 10px 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+    summary { cursor: pointer; padding: 13px 18px; font-weight: 700; list-style: none; position: relative; padding-right: 44px; transition: background .2s; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--teal); transition: transform .3s; }
+    details[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+    details[open] summary { background: #f0fdfa; }
+    details > div { padding: 4px 18px 14px; }
+
+    .to-top { position: fixed; right: 20px; bottom: 20px; width: 46px; height: 46px; border-radius: 999px; border: 0; background: #0f172a; color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 24px rgba(0,0,0,.25); opacity: 0; pointer-events: none; transition: .3s; z-index: 40; }
+    .to-top.show { opacity: 1; pointer-events: auto; }
+    .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,.88); display: none; place-items: center; padding: 3vmin; cursor: zoom-out; }
+    .lightbox.open { display: grid; }
+    .lightbox img { max-width: 100%; max-height: 100%; border-radius: 12px; background: #fff; }
+    footer.end { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+
+    @media (max-width: 1000px) {
+      .read { grid-template-columns: 1fr; gap: 0; padding: 20px 16px 60px; }
+      .toc { display: none; }
+      .grid-2, .grid-3, .steps, .pv { grid-template-columns: 1fr; }
+      .stepc::after, .pv-step::after { display: none; }
+      h1 { font-size: 30px; } h2 { font-size: 25px; }
+      .appbar { padding: 10px 14px; } .brand span { display: none; }
+      .hbar { grid-template-columns: 110px 1fr 54px; }
+    }
+    @media print {
+      .appbar, .toc, .to-top { display: none; }
+      .read { display: block; }
+      .rv { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .rv { opacity: 1; transform: none; }
+      .hbar .fillbar { width: var(--w); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Bỏ qua đến nội dung chính</a>
+  <header class="appbar">
+    <div class="brand">
+      <a href="./index.html">← Giải thuật nâng cao</a>
+      <strong>DRAG · Bản đọc hiểu</strong>
+      <span>Trần Tuấn Tài · ThS HUIT</span>
+    </div>
+    <nav class="modes" aria-label="Chuyển chế độ">
+      <a href="DRAG_Slide.html">▶ Slide trình bày</a>
+      <a class="alt" href="https://arxiv.org/abs/2506.01954" target="_blank" rel="noopener">PDF gốc</a>
+    </nav>
+    <div class="readbar" id="readbar" aria-hidden="true"></div>
+  </header>
+
+  <div class="read">
+    <nav class="toc" aria-label="Mục lục bài đọc">
+      <p>Mục lục</p>
+      <a href="#tom-tat">Tóm tắt nhanh</a>
+      <a href="#van-de">1. Đặt vấn đề</a>
+      <a href="#nen-tang">2. Kiến thức nền</a>
+      <a href="#lien-quan">3. Công trình liên quan</a>
+      <a href="#y-tuong">4. Ý tưởng cốt lõi</a>
+      <a href="#phuong-phap">5. Phương pháp 4 bước</a>
+      <a class="sub" href="#thuat-toan">5.1 Algorithm 1</a>
+      <a class="sub" href="#buoc-1">5.2 Sinh evidence</a>
+      <a class="sub" href="#buoc-2">5.3 Xếp hạng evidence</a>
+      <a class="sub" href="#buoc-3">5.4 Đồ thị tri thức</a>
+      <a class="sub" href="#buoc-4">5.5 SLM trả lời</a>
+      <a class="sub" href="#vi-du">5.6 Ví dụ đầy đủ</a>
+      <a href="#rieng-tu">6. Bảo vệ riêng tư</a>
+      <a href="#thiet-lap">7. Thiết lập thực nghiệm</a>
+      <a href="#ket-qua">8. Kết quả</a>
+      <a class="sub" href="#sota">8.1 So với SoTA</a>
+      <a class="sub" href="#ablation-k">8.2 Số evidence K</a>
+      <a class="sub" href="#teacher">8.3 Chọn thầy</a>
+      <a class="sub" href="#chi-phi">8.4 Evidence vs Graph</a>
+      <a class="sub" href="#open-qa">8.5 Open QA &amp; Fact check</a>
+      <a class="sub" href="#kq-rieng-tu">8.6 Kết quả riêng tư</a>
+      <a href="#dong-gop">9. Đóng góp &amp; hạn chế</a>
+      <a href="#phan-bien">10. Nhận xét phản biện</a>
+      <a href="#cai-tien">11. Đề xuất cải tiến</a>
+      <a class="sub" href="#ma-nguon">11.1 Phát hiện trong mã nguồn</a>
+      <a class="sub" href="#drag-plus">11.2 Kiến trúc DRAG+</a>
+      <a class="sub" href="#thuat-toan-plus">11.3 Thuật toán DRAG+</a>
+      <a class="sub" href="#ke-hoach">11.4 Kế hoạch kiểm chứng</a>
+      <a href="#thuat-ngu">12. Thuật ngữ</a>
+      <a href="#hoi-dap">13. Câu hỏi có thể gặp</a>
+    </nav>
+
+    <article id="main-content">
+      <header class="intro rv">
+        <div class="badges">
+          <span class="badge">ACL 2025 · Main</span>
+          <span class="badge alt">arXiv:2506.01954v1 · 02/06/2025</span>
+          <span class="badge blue">VILA Lab · MBZUAI</span>
+        </div>
+        <p class="kicker">Bản đọc hiểu · Giải thuật nâng cao</p>
+        <h1>DRAG: <span class="grad">Distilling RAG</span> for SLMs from LLMs to Transfer Knowledge and Mitigate Hallucination via Evidence and Graph-based Distillation</h1>
+        <p class="lede" style="margin-top:14px">Bản đọc đi theo đúng thứ tự của slide. Mỗi mục có phần giải thích, hình hoặc bảng số liệu lấy từ bài báo, và một khung <b>“Khi trình bày”</b> gợi ý lời nói. Bấm vào hình để phóng to.</p>
+      </header>
+
+      <div class="table-scroll rv">
+        <table>
+          <tbody>
+            <tr><th style="width:24%">Tác giả</th><td>Jennifer Chen*, Aidar Myrzakhan*, Yaxin Luo, Hassaan Muhammad Khan, Sondos Mahmoud Bsharat, Zhiqiang Shen§ (tác giả liên hệ). *Đóng góp ngang nhau.</td></tr>
+            <tr><th>Đơn vị</th><td>VILA Lab — Mohamed bin Zayed University of AI; McGill University; National University of Science and Technology</td></tr>
+            <tr><th>Hội nghị</th><td>ACL 2025 (Main Conference) · arXiv cs.CL</td></tr>
+            <tr><th>Mã nguồn</th><td><a href="https://github.com/VILA-Lab/DRAG" target="_blank" rel="noopener">github.com/VILA-Lab/DRAG</a> — 7 script Python, từ <code>0_generate_all_context.py</code> đến <code>6_generate_responses.py</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tóm tắt -->
+      <section id="tom-tat">
+        <h2 class="rv"><span class="no">TL;DR</span>Tóm tắt nhanh</h2>
+        <p class="rv">DRAG dùng một <b>LLM lớn làm “thầy”</b> trên cloud để sinh các đoạn chứng cứ (evidence) và đồ thị quan hệ (knowledge graph) cho câu hỏi, lọc lấy phần liên quan nhất, rồi đưa cho một <b>SLM nhỏ làm “trò”</b> chạy cục bộ để tự trả lời. Không mô hình nào bị fine-tune. Kết quả: SLM chính xác hơn rõ rệt, ít ảo giác hơn, và dữ liệu cá nhân có thể được lọc trước khi rời thiết bị.</p>
+        <div class="grid-3 rv">
+          <div class="stat"><div class="value"><span class="count" data-to="27.7" data-dec="1" data-pre="+">+27.7</span>%</div><div class="label">so với MiniRAG cùng backbone (ARC-C)</div></div>
+          <div class="stat o"><div class="value">K ≈ <span class="count" data-to="15">15</span></div><div class="label">evidence là điểm cân bằng chi phí – độ chính xác</div></div>
+          <div class="stat b"><div class="value"><span class="count" data-to="95.7" data-dec="1" data-pre="−">−95.7</span>%</div><div class="label">rò rỉ PII (15.090 → 649) khi SLM lọc câu hỏi</div></div>
+        </div>
+      </section>
+
+      <!-- 1 -->
+      <section id="van-de">
+        <h2 class="rv"><span class="no">1</span>Đặt vấn đề</h2>
+        <p class="rv">RAG (Retrieval-Augmented Generation) ghép một bộ truy xuất tri thức ngoài với mô hình sinh, giúp câu trả lời bám sự thật hơn. Nhưng bài báo chỉ ra ba vướng mắc:</p>
+        <div class="grid-3 rv">
+          <div class="card hot"><h4>💸 Đắt</h4><p>Phải duy trì một kho tri thức lớn, luôn cập nhật; khung RAG chủ yếu thiết kế cho LLM cỡ lớn trên cloud.</p></div>
+          <div class="card blue"><h4>📱 Không hợp thiết bị nhỏ</h4><p>Ngữ cảnh dài và bộ truy xuất cổ điển quá nặng cho SLM chạy ở môi trường hạn chế tài nguyên.</p></div>
+          <div class="card violet"><h4>🌀 Vẫn ảo giác</h4><p>Ngay cả RAG tiên tiến vẫn sinh câu nghe hợp lý mà sai; câu trả lời sai của người dùng còn có thể “làm bẩn” kho dữ liệu RAG.</p></div>
+        </div>
+        <p class="rv">Ví dụ trong Phụ lục I: hỏi “thuật ngữ nào mô tả vòng đời côn trùng đạt trưởng thành <i>mà không qua nhộng</i>”, SLM không có ngữ cảnh chọn <b class="t-red">(b) Complete metamorphosis — sai</b>. Đáp án đúng là (a) Incomplete metamorphosis.</p>
+        <div class="key rv"><span class="ico">❔</span><span>Câu hỏi nghiên cứu: làm sao để <b>SLM thừa hưởng năng lực RAG của LLM</b> mà không phải fine-tune, không tốn kém khi suy luận, và không lộ dữ liệu người dùng?</span></div>
+        <div class="say rv"><strong>Khi trình bày.</strong> “RAG cho mô hình lớn thì chính xác nhưng đắt; mô hình nhỏ chạy trên máy thì rẻ và riêng tư nhưng hay bịa. DRAG tìm cách lấy cái tốt của cả hai.”</div>
+      </section>
+
+      <!-- 2 -->
+      <section id="nen-tang">
+        <h2 class="rv"><span class="no">2</span>Kiến thức nền (Mục 3.1)</h2>
+        <h3 class="rv">Naive RAG</h3>
+        <p class="rv">Gọi X là không gian câu hỏi, Y là không gian câu trả lời, D = {d<sub>1</sub>, …, d<sub>|D|</sub>} là kho văn bản ngoài. RAG phân rã xác suất sinh câu trả lời thành hai phần:</p>
+        <div class="formula rv">p(y | x) = Σ<sub>d∈D</sub> <span class="c">p<sub>θr</sub>(d | x)</span> · <span class="o">p<sub>θg</sub>(y | x, d)</span> &nbsp;&nbsp;<span class="g">(1)</span></div>
+        <p class="rv"><span class="t-teal"><b>p<sub>θr</sub>(d | x)</b></span> là phân phối truy xuất — chấm độ liên quan của tài liệu d với câu hỏi x. <span class="t-orange"><b>p<sub>θg</sub>(y | x, d)</b></span> là phân phối sinh — tạo câu trả lời dựa trên cả x và d.</p>
+        <h3 class="rv">Graph RAG</h3>
+        <p class="rv">Cho đồ thị tri thức G = (V, E): mỗi nút là một thực thể, mỗi cạnh (v<sub>i</sub>, v<sub>j</sub>) là một quan hệ. Thay vì lấy tài liệu, Graph RAG lấy <b>đồ thị con z</b> liên quan đến câu hỏi:</p>
+        <div class="formula rv">p(y | x) = Σ<sub>z⊆G</sub> <span class="c">p<sub>θr</sub>(z | x)</span> · <span class="o">p<sub>θg</sub>(y | x, z)</span> &nbsp;&nbsp;<span class="g">(2)</span></div>
+        <div class="grid-2 rv">
+          <div class="diagram">
+            <svg viewBox="0 0 520 120" role="img" aria-label="Sơ đồ Naive RAG">
+              <rect x="5" y="40" width="80" height="40" rx="10" fill="#eff6ff" stroke="#93c5fd"/><text x="45" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">query x</text>
+              <line x1="85" y1="60" x2="140" y2="60" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
+              <rect x="140" y="25" width="130" height="70" rx="12" fill="#ecfeff" stroke="#14b8a6"/><text x="205" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#0f766e">Retriever</text><text x="205" y="75" text-anchor="middle" font-size="12" fill="#64748b">encoder + index</text>
+              <line x1="270" y1="60" x2="320" y2="60" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
+              <rect x="320" y="23" width="34" height="44" rx="4" fill="#fff" stroke="#94a3b8"/><rect x="328" y="31" width="34" height="44" rx="4" fill="#fff" stroke="#94a3b8"/><rect x="336" y="39" width="34" height="44" rx="4" fill="#fff" stroke="#64748b"/><text x="345" y="105" text-anchor="middle" font-size="12" fill="#64748b">top-k d</text>
+              <line x1="372" y1="60" x2="410" y2="60" stroke="#c2410c" stroke-width="2.5" class="flow-line"/>
+              <rect x="410" y="25" width="105" height="70" rx="12" fill="#fff7ed" stroke="#f97316"/><text x="462" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#c2410c">Generator</text><text x="462" y="75" text-anchor="middle" font-size="12" fill="#64748b">→ y</text>
+            </svg>
+            <figcaption>Naive RAG: truy xuất văn bản rồi sinh câu</figcaption>
+          </div>
+          <div class="diagram">
+            <svg viewBox="0 0 520 120" role="img" aria-label="Đồ thị và đồ thị con">
+              <g stroke="#cbd5e1" stroke-width="2"><line x1="60" y1="30" x2="150" y2="55"/><line x1="150" y1="55" x2="90" y2="95"/><line x1="150" y1="55" x2="250" y2="30"/><line x1="250" y1="30" x2="330" y2="70"/><line x1="330" y1="70" x2="250" y2="95"/><line x1="330" y1="70" x2="440" y2="45"/><line x1="440" y1="45" x2="480" y2="95"/></g>
+              <g stroke="#f97316" stroke-width="3.5"><line x1="250" y1="30" x2="330" y2="70"/><line x1="330" y1="70" x2="250" y2="95"/></g>
+              <g fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"><circle cx="60" cy="30" r="11"/><circle cx="150" cy="55" r="11"/><circle cx="90" cy="95" r="11"/><circle cx="440" cy="45" r="11"/><circle cx="480" cy="95" r="11"/></g>
+              <g fill="#fdba74" stroke="#c2410c" stroke-width="2" class="breathe"><circle cx="250" cy="30" r="13"/><circle cx="330" cy="70" r="13"/><circle cx="250" cy="95" r="13"/></g>
+              <text x="372" y="108" font-size="12.5" font-weight="700" fill="#c2410c">subgraph z</text>
+            </svg>
+            <figcaption>Graph RAG: lấy đồ thị con z ⊆ G làm ngữ cảnh</figcaption>
+          </div>
+        </div>
+        <div class="note rv"><p><b>DRAG dùng cả hai dạng ngữ cảnh.</b> Phần truy xuất (θr) được giao cho LLM thầy: thầy <i>sinh</i> evidence (vai trò của d) và bộ ba quan hệ (vai trò của z). Phần sinh câu (θg) do SLM đảm nhận trên thiết bị.</p></div>
+      </section>
+
+      <!-- 3 -->
+      <section id="lien-quan">
+        <h2 class="rv"><span class="no">3</span>Công trình liên quan (Mục 2)</h2>
+        <p class="rv">Bài báo xếp các nghiên cứu trước vào ba hướng: cải tiến cơ chế truy xuất của RAG (Active RAG, unified active retrieval), đưa tri thức có cấu trúc vào RAG (Graph RAG, G-Retriever, GNN-RAG…), và xếp hạng / chưng cất cho RAG (LambdaMART + RRF, LongRAG, LLMQuoter).</p>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Định vị DRAG so với các hướng tiếp cận chính</caption>
+            <thead><tr><th>Phương pháp</th><th>Ý tưởng chính</th><th>Fine-tune?</th><th>Hướng tới SLM?</th><th>Dùng đồ thị?</th></tr></thead>
+            <tbody>
+              <tr><td><b>RAG</b> (Lewis 2020)</td><td>Dense retriever + seq2seq generator</td><td class="yes">Có</td><td class="no">Không</td><td class="no">Không</td></tr>
+              <tr><td><b>Self-RAG</b> (Asai 2023)</td><td>Học cách truy xuất, sinh và tự phê bình (self-reflection)</td><td class="yes">Có</td><td class="no">Không</td><td class="no">Không</td></tr>
+              <tr><td><b>CRAG</b> (Yan 2024)</td><td>Đánh giá và sửa lỗi tài liệu truy xuất (corrective)</td><td class="yes">Có</td><td class="no">Không</td><td class="no">Không</td></tr>
+              <tr><td><b>SimRAG</b> (Xu 2024)</td><td>Tự cải thiện để thích nghi miền chuyên biệt</td><td class="yes">Có</td><td class="no">Không</td><td class="no">Không</td></tr>
+              <tr><td><b>Graph RAG</b> (Edge 2024)</td><td>Đồ thị thực thể từ kho văn bản, trả lời câu hỏi toàn cục</td><td class="no">Không</td><td class="no">Không</td><td class="yes">Có</td></tr>
+              <tr><td><b>MiniRAG</b> (Fan 2025)</td><td>RAG cực đơn giản cho mô hình nhỏ</td><td class="no">Không</td><td class="yes">Có</td><td class="yes">Có</td></tr>
+              <tr><td><b>LLMQuoter</b> (2025)</td><td>LoRA trên 15k mẫu HotpotQA, “quote-first-then-answer”</td><td class="yes">Có</td><td class="yes">Có</td><td class="no">Không</td></tr>
+              <tr class="ours sep"><td><b>DRAG</b></td><td>LLM thầy sinh evidence xếp hạng + đồ thị cho SLM trò</td><td><span class="best">Không</span></td><td class="yes">Có</td><td class="yes">Có</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="rv">Bài báo nhấn mạnh sự khác biệt với LLMQuoter: “our method is <span class="mark">finetuning-free and more efficient</span>”.</p>
+      </section>
+
+      <!-- 4 -->
+      <section id="y-tuong">
+        <h2 class="rv"><span class="no">4</span>Ý tưởng cốt lõi</h2>
+        <p class="rv">DRAG coi việc truy xuất là <b>trung tâm của quá trình chưng cất</b>. Thay vì để SLM tự truy xuất hay tự nhớ, LLM thầy cung cấp ngữ cảnh đã chắt lọc và SLM học cách <i>neo câu trả lời vào chứng cứ</i>, bắt chước lối suy luận dựa trên chứng cứ của thầy.</p>
+        <div class="diagram rv">
+          <svg viewBox="0 0 1160 230" role="img" aria-label="Mô hình Teacher–Student của DRAG">
+            <defs>
+              <marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#0f766e"/></marker>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#134e4a"/></linearGradient>
+            </defs>
+            <rect x="0" y="0" width="560" height="230" rx="16" fill="#0f172a" opacity=".04"/>
+            <text x="20" y="24" font-size="13" font-weight="800" fill="#0f766e" letter-spacing="1">☁ CLOUD</text>
+            <rect x="600" y="0" width="560" height="230" rx="16" fill="#f97316" opacity=".05"/>
+            <text x="1080" y="24" font-size="13" font-weight="800" fill="#c2410c" letter-spacing="1">📱 LOCAL</text>
+            <rect x="20" y="80" width="120" height="70" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+            <text x="80" y="112" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">Câu hỏi q</text>
+            <text x="80" y="132" text-anchor="middle" font-size="12" fill="#64748b">(đã gỡ PII)</text>
+            <line x1="140" y1="115" x2="180" y2="115" stroke="#0f766e" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
+            <rect x="185" y="40" width="250" height="150" rx="18" fill="url(#g1)"/>
+            <text x="310" y="74" text-anchor="middle" font-size="18" font-weight="800" fill="#5eead4">LLM Teacher (M_large)</text>
+            <text x="310" y="96" text-anchor="middle" font-size="12.5" fill="#94a3b8">không trả đáp án — chỉ cung cấp tri thức</text>
+            <rect x="205" y="118" width="100" height="48" rx="10" fill="#134e4a" stroke="#2dd4bf"/>
+            <text x="255" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#ecfeff">N evidence</text>
+            <text x="255" y="157" text-anchor="middle" font-size="11" fill="#99f6e4">+ xếp hạng</text>
+            <rect x="315" y="118" width="100" height="48" rx="10" fill="#134e4a" stroke="#fdba74"/>
+            <text x="365" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#ecfeff">(a, b, r)</text>
+            <text x="365" y="157" text-anchor="middle" font-size="11" fill="#fed7aa">đồ thị</text>
+            <line x1="435" y1="115" x2="625" y2="115" stroke="#0f766e" stroke-width="3" marker-end="url(#ar1)" class="flow-line"/>
+            <text x="530" y="100" text-anchor="middle" font-size="13" font-weight="800" fill="#0f766e">DISTILLATION</text>
+            <text x="530" y="140" text-anchor="middle" font-size="12" fill="#64748b">top-K evidence ± top-K quan hệ</text>
+            <rect x="630" y="55" width="210" height="120" rx="16" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+            <text x="735" y="92" text-anchor="middle" font-size="15" font-weight="800" fill="#9a3412">Ngữ cảnh tinh lọc</text>
+            <text x="735" y="116" text-anchor="middle" font-size="12.5" fill="#78716c">D_filtered</text>
+            <text x="735" y="136" text-anchor="middle" font-size="12.5" fill="#78716c">{(a_j, b_j, r_j)}, j = 1..K</text>
+            <line x1="840" y1="115" x2="880" y2="115" stroke="#0f766e" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
+            <g class="breathe">
+              <rect x="885" y="40" width="255" height="150" rx="18" fill="#ecfeff" stroke="#14b8a6" stroke-width="2.5"/>
+              <text x="1012" y="78" text-anchor="middle" font-size="18" font-weight="800" fill="#0f766e">SLM Student (M_small)</text>
+              <text x="1012" y="100" text-anchor="middle" font-size="12.5" fill="#64748b">2B – 9B tham số</text>
+              <rect x="925" y="120" width="175" height="44" rx="10" fill="#0f766e"/>
+              <text x="1012" y="148" text-anchor="middle" font-size="15" font-weight="800" fill="#ecfeff">ŷ ← M_small(q, context)</text>
+            </g>
+          </svg>
+          <figcaption>Hình tự vẽ: thầy trên cloud chỉ cung cấp tri thức; trò trên thiết bị tự sinh câu trả lời</figcaption>
+        </div>
+        <h3 class="rv">Vì sao thầy không trả lời luôn? (Mục 3.4)</h3>
+        <div class="grid-2 rv">
+          <div class="card cool"><h4>① Chuyên môn hóa</h4><p>Thầy là mô hình đa năng rất lớn; trò có thể là mô hình chuyên miền. Trò chỉ nhận phần tri thức cần thiết, không phải gánh tri thức tổng quát thừa.</p></div>
+          <div class="card hot"><h4>② Dễ bảo vệ riêng tư</h4><p>Thầy ở cloud, trò ở máy người dùng. Chỉ cần gửi câu hỏi đã ẩn danh và nhận lại tri thức có cấu trúc, không phải gửi/nhận nguyên câu trả lời.</p></div>
+        </div>
+        <p class="rv">Tác giả còn lập luận rằng một LLM được huấn luyện tốt là <span class="mark teal">bộ truy xuất mạnh và hiệu quả hơn</span> cách “query encoder + document index” truyền thống, nhất là khi mô hình đích yếu.</p>
+        <div class="table-scroll rv">
+          <table>
+            <caption>RAG truyền thống và DRAG khác nhau ở đâu</caption>
+            <thead><tr><th style="width:22%">Khía cạnh</th><th>RAG truyền thống</th><th>DRAG</th></tr></thead>
+            <tbody>
+              <tr><td><b>Nguồn tri thức</b></td><td>Kho tài liệu ngoài, phải cập nhật và lập chỉ mục</td><td class="t-teal"><b>Tri thức nội tại của LLM thầy</b></td></tr>
+              <tr><td><b>Bộ truy xuất</b></td><td>Query encoder + document index</td><td class="t-teal"><b>Prompt LLM sinh N evidence</b></td></tr>
+              <tr><td><b>Lọc ngữ cảnh</b></td><td>Điểm tương đồng vector</td><td class="t-teal"><b>Cosine + LLM chấm hạng</b></td></tr>
+              <tr><td><b>Ngữ cảnh đưa vào</b></td><td>Đoạn văn thô, dài</td><td class="t-teal"><b>Evidence ngắn ± bộ ba (a, b, r)</b></td></tr>
+              <tr><td><b>Huấn luyện</b></td><td>Nhiều biến thể cần fine-tune</td><td class="t-teal"><b>Không fine-tune</b></td></tr>
+              <tr><td><b>Riêng tư</b></td><td>Gửi nguyên câu hỏi lên cloud</td><td class="t-teal"><b>SLM gỡ PII trước khi gửi</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section id="phuong-phap">
+        <h2 class="rv"><span class="no">5</span>Phương pháp 4 bước (Mục 3.2)</h2>
+        <div class="steps rv">
+          <div class="stepc"><div class="n">1</div><strong>Evidence Generation</strong><span>LLM sinh N đoạn chứng cứ D = {d₁…d<sub>N</sub>}</span></div>
+          <div class="stepc"><div class="n">2</div><strong>RAG Evidence Ranking</strong><span>Cosine + LLM chấm hạng → D<sub>filtered</sub></span></div>
+          <div class="stepc"><div class="n">3</div><strong>Graph RAG Generation</strong><span>Trích (a, b, r), xếp hạng, gộp thành simple graph</span></div>
+          <div class="stepc"><div class="n">4</div><strong>SLM Evaluation</strong><span>ŷ ← M<sub>small</sub>(q, context)</span></div>
+        </div>
+        <figure class="rv">
+          <img src="assets/drag/fig1.png" alt="Hình 1 bài báo DRAG: tổng quan khung chưng cất RAG dựa trên evidence và đồ thị" data-zoom>
+          <figcaption><b>Hình 1 (bài báo).</b> Từ câu hỏi (trên trái), LLM sinh evidence và lọc bằng LLM + cosine (hàng trên). Evidence đã lọc được chuyển thành multigraph, lọc quan hệ, rồi gộp thành simple graph (hàng dưới). SLM nhận ngữ cảnh và trả lời: “(a) is correct”.</figcaption>
+        </figure>
+
+        <h3 id="thuat-toan" class="rv">5.1 Algorithm 1 — DRAG Framework</h3>
+        <div class="algo rv">
+          <span class="ln"><span class="kw">Input:</span> câu hỏi q; LLM lớn M<sub>large</sub>; LLM nhỏ M<sub>small</sub>; số evidence N; số quan hệ top K</span>
+          <span class="ln step"><span class="st">Step 1: Evidence Generation</span></span>
+          <span class="ln" data-n="1">Prompt M<sub>large</sub> sinh N evidence liên quan q → D = {d<sub>1</sub>, …, d<sub>N</sub>}</span>
+          <span class="ln step"><span class="st">Step 2: RAG Evidence Ranking</span> — <span class="kw">foreach</span> d<sub>i</sub> ∈ D</span>
+          <span class="ln" data-n="2">score<sub>i</sub><sup>(sim)</sup> = <span class="fn">cos</span>(e<sub>i</sub>, q)</span>
+          <span class="ln" data-n="3">rank<sub>LLM</sub>(d<sub>i</sub>) via M<sub>large</sub></span>
+          <span class="ln" data-n="4">s<sub>i</sub> = score<sub>i</sub><sup>(sim)</sup> + rank<sub>LLM</sub>(d<sub>i</sub>)</span>
+          <span class="ln" data-n="5">Chọn D<sub>filtered</sub> ⊂ D theo s<sub>i</sub></span>
+          <span class="ln step"><span class="st">Step 3: Graph RAG Generation</span> — <span class="kw">foreach</span> d<sub>i</sub> ∈ D<sub>filtered</sub></span>
+          <span class="ln" data-n="6">Prompt M<sub>large</sub> trích R<sub>i</sub> = {(a, b, r) | a, b ∈ V, r ∈ E}</span>
+          <span class="ln" data-n="7">Dựng G = (V, E): thêm nút a, b và cạnh nhãn r</span>
+          <span class="ln step"><span class="st">Step 4: Small-Scale LLM Evaluation</span></span>
+          <span class="ln" data-n="8">Chọn top K evidence và quan hệ theo điểm ngữ nghĩa + LLM</span>
+          <span class="ln" data-n="9">ŷ ← <span class="fn">M<sub>small</sub></span>(q, {d<sub>i</sub> ∈ D<sub>filtered</sub>} và/hoặc {(a<sub>j</sub>, b<sub>j</sub>, r<sub>j</sub>)}<sub>j=1..K</sub>)</span>
+          <span class="ln" data-n="10"><span class="kw">return</span> ŷ <span class="cm">// đáp án cuối từ SLM</span></span>
+        </div>
+        <div class="note rv"><p><b>Phân tích chi phí.</b> Với mỗi câu hỏi: bước 1 gọi M<sub>large</sub> 1 lần (sinh N evidence); bước 2 tính N phép cosine và gọi M<sub>large</sub> để chấm hạng; bước 3 gọi M<sub>large</sub> cho từng evidence trong D<sub>filtered</sub> để trích quan hệ (và thêm lời gọi gộp cạnh). Mọi lời gọi LLM lớn nằm trên cloud; phía thiết bị chỉ có <b>một lần suy luận của SLM</b>. Đây là lý do tác giả nói DRAG hiệu quả khi suy luận nhưng tốn kém ở khâu chưng cất.</p></div>
+
+        <h3 id="buoc-1" class="rv">5.2 Bước 1 — Sinh evidence</h3>
+        <p class="rv">Với câu hỏi q, M<sub>large</sub> được yêu cầu sinh N đoạn chứng cứ khác nhau. Mỗi d<sub>i</sub> là một mẩu sự thật có thể giúp trả lời q. Bước này vừa đa dạng hóa nguồn tri thức, vừa là đầu vào cho xếp hạng và trích xuất cấu trúc. Prompt dùng trong bài (Phụ lục F):</p>
+        <div class="formula rv"><span class="g">System:</span> You are an assistant in charge of generating factual evidence statements that aid in solving the provided question. Provide only the evidence statements with no additional remarks. <span class="o">Do not give the answer away directly.</span><br><span class="g">User:</span> Generate <span class="c">N</span> evidences that pertain to answering the following question: <span class="c">{q}</span></div>
+        <div class="warn rv"><p>Câu <b>“Do not give the answer away directly”</b> rất quan trọng: nếu thiếu, evidence có thể chứa luôn đáp án và kết quả đo sẽ phản ánh năng lực của thầy chứ không phải của trò.</p></div>
+
+        <h3 id="buoc-2" class="rv">5.3 Bước 2 — Xếp hạng evidence</h3>
+        <p class="rv">Mỗi evidence được chấm bằng hai tín hiệu độc lập rồi cộng lại với trọng số bằng nhau:</p>
+        <div class="grid-2 rv">
+          <div class="card cool"><h4>Điểm ngữ nghĩa</h4><p>Nhúng d<sub>i</sub> và q bằng sentence-transformers (Sentence-BERT), lấy cosine. Đo độ gần về nghĩa.</p></div>
+          <div class="card hot"><h4>Điểm LLM</h4><p>M<sub>large</sub> tự xếp hạng mức phù hợp của từng evidence, dựa trên tri thức nội tại của nó. Đo mức phù hợp ngữ cảnh.</p></div>
+        </div>
+        <div class="formula rv">
+          <span class="c">score<sub>i</sub><sup>(sim)</sup> = cos(e<sub>i</sub>, q)</span> <span class="g">(3)</span><br>
+          <span class="o">s<sub>i</sub> = score<sub>i</sub><sup>(sim)</sup> + rank<sub>LLM</sub>(d<sub>i</sub>)</span> <span class="g">(4)</span><br>
+          Loại X = N − K evidence có s<sub>i</sub> thấp nhất → <span class="b">D<sub>filtered</sub> ⊂ D</span> <span class="g">(5)</span>
+        </div>
+        <div class="diagram rv">
+          <svg viewBox="0 0 860 210" role="img" aria-label="Minh họa xếp hạng evidence">
+            <text x="100" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#0f766e">D: N evidence</text>
+            <g font-size="13" font-weight="600">
+              <rect x="20" y="36" width="160" height="32" rx="8" fill="#f8fafc" stroke="#e2e8f0"/><text x="32" y="57">d₁ nymphs lớn dần…</text>
+              <rect x="20" y="76" width="160" height="32" rx="8" fill="#f8fafc" stroke="#e2e8f0"/><text x="32" y="97">d₂ hemimetabolism…</text>
+              <rect x="20" y="116" width="160" height="32" rx="8" fill="#f8fafc" stroke="#e2e8f0"/><text x="32" y="137">d₃ không có nhộng…</text>
+              <rect x="20" y="156" width="160" height="32" rx="8" fill="#f8fafc" stroke="#e2e8f0"/><text x="32" y="177">d₄ complete meta…</text>
+            </g>
+            <line x1="190" y1="112" x2="290" y2="112" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
+            <rect x="295" y="50" width="250" height="125" rx="14" fill="#0f172a"/>
+            <text x="420" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#5eead4">cos(eᵢ, q)  +  rank_LLM(dᵢ)</text>
+            <text x="420" y="108" text-anchor="middle" font-size="13" fill="#cbd5e1">sentence-transformers  |  M_large</text>
+            <text x="420" y="145" text-anchor="middle" font-size="16" font-weight="800" fill="#fde68a">sᵢ = tổng hai điểm</text>
+            <line x1="550" y1="112" x2="650" y2="112" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
+            <text x="750" y="22" text-anchor="middle" font-size="14" font-weight="800" fill="#0f766e">D_filtered (top K)</text>
+            <g font-size="13" font-weight="700">
+              <rect x="660" y="36" width="180" height="32" rx="8" fill="#ecfeff" stroke="#14b8a6"/><text x="672" y="57">d₁</text><text x="828" y="57" text-anchor="end" fill="#0f766e">1.73</text>
+              <rect x="660" y="76" width="180" height="32" rx="8" fill="#ecfeff" stroke="#14b8a6"/><text x="672" y="97">d₂</text><text x="828" y="97" text-anchor="end" fill="#0f766e">1.64</text>
+              <rect x="660" y="116" width="180" height="32" rx="8" fill="#ecfeff" stroke="#14b8a6"/><text x="672" y="137">d₃</text><text x="828" y="137" text-anchor="end" fill="#0f766e">1.58</text>
+              <rect x="660" y="156" width="180" height="32" rx="8" fill="#fef2f2" stroke="#fecaca" opacity=".6"/><text x="672" y="177" fill="#b91c1c" text-decoration="line-through">d₄ (bị loại)</text><text x="828" y="177" text-anchor="end" fill="#b91c1c">0.62</text>
+            </g>
+          </svg>
+          <figcaption>Điểm số chỉ để minh họa — bài báo không công bố điểm của từng evidence</figcaption>
+        </div>
+
+        <h3 id="buoc-3" class="rv">5.4 Bước 3 — Sinh đồ thị tri thức (Graph RAG Generation)</h3>
+        <p class="rv">Với mỗi evidence trong D<sub>filtered</sub>, M<sub>large</sub> trích các bộ ba quan hệ R<sub>i</sub> = {(a, b, r) | a, b ∈ V, r ∈ E} <span class="muted">(6)</span>. Các bộ ba dựng thành đồ thị G = (V, E): nút là thực thể, cạnh mang nhãn quan hệ r. Quan hệ cũng được xếp hạng như bước 2 để giữ top K.</p>
+        <p class="rv">Khi một cặp thực thể có nhiều quan hệ, ta được <b>multigraph</b>. Phụ lục H đề xuất <b>gộp thành simple graph</b> (đồ thị không có cạnh song song): nhờ thầy tóm các phát biểu về cùng một cặp thành một câu.</p>
+        <div class="grid-2 rv">
+          <div class="kg">
+            <span class="tag">Multigraph</span>
+            <svg viewBox="0 0 520 250" role="img" aria-label="Multigraph có hai cạnh giữa nymphs và adults">
+              <path d="M130 120 Q 260 40 390 120" stroke="#5eead4" stroke-width="2.5" fill="none" class="flow-line"/>
+              <path d="M130 120 Q 260 200 390 120" stroke="#fdba74" stroke-width="2.5" fill="none" class="flow-line"/>
+              <text x="260" y="62" text-anchor="middle" fill="#99f6e4" font-size="12.5">“resemble the adult stage”</text>
+              <text x="260" y="192" text-anchor="middle" fill="#fed7aa" font-size="12.5">“transition directly into adults”</text>
+              <line x1="130" y1="120" x2="130" y2="215" stroke="#93c5fd" stroke-width="2" class="flow-line"/>
+              <text x="140" y="175" fill="#bfdbfe" font-size="12">characteristic of</text>
+              <circle cx="130" cy="120" r="40" fill="#134e4a" stroke="#5eead4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">nymphs</text>
+              <circle cx="390" cy="120" r="40" fill="#7c2d12" stroke="#fdba74" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#fff7ed" font-size="14" font-weight="800">adults</text>
+              <rect x="40" y="215" width="180" height="30" rx="15" fill="#1e3a8a" stroke="#93c5fd"/><text x="130" y="235" text-anchor="middle" fill="#eff6ff" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
+            </svg>
+          </div>
+          <div class="kg">
+            <span class="tag">Simple graph</span>
+            <svg viewBox="0 0 520 250" role="img" aria-label="Simple graph sau khi gộp cạnh">
+              <line x1="130" y1="120" x2="390" y2="120" stroke="#fde68a" stroke-width="4" class="flow-line"/>
+              <rect x="170" y="70" width="180" height="38" rx="10" fill="#0f172a" stroke="#fde68a"/>
+              <text x="260" y="86" text-anchor="middle" fill="#fde68a" font-size="11.5">“Nymphs transition directly into</text>
+              <text x="260" y="100" text-anchor="middle" fill="#fde68a" font-size="11.5">adults and resemble the adult stage”</text>
+              <line x1="130" y1="120" x2="130" y2="215" stroke="#93c5fd" stroke-width="2" class="flow-line"/>
+              <circle cx="130" cy="120" r="40" fill="#134e4a" stroke="#5eead4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">nymphs</text>
+              <circle cx="390" cy="120" r="40" fill="#7c2d12" stroke="#fdba74" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#fff7ed" font-size="14" font-weight="800">adults</text>
+              <rect x="40" y="215" width="180" height="30" rx="15" fill="#1e3a8a" stroke="#93c5fd"/><text x="130" y="235" text-anchor="middle" fill="#eff6ff" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
+              <text x="400" y="225" text-anchor="middle" fill="#86efac" font-size="14" font-weight="800">2 cạnh → 1 cạnh</text>
+            </svg>
+          </div>
+        </div>
+        <div class="formula rv"><span class="g">Prompt gộp cạnh (Phụ lục H):</span> "You are an assistant in charge of combining the provided statements into one summarized statement. Be concise without losing any of the information."</div>
+        <div class="key rv"><span class="ico">⚖️</span><span>Chuyển evidence sang đồ thị <b>chắc chắn mất thông tin</b>, nhưng evidence dài sẽ đè nặng lên SLM. Đồ thị giữ tri thức cấu trúc cốt lõi với <b>ít token hơn ~18%</b>. Bước gộp simple graph giảm thêm một ít dư thừa; tác giả coi đây là bước tùy chọn vì lợi ích nhỏ.</span></div>
+
+        <h3 id="buoc-4" class="rv">5.5 Bước 4 — SLM trả lời</h3>
+        <p class="rv">Ngữ cảnh đưa cho M<sub>small</sub> có thể gồm (1) tập evidence đã lọc {d<sub>i</sub> ∈ D<sub>filtered</sub>}, (2) top K bộ ba quan hệ {(a<sub>j</sub>, b<sub>j</sub>, r<sub>j</sub>)}<sub>j=1..K</sub>, hoặc cả hai. Chúng được nối với câu hỏi q thành một prompt:</p>
+        <div class="formula rv">ŷ ← M<sub>small</sub>(<span class="c">q</span>, <span class="o">context</span>) &nbsp;<span class="g">(7)</span></div>
+        <p class="rv">Ba cấu hình được đánh giá trong thực nghiệm: <b>DRAG<sub>G</sub></b> (chỉ đồ thị), <b>DRAG<sub>E</sub></b> (chỉ evidence), <b>DRAG<sub>C</sub></b> (kết hợp).</p>
+
+        <h3 id="vi-du" class="rv">5.6 Ví dụ đầy đủ (Phụ lục I)</h3>
+        <div class="grid-2 rv">
+          <div>
+            <div class="bubble q"><span class="who t-blue">Câu hỏi</span>Which term best describes the life cycle of an insect that reaches the adult stage without being a pupa?<br><span class="muted">a. Incomplete metamorphosis · b. Complete metamorphosis · c. Alternation of generations · d. Spontaneous mutation</span></div>
+            <div class="bubble wrong"><span class="who t-red">Trả lời không ngữ cảnh</span>Complete metamorphosis (b) → <b>(b) is incorrect ✗</b></div>
+            <div class="bubble right"><span class="who t-green">Trả lời với evidence + graph</span>Incomplete metamorphosis (a) → <b>(a) is correct ✓</b></div>
+          </div>
+          <div class="card">
+            <h4>Ngữ cảnh sau khi lọc</h4>
+            <p style="font-size:15px"><b>Evidence:</b> nymphs lớn dần và lột xác nhiều lần đến khi trưởng thành — dấu hiệu của incomplete metamorphosis; incomplete metamorphosis còn gọi là hemimetabolism; côn trùng biến thái không hoàn toàn <span class="mark">không có giai đoạn nhộng</span>.</p>
+            <p style="font-size:15px;margin:0"><b>Quan hệ:</b> (nymphs, adults) — “Nymphs transition directly into adults, and resemble the adult stage”; (nymphs, incomplete metamorphosis) — “Nymphs are a characteristic of incomplete metamorphosis”.</p>
+          </div>
+        </div>
+        <p class="rv">Lưu ý: trong danh sách evidence ban đầu có một câu về <i>complete metamorphosis</i> (có nhộng). Bước xếp hạng đã loại câu này, giúp SLM không bị dẫn sai.</p>
+        <div class="say rv"><strong>Khi trình bày.</strong> “Cùng một mô hình nhỏ: hỏi chay thì chọn sai (b). Đưa ba câu chứng cứ và hai quan hệ do thầy chắt lọc thì chọn đúng (a). Đó là toàn bộ tinh thần của DRAG.”</div>
+      </section>
+
+      <!-- 6 -->
+      <section id="rieng-tu">
+        <h2 class="rv"><span class="no">6</span>Bảo vệ quyền riêng tư (Mục 3.3 + Phụ lục G)</h2>
+        <p class="rv">Khi hỏi LLM lớn, người dùng thường phải gửi nguyên câu hỏi — có thể chứa tên, email, địa chỉ — lên cloud. Trong DRAG, SLM cục bộ <b>viết lại câu hỏi để gỡ thông tin nhạy cảm</b> trước khi gửi. Việc viết lại đơn giản hơn nhiều so với trả lời trực tiếp, nên SLM làm tốt.</p>
+        <div class="pv rv">
+          <div class="pv-step alert"><b>① Câu hỏi có PII</b>Tên, email, địa chỉ…</div>
+          <div class="pv-step safe"><b>② SLM viết lại</b>Gỡ PII ngay trên máy</div>
+          <div class="pv-step cloud"><b>③ LLM cloud</b>Chỉ thấy câu hỏi ẩn danh</div>
+          <div class="pv-step"><b>④ Evidence + Graph</b>Gửi về thiết bị</div>
+          <div class="pv-step safe"><b>⑤ SLM trả lời</b>Dữ liệu riêng không rời máy</div>
+        </div>
+        <h3 class="rv">Benchmark rò rỉ riêng tư</h3>
+        <div class="table-scroll rv">
+          <table>
+            <thead><tr><th style="width:24%">Bước</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><b>1. Sampling</b></td><td>Chọn ngẫu nhiên 5.000 câu hỏi từ MMLU</td></tr>
+              <tr><td><b>2. Augmentation</b></td><td>GPT-4o chèn PII giả nhưng thực tế (tên, email, đơn vị công tác)</td></tr>
+              <tr><td><b>3. Privacy Filtering</b></td><td>SLM gỡ PII, giữ nguyên ý nghĩa câu hỏi</td></tr>
+              <tr><td><b>4. DRAG Processing</b></td><td>Câu hỏi sạch đi qua DRAG để lấy evidence và trả lời</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="bubble wrong rv"><span class="who t-red">Câu hỏi có PII (Ví dụ 1, Phụ lục I.1)</span>Which of the following amino acids cannot provide a substrate for gluconeogenesis? <span class="pii">Dr. Amelia Thompson</span>, who wrote an article on amino acid metabolism for Biochem Review, can be contacted at <span class="pii">athompson93@biochemjournal.fake</span>.</div>
+        <div class="bubble right rv"><span class="who t-green">Sau khi SLM lọc</span>What amino acids cannot provide a substrate for gluconeogenesis? → <b>(a) Leucine and lysine ✓</b></div>
+      </section>
+
+      <!-- 7 -->
+      <section id="thiet-lap">
+        <h2 class="rv"><span class="no">7</span>Thiết lập thực nghiệm (Mục 4.1 + Phụ lục A)</h2>
+        <div class="grid-2 rv">
+          <div class="card" style="background:linear-gradient(145deg,#0f172a,#134e4a);color:#e2e8f0;border:0">
+            <h4 style="color:#5eead4">☁ 5 Teacher LLMs</h4>
+            <div class="chips"><span class="chip">GPT-4o</span><span class="chip">Claude 3.5 Sonnet</span><span class="chip">DeepSeek-V3</span><span class="chip">LLaMA-3.3-70B</span><span class="chip">Gemini 1.5 Flash</span></div>
+            <p style="font-size:14px;margin:6px 0 0;color:#99f6e4">Riêng Open-LLM Leaderboard dùng GPT-4o-mini cho đỡ tốn kém.</p>
+          </div>
+          <div class="card hot">
+            <h4>📱 7 Student SLMs (2B–9B)</h4>
+            <div class="chips"><span class="chip">Gemma-2-2B-it</span><span class="chip">Phi-3.5-mini-instruct</span><span class="chip">Qwen2.5-3B</span><span class="chip">LLaMA-3.2-3B</span><span class="chip">Qwen2.5-7B</span><span class="chip">LLaMA-3.1-8B</span><span class="chip">Gemma-2-9B-it</span></div>
+            <p style="font-size:14px;margin:6px 0 0" class="muted">AVERITEC dùng BLOOM-7B và GPT-3.5-Turbo làm trò.</p>
+          </div>
+        </div>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Các benchmark được dùng</caption>
+            <thead><tr><th>Benchmark</th><th>Mô tả</th><th>Loại</th></tr></thead>
+            <tbody>
+              <tr><td><b>ARC-Challenge</b></td><td>Câu hỏi khoa học tự nhiên; chọn tập Challenge vì các phương pháp truy xuất và đồng xuất hiện đều thất bại</td><td>MCQA</td></tr>
+              <tr><td><b>MedMCQA</b></td><td>Hơn 194k câu thi tuyển sinh y khoa, 21 môn</td><td>MCQA</td></tr>
+              <tr><td><b>GPQA</b></td><td>448 câu do chuyên gia viết; tiến sĩ đúng ngành chỉ đạt 65% dù có web (“Google-proof”)</td><td>MCQA</td></tr>
+              <tr><td><b>MMLU</b></td><td>57 lĩnh vực, phổ biến và toàn diện</td><td>MCQA</td></tr>
+              <tr><td><b>Open-LLM-Leaderboard</b></td><td>Câu hỏi mở, tránh thiên lệch chọn đáp án và đoán mò</td><td>Open QA</td></tr>
+              <tr><td><b>AVERITEC</b></td><td>Kiểm chứng tuyên bố: support / refute / not enough evidence / conflicting</td><td>Fact check</td></tr>
+              <tr><td><b>WebQuestions</b> (Phụ lục C)</td><td>Open QA bổ sung theo OpenQA</td><td>Open QA</td></tr>
+              <tr class="ours"><td><b>Privacy benchmark</b></td><td>5.000 câu MMLU + PII giả (đóng góp mới của bài)</td><td>Riêng tư</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="rv">Đánh giá <b>zero-shot</b> bằng <code>lm-evaluation-harness</code> trên <b>4 × RTX 4090</b>. Số evidence/quan hệ giữ lại K ∈ {5, 10, 15, 20}; phụ lục thử thêm N = 30, 40, 50.</p>
+      </section>
+
+      <!-- 8 -->
+      <section id="ket-qua">
+        <h2 class="rv"><span class="no">8</span>Kết quả thực nghiệm</h2>
+
+        <h3 id="sota" class="rv">8.1 So với các khung RAG khác (Bảng 1)</h3>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Bảng 1 — DRAG (cấu hình evidence) so với các phương pháp trước. “↑” = mức tăng so với phương pháp khác cùng backbone và cấu hình suy luận.</caption>
+            <thead><tr><th>Khung</th><th>Backbone</th><th class="num">MedMCQA</th><th class="num">MMLU</th><th class="num">ARC-C</th></tr></thead>
+            <tbody>
+              <tr><td>Self-RAG</td><td>SelfRAG-LLaMA-2-7B</td><td class="num">–</td><td class="num">–</td><td class="num">67.3</td></tr>
+              <tr><td>CRAG</td><td>SelfRAG-LLaMA-2-7B</td><td class="num">–</td><td class="num">–</td><td class="num">68.6</td></tr>
+              <tr class="ours"><td>DRAG</td><td>LLaMA-2-7B</td><td class="num">72.4</td><td class="num">71.2</td><td class="num">86.2<span class="up">↑17.6</span></td></tr>
+              <tr class="sep"><td>SimRAG</td><td>Llama-3.1-8B-Instruct</td><td class="num">–</td><td class="num">67.5</td><td class="num">81.4</td></tr>
+              <tr class="ours"><td>DRAG</td><td>Llama-3.1-8B-Instruct</td><td class="num">74.2</td><td class="num">75.7<span class="up">↑8.2</span></td><td class="num">93.1<span class="up">↑11.7</span></td></tr>
+              <tr class="sep"><td rowspan="5">MiniRAG</td><td>GLM-edge-1.5B-chat</td><td class="num">52.1</td><td class="num">47.0</td><td class="num">62.3</td></tr>
+              <tr><td>Qwen2.5-3B-Instruct</td><td class="num">58.3</td><td class="num">70.9</td><td class="num">67.7</td></tr>
+              <tr><td>Llama-3.2-3B-Instruct</td><td class="num">52.7</td><td class="num">69.1</td><td class="num">65.3</td></tr>
+              <tr><td>Gemma-2-2B-it</td><td class="num">48.5</td><td class="num">57.3</td><td class="num">68.6</td></tr>
+              <tr><td>Phi-3.5-mini-instruct</td><td class="num">61.1</td><td class="num">72.7</td><td class="num">82.7</td></tr>
+              <tr class="ours sep"><td rowspan="5">DRAG</td><td>GLM-edge-1.5B-chat</td><td class="num">56.9<span class="up">↑4.8</span></td><td class="num">69.0<span class="up">↑22.0</span></td><td class="num"><span class="best">90.0<span class="up">↑27.7</span></span></td></tr>
+              <tr class="ours"><td>Qwen2.5-3B-Instruct</td><td class="num">72.8<span class="up">↑14.5</span></td><td class="num">73.8<span class="up">↑2.9</span></td><td class="num">93.0<span class="up">↑25.3</span></td></tr>
+              <tr class="ours"><td>Llama-3.2-3B-Instruct</td><td class="num">73.6<span class="up">↑20.9</span></td><td class="num">74.4<span class="up">↑5.3</span></td><td class="num"><span class="best">93.0<span class="up">↑27.7</span></span></td></tr>
+              <tr class="ours"><td>Gemma-2-2B-it</td><td class="num"><span class="best">72.4<span class="up">↑23.9</span></span></td><td class="num">71.2<span class="up">↑13.9</span></td><td class="num">91.5<span class="up">↑22.9</span></td></tr>
+              <tr class="ours"><td>Phi-3.5-mini-instruct</td><td class="num">74.4<span class="up">↑13.3</span></td><td class="num">77.8<span class="up">↑5.1</span></td><td class="num">94.1<span class="up">↑11.4</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card rv">
+          <div class="chart-head">
+            <div class="tabs" id="miniTabs"><button type="button" class="on" data-ds="arc">ARC-C</button><button type="button" data-ds="med">MedMCQA</button><button type="button" data-ds="mmlu">MMLU</button></div>
+            <div class="legend"><span><i style="background:#64748b"></i>MiniRAG</span><span><i style="background:#0f766e"></i>DRAG</span><span><i style="background:#16a34a;border-radius:999px"></i>Mức tăng</span></div>
+          </div>
+          <div class="gchart" id="miniChart"></div>
+          <div class="glabels" id="miniLabels"></div>
+        </div>
+        <p class="rv">Mức tăng lớn nhất thuộc về các SLM yếu (GLM-edge-1.5B, Llama-3.2-3B): <span class="mark">mô hình càng nhỏ càng hưởng lợi nhiều</span> từ ngữ cảnh chắt lọc. Phụ lục B.1 cũng ghi nhận Gemma-2-2B tăng từ 42.91% lên 72.44% trên MedMCQA (+29.5).</p>
+
+        <h3 id="ablation-k" class="rv">8.2 Số evidence K bao nhiêu là đủ? (Bảng 2, 8, 10, 11, 17 + Hình 2)</h3>
+        <div class="card rv">
+          <div class="chart-head">
+            <div class="tabs" id="kTabs"><button type="button" class="on" data-ds="arc">ARC-C</button><button type="button" data-ds="med">MedMCQA</button><button type="button" data-ds="mmlu">MMLU</button><button type="button" data-ds="gpqa">GPQA (tới N = 50)</button></div>
+            <span class="muted" style="font-size:13px;font-weight:700">Gemma-2-2B · thầy GPT-4o</span>
+          </div>
+          <div class="lchart" id="kChart"></div>
+        </div>
+        <p class="rv">Kết quả nhất quán trên các benchmark: <b>khoảng 15 evidence</b> cho cân bằng tốt nhất giữa chi phí và độ chính xác. Ít hơn thì thiếu tri thức; nhiều hơn thì dư thừa, nhiễu và hơi giảm. Bảng 17 với N = 30, 40, 50 trên GPQA xác nhận: tăng N không cải thiện đáng kể, vì một câu hỏi thường chỉ cần lượng chứng cứ giới hạn.</p>
+        <div class="table-scroll rv">
+          <table style="font-size:13.5px">
+            <caption>Bảng 2 — ARC-Challenge, thầy GPT-4o, theo số mục truy xuất (5 / 10 / 15 / 20)</caption>
+            <thead>
+              <tr><th rowspan="2">SLM</th><th rowspan="2" class="num">Gốc</th><th colspan="4" class="grp">Graph only</th><th colspan="4" class="grp">Evidence only</th><th colspan="4" class="grp">Combined</th></tr>
+              <tr><th class="num">5</th><th class="num">10</th><th class="num">15</th><th class="num">20</th><th class="num">5</th><th class="num">10</th><th class="num">15</th><th class="num">20</th><th class="num">5</th><th class="num">10</th><th class="num">15</th><th class="num">20</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Phi-3.5-mini</td><td class="num">78.55</td><td class="num">91.69</td><td class="num">92.76</td><td class="num">93.48</td><td class="num">93.30</td><td class="num">92.31</td><td class="num">93.74</td><td class="num">94.01</td><td class="num"><b>94.10</b></td><td class="num">92.40</td><td class="num">93.12</td><td class="num">93.74</td><td class="num">93.74</td></tr>
+              <tr><td>Qwen2.5-3B</td><td class="num">48.26</td><td class="num">88.47</td><td class="num">89.81</td><td class="num">91.15</td><td class="num">90.17</td><td class="num">91.06</td><td class="num">91.96</td><td class="num"><b>93.03</b></td><td class="num">92.85</td><td class="num">89.81</td><td class="num">91.06</td><td class="num">92.49</td><td class="num">92.23</td></tr>
+              <tr><td>Llama-3.2-3B</td><td class="num">42.45</td><td class="num">86.77</td><td class="num">88.47</td><td class="num">90.44</td><td class="num">90.44</td><td class="num">89.10</td><td class="num">91.78</td><td class="num">92.31</td><td class="num"><b>93.03</b></td><td class="num">88.56</td><td class="num">91.51</td><td class="num">92.67</td><td class="num">92.40</td></tr>
+              <tr><td>Llama-3.1-8B</td><td class="num">54.24</td><td class="num">89.01</td><td class="num">90.71</td><td class="num">91.96</td><td class="num">91.42</td><td class="num">92.05</td><td class="num">94.10</td><td class="num"><b>94.28</b></td><td class="num">93.30</td><td class="num">91.69</td><td class="num">93.03</td><td class="num"><b>94.28</b></td><td class="num">93.57</td></tr>
+              <tr><td>Qwen2.5-7B</td><td class="num">55.23</td><td class="num">90.97</td><td class="num">91.78</td><td class="num">92.49</td><td class="num">92.58</td><td class="num">91.87</td><td class="num">93.12</td><td class="num">93.39</td><td class="num"><b>93.83</b></td><td class="num">91.51</td><td class="num">93.03</td><td class="num">93.48</td><td class="num">93.74</td></tr>
+              <tr><td>Gemma-2-9B</td><td class="num">63.27</td><td class="num">92.58</td><td class="num">93.30</td><td class="num">93.74</td><td class="num">94.10</td><td class="num">93.74</td><td class="num">94.28</td><td class="num"><span class="best">94.73</span></td><td class="num">94.46</td><td class="num">93.30</td><td class="num">94.19</td><td class="num">94.28</td><td class="num">94.37</td></tr>
+              <tr><td>Gemma-2-2B</td><td class="num">53.71</td><td class="num">85.08</td><td class="num">87.94</td><td class="num">88.56</td><td class="num">88.92</td><td class="num">88.11</td><td class="num">90.71</td><td class="num">91.33</td><td class="num"><b>91.51</b></td><td class="num">87.67</td><td class="num">90.71</td><td class="num">91.33</td><td class="num">91.33</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure class="rv">
+          <img src="assets/drag/fig2.png" alt="Hình 2 bài báo: độ chính xác theo số mục truy xuất trên ARC-C, GPQA, MedMCQA, MMLU" data-zoom>
+          <figcaption><b>Hình 2 (bài báo).</b> Graph only (xanh), Evidence only (đỏ) và LLM gốc (nét đứt) trên 4 benchmark, 4 SLM. Đường evidence gần như luôn nằm trên; cả hai đều vượt xa đường gốc.</figcaption>
+        </figure>
+
+        <h3 id="teacher" class="rv">8.3 Chọn thầy nào? (Bảng 3 + Bảng 9)</h3>
+        <p class="rv">Phát hiện bất ngờ: <span class="mark">thầy mạnh hơn không phải lúc nào cũng cho trò giỏi hơn</span>. Thứ hạng theo hiệu quả chưng cất: GPT-4o &gt; Claude 3.5 Sonnet &gt; DeepSeek-V3 &gt; LLaMA-3.3-70B &gt; Gemini 1.5 Flash. Chất lượng và tính nhất quán của evidence quan trọng hơn năng lực thô của thầy.</p>
+        <div class="grid-2 rv">
+          <div class="card">
+            <h4>MedMCQA — trung bình 7 SLM, cấu hình Evidence, K = 15</h4>
+            <p class="muted" style="font-size:13px">Người viết tự tính trung bình từ Bảng 3</p>
+            <div class="hbar"><span>Không ngữ cảnh</span><div class="track"><div class="fillbar g" style="--w:53.27%"></div></div><b>53.27</b></div>
+            <div class="hbar"><span>🥇 GPT-4o</span><div class="track"><div class="fillbar" style="--w:73.34%"></div></div><b>73.34</b></div>
+            <div class="hbar"><span>Claude 3.5</span><div class="track"><div class="fillbar b" style="--w:68.70%"></div></div><b>68.70</b></div>
+            <div class="hbar"><span>DeepSeek-V3</span><div class="track"><div class="fillbar b" style="--w:68.48%"></div></div><b>68.48</b></div>
+            <div class="hbar"><span>LLaMA-3.3-70B</span><div class="track"><div class="fillbar b" style="--w:67.97%"></div></div><b>67.97</b></div>
+            <div class="hbar"><span>Gemini 1.5 Flash</span><div class="track"><div class="fillbar o" style="--w:60.55%"></div></div><b>60.55</b></div>
+          </div>
+          <div>
+            <div class="table-scroll" style="margin-top:0">
+              <table style="font-size:14px">
+                <caption>Bảng 9 — chính các thầy làm bài (cận trên)</caption>
+                <thead><tr><th>Teacher</th><th class="num">ARC-C</th><th class="num">MedMCQA</th><th class="num">GPQA</th><th class="num">MMLU</th></tr></thead>
+                <tbody>
+                  <tr class="ours"><td>GPT-4o</td><td class="num">96.7</td><td class="num">77.0</td><td class="num">53.6</td><td class="num">88.7</td></tr>
+                  <tr><td>Claude 3.5 Sonnet</td><td class="num">96.4</td><td class="num">76.1</td><td class="num"><span class="best">59.4</span></td><td class="num">88.7</td></tr>
+                  <tr><td>DeepSeek-V3</td><td class="num">95.3</td><td class="num">74.3</td><td class="num">59.1</td><td class="num">87.1</td></tr>
+                  <tr><td>LLaMA-3.3-70B</td><td class="num">95.1</td><td class="num">72.7</td><td class="num">50.5</td><td class="num">86.0</td></tr>
+                  <tr><td>Gemini 1.5 Flash</td><td class="num">90.3</td><td class="num">69.9</td><td class="num">39.5</td><td class="num">78.9</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size:15px">Claude giải GPQA giỏi hơn GPT-4o, nhưng trò học từ GPT-4o lại tốt hơn. Trò giỏi nhất (Gemma-2-9B, Llama-3.1-8B) chỉ kém GPT-4o khoảng <b>2.0–2.5%</b> trên ARC-C và MedMCQA.</p>
+          </div>
+        </div>
+
+        <h3 id="chi-phi" class="rv">8.4 Evidence hay Graph? (Bảng 5)</h3>
+        <div class="grid-2 rv">
+          <div class="table-scroll" style="margin:0">
+            <table>
+              <caption>Bảng 5 — Thống kê token</caption>
+              <thead><tr><th>Loại</th><th class="num">Tổng token</th><th class="num">Trung bình / mục</th></tr></thead>
+              <tbody>
+                <tr><td>Evidence</td><td class="num">29,698,547</td><td class="num">26.30</td></tr>
+                <tr class="ours"><td>Graph</td><td class="num">24,324,636</td><td class="num">21.55 <span class="best">↓18.1%</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card cool">
+            <h4>Đọc bảng thế nào?</h4>
+            <p style="font-size:15.5px">Đồ thị ngắn hơn ~18% token nên hợp với môi trường tài nguyên thấp hoặc thời gian thực. Nhưng <b>evidence only</b> thường cho độ chính xác cao nhất; <b>combined</b> cho độ chính xác tương đương evidence mà tốn thêm chi phí suy luận, nên tác giả đánh giá là dư thừa.</p>
+          </div>
+        </div>
+
+        <h3 id="open-qa" class="rv">8.5 Câu hỏi mở và kiểm chứng sự thật (Bảng 6, 7, 16)</h3>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Bảng 6 — Open-LLM Leaderboard (thầy GPT-4o-mini). DRAG<sub>G</sub> / DRAG<sub>E</sub> / DRAG<sub>C</sub> = graph / evidence / combined.</caption>
+            <thead><tr><th>SLM</th><th class="num">Gốc</th><th class="num">DRAG<sub>G</sub></th><th class="num">DRAG<sub>E</sub></th><th class="num">DRAG<sub>C</sub></th></tr></thead>
+            <tbody>
+              <tr><td>Phi-3.5-mini-instruct</td><td class="num">35.26</td><td class="num">38.22<span class="up">↑2.96</span></td><td class="num"><b>40.13</b><span class="up">↑4.87</span></td><td class="num">39.84<span class="up">↑4.58</span></td></tr>
+              <tr><td>Qwen2.5-3B-Instruct</td><td class="num">32.59</td><td class="num">36.01<span class="up">↑3.42</span></td><td class="num">37.23<span class="up">↑4.64</span></td><td class="num"><b>37.50</b><span class="up">↑4.91</span></td></tr>
+              <tr><td>Llama-3.2-3B-Instruct</td><td class="num">29.85</td><td class="num">32.79<span class="up">↑2.94</span></td><td class="num"><b>34.12</b><span class="up">↑4.27</span></td><td class="num">33.65<span class="up">↑3.80</span></td></tr>
+              <tr><td>Llama-3.1-8B-Instruct</td><td class="num">45.07</td><td class="num">49.13<span class="up">↑4.06</span></td><td class="num">50.26<span class="up">↑5.19</span></td><td class="num"><b>51.73</b><span class="up">↑6.66</span></td></tr>
+              <tr><td>Qwen2.5-7B-Instruct</td><td class="num">44.67</td><td class="num">48.73<span class="up">↑4.06</span></td><td class="num">52.36<span class="up">↑7.69</span></td><td class="num"><b>52.66</b><span class="up">↑7.99</span></td></tr>
+              <tr><td>Gemma-2-9B-it</td><td class="num">46.44</td><td class="num">49.12<span class="up">↑2.68</span></td><td class="num"><span class="best">53.45</span><span class="up">↑7.01</span></td><td class="num">53.19<span class="up">↑6.75</span></td></tr>
+              <tr><td>Gemma-2-2B-it</td><td class="num">32.54</td><td class="num">35.98<span class="up">↑3.44</span></td><td class="num"><b>37.31</b><span class="up">↑4.77</span></td><td class="num">37.26<span class="up">↑4.72</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-2 rv">
+          <div class="card">
+            <h4>Bảng 7 — AVERITEC (fact verification)</h4>
+            <div class="hbar"><span>GPT-3.5 gốc</span><div class="track"><div class="fillbar g" style="--w:29%"></div></div><b>29.00</b></div>
+            <div class="hbar"><span>+ Graph</span><div class="track"><div class="fillbar o" style="--w:40.98%"></div></div><b>40.98</b></div>
+            <div class="hbar"><span>+ Evidence</span><div class="track"><div class="fillbar" style="--w:49.1%"></div></div><b>49.10</b></div>
+            <div class="hbar"><span>+ Combined</span><div class="track"><div class="fillbar b" style="--w:45.63%"></div></div><b>45.63</b></div>
+            <p class="muted" style="font-size:14px;margin:0">BLOOM-7B: 26 → 30.11 (G) / <b>32.43</b> (E) / 32.29 (C)</p>
+          </div>
+          <div class="card">
+            <h4>Bảng 16 — WebQuestions (K = 15, Phụ lục C)</h4>
+            <div class="hbar"><span>Gemma-2-2B gốc</span><div class="track"><div class="fillbar g" style="--w:24.51%"></div></div><b>24.51</b></div>
+            <div class="hbar"><span>+ Evidence</span><div class="track"><div class="fillbar" style="--w:52.10%"></div></div><b>52.10</b></div>
+            <div class="hbar"><span>Gemma-2-9B gốc</span><div class="track"><div class="fillbar g" style="--w:45.71%"></div></div><b>45.71</b></div>
+            <div class="hbar"><span>+ Evidence</span><div class="track"><div class="fillbar" style="--w:59.15%"></div></div><b>59.15</b></div>
+            <p class="muted" style="font-size:14px;margin:0">Gemma-2-2B tăng hơn gấp đôi: +27.6 điểm.</p>
+          </div>
+        </div>
+
+        <h3 id="kq-rieng-tu" class="rv">8.6 Kết quả bảo vệ riêng tư (Mục 4.7 + Bảng 4)</h3>
+        <div class="grid-3 rv">
+          <div class="stat o"><div class="value"><span class="count" data-to="15090" data-sep="1">15,090</span></div><div class="label">PII được chèn vào</div></div>
+          <div class="stat"><div class="value"><span class="count" data-to="649">649</span></div><div class="label">PII còn sót sau khi SLM lọc</div></div>
+          <div class="stat b"><div class="value"><span class="count" data-to="95.7" data-dec="1" data-pre="−">−95.7</span>%</div><div class="label">tỉ lệ rò rỉ PII</div></div>
+        </div>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Bảng 4 (rút gọn) — MMLU có PII đã lọc, thầy GPT-4o, K = 20</caption>
+            <thead><tr><th>SLM</th><th class="num">Gốc</th><th class="num">Evidence (20)</th><th class="num">Combined (20)</th><th class="num">Tăng tốt nhất</th></tr></thead>
+            <tbody>
+              <tr><td>Phi-3.5-mini-instruct</td><td class="num">66.22</td><td class="num"><b>75.58</b></td><td class="num">74.48</td><td class="num up">+9.36</td></tr>
+              <tr><td>Qwen2.5-3B-Instruct</td><td class="num">62.01</td><td class="num"><b>71.95</b></td><td class="num">71.58</td><td class="num up">+9.94</td></tr>
+              <tr><td>Llama-3.2-3B-Instruct</td><td class="num">57.27</td><td class="num"><b>71.36</b></td><td class="num">71.13</td><td class="num up">+14.09</td></tr>
+              <tr><td>Llama-3.1-8B-Instruct</td><td class="num">65.01</td><td class="num"><b>74.15</b></td><td class="num">73.39</td><td class="num up">+9.14</td></tr>
+              <tr><td>Qwen2.5-7B-Instruct</td><td class="num">69.71</td><td class="num"><b>76.34</b></td><td class="num">76.16</td><td class="num up">+6.63</td></tr>
+              <tr><td>Gemma-2-9B-it</td><td class="num">69.73</td><td class="num"><b>76.49</b></td><td class="num"><b>76.49</b></td><td class="num up">+6.76</td></tr>
+              <tr><td>Gemma-2-2B-it</td><td class="num">55.59</td><td class="num"><b>67.58</b></td><td class="num">66.88</td><td class="num up">+11.99</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="rv">Lọc PII <b>không làm giảm</b> hiệu quả của DRAG: mọi SLM vẫn tăng 6.6–14.1 điểm so với gốc.</p>
+      </section>
+
+      <!-- 9 -->
+      <section id="dong-gop">
+        <h2 class="rv"><span class="no">9</span>Đóng góp, hạn chế và đạo đức</h2>
+        <div class="grid-2 rv">
+          <div class="card cool">
+            <h4>✅ Ba đóng góp (tác giả nêu)</h4>
+            <ol style="margin:0;padding-left:20px">
+              <li>Khung chưng cất RAG dựa trên <b>evidence + đồ thị tri thức</b>, chuyển năng lực RAG và giảm ảo giác từ LLM sang SLM.</li>
+              <li><b>Benchmark rò rỉ riêng tư</b> và cơ chế giảm rủi ro dựa trên khung này.</li>
+              <li><b>Đánh giá toàn diện</b> trên nhiều tác vụ, nhiều thầy và trò, cân bằng hiệu quả – độ chính xác – tính nhất quán sự thật.</li>
+            </ol>
+          </div>
+          <div class="card hot">
+            <h4>⚠️ Hạn chế (tác giả tự nêu)</h4>
+            <ol style="margin:0;padding-left:20px">
+              <li><b>Đánh đổi lưu giữ tri thức:</b> tri thức ngầm, tinh tế của thầy có thể bị mất — rõ nhất ở tác vụ mở, sáng tạo, chủ quan.</li>
+              <li><b>Chi phí chưng cất:</b> sinh và xếp hạng evidence, dựng đồ thị tốn nhiều tính toán.</li>
+              <li><b>Rò rỉ đáp án:</b> dù prompt đã dặn “không đưa thẳng đáp án”, vẫn có nguy cơ evidence gợi ý đáp án.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="warn rv"><p><b>Đạo đức.</b> Đầu ra của DRAG vẫn phải được con người kiểm tra trong các lĩnh vực rủi ro cao như pháp lý, y tế, khoa học. Thiên lệch trong thầy, trong đồ thị và evidence có thể truyền sang SLM, nên cần đánh giá và giảm thiểu liên tục.</p></div>
+      </section>
+
+      <!-- 10 -->
+      <section id="phan-bien">
+        <h2 class="rv"><span class="no">10</span>Nhận xét phản biện của người đọc</h2>
+        <p class="rv">Những điểm sau không có trong bài; chúng là quan sát khi đối chiếu số liệu, hữu ích khi bị hỏi vặn.</p>
+        <div class="grid-2 rv">
+          <div class="card blue"><h4>So sánh khác backbone</h4><p>Câu “DRAG đạt 94.1%, hơn Self-RAG 26.8%” so <b>Phi-3.5-mini</b> với SelfRAG-LLaMA-2-7B. So cùng họ LLaMA-2-7B thì mức hơn là <b>+18.9</b> (86.2 vs 67.3), vẫn lớn nhưng thấp hơn.</p></div>
+          <div class="card blue"><h4>Văn bản và bảng chưa khớp</h4><p>Mục 4.2 viết mức tăng tối đa so với MiniRAG trên ARC-C là +11.4, nhưng Bảng 1 ghi tới +27.7. Mục 4.7 nói “combined” tốt nhất ở bài toán riêng tư, trong khi Bảng 4 cho thấy evidence-only (K = 20) bằng hoặc cao hơn ở cả 7 SLM.</p></div>
+          <div class="card blue"><h4>Vẫn phụ thuộc cloud</h4><p>Thầy phải được gọi cho <b>mỗi câu hỏi mới</b>. DRAG giảm chi phí phía SLM chứ không bỏ được LLM; “chưng cất” ở đây là chưng cất <i>ngữ cảnh</i> theo từng truy vấn, không phải chưng cất vào trọng số.</p></div>
+          <div class="card blue"><h4>Phạm vi đánh giá</h4><p>Đa số benchmark là trắc nghiệm, nơi “gợi ý” trong evidence có thể giúp loại trừ phương án. Hạn chế 3 của tác giả (rò rỉ đáp án) vì vậy đáng được đo định lượng hơn.</p></div>
+        </div>
+        <div class="key rv"><span class="ico">🧭</span><span>Hướng mở rộng hợp lý: <b>cache evidence</b> cho câu hỏi lặp, đo <b>tỉ lệ rò rỉ đáp án</b> trong evidence, và thử trên tác vụ sinh dài (tóm tắt, hội thoại) thay vì chỉ trắc nghiệm.</span></div>
+      </section>
+
+      <!-- 11 -->
+      <section id="cai-tien">
+        <h2 class="rv"><span class="no">11</span>Đề xuất cải tiến <span class="tag-new">ĐỀ XUẤT</span></h2>
+        <p class="rv">Mục này là đề xuất của người trình bày, không có trong bài báo. Mỗi cải tiến xuất phát từ một hạn chế tác giả tự nêu, một quan sát trong số liệu, hoặc một điểm đọc được trong mã nguồn công khai. <b>Chưa có kết quả thực nghiệm</b> cho các đề xuất này; mục 11.4 mô tả cách kiểm chứng.</p>
+
+        <h3 id="ma-nguon" class="rv">11.1 Phát hiện khi đọc mã nguồn (VILA-Lab/DRAG, commit <code>eac3435</code>)</h3>
+        <p class="rv">Bước xếp hạng evidence nằm trong hai file. Hàm tính tương đồng sắp xếp <b>tăng dần</b> theo cosine, nên phần tử đầu danh sách là evidence <i>ít</i> giống câu hỏi nhất:</p>
+        <div class="algo rv">
+          <span class="file">semantic_distance_calculator.py · get_top_k_sentences()</span>
+          <span class="ln" data-n="21">sentences.insert(0, query) <span class="cm"># sửa trực tiếp list đầu vào</span></span>
+          <span class="ln" data-n="23">similarity_scores = cosine_similarity([emb[0]], emb[1:])</span>
+          <span class="ln err" data-n="27">sorted_sentences = [x <span class="kw">for</span> _, x <span class="kw">in</span> sorted(zip(scores, sentences[1:]), key=<span class="kw">lambda</span> pair: pair[0])]</span>
+          <span class="ln" data-n="29"><span class="kw">return</span> sorted_sentences[:k]</span>
+        </div>
+        <p class="rv">Sau đó file xếp hạng gán <code>semantic_rank = i + 1</code> theo thứ tự trên, cộng với <code>llm_rank</code>, rồi chọn tổng <b>nhỏ nhất</b>:</p>
+        <div class="algo rv">
+          <span class="file">2_generate_evidence_rankings.py</span>
+          <span class="ln" data-n="59">new_data.append([qid, sentence_to_llm_rank[sentence], sentence, int(i + 1)])</span>
+          <span class="ln err" data-n="86">row['llm_rank'] + row['semantic_rank'], <span class="cm"># cộng hạng thô</span></span>
+          <span class="ln" data-n="96">q_to_rank[qid].sort(key=<span class="kw">lambda</span> x: x[0]) <span class="cm"># nhỏ hơn = tốt hơn</span></span>
+        </div>
+        <div class="grid-2 rv">
+          <div class="card hot">
+            <h4>Ba điểm cần lưu ý</h4>
+            <ol style="margin:0;padding-left:20px">
+              <li><b>Chiều xếp hạng ngữ nghĩa bị đảo:</b> hạng 1 ứng với evidence ít liên quan nhất, nên tín hiệu cosine đang “thưởng” cho evidence lạc đề. File <code>4_generate_graph_rankings.py</code> dùng cùng hàm nên có cùng vấn đề.</li>
+              <li><b>rank<sub>LLM</sub> chỉ là thứ tự sinh:</b> <code>1_generate_evidences.py</code> gán hạng theo vị trí evidence trong câu trả lời (prompt yêu cầu “ordered from most relevant to least relevant”), không có lần gọi chấm điểm riêng.</li>
+              <li><b>Cộng hạng, không cộng điểm:</b> công thức (4) trong bài viết là cộng điểm cosine; code lại cộng thứ hạng nguyên.</li>
+            </ol>
+          </div>
+          <div class="card cool">
+            <h4>Ví dụ minh họa với 3 evidence</h4>
+            <table style="font-size:14px">
+              <thead><tr><th>Evidence</th><th class="num">cos</th><th class="num">Hạng hiện tại</th><th class="num">Hạng đúng</th></tr></thead>
+              <tbody>
+                <tr><td>d₁ (rất liên quan)</td><td class="num">0.82</td><td class="num t-red"><b>3</b></td><td class="num t-green"><b>1</b></td></tr>
+                <tr><td>d₂</td><td class="num">0.64</td><td class="num">2</td><td class="num">2</td></tr>
+                <tr><td>d₃ (lạc đề)</td><td class="num">0.21</td><td class="num t-red"><b>1</b></td><td class="num t-green"><b>3</b></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="warn rv"><p>Không thể khẳng định các con số trong bài được tạo bằng đúng phiên bản code này. Vì LLM đã liệt kê evidence theo độ liên quan, tác động thực tế có thể nhỏ; nhưng đây là điểm nên kiểm tra đầu tiên khi tái lập thí nghiệm.</p></div>
+        <p class="rv"><b>Đề xuất sửa:</b> đảo chiều sắp xếp, và hợp nhất các thứ hạng bằng <b>Reciprocal Rank Fusion</b> (Cormack 2009, chính bài báo cũng trích dẫn) thay cho cộng hạng thô. Có thể thêm tín hiệu thứ ba từ một cross-encoder reranker chạy cục bộ:</p>
+        <div class="algo rv">
+          <span class="file">Đề xuất</span>
+          <span class="ln fix">sorted(zip(scores, sentences[1:]), key=<span class="kw">lambda</span> pair: pair[0], <span class="fn">reverse=True</span>)</span>
+          <span class="ln fix">s<sub>i</sub> = 1/(k<sub>0</sub> + r<sub>LLM</sub>(d<sub>i</sub>)) + 1/(k<sub>0</sub> + r<sub>sem</sub>(d<sub>i</sub>)) + 1/(k<sub>0</sub> + r<sub>CE</sub>(d<sub>i</sub>)) <span class="cm"># k0 = 60, lớn hơn = tốt hơn</span></span>
+        </div>
+
+        <h3 id="drag-plus" class="rv">11.2 Kiến trúc DRAG+ — sáu cải tiến</h3>
+        <div class="diagram rv">
+          <svg viewBox="0 0 1160 210" role="img" aria-label="Pipeline DRAG+ đề xuất">
+            <defs>
+              <marker id="arP" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7c3aed"/></marker>
+              <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#134e4a"/></linearGradient>
+            </defs>
+            <path d="M415 88 C 520 34, 970 34, 1075 88" fill="none" stroke="#16a34a" stroke-width="2.5" class="flow-line" marker-end="url(#arP)"/>
+            <text x="745" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#16a34a" stroke="#fff" stroke-width="6" paint-order="stroke">SLM đủ tự tin (p ≥ τ) → trả lời ngay, không gọi cloud</text>
+            <path d="M580 172 C 650 190, 840 190, 910 172" fill="none" stroke="#0891b2" stroke-width="2.5" class="flow-line" marker-end="url(#arP)"/>
+            <text x="745" y="203" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0891b2" stroke="#fff" stroke-width="6" paint-order="stroke">cache hit → dùng lại evidence cũ</text>
+            <g font-weight="800" text-anchor="middle">
+              <rect x="10" y="90" width="140" height="80" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+              <text x="80" y="126" font-size="14" fill="#9a3412">Câu hỏi</text><text x="80" y="146" font-size="12" font-weight="600" fill="#78716c">có thể chứa PII</text>
+              <rect x="175" y="90" width="140" height="80" rx="14" fill="#ecfeff" stroke="#14b8a6" stroke-width="2"/>
+              <text x="245" y="122" font-size="13.5" fill="#0f766e">⑥ Lọc PII 2 lớp</text><text x="245" y="142" font-size="11.5" font-weight="600" fill="#64748b">NER/regex + SLM</text>
+              <rect x="340" y="90" width="150" height="80" rx="14" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+              <text x="415" y="122" font-size="13.5" fill="#15803d">② Cổng tự tin</text><text x="415" y="142" font-size="11.5" font-weight="600" fill="#64748b">SLM thử trả lời trước</text>
+              <rect x="515" y="90" width="130" height="80" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+              <text x="580" y="122" font-size="13.5" fill="#0e7490">③ Cache</text><text x="580" y="142" font-size="11.5" font-weight="600" fill="#64748b">theo embedding</text>
+              <rect x="670" y="90" width="150" height="80" rx="14" fill="url(#gP)"/>
+              <text x="745" y="122" font-size="13.5" fill="#5eead4">LLM Teacher</text><text x="745" y="142" font-size="11.5" font-weight="600" fill="#94a3b8">sinh N evidence</text>
+              <rect x="845" y="90" width="130" height="80" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+              <text x="910" y="116" font-size="13" fill="#6d28d9">① RRF rerank</text><text x="910" y="134" font-size="13" fill="#6d28d9">④ K thích nghi</text><text x="910" y="152" font-size="11.5" font-weight="600" fill="#64748b">+ cross-encoder</text>
+              <rect x="1000" y="90" width="150" height="80" rx="14" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+              <text x="1075" y="116" font-size="13" fill="#b91c1c">⑤ Lọc rò rỉ</text><text x="1075" y="134" font-size="13" fill="#0f766e">→ SLM trả lời</text><text x="1075" y="152" font-size="11.5" font-weight="600" fill="#64748b">ŷ ← M_small(q, ctx)</text>
+            </g>
+            <g stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arP)">
+              <line x1="150" y1="130" x2="171" y2="130"/><line x1="315" y1="130" x2="336" y2="130"/><line x1="490" y1="130" x2="511" y2="130"/>
+              <line x1="645" y1="130" x2="666" y2="130"/><line x1="820" y1="130" x2="841" y2="130"/><line x1="975" y1="130" x2="996" y2="130"/>
+            </g>
+          </svg>
+          <figcaption>Hình tự vẽ: DRAG+ giữ nguyên lõi 4 bước, thêm hai lối tắt (cổng tự tin, cache) và ba bộ lọc</figcaption>
+        </div>
+        <div class="imp-grid rv">
+          <div class="card violet"><h4><span class="imp-n">1</span>Rerank RRF + cross-encoder</h4><p>Sửa chiều xếp hạng; hợp nhất hạng LLM, hạng cosine và hạng cross-encoder bằng RRF. RRF bền với chênh lệch thang đo giữa các tín hiệu, khác với cộng hạng thô.</p></div>
+          <div class="card cool"><h4><span class="imp-n">2</span>Cổng tự tin (confidence gating)</h4><p>SLM trả lời thử trước. Nếu xác suất phương án cao nhất ≥ τ thì dừng, không gọi thầy. Lý do: Phi-3.5-mini đã đúng <b>78.55%</b> ARC-C khi không có ngữ cảnh (Bảng 2).</p></div>
+          <div class="card blue"><h4><span class="imp-n">3</span>Cache ngữ nghĩa</h4><p>Lưu evidence và đồ thị theo embedding câu hỏi. Câu mới có cos ≥ θ với câu đã lưu thì dùng lại → trực tiếp giảm hạn chế 2 (chi phí chưng cất).</p></div>
+          <div class="card"><h4><span class="imp-n">4</span>K thích nghi</h4><p>Bảng 2 cho thấy độ chính xác đi ngang sau 10–15. Thay vì K cố định, lấy evidence theo thứ tự RRF và dừng khi điểm tụt quá ngưỡng hoặc chạm ngân sách token.</p></div>
+          <div class="card hot"><h4><span class="imp-n">5</span>Lọc rò rỉ đáp án</h4><p>Loại hoặc viết lại evidence chứa nguyên văn phương án đúng, hoặc được mô hình NLI đánh giá là suy ra trực tiếp đáp án. Báo cáo <b>tỉ lệ rò rỉ</b> như một chỉ số — giải quyết hạn chế 3.</p></div>
+          <div class="card cool"><h4><span class="imp-n">6</span>Lọc PII 2 lớp</h4><p>Lớp 1: NER/regex bắt chắc chắn email, số điện thoại, địa chỉ. Lớp 2: SLM viết lại phần còn lại. Mục tiêu: giảm 649 PII còn sót mà không xóa thực thể cần cho câu hỏi.</p></div>
+        </div>
+
+        <h3 id="thuat-toan-plus" class="rv">11.3 Thuật toán DRAG+ (giả mã đề xuất)</h3>
+        <div class="algo rv">
+          <span class="ln"><span class="kw">Input:</span> q; M<sub>large</sub>; M<sub>small</sub>; N; ngưỡng tự tin τ; ngưỡng cache θ; ngân sách token B</span>
+          <span class="ln new" data-n="1">q' ← <span class="fn">RegexNER</span>(q); q' ← M<sub>small</sub>.rewrite(q') <span class="cm">// ⑥ lọc PII 2 lớp</span></span>
+          <span class="ln new" data-n="2">(ŷ<sub>0</sub>, p) ← M<sub>small</sub>(q') <span class="cm">// ② trả lời thử</span></span>
+          <span class="ln new" data-n="3"><span class="kw">if</span> p ≥ τ <span class="kw">then return</span> ŷ<sub>0</sub></span>
+          <span class="ln new" data-n="4"><span class="kw">if</span> ∃ q<sub>c</sub> ∈ Cache: cos(q', q<sub>c</sub>) ≥ θ <span class="kw">then</span> D ← Cache[q<sub>c</sub>] <span class="cm">// ③</span></span>
+          <span class="ln" data-n="5"><span class="kw">else</span> D ← M<sub>large</sub> sinh N evidence cho q'; Cache[q'] ← D</span>
+          <span class="ln new" data-n="6"><span class="kw">foreach</span> d<sub>i</sub> ∈ D: s<sub>i</sub> ← RRF(r<sub>LLM</sub>, r<sub>sem</sub>, r<sub>CE</sub>) <span class="cm">// ① xếp giảm dần theo cos</span></span>
+          <span class="ln new" data-n="7">D ← { d<sub>i</sub> : không rò rỉ đáp án } <span class="cm">// ⑤ string match + NLI</span></span>
+          <span class="ln new" data-n="8">D<sub>K</sub> ← tiền tố của D (theo s<sub>i</sub>) đến khi s<sub>i</sub> tụt mạnh hoặc tổng token &gt; B <span class="cm">// ④</span></span>
+          <span class="ln" data-n="9">ŷ ← M<sub>small</sub>(q', D<sub>K</sub>)</span>
+          <span class="ln" data-n="10"><span class="kw">return</span> ŷ</span>
+        </div>
+        <div class="note rv"><p><b>Về độ phức tạp.</b> Gọi ρ là tỉ lệ câu vượt cổng tự tin và h là tỉ lệ cache hit. Số lời gọi M<sub>large</sub> trung bình mỗi câu giảm từ khoảng 1 + |D<sub>filtered</sub>| (sinh evidence, rồi trích quan hệ) xuống còn khoảng (1 − ρ)(1 − h) lần sinh evidence khi chỉ dùng cấu hình evidence. Đổi lại, mỗi câu tốn thêm một lần suy luận SLM để trả lời thử và một lần chạy cross-encoder trên N evidence — đều chạy cục bộ.</p></div>
+
+        <h3 id="ke-hoach" class="rv">11.4 Kế hoạch kiểm chứng</h3>
+        <div class="table-scroll rv">
+          <table>
+            <caption>Mỗi cải tiến gắn với một hạn chế và một chỉ số đo</caption>
+            <thead><tr><th>Cải tiến</th><th>Giải quyết</th><th>Kỳ vọng</th><th>Chỉ số đo</th></tr></thead>
+            <tbody>
+              <tr><td><span class="imp-n">1</span><b>RRF + cross-encoder</b></td><td>Xếp hạng đảo chiều, cộng hạng thô</td><td>Evidence đúng trọng tâm hơn ở cùng K</td><td>Accuracy; Recall@K của evidence</td></tr>
+              <tr><td><span class="imp-n">2</span><b>Cổng tự tin</b></td><td>Gọi cloud cho mọi câu hỏi</td><td>Ít lời gọi thầy, accuracy gần như giữ nguyên</td><td>% câu gọi cloud; accuracy; độ trễ</td></tr>
+              <tr><td><span class="imp-n">3</span><b>Cache ngữ nghĩa</b></td><td>Chi phí chưng cất</td><td>Câu hỏi lặp không tốn thêm token thầy</td><td>Cache hit rate; token thầy / câu</td></tr>
+              <tr><td><span class="imp-n">4</span><b>K thích nghi</b></td><td>K cố định gây thiếu hoặc nhiễu</td><td>Ít token ở câu dễ, đủ tri thức ở câu khó</td><td>Token SLM / câu; accuracy</td></tr>
+              <tr><td><span class="imp-n">5</span><b>Lọc rò rỉ đáp án</b></td><td>Rò rỉ đáp án</td><td>Kết quả phản ánh đúng năng lực trò</td><td>Tỉ lệ rò rỉ; accuracy trước/sau lọc</td></tr>
+              <tr><td><span class="imp-n">6</span><b>Lọc PII 2 lớp</b></td><td>Còn 649 / 15.090 PII sót</td><td>Ít PII sót hơn, giữ nghĩa câu hỏi</td><td>PII còn lại theo loại; accuracy</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-3 rv">
+          <div class="card"><h4>Baseline</h4><p>DRAG gốc: thầy GPT-4o, evidence-only, K = 15, chạy bằng chuỗi script <code>1_</code> → <code>6_</code> trong repo.</p></div>
+          <div class="card"><h4>Ablation</h4><p>Bật/tắt từng cải tiến ①–⑥ để tách đóng góp; luôn báo cáo cả accuracy lẫn chi phí (lời gọi cloud, token).</p></div>
+          <div class="card"><h4>Dữ liệu &amp; mô hình</h4><p>ARC-C, MedMCQA và Privacy benchmark; hai SLM đại diện: Gemma-2-2B (yếu) và Llama-3.1-8B (mạnh).</p></div>
+        </div>
+        <div class="say rv"><strong>Khi trình bày.</strong> “Ngoài các hạn chế tác giả nêu, khi đọc mã nguồn em thấy bước xếp hạng ngữ nghĩa đang sắp tăng dần. Em đề xuất DRAG+: sửa xếp hạng bằng RRF, thêm cổng tự tin và cache để giảm lời gọi cloud, lọc rò rỉ đáp án và lọc PII hai lớp. Mỗi cải tiến có chỉ số đo riêng để kiểm chứng.”</div>
+      </section>
+
+      <!-- 12 -->
+      <section id="thuat-ngu">
+        <h2 class="rv"><span class="no">12</span>Thuật ngữ</h2>
+        <div class="table-scroll rv">
+          <table>
+            <thead><tr><th style="width:26%">Thuật ngữ</th><th>Giải thích</th></tr></thead>
+            <tbody>
+              <tr><td><b>RAG</b></td><td>Retrieval-Augmented Generation — truy xuất tri thức ngoài rồi sinh câu trả lời dựa trên đó</td></tr>
+              <tr><td><b>LLM / SLM</b></td><td>Large / Small Language Model; trong bài, SLM là mô hình 1.5B–9B tham số</td></tr>
+              <tr><td><b>Hallucination (ảo giác)</b></td><td>Mô hình sinh nội dung nghe hợp lý nhưng sai sự thật</td></tr>
+              <tr><td><b>Distillation (chưng cất)</b></td><td>Chuyển tri thức từ mô hình thầy lớn sang mô hình trò nhỏ; ở DRAG là chuyển qua ngữ cảnh, không qua trọng số</td></tr>
+              <tr><td><b>Evidence</b></td><td>Đoạn phát biểu sự thật ngắn giúp trả lời câu hỏi, do LLM thầy sinh</td></tr>
+              <tr><td><b>Knowledge graph / triple</b></td><td>Đồ thị thực thể – quan hệ; mỗi cạnh là bộ ba (a, b, r)</td></tr>
+              <tr><td><b>Multigraph / Simple graph</b></td><td>Đồ thị cho phép / không cho phép nhiều cạnh giữa cùng hai nút</td></tr>
+              <tr><td><b>Cosine similarity</b></td><td>Độ tương đồng giữa hai vector nhúng, dùng để đo độ gần ngữ nghĩa</td></tr>
+              <tr><td><b>PII</b></td><td>Personally Identifiable Information — thông tin định danh cá nhân như tên, email, địa chỉ</td></tr>
+              <tr><td><b>Zero-shot</b></td><td>Đánh giá không đưa ví dụ mẫu trong prompt</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 12 -->
+      <section id="hoi-dap">
+        <h2 class="rv"><span class="no">13</span>Câu hỏi có thể gặp</h2>
+        <details class="rv"><summary>DRAG có fine-tune SLM không?</summary><div><p>Không. Toàn bộ khung chỉ dùng prompt. Đây là điểm khác chính so với LLMQuoter (LoRA) hay Self-RAG, SimRAG.</p></div></details>
+        <details class="rv"><summary>Nếu đã gọi GPT-4o thì sao không để GPT-4o trả lời luôn?</summary><div><p>Ba lý do trong bài: trò có thể là mô hình chuyên miền; chỉ gửi câu hỏi đã ẩn danh nên bảo vệ được riêng tư; và thầy chỉ cung cấp tri thức nên câu trả lời cuối do mô hình cục bộ kiểm soát. Tuy vậy, về chi phí, lời gọi cloud cho mỗi câu hỏi vẫn còn.</p></div></details>
+        <details class="rv"><summary>Vì sao xếp hạng cần cả cosine lẫn LLM?</summary><div><p>Cosine chỉ đo độ gần ngữ nghĩa bề mặt; một câu về <i>complete metamorphosis</i> vẫn rất “gần” câu hỏi về <i>metamorphosis</i>. LLM đánh giá mức phù hợp theo ngữ cảnh. Hai điểm được cộng với trọng số bằng nhau.</p></div></details>
+        <details class="rv"><summary>Graph có tốt hơn Evidence không?</summary><div><p>Không về độ chính xác: evidence-only thường cao nhất. Graph ngắn hơn ~18% token nên rẻ hơn khi suy luận. Kết hợp cả hai không tăng đáng kể mà tốn thêm chi phí.</p></div></details>
+        <details class="rv"><summary>Vì sao chọn K = 15?</summary><div><p>Thực nghiệm trên 4 benchmark cho thấy độ chính xác tăng nhanh tới 10–15 rồi đi ngang; với N = 30–50 trên GPQA thì không tăng hoặc giảm nhẹ do nhiễu.</p></div></details>
+        <details class="rv"><summary>Làm sao biết evidence không lộ đáp án?</summary><div><p>Bài chỉ dặn trong prompt “Do not give the answer away directly” và tự nhận rủi ro rò rỉ vẫn còn. Đây là điểm chưa được đo định lượng.</p></div></details>
+        <details class="rv"><summary>SLM lọc PII có làm mất nghĩa câu hỏi không?</summary><div><p>Theo Bảng 4, sau khi lọc, mọi SLM vẫn tăng 6.6–14.1 điểm trên MMLU so với gốc, nên phần nghĩa cần thiết được giữ lại. PII giảm 95.7% (còn 649 trên 15.090).</p></div></details>
+      </section>
+
+      <footer class="end">
+        Bản đọc hiểu dựa trên arXiv:2506.01954v1 (ACL 2025). Hình 1 và Hình 2 trích từ bài báo; các sơ đồ khác do người viết vẽ lại để minh họa. ·
+        <a href="DRAG_Slide.html">Mở slide trình bày →</a>
+      </footer>
+    </article>
+  </div>
+
+  <button type="button" class="to-top" id="toTop" aria-label="Lên đầu trang">↑</button>
+  <div class="lightbox" id="lightbox" role="dialog" aria-label="Xem hình phóng to"><img alt=""></div>
+
+  <script>
+    (() => {
+      /* Reading progress + back to top */
+      const readbar = document.getElementById("readbar");
+      const toTop = document.getElementById("toTop");
+      const onScroll = () => {
+        const h = document.documentElement;
+        const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+        readbar.style.width = (p * 100).toFixed(2) + "%";
+        toTop.classList.toggle("show", h.scrollTop > 600);
+      };
+      addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+      toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+
+      /* Count-up */
+      function countUp(el) {
+        const to = parseFloat(el.dataset.to);
+        const dec = parseInt(el.dataset.dec || "0", 10);
+        const pre = el.dataset.pre || "";
+        const fmt = (v) => {
+          let s = v.toFixed(dec);
+          if (el.dataset.sep) s = Number(s).toLocaleString("en-US");
+          return pre + s;
+        };
+        const start = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - start) / 1300);
+          el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      /* Grouped bar chart: MiniRAG vs DRAG (Bảng 1) */
+      const miniData = {
+        models: ["GLM-edge-1.5B", "Qwen2.5-3B", "Llama-3.2-3B", "Gemma-2-2B", "Phi-3.5-mini"],
+        arc:  { mini: [62.3, 67.7, 65.3, 68.6, 82.7], drag: [90.0, 93.0, 93.0, 91.5, 94.1] },
+        med:  { mini: [52.1, 58.3, 52.7, 48.5, 61.1], drag: [56.9, 72.8, 73.6, 72.4, 74.4] },
+        mmlu: { mini: [47.0, 70.9, 69.1, 57.3, 72.7], drag: [69.0, 73.8, 74.4, 71.2, 77.8] }
+      };
+      const miniChart = document.getElementById("miniChart");
+      const miniLabels = document.getElementById("miniLabels");
+      let miniDs = "arc";
+      function drawMini() {
+        const d = miniData[miniDs];
+        const h = (v) => ((v - 40) / 60) * 100;
+        miniChart.innerHTML = miniData.models.map((m, i) => `
+          <div class="grp">
+            <div class="bar mini" data-h="${h(d.mini[i])}"><span>${d.mini[i].toFixed(1)}</span></div>
+            <div class="bar drag" data-h="${h(d.drag[i])}"><span>${d.drag[i].toFixed(1)}</span><em class="delta">+${(d.drag[i] - d.mini[i]).toFixed(1)}</em></div>
+          </div>`).join("");
+        miniLabels.innerHTML = miniData.models.map((m) => `<div>${m}</div>`).join("");
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          miniChart.querySelectorAll(".bar").forEach((b) => { b.style.height = b.dataset.h + "%"; });
+        }));
+      }
+      document.querySelectorAll("#miniTabs button").forEach((b) => b.addEventListener("click", () => {
+        document.querySelectorAll("#miniTabs button").forEach((x) => x.classList.toggle("on", x === b));
+        miniDs = b.dataset.ds;
+        drawMini();
+      }));
+
+      /* Line chart: ablation K (Gemma-2-2B, GPT-4o) — Bảng 2, 8, 10, 11, 17 */
+      const kData = {
+        arc:  { x: [5, 10, 15, 20], orig: 53.71, g: [85.08, 87.94, 88.56, 88.92], e: [88.11, 90.71, 91.33, 91.51], c: [87.67, 90.71, 91.33, 91.33], y: [50, 95] },
+        med:  { x: [5, 10, 15, 20], orig: 42.91, g: [62.59, 66.91, 68.68, 69.64], e: [66.51, 70.36, 71.38, 72.44], c: [65.62, 69.35, 71.72, 72.03], y: [40, 75] },
+        mmlu: { x: [5, 10, 15, 20], orig: 56.8,  g: [62.16, 64.50, 66.66, 67.44], e: [66.19, 68.91, 70.39, 71.16], c: [66.24, 68.93, 70.37, 70.64], y: [54, 73] },
+        gpqa: { x: [5, 10, 15, 20, 30, 40, 50], orig: 28.75, g: [32.42, 32.23, 32.78, 33.70, 33.46, 33.08, 34.50], e: [32.97, 34.98, 36.26, 36.81, 37.10, 36.33, 35.64], c: [33.33, 35.16, 35.71, 37.55, 37.33, 36.78, 36.43], y: [27, 39] }
+      };
+      const kChart = document.getElementById("kChart");
+      let kDs = "arc";
+      function drawK() {
+        const d = kData[kDs];
+        const W = 820, H = 340, L = 46, R = 18, T = 22, B = 42;
+        const xs = (i) => L + (i * (W - L - R)) / (d.x.length - 1);
+        const ys = (v) => T + (1 - (v - d.y[0]) / (d.y[1] - d.y[0])) * (H - T - B);
+        const span = d.y[1] - d.y[0];
+        const step = span > 30 ? 10 : span > 15 ? 5 : 2;
+        let grid = "";
+        for (let v = Math.ceil(d.y[0] / step) * step; v <= d.y[1]; v += step) {
+          grid += `<line x1="${L}" x2="${W - R}" y1="${ys(v)}" y2="${ys(v)}" stroke="#e2e8f0"/><text x="${L - 8}" y="${ys(v) + 4}" text-anchor="end" font-size="12" fill="#64748b">${v}</text>`;
+        }
+        d.x.forEach((x, i) => { grid += `<text x="${xs(i)}" y="${H - B + 20}" text-anchor="middle" font-size="12.5" fill="#334155" font-weight="${x === 15 ? 800 : 500}">${x}</text>`; });
+        const i15 = d.x.indexOf(15);
+        const band = `<rect x="${xs(i15) - 22}" y="${T}" width="44" height="${H - T - B}" fill="#fde68a" opacity=".45" rx="8"/><text x="${xs(i15)}" y="${T + 14}" text-anchor="middle" font-size="12" font-weight="800" fill="#b45309">K = 15</text>`;
+        const path = (arr) => arr.map((v, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(" ");
+        const series = [
+          { k: "e", name: "Evidence only", color: "#0f766e" },
+          { k: "c", name: "Combined", color: "#1d4ed8" },
+          { k: "g", name: "Graph only", color: "#c2410c" }
+        ];
+        const lines = series.map((s) => `<path class="ln-path" pathLength="1" d="${path(d[s.k])}" stroke="${s.color}"/>` +
+          d[s.k].map((v, i) => `<circle cx="${xs(i)}" cy="${ys(v)}" r="4.5" fill="#fff" stroke="${s.color}" stroke-width="2.5"><title>${s.name} · K=${d.x[i]}: ${v}</title></circle>`).join("")).join("");
+        const orig = `<line x1="${L}" x2="${W - R}" y1="${ys(d.orig)}" y2="${ys(d.orig)}" stroke="#64748b" stroke-width="2.5" stroke-dasharray="7 6"/><text x="${W - R}" y="${ys(d.orig) - 7}" text-anchor="end" font-size="12.5" font-weight="700" fill="#475569">Không ngữ cảnh: ${d.orig}</text>`;
+        const legend = series.map((s, i) => `<g transform="translate(${L + 8 + i * 140},${H - 6})"><rect width="14" height="4" y="-6" rx="2" fill="${s.color}"/><text x="20" y="0" font-size="12.5" font-weight="700" fill="#334155">${s.name}</text></g>`).join("");
+        kChart.classList.remove("on");
+        kChart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Độ chính xác theo số evidence K">${band}${grid}${orig}${lines}${legend}</svg>`;
+        requestAnimationFrame(() => requestAnimationFrame(() => kChart.classList.add("on")));
+      }
+      document.querySelectorAll("#kTabs button").forEach((b) => b.addEventListener("click", () => {
+        document.querySelectorAll("#kTabs button").forEach((x) => x.classList.toggle("on", x === b));
+        kDs = b.dataset.ds;
+        drawK();
+      }));
+
+      /* Scroll reveal + one-time triggers */
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          const el = en.target;
+          el.classList.add("in");
+          el.querySelectorAll(".count").forEach(countUp);
+          if (el.contains(miniChart)) drawMini();
+          if (el.contains(kChart)) drawK();
+          io.unobserve(el);
+        });
+      }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+      document.querySelectorAll(".rv").forEach((el) => io.observe(el));
+
+      /* Active TOC */
+      const tocLinks = [...document.querySelectorAll(".toc a")];
+      const targets = tocLinks.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+      const spy = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          tocLinks.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + en.target.id));
+        });
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      targets.forEach((t) => spy.observe(t));
+
+      /* Lightbox */
+      const lightbox = document.getElementById("lightbox");
+      document.querySelectorAll("[data-zoom]").forEach((img) => img.addEventListener("click", () => {
+        lightbox.querySelector("img").src = img.src;
+        lightbox.querySelector("img").alt = img.alt;
+        lightbox.classList.add("open");
+      }));
+      lightbox.addEventListener("click", () => lightbox.classList.remove("open"));
+      addEventListener("keydown", (e) => { if (e.key === "Escape") lightbox.classList.remove("open"); });
+    })();
+  </script>
+</body>
+</html>
