@@ -803,7 +803,7 @@
           <li><strong>Expert.</strong> Mô hình tự viết một đoạn mô tả chuyên gia viết comment một câu cho một hàm. Đoạn đó thay system prompt mặc định, rồi hỏi như zero-shot.</li>
         </ul>
         <h3>Temperature, top-p, và các thước</h3>
-        <p>Temperature từ 0 đến 1 làm phân bố xác suất phẳng hơn, câu ngẫu nhiên hơn. Temperature 0 cho câu gần như cố định. Top-p giữ nhóm từ có tổng xác suất đạt ngưỡng. Top-p 0,1 chỉ xét nhóm từ chiếm 10% xác suất cao nhất. Ngưỡng càng lớn, càng nhiều từ hiếm được xét.</p>
+        <p>Temperature từ 0 đến 1 làm phân bố xác suất phẳng hơn, câu ngẫu nhiên hơn. Temperature 0 cho câu gần như cố định. Top-p giữ nhóm từ có tổng xác suất đạt ngưỡng. Top-k thì giữ đúng k từ xác suất cao nhất. Bài nhắc cả ba tham số, nhưng RQ3 không thử top-k vì API GPT-3.5 và GPT-4 không cho chỉnh top-k. Ví dụ cụ thể nằm ở mục RQ3.</p>
         <p>BLEU, METEOR và ROUGE-L đếm từ trùng. BLEU còn phạt câu dài hơn mẫu. BERTScore và các độ đo câu (Sentence-BERT, Universal Sentence Encoder) so nghĩa với mẫu, nên vẫn kéo theo chất lượng của mẫu. SIDE so vector của code Java với vector của câu tóm tắt, không cần mẫu, nhưng mới có cho Java. GPT-4 hoặc GPT-3.5 chấm thang 1–5 theo bốn tiêu chí: đúng, rõ, đủ ý, gọn.</p>
         <p>Spearman ρ đo hai cách xếp hạng có đi cùng nhau không. ρ dương là cùng chiều, âm là ngược chiều, 0 là không liên quan. p-value dưới 0,05 thì mối liên quan được xem là có ý nghĩa thống kê.</p>
         <div class="say"><strong>Khi nói.</strong> Hàm làm ba việc: người gửi, địa chỉ trả lời, người nhận. Mẫu gốc nêu đủ nhưng viết khó hiểu. CodeLlama sót người nhận. StarChat chỉ nói người nhận. BLEU phạt câu dài hơn mẫu. GPT-4 khi ngồi ghế giám khảo cho điểm cao cho câu đủ việc và dễ đọc. Vì vậy phải nói rõ đang dùng thước nào.</div>
@@ -842,6 +842,7 @@
 
       <section id="rq1">
         <h2>5. RQ1 — Thước nào hợp</h2>
+        <p><strong>Câu hỏi RQ1.</strong> Phương pháp đánh giá nào phù hợp để đo chất lượng câu tóm tắt do LLM sinh ra? Câu của LLM có khi còn tốt hơn comment mẫu, nên các thước so độ giống với comment mẫu như BLEU, ROUGE-L, BERTScore có còn đo đúng không, và GPT-4 có làm giám khảo thay người chấm được không?</p>
         <p>Mười lăm người chấm mù: 1 nghiên cứu sinh, 5 thạc sĩ, 9 sinh viên đại học, mỗi người trên 3 năm lập trình. Mỗi ngôn ngữ 50 mẫu, tổng 150. Thang 1–5. Mẫu gốc được trộn với bốn câu của bốn LLM.</p>
         <figure class="chart">
           <figcaption>Điểm người chấm. Trục là thang 1–5.</figcaption>
@@ -899,6 +900,7 @@
 
       <section id="rq2">
         <h2>6. RQ2 — Năm kiểu prompt</h2>
+        <p><strong>Câu hỏi RQ2.</strong> Các kỹ thuật prompt khác nhau hiệu quả đến đâu khi đưa LLM vào bài toán tóm tắt mã nguồn? Kiểu nào hợp với từng LLM, và prompt công phu hơn có luôn tốt hơn cách ra lệnh thẳng zero-shot không?</p>
         <p>Sáu trăm mẫu: 200 Java, 200 Python, 200 C. Điểm dưới đây là điểm GPT-4 chấm. Ô đậm là mức cao nhất của mô hình đó trên ngôn ngữ đó. Bốn kiểu sau zero-shot đều công phu hơn. Câu hỏi là công phu hơn có cho câu tốt hơn không.</p>
         <ul>
           <li><strong>Zero-shot, ra lệnh thẳng.</strong> “Please generate a short comment in one sentence for the following function”, kèm đoạn code.</li>
@@ -952,7 +954,13 @@
       <section id="rq3">
         <h2>7. RQ3 — Temperature và top-p</h2>
         <p><span class="who m2">La Hoàng Tú</span> Nhận từ đây đến hết đóng góp và hạn chế.</p>
-        <p>RQ3, RQ4 và RQ5 dùng few-shot để so được với các bài trước. Top-p thử 0,5, 0,75 và 1. Temperature thử 0,1, 0,5 và 1.</p>
+        <p><strong>Câu hỏi RQ3.</strong> Các cài đặt tham số mô hình khác nhau ảnh hưởng thế nào đến chất lượng tóm tắt mã nguồn của LLM?</p>
+        <p>RQ3 hỏi top-p và temperature có đổi chất lượng câu tóm tắt không, và vì cả hai cùng kiểm soát độ ngẫu nhiên thì mức ảnh hưởng có khác nhau không. RQ3, RQ4 và RQ5 dùng few-shot để so được với các bài trước. Top-p thử 0,5, 0,75 và 1. Temperature thử 0,1, 0,5 và 1, thành lưới 3 × 3 = 9 cấu hình cho mỗi mô hình. Sáu trăm mẫu: 200 Java, 200 Python, 200 C. GPT-4 chấm thang 1–5.</p>
+        <h3>Ví dụ để hình dung hai tham số</h3>
+        <p>Top-p xếp các từ theo xác suất từ cao xuống thấp và giữ nhóm đứng đầu sao cho tổng xác suất đạt ngưỡng. Giả sử từ tiếp theo của câu tóm tắt hàm đăng nhập là: “user” 50%, “account” 30%, “credential” 12%, “person” 5%, “cookie” 3%. Top-p 0,1 thì “user” đã chiếm 50%, vượt ngưỡng, nên chỉ còn từ đó và câu rất cố định. Top-p 0,9 giữ “user”, “account” và “credential”, tổng 92%, nên “credential” có cơ hội được chọn và câu đa dạng hơn.</p>
+        <p>Temperature chỉnh lại xác suất sau bước lọc top-p. Minh họa còn hai từ, A 80% và B 20%. Temperature 0 đẩy chênh lệch lên cực đại, mô hình luôn chọn A, mọi lần chạy ra cùng một câu. Temperature 1 làm phẳng khoảng cách, ví dụ còn khoảng 60% và 40%. Từ B dễ xuất hiện hơn. Hai con số 60% và 40% là minh họa cách làm phẳng, không phải một phép đo trong bài.</p>
+        <p>Ghép hai bước thành một lượt chọn từ. Câu đang viết là “This function authenticates the…”, xác suất từ tiếp theo: “user” 50%, “account” 30%, “person” 12%, “banana” 5%, “cookie” 3%. Danh sách này là một minh họa khác, không phải ví dụ đăng nhập ở trên. Bước một, lọc top-p theo xác suất cộng dồn: top-p 0,5 chỉ giữ “user”, top-p 0,85 giữ “user”, “account” và “person”. Bước hai, temperature: bằng 0 thì toàn bộ xác suất dồn vào “user”. Bằng 1 thì ba từ còn lại giữ tỷ lệ gốc sau khi chia lại cho tổng 92%, khoảng 54%, 33% và 13%, nên “account” và “person” vẫn có cơ hội. Với tham số trong minh họa, từ được chọn là “user”.</p>
+        <p>Top-k giữ đúng k từ có xác suất cao nhất, khác top-p ở chỗ top-k cố định số từ còn top-p cố định tổng xác suất. Bài nhắc top-k cùng top-p và temperature, nhưng không đưa top-k vào lưới thí nghiệm vì API GPT-3.5 và GPT-4 không hỗ trợ chỉnh top-k.</p>
         
 <figure class="chart">
   <figcaption>GPT-4, top-p = 0,5: điểm khi tăng temperature</figcaption>
@@ -990,19 +998,20 @@
               <tr><td>0,75</td><td>3,54 / 3,66 / 3,35</td><td>3,55 / 3,65 / 3,24</td><td>3,46 / 3,64 / 3,41</td></tr>
               <tr><td>1</td><td>3,56 / 3,97 / 3,56</td><td>3,55 / 3,71 / 3,42</td><td>3,41 / 3,72 / 3,52</td></tr>
               <tr><td rowspan="3">GPT-4</td><td>0,5</td><td>4,44 / 4,25 / 4,33</td><td>4,47 / 4,30 / 4,31</td><td>4,45 / 4,31 / 4,29</td></tr>
-              <tr><td>0,75</td><td>4,48 / 4,27 / 4,31</td><td>4,46 / 4,34 / 4,36</td><td>4,47 / 4,33 / 4,36</td></tr>
+              <tr><td>0,75</td><td>4,48 / 4,27 / 4,31</td><td>4,46 / 4,34 / 4,26</td><td>4,47 / 4,33 / 4,36</td></tr>
               <tr><td>1</td><td>4,66 / 4,16 / 4,18</td><td>4,43 / 4,27 / 4,33</td><td>4,40 / 4,18 / 4,33</td></tr>
             </tbody>
           </table>
         </div>
-        <p>Với GPT-4 và top-p 0,5, tăng temperature làm comment Python tốt lên và comment C đi xuống. Java gần như đứng yên. GPT-4 biến ít hơn CodeLlama và StarChat. Top-p và temperature cùng chỉnh độ ngẫu nhiên, và ảnh hưởng cùng kiểu.</p>
-        <p class="finding">Không có một mức temperature đúng cho mọi mô hình và mọi ngôn ngữ. Nên chỉnh một trong hai tham số, không chỉnh cả hai cùng lúc.</p>
-        <div class="say"><strong>Khi nói.</strong> Top-p 0,9 nghĩa là cắt các từ hiếm nằm ngoài 90% xác suất cộng dồn. Temperature làm đường xác suất phẳng hơn. Tài liệu của OpenAI khuyên chỉnh một trong hai. Bảng này cho thấy lời khuyên đó hợp với bài toán comment.</div>
+        <p>Với GPT-4 và top-p 0,5, tăng temperature làm comment Python tốt lên (4,25 rồi 4,30 rồi 4,31) và comment C đi xuống (4,33 rồi 4,31 rồi 4,29). Java gần như đứng yên: 4,44, 4,47, 4,45. GPT-4 biến ít hơn CodeLlama và StarChat. Trên bảng, đổi top-p hoặc temperature với GPT-4 thường chỉ xê dịch khoảng 0,1–0,3 điểm, nhỏ hơn nhiều so với việc đổi kiểu prompt. Ví dụ nhóm tính từ hai bảng: GPT-4 trên Java chạy từ 4,40 đến 4,66 qua chín cấu hình, lệch 0,26; còn CodeLlama trên Java đổi từ few-shot 3,78 sang critique 2,15, lệch 1,63. Top-p và temperature cùng chỉnh độ ngẫu nhiên, ảnh hưởng tương đồng, nên chỉ nên chỉnh một trong hai.</p>
+        <p class="finding">Không có một mức temperature hay top-p đúng cho mọi mô hình và mọi ngôn ngữ. Hai tham số thay thế nhau. Tác động của chúng nhỏ hơn tác động của việc chọn prompt.</p>
+        <div class="say"><strong>Khi nói.</strong> Lấy ví dụ từ “user” 50% để giải thích top-p 0,1 và 0,9, rồi lấy từ A 80% và từ B 20% để giải thích temperature 0 và 1. Nhắc top-k không được thử vì API GPT không chỉnh được. Chỉ vào biểu đồ: cùng top-p 0,5, Python đi lên còn C đi xuống. Dao động của GPT-4 chỉ khoảng 0,1 đến 0,3 điểm.</div>
       </section>
 
       <section id="rq4">
         <h2>8. RQ4 — Họ ngôn ngữ</h2>
-        <p>Mỗi ngôn ngữ 200 mẫu, few-shot, GPT-4 chấm.</p>
+        <p><strong>Câu hỏi RQ4.</strong> LLM tóm tắt mã nguồn viết bằng các loại ngôn ngữ lập trình khác nhau như thế nào? LLM có học tốt mọi ngôn ngữ như nhau không, và họ lập trình cùng độ dồi dào của dữ liệu huấn luyện ảnh hưởng thế nào đến câu tóm tắt?</p>
+        <p>Mỗi ngôn ngữ 200 mẫu, few-shot bốn ví dụ, bốn mô hình, GPT-4 chấm. Mười ngôn ngữ thuộc năm họ: hướng đối tượng, thủ tục, script, hàm và logic.</p>
         <figure class="chart">
           <figcaption>Năm ngôn ngữ đại diện. Prolog thấp nhất ở cả bốn mô hình.</figcaption>
           <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
@@ -1011,7 +1020,7 @@
         <figure class="chart">
           <figcaption>Điểm GPT-4 trên đủ 10 ngôn ngữ. Trục cắt từ 3,9 đến 4,8 để thấy chênh lệch.</figcaption>
           <div class="hbar"><div class="hbar-row"><span>Java · OOP</span><span class="track"><i class="fill sw-g4" style="width:84.4%"></i></span><b>4,66</b></div><div class="hbar-row"><span>Go · thủ tục</span><span class="track"><i class="fill sw-g4" style="width:51.1%"></i></span><b>4,36</b></div><div class="hbar-row"><span>PHP · script</span><span class="track"><i class="fill sw-g4" style="width:45.6%"></i></span><b>4,31</b></div><div class="hbar-row"><span>C · thủ tục</span><span class="track"><i class="fill sw-g4" style="width:31.1%"></i></span><b>4,18</b></div><div class="hbar-row"><span>Ruby · script</span><span class="track"><i class="fill sw-g4" style="width:52.2%"></i></span><b>4,37</b></div><div class="hbar-row"><span>Python · script</span><span class="track"><i class="fill sw-g4" style="width:28.9%"></i></span><b>4,16</b></div><div class="hbar-row"><span>JavaScript</span><span class="track"><i class="fill sw-g4" style="width:43.3%"></i></span><b>4,29</b></div><div class="hbar-row"><span>Erlang · hàm</span><span class="track"><i class="fill sw-g4" style="width:36.7%"></i></span><b>4,23</b></div><div class="hbar-row"><span>Haskell · hàm</span><span class="track"><i class="fill sw-g4" style="width:35.6%"></i></span><b>4,22</b></div><div class="hbar-row"><span>Prolog · logic</span><span class="track"><i class="fill sw-g4" style="width:16.7%"></i></span><b>4,05</b></div></div>
-          <p class="axis-note">Java cao nhất, 4,66. Prolog thấp nhất, 4,05. Khoảng cách không lớn, nhưng Prolog đứng cuối.</p>
+          <p class="axis-note">Java cao nhất, 4,66. Prolog thấp nhất, 4,05. Khoảng cách không lớn, nhưng Prolog đứng cuối. Trung bình GPT-4 theo họ, nhóm tự tính: OOP 4,66, thủ tục 4,27, script 4,28, hàm 4,23, logic 4,05.</p>
         </figure>
         <div class="table-scroll">
           <table>
@@ -1033,21 +1042,22 @@
             </tbody>
           </table>
         </div>
-        <p>GPT-4 đứng đầu cả năm họ. Trong họ thủ tục, Go tốt hơn C với StarChat, GPT-3.5 và GPT-4. CodeLlama ngược lại: C 3,91 và Go 3,86. Cả bốn mô hình làm PHP tốt hơn Python. CodeLlama hơn GPT-3.5 trên Ruby và JavaScript. Ở họ hàm, hai mô hình chuyên code mạnh hơn trên Haskell. Hai mô hình đa năng mạnh hơn trên Erlang.</p>
-        <p>Prolog thấp nhất với cả bốn. Prolog không chạy theo vòng lặp và nhánh if, mà theo sự kiện, luật và hợp nhất. Tokenizer cùng cơ chế attention của LLM học chủ yếu code mệnh lệnh, nên suy ra quan hệ lùi của Prolog rất khó. Tập Prolog thu được cũng nhỏ nhất, 1.547 cặp.</p>
-        <p class="finding">GPT-4 áp đảo trên cả 10 ngôn ngữ. Lập trình logic, đại diện là Prolog, là chỗ khó nhất vì ít dữ liệu và vì cách viết khai báo khác code tuần tự.</p>
-        <div class="say"><strong>Khi nói.</strong> Nếu được hỏi LLM dở nhất ở ngôn ngữ nào, câu trả lời của bài này là Prolog. Người viết Prolog nêu quan hệ là gì, không viết từng bước làm thế nào. Đó là gợi ý cho hướng tinh chỉnh hoặc bổ sung tri thức với ngôn ngữ khai báo ít dữ liệu.</div>
+        <p>GPT-4 đứng đầu cả năm họ. Trong họ thủ tục, Go tốt hơn C với StarChat, GPT-3.5 và GPT-4. CodeLlama ngược lại, và hơn cả GPT-3.5 trên C: 3,91 so với 3,56. Cả bốn mô hình làm PHP tốt hơn Python. CodeLlama hơn GPT-3.5 trên Ruby, 3,98 so với 3,64, và trên JavaScript, 4,03 so với 3,53. Ở họ hàm, hai mô hình chuyên code mạnh hơn trên Haskell. Hai mô hình đa năng mạnh hơn trên Erlang.</p>
+        <p>Prolog thấp nhất với cả bốn. Prolog không chạy theo vòng lặp và nhánh if, mà theo sự kiện, luật và hợp nhất. Tokenizer cùng cơ chế attention của LLM học chủ yếu code mệnh lệnh, nên suy ra quan hệ lùi của Prolog rất khó. Tập Prolog thu được cũng nhỏ nhất, 1.547 cặp. Với ngôn ngữ hiếm kiểu này, đừng trông vào LLM tổng quát. Ngược lại, C, Ruby và JavaScript đủ phổ biến để chạy CodeLlama 7B local và vẫn cao hơn GPT-3.5.</p>
+        <p class="finding">GPT-4 áp đảo trên cả 10 ngôn ngữ. Lập trình logic, đại diện là Prolog, là chỗ khó nhất vì ít dữ liệu và vì cách viết khai báo khác code tuần tự. CodeLlama 7B hơn GPT-3.5 trên C, Ruby và JavaScript.</p>
+        <div class="say"><strong>Khi nói.</strong> Nếu được hỏi LLM dở nhất ở ngôn ngữ nào, câu trả lời của bài này là Prolog. Người viết Prolog nêu quan hệ là gì, không viết từng bước làm thế nào. Nếu được hỏi có phải lúc nào cũng cần GPT, chỉ vào C 3,91 so với 3,56, Ruby 3,98 so với 3,64 và JavaScript 4,03 so với 3,53: CodeLlama 7B chạy local cao hơn GPT-3.5.</div>
       </section>
 
       <section id="rq5">
         <h2>9. RQ5 — Năm loại ý định</h2>
-        <p>Bộ phân loại COIN chia comment Java thành năm ý định. Mỗi loại rút 180 mẫu. Thí nghiệm dùng few-shot.</p>
+        <p><strong>Câu hỏi RQ5.</strong> Khả năng sinh các loại tóm tắt mã nguồn theo các danh mục ý định khác nhau của các LLM như thế nào? Mỗi LLM có thế mạnh riêng với từng loại ý định chú thích không, và mô hình mã nguồn mở nhỏ gọn có cạnh tranh được với LLM thương mại đắt đỏ ở từng loại không?</p>
+        <p>Bộ phân loại COIN chia comment thành sáu loại. Loại Others, ví dụ “The implementation is awesome.”, không mang thông tin kỹ thuật. Bài xem đó là nhiễu và loại khỏi thí nghiệm. Năm loại còn lại lấy từ tập Java của CodeSearchNet, mỗi loại rút ngẫu nhiên 180 mẫu, tổng 900. Few-shot dùng bốn ví dụ đúng cùng loại ý định, lấy từ tập huấn luyện.</p>
         <ul>
-          <li><strong>What:</strong> chức năng là gì. Ví dụ đẩy một phần tử lên đỉnh stack.</li>
-          <li><strong>Why:</strong> vì sao thiết kế vậy.</li>
-          <li><strong>How-it-is-done:</strong> làm bằng cách nào. Ví dụ dịch các phần tử phía sau sang trái.</li>
-          <li><strong>Property:</strong> tính chất, điều kiện trước hoặc sau. Ví dụ không chạy trong thời gian hằng số.</li>
-          <li><strong>How-to-use:</strong> cách gọi, phiên bản. Ví dụ chỉ được gọi một lần trong mỗi lần gọi next().</li>
+          <li><strong>What:</strong> chức năng là gì, không đi vào cách làm. Ví dụ “Pushes an item onto the top of this stack.”</li>
+          <li><strong>Why:</strong> vì sao thiết kế vậy, khi mục đích bị phần cài đặt che mất. Bài nêu trường hợp giải thích hàm nạp chồng.</li>
+          <li><strong>How-it-is-done:</strong> làm bằng cách nào. Ví dụ “Shifts any subsequent elements to the left.”</li>
+          <li><strong>Property:</strong> điều kiện trước, điều kiện sau, hoặc tính chất. Ví dụ “This method is not a constant-time operation.”</li>
+          <li><strong>How-to-use:</strong> cách gọi, môi trường, phiên bản. Ví dụ “This method can be called only once per call to next().”</li>
         </ul>
         <figure class="chart">
           <figcaption>CodeLlama 7B so với GPT-4. Why và Property là hai cột CodeLlama không thua.</figcaption>
@@ -1070,8 +1080,8 @@
         </div>
         <p>CodeLlama hơn GPT-4 ở Why, 4,29 so với 4,28, và hơn rõ hơn ở Property, 4,19 so với 4,06. GPT-4 vẫn cao hơn ở What, How-it-is-done và How-to-use. GPT-3.5 và GPT-4 đều yếu tương đối ở Property so với các loại còn lại của chính chúng. StarChat thấp nhất ở How-to-use.</p>
         <p>RQ5 dùng few-shot trên Java. Bài giải thích CodeLlama hơn ở Why và Property vì few-shot không phải prompt tối ưu của GPT-4 khi xét chung: trung bình chain-of-thought 4,54, few-shot 4,33. Riêng cột Java của Bảng IV, few-shot 4,66 lại là ô cao nhất của GPT-4. Kết quả Why và Property vì vậy gắn với few-shot và với Java.</p>
-        <p class="finding">Với few-shot trên Java, CodeLlama-Instruct 7B viết comment Why và Property sát hoặc hơn GPT-4. Nhóm không có nhiều GPU vẫn có thể tự chạy mô hình mở cỡ nhỏ cho hai loại comment này.</p>
-        <div class="say"><strong>Khi nói.</strong> Đây là ý có giá trị thực hành nhất. Không bắt buộc gọi API GPT-4 cho mọi comment thiết kế. Mô hình 7B, nếu được bốn ví dụ đúng loại, làm được phần Why và Property.</div>
+        <p class="finding">Với few-shot trên Java, CodeLlama-Instruct 7B viết comment Why và Property sát hoặc hơn GPT-4. Không bắt buộc trả phí API GPT-4 cho mọi comment: mô hình mở 7B chạy local làm được hai loại này. Ví dụ mồi phải đúng loại ý định đang cần.</p>
+        <div class="say"><strong>Khi nói.</strong> Đọc một câu ví dụ cho mỗi loại trước khi đọc điểm. Nhắc Others bị loại. GPT-4 dẫn đầu What, How và How-to-use. CodeLlama 7B dẫn đầu Why và Property. Ý thực hành là chạy mô hình 7B local cho hai loại đó, và few-shot phải cùng loại ý định.</div>
       </section>
 
       <section id="dong-gop">
@@ -1084,7 +1094,7 @@
         <p><strong>Ngẫu nhiên.</strong> StarChat-β và CodeLlama không đặt temperature về 0 được, nên lúc sinh câu cả bài dùng 0,1, trừ RQ3. Lúc GPT-4 chấm ở RQ2–RQ5, temperature đặt 0.</p>
         <p><strong>Luật lấy câu đầu.</strong> Lời LLM thường là một đoạn. Lấy câu đầu giúp comment gọn, nhưng có thể bỏ chi tiết ở câu sau.</p>
         <p><strong>Chi phí.</strong> Gọi GPT-4 đắt, nên không phải câu hỏi nào cũng chạy đủ mười ngôn ngữ. RQ4 là câu hỏi dùng đủ mười ngôn ngữ. RQ5 chỉ Java.</p>
-        <div class="say"><strong>Khi nói.</strong> Hạn chế đáng nhắc là luật lấy câu đầu. Câu đầu của GPT-4 và CodeLlama vẫn được người chấm và GPT-4 chấm cao hơn mẫu gốc. Xong phần bài báo, Võ Văn Hải nói cách nhóm chạy lại và chỗ nhóm nới luật câu đầu.</div>
+        <div class="say"><strong>Khi nói.</strong> Hạn chế đáng nhắc là luật lấy câu đầu. Khi áp dụng: bỏ BLEU trong kiểm thử nội bộ, ví dụ few-shot phải cùng loại ý định, ngôn ngữ hiếm như Prolog đừng trông vào LLM tổng quát, còn C, Ruby, JavaScript cùng comment Why và Property có thể chạy CodeLlama 7B local. Xong phần bài báo, Võ Văn Hải nói cách nhóm chạy lại.</div>
       </section>
 
       <section id="chay-lai">
@@ -1135,7 +1145,7 @@
           <li><strong>Vì sao BLEU không còn đúng?</strong> Mẫu trong CodeSearchNet ngắn và thiếu ý. LLM viết dài, dùng từ khác. BLEU đếm từ trùng và phạt câu dài, nên trừ điểm một câu mà người đọc lại cho cao.</li>
           <li><strong>Vì sao zero-shot của GPT-3.5 đôi khi hơn few-shot và chain-of-thought?</strong> GPT-3.5 đã hiểu chỉ thị tốt. Bốn ví dụ lấy từ dữ liệu có comment mẫu trung bình, hoặc năm câu hỏi trung gian, có thể đưa chi tiết thừa vào ngữ cảnh.</li>
           <li><strong>Vì sao CodeLlama 7B hơn GPT-4 ở Why và Property?</strong> Thí nghiệm đó dùng few-shot trên Java. Bài nói few-shot hợp CodeLlama, còn với GPT-4 thì chain-of-thought cao nhất khi cộng ba ngôn ngữ. Trên riêng Java, Bảng IV cho few-shot 4,66 là ô cao nhất của GPT-4. CodeLlama được tinh chỉnh trên code và chỉ thị, nên khi có bốn ví dụ cùng loại thì bắt được ràng buộc và lý do thiết kế.</li>
-          <li><strong>Mang vào việc làm phần mềm thì sao?</strong> Bỏ BLEU trong bộ kiểm thử nội bộ, dùng GPT-4 hoặc GPT-3.5 để chấm. Chọn prompt theo mô hình: zero-shot cho GPT-3.5, few-shot cho mô hình mở. Có thể tự chạy CodeLlama 7B cho comment Why và Property.</li>
+          <li><strong>Mang vào việc làm phần mềm thì sao?</strong> Bỏ BLEU trong bộ kiểm thử nội bộ. Chọn prompt theo mô hình, và ví dụ few-shot phải cùng loại ý định. Ngôn ngữ hiếm như Prolog đừng trông vào LLM tổng quát. Với C, Ruby, JavaScript, và với comment Why cùng Property, có thể tự chạy CodeLlama 7B local.</li>
           <li><strong>Chỉ lấy câu đầu có làm lệch độ gọn và độ đủ ý không?</strong> Lời gốc thường có câu dẫn. Bài lấy câu đầu để comment dùng được trong code, và câu đầu của GPT-4 cùng CodeLlama vẫn được người và GPT-4 chấm cao hơn cả đoạn mẫu gốc. Nhóm giữ luật đó cho What, How và How-to-use. Với Why và Property, nếu câu đầu chưa nêu lý do hoặc ràng buộc thì ghép thêm câu thứ hai. Phần này chưa có điểm đo của nhóm.</li>
           <li><strong>Bài công bố ở đâu?</strong> Kỷ yếu IEEE/ACM của hội nghị ICSE 2025 tại Ottawa, 26 tháng 4 đến 6 tháng 5 năm 2025, trang 1882–1894. DOI 10.1109/ICSE55347.2025.00034. <a href="https://ieeexplore.ieee.org/document/11029737">IEEE Xplore</a>.</li>
         </ul>

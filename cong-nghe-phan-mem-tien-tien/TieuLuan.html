@@ -750,7 +750,7 @@
     .steps h3 { font-size: 1.25em; }
     .steps p { font-size: 1em; }
     .steps li .out { min-height: 5.4em; margin-top: auto; padding-top: 0.8em; border-top: 1px dashed #b9cde3; }
-    .out b {
+    .steps .out b {
       display: block;
       font-size: 0.8em;
       letter-spacing: 0.08em;
@@ -1243,14 +1243,28 @@
       font-weight: 800;
     }
     .slide .seq { font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
-    .l-trend .tip { margin-top: 1.1em; }
+    .l-trend .tip { margin-top: 0.7em; }
+    .samp-cards { display: grid; gap: 0.65em; min-height: 0; }
+    .samp {
+      padding: 0.7em 0.85em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-top: 0.28em solid var(--sky);
+      border-radius: 0 0.7em 0.7em 0;
+      font-size: 0.74em;
+      line-height: 1.4;
+    }
+    .samp .hd { display: block; margin-bottom: 0.2em; font-size: 0.92em; letter-spacing: 0.04em; text-transform: uppercase; color: var(--blue); }
+    .probs { display: flex; flex-wrap: wrap; gap: 0.28em; margin: 0.35em 0; }
+    .probs span { padding: 0.12em 0.45em; background: var(--mist); border-radius: 999px; font-weight: 800; color: var(--navy); }
+    .duel-name small { display: block; margin-top: 0.12em; font-size: 0.68em; font-weight: 600; line-height: 1.25; color: var(--muted); }
 
     /* ---------- 13. So kè từng cặp ---------- */
     .duel-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.55fr 1fr; gap: 2em; }
     .duel-rows { flex: 1; display: grid; align-content: center; gap: 0.9em; }
     .duel-row {
       display: grid;
-      grid-template-columns: 7em 1fr 6.5em;
+      grid-template-columns: 13.5em 1fr 6.2em;
       align-items: center;
       gap: 1em;
       padding-bottom: 0.9em;
@@ -1337,6 +1351,419 @@
     .idx { padding: 0.25em 0.5em 0; font-size: 2.4em; font-weight: 800; line-height: 1; color: var(--line); }
     .swot-cols p { padding: 0.4em 1.1em 1.2em; font-size: 1em; }
     .l-swot .tip { margin-top: 1.1em; }
+
+    /* ---------- RQ3–RQ5 theo tài liệu trình bày ---------- */
+    .slide h2.ask { max-width: none; font-size: 1.72em; }
+    .q-pair { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4em; align-content: center; }
+    .q-pair article {
+      padding: 1.6em 1.5em;
+      background: var(--mist);
+      border-left: 0.4em solid var(--sky);
+      border-radius: 0 1em 1em 0;
+    }
+    .q-pair h3 { margin-bottom: 0.45em; font-size: 1.15em; color: var(--blue); }
+    .q-pair p { font-size: 1.15em; }
+    .split { flex: 1; min-height: 0; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 1.4em; }
+    .split .lead { padding: 1.2em 1.3em; background: var(--mist); border-radius: 1em; font-size: 1.02em; }
+    .case { display: grid; gap: 0.7em; }
+    .case article { padding: 0.9em 1em; background: #fff; border: 1px solid var(--line); border-radius: 0.8em; }
+    .case h3 { margin-bottom: 0.25em; color: var(--blue); font-size: 0.95em; }
+    .flow, .flow5 { flex: 1; min-height: 0; display: grid; gap: 1.5em; align-items: stretch; }
+    .flow { grid-template-columns: repeat(4, 1fr); }
+    .flow5 { grid-template-columns: repeat(5, 1fr); gap: 0.8em; }
+    .flow article, .flow5 article {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35em;
+      padding: 0.9em 0.85em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 0.8em;
+    }
+    .flow article:not(:last-child)::after, .flow5 article:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -0.95em;
+      top: 1.1em;
+      z-index: 1;
+      color: var(--sky);
+      font-weight: 800;
+    }
+    .flow .n, .flow5 .n, .coin .n {
+      display: inline-grid;
+      place-items: center;
+      width: 1.7em;
+      height: 1.7em;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      font-size: 0.78em;
+      font-weight: 800;
+    }
+    .flow h3, .flow5 h3 { font-size: 0.95em; color: var(--navy); }
+    .flow p, .flow5 p { font-size: 0.82em; }
+    .flow .probs span, .mini-p { font-size: 0.78em; }
+    .sheet { flex: 1; min-height: 0; overflow: hidden; }
+    .sheet table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .sheet.dense table { font-size: 0.62em; }
+    .sheet.lang table { font-size: 0.78em; }
+    .sheet th, .sheet td { padding: 0.28em 0.35em; text-align: center; border-bottom: 1px solid var(--line); }
+    .sheet th { background: var(--navy); color: #fff; font-weight: 700; }
+    .sheet th.sub { background: #13508f; font-weight: 600; }
+    .sheet td.model { text-align: left; font-weight: 800; color: var(--navy); background: var(--mist); }
+    .sheet thead th:first-child { background: var(--navy); color: #fff; }
+    .sheet td.top { font-weight: 800; color: #065f46; background: #d1fae5; }
+    .sheet td.low { color: #9a3412; background: #ffedd5; }
+    .sheet caption { caption-side: bottom; padding-top: 0.45em; text-align: left; font-size: 0.78em; color: var(--muted); }
+    .sheet.dense caption { font-size: 1.3em; }
+    .coin { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7em; }
+    .coin article {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25em;
+      padding: 0.75em 0.85em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-top: 0.28em solid var(--sky);
+      border-radius: 0.7em;
+    }
+    .coin h3 { font-size: 0.92em; color: var(--navy); }
+    .coin p { font-size: 0.74em; }
+    .coin .ex { margin-top: auto; font-size: 0.98em; }
+    .coin .ex b { margin-right: 0.3em; font-weight: 800; color: var(--navy); }
+    .coin q { quotes: none; font-style: italic; font-weight: 700; color: var(--blue); }
+    .coin article.out { border-top-color: var(--amber); background: #fff7ed; }
+    .rank5 { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.6em; }
+    .rank5 article { display: flex; flex-direction: column; gap: 0.5em; min-height: 0; padding: 0.7em 0.5em; background: var(--mist); border-radius: 0.9em; }
+    .rank5 h3 { font-size: 0.98em; color: var(--navy); text-align: center; }
+    .rank5 ol { flex: 1; display: grid; grid-template-rows: repeat(4, 1fr); gap: 0.45em; }
+    .badge-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .rank5 li {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) 2.9em;
+      align-items: center;
+      column-gap: 0.35em;
+      padding: 0.3em 0.25em 0.3em 0.5em;
+      border-radius: 0.7em;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      border: 1px solid var(--edge);
+      box-shadow: 0 0.4em 0.9em rgba(11, 37, 69, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    }
+    .rank5 li::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.18) 100%);
+      pointer-events: none;
+    }
+    .rank5 .tier {
+      position: relative;
+      font-size: 2em;
+      font-style: italic;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      padding-right: 0.06em;
+      background: var(--num);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0.04em 0 var(--num-shadow));
+    }
+    .rank5 .who-sc { position: relative; display: grid; min-width: 0; }
+    .rank5 li b { font-size: 0.7em; font-weight: 800; line-height: 1.2; white-space: nowrap; letter-spacing: -0.01em; }
+    .rank5 li .sc { font-size: 1.32em; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .rank5 .tier-badge { position: relative; width: 2.9em; height: 2.9em; filter: drop-shadow(0 0.18em 0.2em rgba(0, 0, 0, 0.35)); }
+    .tier-badge .ring { fill: url(#bdRing); }
+    .tier-badge .ring-edge { fill: none; stroke: #ffffff; stroke-width: 0.8; opacity: 0.8; }
+    .tier-badge .face { fill: url(#bdFace); }
+    .tier-badge .glint { fill: #ffffff; opacity: 0.16; }
+    .tier-badge .plinth { fill: url(#bdPlinth); }
+    .tier-badge .plinth-top { fill: var(--plinth); }
+    .tier-badge .emb { fill: var(--ico); stroke: var(--ico-edge); stroke-width: 0.7; stroke-linejoin: round; }
+    .tier-badge .emb-line { fill: none; stroke: var(--ico-edge); stroke-width: 0.9; stroke-linecap: round; stroke-linejoin: round; }
+    .tier-badge .spark { fill: #fff8dc; transform-box: fill-box; transform-origin: center; }
+    .slide.active .rank5 .tier-badge .spark { animation: spark 2.2s ease-in-out infinite; }
+    @keyframes spark { 0%, 100% { opacity: 0.35; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
+    .rank5 .r1 {
+      --bg: linear-gradient(110deg, #0c0a07 0%, #241d11 52%, #5a4824 100%);
+      --edge: #7a6230;
+      --fg: #f3d27c;
+      --num: linear-gradient(180deg, #fff3c4 0%, #f2c54f 45%, #a8741a 100%);
+      --num-shadow: rgba(0, 0, 0, 0.6);
+      --ico: url(#icGold);
+      --ico-edge: #fff3c4;
+      --plinth: #d9b35a;
+    }
+    .rank5 .r1::before { background: linear-gradient(115deg, rgba(255, 236, 170, 0.22) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 64%, rgba(255, 220, 130, 0.16) 100%); }
+    .rank5 .r2 {
+      --bg: linear-gradient(110deg, #f6f3ff 0%, #ddd6fb 55%, #b9aef2 100%);
+      --edge: #c9bff5;
+      --fg: #33267d;
+      --num: linear-gradient(180deg, #8f7ff0 0%, #5a46c8 55%, #2e2177 100%);
+      --num-shadow: rgba(255, 255, 255, 0.9);
+      --ico: url(#icLilac);
+      --ico-edge: #ffffff;
+      --plinth: #cfc6f7;
+    }
+    .rank5 .r3 {
+      --bg: linear-gradient(110deg, #fff7e6 0%, #f5dca2 55%, #dcaa4f 100%);
+      --edge: #e9c983;
+      --fg: #7a3a06;
+      --num: linear-gradient(180deg, #f59e0b 0%, #c2410c 60%, #7c2d12 100%);
+      --num-shadow: rgba(255, 255, 255, 0.85);
+      --ico: url(#icAmber);
+      --ico-edge: #fff3d6;
+      --plinth: #efd08e;
+    }
+    .rank5 .r4 {
+      --bg: linear-gradient(110deg, #fff2f4 0%, #f9d0d8 55%, #ec9fb0 100%);
+      --edge: #f3bcc7;
+      --fg: #9f1239;
+      --num: linear-gradient(180deg, #f472b6 0%, #be123c 60%, #881337 100%);
+      --num-shadow: rgba(255, 255, 255, 0.85);
+      --ico: url(#icRose);
+      --ico-edge: #ffe4ea;
+      --plinth: #f6c6cf;
+    }
+
+    /* ---------- Trang mở đầu mỗi RQ ---------- */
+    .l-rq { padding: 0; }
+    .rq-band {
+      position: relative;
+      flex: 0 0 60%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 1em;
+      padding: 2.6em 3.2em 2.2em;
+      overflow: hidden;
+      background: var(--grad);
+    }
+    .rq-band::before,
+    .rq-band::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .rq-band::before { width: 28em; height: 28em; right: -7em; top: -10em; background: rgba(255, 255, 255, 0.06); }
+    .rq-band::after { width: 15em; height: 15em; right: 10em; bottom: -9em; background: rgba(0, 180, 216, 0.14); }
+    .rq-band .eyebrow { position: relative; color: #7dd3fc; }
+    .slide .rq-band h2 { position: relative; max-width: 30em; font-size: 2.35em; line-height: 1.22; color: #fff; }
+    .rq-band h2 b { color: #7dd3fc; }
+    .slide .rq-sub { flex: 1; display: grid; align-content: center; gap: 0.75em; padding: 1.2em 3.2em 3.4em; }
+    .rq-sub li { padding: 0.1em 0 0.1em 1em; border-left: 0.3em solid var(--sky); font-size: 1.1em; color: var(--ink); }
+    .slide.active .rq-band h2 { animation: rise 0.6s 0.1s ease both; }
+
+    /* ---------- Sơ đồ nhiều bước có hình ---------- */
+    .stages { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.2em; }
+    .stages.s4 { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.85fr); gap: 1.4em; }
+    .stages > article {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--mist);
+      border: 1px solid var(--line);
+      border-radius: 0.8em;
+    }
+    .stages > article:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -1.15em;
+      z-index: 1;
+      width: 1.1em;
+      height: 1.7em;
+      transform: translateY(-50%);
+      background: var(--sky);
+      clip-path: polygon(0 28%, 50% 28%, 50% 0, 100% 50%, 50% 100%, 50% 72%, 0 72%);
+    }
+    .stages.s4 > article:not(:last-child)::after { right: -1.3em; }
+    .stages header { padding: 0.55em 0.6em 0.6em; background: var(--grad); border-radius: 0.8em 0.8em 0 0; text-align: center; }
+    .stages header small { display: block; font-size: 0.64em; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #7dd3fc; }
+    .stages header h3 { font-size: 0.88em; color: #fff; }
+    .stages .body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.6em; padding: 0.8em 0.75em; font-size: 1.22em; }
+    .stages .body > p { font-size: 0.72em; text-align: center; }
+    .stages .body > p b { color: var(--navy); }
+    .ico { display: block; width: 3.2em; height: 3.2em; margin: 0 auto; }
+    .ico .ln { fill: none; stroke: var(--blue); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .ico .fill { fill: var(--ice); stroke: var(--blue); stroke-width: 2.4; }
+    .ico .thick { stroke-width: 4.2; stroke: var(--sky); }
+    .tiles { display: grid; gap: 0.35em; }
+    .tiles li {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      padding: 0.32em 0.45em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 0.5em;
+      font-size: 0.72em;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .tiles i {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2.1em;
+      height: 2.1em;
+      border-radius: 0.45em;
+      background: var(--c, var(--grad-cyan));
+      color: var(--fg, #fff);
+      font-style: normal;
+      font-size: 0.82em;
+      font-weight: 800;
+    }
+    .tiles li.pick { border-color: var(--sky); background: var(--ice); }
+    .stages .body > p.big-n, .big-n { text-align: center; font-size: 1.5em; font-weight: 800; line-height: 1.1; color: var(--navy); }
+    .big-n small { display: block; font-size: 0.5em; font-weight: 700; color: var(--muted); }
+    .scale { display: flex; justify-content: center; gap: 0.25em; }
+    .scale li {
+      display: grid;
+      place-items: center;
+      width: 1.7em;
+      height: 1.7em;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--blue);
+      font-size: 0.68em;
+      font-weight: 800;
+    }
+    .scale li:last-child { background: var(--grad-cyan); border-color: transparent; color: #fff; }
+    .grid9 { display: grid; grid-template-columns: auto repeat(3, 1fr); gap: 0.28em; align-items: center; font-size: 0.64em; }
+    .grid9 b { font-weight: 800; color: var(--blue); text-align: center; white-space: nowrap; }
+    .grid9 i {
+      display: grid;
+      place-items: center;
+      aspect-ratio: 1.25;
+      border-radius: 0.35em;
+      background: rgba(30, 136, 229, var(--a));
+      border: 1px solid var(--line);
+      font-style: normal;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .grid9 .axis { grid-column: 1 / -1; text-align: center; font-weight: 700; color: var(--muted); }
+    .langs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.28em; }
+    .langs li {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      padding: 0.15em 0.5em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.66em;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .langs li::before { content: ""; width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--c, var(--sky)); }
+    .f-oop { --c: #0b2545; }
+    .f-pp { --c: #13508f; }
+    .f-sp { --c: #1e88e5; }
+    .f-fp { --c: #00a6c7; }
+    .f-lp { --c: #c2410c; }
+    .shots { display: grid; gap: 0.25em; }
+    .shots li {
+      padding: 0.22em 0.5em;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 0.4em;
+      font-size: 0.62em;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .shots li.now { background: var(--ice); border-color: var(--sky); font-weight: 800; color: var(--navy); }
+    .fam { display: flex; align-items: flex-end; justify-content: center; gap: 0.45em; height: 6em; margin: 0.9em 0 1.1em; }
+    .fam span { position: relative; width: 1.8em; height: var(--h); background: var(--c); border-radius: 0.3em 0.3em 0 0; }
+    .fam b, .fam i { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.58em; }
+    .fam b { bottom: 100%; color: var(--navy); }
+    .fam i { top: 100%; font-style: normal; font-weight: 800; color: var(--muted); }
+    .inbox { padding: 0.45em 0.6em; background: #fff; border: 1px solid var(--line); border-radius: 0.5em; font-size: 0.74em; font-style: italic; font-weight: 600; color: var(--navy); }
+    .pbars { display: grid; gap: 0.35em; }
+    .pbars li { display: grid; grid-template-columns: 4.6em 1fr 2.4em; align-items: center; gap: 0.45em; font-size: 0.7em; font-weight: 700; color: var(--navy); }
+    .pbars i { height: 0.8em; border-radius: 999px; background: linear-gradient(90deg, var(--c, var(--sky)) var(--w), #fff var(--w)); border: 1px solid var(--line); }
+    .pbars b { text-align: right; }
+    .pbars li.low { --c: #9aa8b8; }
+    .mini { display: grid; gap: 0.2em; padding: 0.5em 0.55em; background: #fff; border: 1px solid var(--line); border-radius: 0.6em; }
+    .mini > b { font-size: 0.7em; color: var(--blue); }
+    .mini svg { display: block; width: 100%; height: 4.6em; }
+    .mini p { font-size: 0.68em; color: var(--muted); }
+    .mini .area { fill: rgba(30, 136, 229, 0.16); }
+    .mini .cum { fill: none; stroke: var(--sky); stroke-width: 1.8; stroke-linejoin: round; }
+    .mini .ax { fill: none; stroke: #9aa8b8; stroke-width: 0.8; }
+    .mini .thr { fill: none; stroke: var(--navy); stroke-width: 1; stroke-dasharray: 2.5 2; }
+    .mini .pb { fill: var(--sky); }
+    .mini .pb.off { fill: #c9d6e4; }
+    .mini text { font-size: 6.5px; font-weight: 700; fill: var(--navy); text-anchor: middle; }
+    .tok { display: inline-block; padding: 0 0.4em; border-radius: 0.3em; background: var(--ice); color: var(--blue); font-weight: 800; }
+    .pick-box { padding: 1em 0.5em; text-align: center; background: #fff; border: 2px solid var(--sky); border-radius: 0.8em; box-shadow: 0 0 0 0.4em rgba(30, 136, 229, 0.12); }
+    .pick-box small { display: block; font-size: 0.74em; font-weight: 700; color: var(--muted); }
+    .pick-box strong { font-size: 1.55em; color: var(--navy); }
+
+    /* ---------- Bảng RQ3 gộp, bảng nhiệt RQ4 ---------- */
+    .sheet.wide table { font-size: 0.84em; }
+    .sheet.wide th, .sheet.wide td { padding: 0.4em 0.3em; }
+    .sheet .g { border-left: 2px solid #b9cde4; }
+    .sheet.wide td.model { text-align: center; }
+    .sheet.wide caption { font-size: 0.86em; }
+    .s-head .sub-h { font-size: 1em; font-weight: 600; color: var(--muted); }
+    .sheet.heat table { font-size: 1em; border-collapse: separate; border-spacing: 0.2em; table-layout: fixed; }
+    .sheet.heat col.m { width: 14%; }
+    .sheet.heat td.model { white-space: nowrap; }
+    .sheet.heat th, .sheet.heat td { border: 0; border-radius: 0.35em; }
+    .sheet.heat th { padding: 0.45em 0.3em; font-size: 0.78em; line-height: 1.25; }
+    .sheet.heat th.sub { background: var(--ice); color: var(--navy); font-size: 0.82em; }
+    .sheet.heat td { padding: 0.85em 0.3em; font-weight: 700; color: var(--navy); }
+    .sheet.heat td.hi { color: #fff; }
+    .sheet.heat td.model { padding-left: 0.7em; }
+    .heat-legend { display: flex; align-items: center; justify-content: center; gap: 0.8em; margin-top: 0.5em; font-size: 0.74em; font-weight: 700; color: var(--muted); }
+    .heat-legend i { width: 16em; height: 0.65em; border-radius: 999px; background: linear-gradient(90deg, #eaf6fb, #0e7490); }
+
+    /* ---------- Hình nhỏ trong thẻ kết luận ---------- */
+    .viz-cards .judge > p { font-size: 0.88em; }
+    .judge .viz { margin-top: auto; padding: 0.7em 0.8em; background: var(--mist); border-radius: 0.6em; }
+    .judge .viz svg { display: block; width: 100%; height: 6.6em; }
+    .viz .py { fill: none; stroke: var(--sky); stroke-width: 2.4; }
+    .viz .cc { fill: none; stroke: var(--amber); stroke-width: 2.4; }
+    .viz .py-d { fill: var(--sky); }
+    .viz .cc-d { fill: var(--amber); }
+    .viz .ax { stroke: #9aa8b8; stroke-width: 1; }
+    .viz text { font-size: 9px; font-weight: 700; fill: var(--muted); text-anchor: middle; }
+    .judge .viz-cap { margin-top: 0.35em; font-size: 0.7em; font-weight: 700; }
+    .viz-cap .py-t { color: var(--sky); }
+    .viz-cap .cc-t { color: var(--amber); }
+    .knobs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.7em; padding: 0.6em 0 0.3em; }
+    .knobs b { display: block; margin-bottom: 0.55em; font-size: 0.72em; color: var(--navy); }
+    .knobs i { position: relative; display: block; height: 0.45em; border-radius: 999px; background: linear-gradient(90deg, var(--sky) 62%, var(--line) 62%); }
+    .knobs i::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 62%;
+      width: 1.05em;
+      height: 1.05em;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #fff;
+      border: 0.22em solid var(--sky);
+    }
+    .knobs span { font-size: 1.7em; font-weight: 800; line-height: 1; color: var(--blue); }
+    .swing { display: grid; gap: 0.6em; }
+    .judge .swing p { display: grid; grid-template-columns: 1fr auto; gap: 0.2em 0.5em; font-size: 0.72em; }
+    .swing b { color: var(--navy); }
+    .swing em { font-style: normal; font-weight: 800; color: var(--navy); }
+    .swing i { grid-column: 1 / -1; height: 0.65em; border-radius: 999px; background: linear-gradient(90deg, var(--c) var(--w), #fff var(--w)); border: 1px solid var(--line); }
+    .swing span { grid-column: 1 / -1; }
 
     /* ---------- 15. Hỏi đáp ---------- */
     .l-qa { flex-direction: row; padding: 0; }
@@ -1494,7 +1921,10 @@
       .exec-panel::after, .cover-side::before, .deco::before, .deco::after, .radial-left, .arrow { display: none; }
       .steps, .obj-grid, .judge-grid, .team, .band, .range-layout, .cs-grid, .trend-grid,
       .duel-grid, .swot, .swot-cols, .roles ul, .banner, .cmp,
-      .cite-stats, .cite-body { grid-template-columns: 1fr; }
+      .cite-stats, .cite-body, .q-pair, .split, .flow, .flow5, .coin, .rank5, .stages, .stages.s4 { grid-template-columns: 1fr; }
+      .stages > article::after { display: none; }
+      .l-rq { padding: 0 0 3.6em; }
+      .rq-band { flex: none; }
       .fig1 svg { height: auto; }
       .author-names { grid-template-rows: none; grid-auto-flow: row; }
       .chevrons { flex-direction: column; gap: 0.3em; }
@@ -1892,6 +2322,23 @@
       </section>
 
 
+            <section class="slide l-rq" aria-label="Mở đầu RQ1">
+        <div class="rq-band">
+          <p class="eyebrow"><span class="who m1">Trần Tuấn Tài</span> Câu hỏi nghiên cứu 1</p>
+          <h2><b>RQ1:</b> Phương pháp đánh giá nào phù hợp để đo chất lượng câu tóm tắt do LLM sinh ra?</h2>
+        </div>
+        <ul class="rq-sub stagger"><li>Câu tóm tắt của LLM có khi còn tốt hơn comment mẫu. Vậy các thước đo so độ giống với comment mẫu như BLEU, ROUGE-L, BERTScore có còn đo đúng chất lượng không?</li><li>Có thể dùng chính LLM, như GPT-4, làm giám khảo thay cho người chấm không?</li></ul>
+        <p class="footer-bar"><span>Kết quả đầu tiên: người đọc chấm các câu tóm tắt</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Trần Tuấn Tài · mở đầu RQ1</h3>
+          <ul>
+            <li>Bắt đầu câu hỏi nghiên cứu thứ nhất: phương pháp đánh giá nào phù hợp để đo chất lượng câu tóm tắt do LLM sinh ra.</li>
+            <li>Lý do bài đặt câu hỏi này: các nghiên cứu trước vẫn dùng BLEU, tức là so câu sinh ra với comment mẫu. Nhưng nhiều nghiên cứu gần đây thấy câu của LLM còn tốt hơn comment mẫu. Khi đó đo độ giống với comment mẫu có thể không còn phù hợp.</li>
+            <li>Hai ý cần trả lời: các thước đo tự động có còn đi cùng đánh giá của người không, và GPT-4 có làm giám khảo thay người được không.</li>
+          </ul>
+        </div>
+      </section>
+
       <!-- 6 · RQ1 người chấm -->
       <section class="slide l-chart-panel" aria-label="RQ1 người chấm">
         <div class="cp-main">
@@ -1997,6 +2444,23 @@
         </div>
       </section>
 
+            <section class="slide l-rq" aria-label="Mở đầu RQ2">
+        <div class="rq-band">
+          <p class="eyebrow"><span class="who m1">Trần Tuấn Tài</span> Câu hỏi nghiên cứu 2</p>
+          <h2><b>RQ2:</b> Các kỹ thuật prompt khác nhau hiệu quả đến đâu khi đưa LLM vào bài toán tóm tắt mã nguồn?</h2>
+        </div>
+        <ul class="rq-sub stagger"><li>Trong năm kiểu prompt zero-shot, few-shot, chain-of-thought, critique và expert, kiểu nào hợp với từng LLM?</li><li>Prompt công phu hơn có luôn cho câu tóm tắt tốt hơn cách ra lệnh thẳng zero-shot không?</li></ul>
+        <p class="footer-bar"><span>Năm kiểu prompt so trên cùng 600 mẫu</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>Trần Tuấn Tài · mở đầu RQ2</h3>
+          <ul>
+            <li>Câu hỏi nghiên cứu thứ hai: các kỹ thuật prompt khác nhau hiệu quả đến đâu khi đưa LLM vào bài toán tóm tắt mã nguồn.</li>
+            <li>Bài so năm kiểu prompt phổ biến: zero-shot, few-shot, chain-of-thought, critique và expert. Không tinh chỉnh mô hình, chỉ đổi cách hỏi.</li>
+            <li>Hai ý cần trả lời: kiểu nào hợp với từng mô hình, và prompt công phu hơn có luôn thắng cách ra lệnh thẳng không.</li>
+          </ul>
+        </div>
+      </section>
+
       <!-- 8 · RQ2 -->
       <section class="slide deco" aria-label="RQ2">
         <header class="s-head">
@@ -2044,138 +2508,494 @@
         </div>
       </section>
 
-      <!-- 9 · RQ3 -->
-      <section class="slide deco l-trend" aria-label="RQ3">
+            <section class="slide l-rq" aria-label="Mở đầu RQ3">
+        <div class="rq-band">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> Câu hỏi nghiên cứu 3</p>
+          <h2><b>RQ3:</b> Các cài đặt tham số mô hình khác nhau ảnh hưởng thế nào đến chất lượng tóm tắt mã nguồn của LLM?</h2>
+        </div>
+        <ul class="rq-sub stagger"><li>Top-p và Temperature có làm thay đổi chất lượng câu tóm tắt hay không?</li><li>Vì cả hai tham số đều dùng để kiểm soát độ ngẫu nhiên, liệu mức độ ảnh hưởng của chúng có sự khác biệt nào không?</li></ul>
+        <p class="footer-bar"><span>Tiếp theo cách Top-p chọn từ</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · mở đầu RQ3</h3>
+          <ul>
+            <li>Em nhận từ câu hỏi nghiên cứu thứ ba.</li>
+            <li>Câu hỏi đầy đủ là: các cài đặt tham số mô hình khác nhau ảnh hưởng như thế nào đến chất lượng tóm tắt mã nguồn của LLM.</li>
+            <li>Có hai vấn đề. Một, top-p và temperature có làm thay đổi chất lượng câu tóm tắt hay không. Hai, vì cả hai tham số đều dùng để kiểm soát độ ngẫu nhiên, liệu mức độ ảnh hưởng của chúng có khác nhau không.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="Top-p">
         <header class="s-head">
-          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · tham số sinh</p>
-          <h2>Temperature và top-p không đi một chiều</h2>
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · Top-p</p>
+          <h2>Top-p chỉ giữ nhóm từ đủ tổng xác suất</h2>
         </header>
-        <div class="trend-grid">
-          <figure class="chart line-card">
-            <figcaption>GPT-4, few-shot, top-p = 0,5: điểm khi tăng temperature</figcaption>
-            <svg class="line-chart" viewBox="0 0 360 170" role="img" aria-labelledby="rq3cap">
-              <title id="rq3cap">Điểm GPT-4 theo temperature 0,1, 0,5 và 1,0 ở Java, Python và C</title>
-              <g class="grid">
-                <line x1="40" y1="16" x2="340" y2="16"/>
-                <line x1="40" y1="54.7" x2="340" y2="54.7"/>
-                <line x1="40" y1="93.3" x2="340" y2="93.3"/>
-                <line x1="40" y1="132" x2="340" y2="132" stroke="#0b2545"/>
-              </g>
-              <text x="32" y="19" text-anchor="end">4,6</text>
-              <text x="32" y="58" text-anchor="end">4,4</text>
-              <text x="32" y="96" text-anchor="end">4,2</text>
-              <text x="32" y="135" text-anchor="end">4,0</text>
-              <text x="78" y="148" text-anchor="middle">0,1</text>
-              <text x="196" y="148" text-anchor="middle">0,5</text>
-              <text x="314" y="148" text-anchor="middle">1,0</text>
-              <text x="196" y="164" text-anchor="middle">temperature</text>
-              <polyline fill="none" stroke="#0b2545" stroke-width="2.8" points="78,47 196,41.1 314,45"/>
-              <polyline fill="none" stroke="#00a6c7" stroke-width="2.8" points="78,83.7 196,74 314,72.1"/>
-              <polyline fill="none" stroke="#f2a516" stroke-width="2.8" points="78,68.2 196,72.1 314,75.9"/>
-              <g fill="#fff" stroke-width="2.2">
-                <circle cx="78" cy="47" r="3.6" stroke="#0b2545"/><circle cx="196" cy="41.1" r="3.6" stroke="#0b2545"/><circle cx="314" cy="45" r="3.6" stroke="#0b2545"/>
-                <circle cx="78" cy="83.7" r="3.6" stroke="#00a6c7"/><circle cx="196" cy="74" r="3.6" stroke="#00a6c7"/><circle cx="314" cy="72.1" r="3.6" stroke="#00a6c7"/>
-                <circle cx="78" cy="68.2" r="3.6" stroke="#f2a516"/><circle cx="196" cy="72.1" r="3.6" stroke="#f2a516"/><circle cx="314" cy="75.9" r="3.6" stroke="#f2a516"/>
-              </g>
-            </svg>
-            <p class="legend"><span><i class="sw-g4"></i>Java</span><span><i class="sw-cl"></i>Python</span><span><i class="sw-sc"></i>C</span></p>
-            <p class="axis-note">Trục tung cắt từ 4,0 đến 4,6 để thấy hướng đi.</p>
-          </figure>
-          <div class="trend-cards stagger">
-            <article class="trend k-g4"><span class="ico" aria-hidden="true">→</span><div><h3>Java gần phẳng</h3><p class="seq">4,44 · 4,47 · 4,45</p><p>Đổi temperature gần như không đổi điểm.</p></div></article>
-            <article class="trend k-cl"><span class="ico" aria-hidden="true">↗</span><div><h3>Python đi lên</h3><p class="seq">4,25 · 4,30 · 4,31</p><p>Temperature cao hơn làm câu Python tốt lên.</p></div></article>
-            <article class="trend k-sc"><span class="ico" aria-hidden="true">↘</span><div><h3>C đi xuống</h3><p class="seq">4,33 · 4,31 · 4,29</p><p>Cùng hướng chỉnh đó, điểm C lại giảm.</p></div></article>
+        <div class="split">
+          <p class="lead">Ở mỗi bước chọn từ tiếp theo, LLM xếp hạng tất cả các từ tiềm năng theo xác suất từ cao xuống thấp và chỉ giữ nhóm từ đứng đầu có tổng xác suất tích lũy đạt mức top-p. Ngưỡng càng lớn, càng nhiều từ có xác suất thấp được xét, câu càng ngẫu nhiên.</p>
+          <div class="case">
+            <article>
+              <h3>Ví dụ · câu tóm tắt hàm đăng nhập</h3>
+              <p class="probs"><span>user 50%</span><span>account 30%</span><span>credential 12%</span><span>person 5%</span><span>cookie 3%</span></p>
+            </article>
+            <article>
+              <h3>Top-p = 0,1</h3>
+              <p>Từ “user” đã chiếm 50%, vượt ngưỡng 10%, nên chỉ duy nhất từ này được chọn. Câu sinh ra rất cố định, ít biến động.</p>
+            </article>
+            <article>
+              <h3>Top-p = 0,9</h3>
+              <p>Giữ “user”, “account”, “credential”, tổng 92%. “credential” có cơ hội được chọn, câu tóm tắt ngẫu nhiên và đa dạng hơn.</p>
+            </article>
           </div>
         </div>
-        <p class="tip"><b>Ý thực hành</b> Không có một mức đúng cho mọi ngôn ngữ. Hai tham số cùng chỉnh độ ngẫu nhiên, nên chỉ chỉnh một tham số.</p>
-        <p class="footer-bar"><span>Few-shot · ba mức temperature 0,1 / 0,5 / 1,0</span><span class="pg"></span></p>
-        <div class="speaker-note sr" aria-hidden="true">
-          <h3>La Hoàng Tú · RQ3</h3>
+        <p class="footer-bar"><span>Temperature chỉnh lại xác suất sau bước lọc này</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · Top-p</h3>
           <ul>
-            <li>Em nhận từ câu hỏi nghiên cứu thứ ba. Câu hỏi này xem temperature và top-p đổi chất lượng comment ra sao. Prompt là few-shot.</li>
-            <li>Top-p được thử ở 0,5, 0,75 và 1. Temperature được thử ở 0,1, 0,5 và 1. Hình vẽ GPT-4, few-shot, top-p cố định 0,5, khi tăng temperature.</li>
-            <li>Java gần như phẳng: 4,44, rồi 4,47, rồi 4,45. Python đi lên: 4,25, 4,30, 4,31. C đi xuống: 4,33, 4,31, 4,29.</li>
-            <li>Cùng một hướng chỉnh, Python tốt lên còn C giảm. Không có một mức đúng cho mọi ngôn ngữ.</li>
-            <li>Hai tham số cùng chỉnh độ ngẫu nhiên. Tài liệu OpenAI khuyên chỉnh temperature hoặc top-p, không chỉnh cả hai. Bài này cho kết quả cùng hướng, nên khi dùng chỉ nên chỉnh một tham số.</li>
+            <li>Top-p, còn gọi là nucleus sampling, lọc từ theo tổng xác suất chứ không theo một số lượng cố định.</li>
+            <li>Ở mỗi bước, mô hình xếp các từ từ xác suất cao xuống thấp và chỉ giữ nhóm đứng đầu đến khi tổng xác suất đạt ngưỡng.</li>
+            <li>Ví dụ từ tiếp theo của câu tóm tắt hàm đăng nhập: user 50%, account 30%, credential 12%, person 5%, cookie 3%.</li>
+            <li>Top-p 0,1 thì user đã chiếm 50%, vượt ngưỡng, nên chỉ còn một từ. Câu rất cố định.</li>
+            <li>Top-p 0,9 giữ user, account và credential, tổng 92%. Credential có cơ hội được chọn, câu đa dạng hơn.</li>
           </ul>
         </div>
       </section>
 
-      <!-- 10 · RQ4 -->
-      <section class="slide l-chart-panel" aria-label="RQ4">
-        <div class="cp-main">
-          <header class="s-head">
-            <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ4 · họ ngôn ngữ</p>
-            <h2>Prolog là chỗ thấp nhất của cả bốn mô hình</h2>
-          </header>
-          <figure class="chart">
-            <figcaption>Năm ngôn ngữ đại diện cho năm họ, few-shot, GPT-4 chấm</figcaption>
-            <p class="legend"><span><i class="sw-cl"></i>CodeLlama</span><span><i class="sw-sc"></i>StarChat-β</span><span><i class="sw-g3"></i>GPT-3.5</span><span><i class="sw-g4"></i>GPT-4</span></p>
-            <div class="groups"><div class="group"><div class="cols"><i class="col sw-cl" style="height:75.6%"><b>3,78</b></i><i class="col sw-sc" style="height:52.0%"><b>2,60</b></i><i class="col sw-g3" style="height:71.2%"><b>3,56</b></i><i class="col sw-g4" style="height:93.2%"><b>4,66</b></i></div><p>Java</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.2%"><b>3,86</b></i><i class="col sw-sc" style="height:59.4%"><b>2,97</b></i><i class="col sw-g3" style="height:82.8%"><b>4,14</b></i><i class="col sw-g4" style="height:87.2%"><b>4,36</b></i></div><p>Go</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:77.6%"><b>3,88</b></i><i class="col sw-sc" style="height:54.6%"><b>2,73</b></i><i class="col sw-g3" style="height:79.8%"><b>3,99</b></i><i class="col sw-g4" style="height:86.2%"><b>4,31</b></i></div><p>PHP</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:71.6%"><b>3,58</b></i><i class="col sw-sc" style="height:57.6%"><b>2,88</b></i><i class="col sw-g3" style="height:68.8%"><b>3,44</b></i><i class="col sw-g4" style="height:84.4%"><b>4,22</b></i></div><p>Haskell</p></div><div class="group"><div class="cols"><i class="col sw-cl" style="height:64.6%"><b>3,23</b></i><i class="col sw-sc" style="height:46.8%"><b>2,34</b></i><i class="col sw-g3" style="height:68.4%"><b>3,42</b></i><i class="col sw-g4" style="height:81.0%"><b>4,05</b></i></div><p>Prolog</p></div></div>
-            <p class="axis-note">GPT-4 đứng đầu từng cột. Đủ mười ngôn ngữ nằm trong bản đọc.</p>
-          </figure>
-        </div>
-        <aside class="cp-panel spot on-dark">
-          <p class="label">Điểm yếu chung</p>
-          <p class="spot-name">Prolog</p>
-          <ul class="spot-list stagger">
-            <li><b>4,05</b>GPT-4, thấp nhất trong năm cột của chính nó</li>
-            <li><b>2,34</b>StarChat-β, thấp nhất cả biểu đồ</li>
-            <li><b>1.547</b>cặp dữ liệu Prolog thu được</li>
-          </ul>
-          <p>Prolog khai báo quan hệ, không viết vòng lặp tuần tự như phần lớn code mà LLM đã học.</p>
-        </aside>
-        <p class="footer-bar"><span>Mỗi ngôn ngữ 200 mẫu</span><span class="pg"></span></p>
-        <div class="speaker-note sr" aria-hidden="true">
-          <h3>La Hoàng Tú · RQ4</h3>
-          <ul>
-            <li>Câu hỏi thứ tư nhìn mười ngôn ngữ, mỗi ngôn ngữ 200 mẫu. Prolog là chỗ thấp nhất của cả bốn mô hình.</li>
-            <li>Với GPT-4, Java 4,66, Go 4,36, PHP 4,31, Haskell 4,22, Prolog 4,05. Cả bốn mô hình làm PHP tốt hơn Python. CodeLlama hơn GPT-3.5 trên Ruby, 3,98 so với 3,64, và trên JavaScript, 4,03 so với 3,53.</li>
-            <li>Riêng Prolog: CodeLlama 3,23, StarChat 2,34, GPT-3.5 3,42, GPT-4 4,05. Tập Prolog nhóm tác giả thu được chỉ 1.547 cặp.</li>
-            <li>Prolog khai báo quan hệ, không viết vòng lặp tuần tự như phần lớn code mà mô hình đã học. Tokenizer và attention học chủ yếu code mệnh lệnh, nên họ ngôn ngữ logic là chỗ yếu chung.</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- 11 · RQ5 -->
-      <section class="slide deco" aria-label="RQ5">
+      <section class="slide deco" aria-label="Temperature">
         <header class="s-head">
-          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ5 · loại ý định</p>
-          <h2>Mô hình 7B viết Why và Property sát, hoặc hơn, GPT-4</h2>
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · Temperature</p>
+          <h2>Temperature làm phẳng xác suất sau Top-p</h2>
         </header>
-        <div class="duel-grid">
-          <figure class="chart">
-            <figcaption>Few-shot trên Java, mỗi loại 180 mẫu, GPT-4 chấm</figcaption>
-            <p class="legend"><span><i class="sw-cl"></i>CodeLlama 7B</span><span><i class="sw-g4"></i>GPT-4</span></p>
-            <div class="duel-rows stagger">
-              <div class="duel-row"><span class="duel-name">What</span><div class="duel-bars"><span class="bar sw-cl" style="--v:76.7%"><b>4,15</b></span><span class="bar sw-g4" style="--v:93.3%"><b>4,40</b></span></div><span class="win k-g4">GPT-4</span></div>
-              <div class="duel-row"><span class="duel-name">Why</span><div class="duel-bars"><span class="bar sw-cl" style="--v:86%"><b>4,29</b></span><span class="bar sw-g4" style="--v:85.3%"><b>4,28</b></span></div><span class="win k-cl">CodeLlama</span></div>
-              <div class="duel-row"><span class="duel-name">How</span><div class="duel-bars"><span class="bar sw-cl" style="--v:56.7%"><b>3,85</b></span><span class="bar sw-g4" style="--v:87.3%"><b>4,31</b></span></div><span class="win k-g4">GPT-4</span></div>
-              <div class="duel-row"><span class="duel-name">Property</span><div class="duel-bars"><span class="bar sw-cl" style="--v:79.3%"><b>4,19</b></span><span class="bar sw-g4" style="--v:70.7%"><b>4,06</b></span></div><span class="win k-cl">CodeLlama</span></div>
-              <div class="duel-row"><span class="duel-name">How-to-use</span><div class="duel-bars"><span class="bar sw-cl" style="--v:64%"><b>3,96</b></span><span class="bar sw-g4" style="--v:81.3%"><b>4,22</b></span></div><span class="win k-g4">GPT-4</span></div>
-            </div>
-            <p class="axis-note">Trục ngang bắt đầu ở 3,0 để thấy chênh lệch.</p>
-          </figure>
-          <aside class="verdict on-dark">
-            <p class="verdict-big"><b>2 / 5</b> loại ý định CodeLlama 7B ngang hoặc hơn GPT-4</p>
-            <ul>
-              <li>Why: hơn 0,01 điểm, gần như hòa.</li>
-              <li>Property: hơn 0,13 điểm.</li>
-              <li>What, How, How-to-use: GPT-4 vẫn dẫn.</li>
-            </ul>
-            <p>Ý thực hành: nhóm ít GPU có thể tự chạy mô hình 7B cho comment Why và Property.</p>
-            <p class="caveat">Chỉ đúng với few-shot trên Java. Không khái quát thành “7B hơn GPT-4”.</p>
-          </aside>
+        <div class="split">
+          <p class="lead">Temperature điều chỉnh phân bố xác suất giữa các từ sau khi đã qua bước lọc top-p. Temperature càng cao, chênh lệch giữa các từ càng nhỏ, từ ít phổ biến càng dễ được chọn.</p>
+          <div class="case">
+            <article>
+              <h3>Ví dụ sau khi lọc</h3>
+              <p>Còn hai từ: từ A xác suất 80%, từ B xác suất 20%.</p>
+            </article>
+            <article>
+              <h3>Temperature = 0</h3>
+              <p>Chênh lệch bị đẩy lên cực đại. Mô hình luôn chọn từ A và trả về cùng một câu tóm tắt ở mọi lần chạy.</p>
+            </article>
+            <article>
+              <h3>Temperature = 1,0</h3>
+              <p>Khoảng cách bị làm phẳng, ví dụ còn 60% và 40%. Từ B có cơ hội xuất hiện cao hơn. Câu sáng tạo hơn, nhưng cũng dễ nhiễu.</p>
+            </article>
+          </div>
         </div>
-        <p class="footer-bar"><span>Few-shot là đỉnh của CodeLlama. Với GPT-4, CoT cao nhất khi cộng ba ngôn ngữ</span><span class="pg"></span></p>
-        <div class="speaker-note sr" aria-hidden="true">
-          <h3>La Hoàng Tú · RQ5</h3>
+        <p class="footer-bar"><span>Hai số 60% và 40% là ví dụ minh họa cách làm phẳng</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · Temperature</h3>
           <ul>
-            <li>Câu hỏi thứ năm xét năm loại ý định của comment, theo bộ phân loại COIN: What, Why, How-it-is-done, Property và How-to-use. Mỗi loại rút 180 mẫu Java. Prompt là few-shot.</li>
-            <li>CodeLlama 7B viết Why 4,29 và Property 4,19. GPT-4 là 4,28 và 4,06. Ở hai loại này, mô hình 7B sát hoặc hơn GPT-4.</li>
-            <li>GPT-4 vẫn cao hơn ở What 4,40, How-it-is-done 4,31 và How-to-use 4,22. Em không nói mô hình 7B hơn GPT-4 ở mọi việc.</li>
-            <li>Bài giải thích bằng nhận định few-shot không phải prompt tối ưu của GPT-4 khi xét chung. Trung bình ba ngôn ngữ, chain-of-thought 4,54 cao nhất, few-shot 4,33 thấp nhất. Riêng Java, few-shot 4,66 lại là ô cao nhất, và câu hỏi này chạy trên Java.</li>
-            <li>Ý thực hành: nhóm ít GPU vẫn có thể tự chạy mô hình 7B để viết comment Why và Property.</li>
+            <li>Temperature không lọc thêm từ. Nó chỉnh lại xác suất của những từ đã được top-p giữ lại.</li>
+            <li>Ví dụ sau khi lọc còn từ A 80% và từ B 20%.</li>
+            <li>Temperature bằng 0 đẩy chênh lệch lên cực đại. Mô hình luôn chọn từ A, mọi lần chạy ra cùng một câu.</li>
+            <li>Temperature bằng 1 làm phẳng khoảng cách. Minh họa trên slide là khoảng 60% và 40%. Từ B dễ lọt vào câu hơn, câu đa dạng hơn nhưng cũng dễ nhiễu.</li>
+            <li>Hai con số 60 và 40 là ví dụ để hình dung, không phải một phép đo trong bảng kết quả.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="Top-k">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · Top-k</p>
+          <h2>Top-k cố định số từ. Top-p cố định tổng xác suất.</h2>
+        </header>
+        <div class="q-pair">
+          <article>
+            <h3>Top-k</h3>
+            <p>Giữ đúng k từ có xác suất cao nhất. Nói cách khác: giữ lại đúng k từ đứng đầu bảng, kể cả khi tổng xác suất của chúng còn thấp hoặc đã rất cao.</p>
+          </article>
+          <article>
+            <h3>Top-p</h3>
+            <p>Giữ số lượng từ vừa đủ để tổng xác suất đạt p%. Số từ được giữ thay đổi theo từng bước chọn từ.</p>
+          </article>
+        </div>
+        <p class="tip"><b>Vì sao RQ3 không thử Top-k</b> Bài nhắc cả ba tham số Top-k, Top-p và Temperature. API thương mại lúc đó, như GPT-3.5 và GPT-4, không cho chỉnh Top-k. Thí nghiệm chỉ tùy chỉnh Top-p và Temperature.</p>
+        <p class="footer-bar"><span>Tiếp theo thứ tự lọc từ rồi chỉnh nhiệt</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · Top-k</h3>
+          <ul>
+            <li>Top-k cũng là một cách lọc từ, nhưng cố định số lượng: giữ đúng k từ xác suất cao nhất.</li>
+            <li>Top-p thì không cố định số từ. Nó giữ vừa đủ để tổng xác suất đạt p phần trăm.</li>
+            <li>Bài báo nhắc cả ba tham số kiểm soát độ ngẫu nhiên: top-k, top-p và temperature.</li>
+            <li>Top-k không được đưa vào thí nghiệm RQ3 vì API GPT-3.5 và GPT-4 lúc đó không hỗ trợ chỉnh top-k. Chỉ top-p và temperature được thử.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Quy trình lấy mẫu">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · lấy mẫu</p>
+          <h2>Một từ được chọn qua lọc Top-p rồi Temperature</h2>
+        </header>
+        <div class="stages s4 stagger">
+          <article>
+            <header><small>Đầu vào</small><h3>Xác suất gốc</h3></header>
+            <div class="body">
+              <p class="inbox">This function authenticates the…</p>
+              <ul class="pbars" aria-label="Xác suất từ tiếp theo">
+                <li><span>“user”</span><i style="--w:50%"></i><b>50%</b></li>
+                <li><span>“account”</span><i style="--w:30%"></i><b>30%</b></li>
+                <li><span>“person”</span><i style="--w:12%"></i><b>12%</b></li>
+                <li class="low"><span>“banana”</span><i style="--w:5%"></i><b>5%</b></li>
+                <li class="low"><span>“cookie”</span><i style="--w:3%"></i><b>3%</b></li>
+              </ul>
+            </div>
+          </article>
+          <article>
+            <header><small>Bước 1</small><h3>Lọc Top-p</h3></header>
+            <div class="body">
+              <div class="mini"><b>Top-p = 0,5</b><svg viewBox="0 0 120 64" aria-hidden="true"><path class="area" d="M8 55 L28 30 L48 15 L68 9 L88 6.5 L108 5 L108 55 Z"/><polyline class="cum" points="8,55 28,30 48,15 68,9 88,6.5 108,5"/><path class="ax" d="M8 3 V55 H114"/><path class="thr" d="M8 30 H28 V55"/><text x="28" y="63">50%</text></svg><p>Giữ lại <span class="tok">user</span></p></div>
+              <div class="mini"><b>Top-p = 0,85</b><svg viewBox="0 0 120 64" aria-hidden="true"><path class="area" d="M8 55 L28 30 L48 15 L68 9 L88 6.5 L108 5 L108 55 Z"/><polyline class="cum" points="8,55 28,30 48,15 68,9 88,6.5 108,5"/><path class="ax" d="M8 3 V55 H114"/><path class="thr" d="M8 12.5 H56.3 V55"/><text x="56.3" y="63">85%</text></svg><p>Giữ lại <span class="tok">user</span> <span class="tok">account</span> <span class="tok">person</span></p></div>
+            </div>
+          </article>
+          <article>
+            <header><small>Bước 2</small><h3>Temperature</h3></header>
+            <div class="body">
+              <div class="mini"><b>Temperature = 0</b><svg viewBox="0 0 120 64" aria-hidden="true"><path class="ax" d="M6 50 H114"/><rect class="pb" x="16" y="8.0" width="20" height="42.0" rx="1.5"/><text x="26" y="5.5">100%</text><text x="26" y="60">user</text><rect class="pb off" x="50" y="48.8" width="20" height="1.2" rx="1.5"/><text x="60" y="46.3">0%</text><text x="60" y="60">account</text><rect class="pb off" x="84" y="48.8" width="20" height="1.2" rx="1.5"/><text x="94" y="46.3">0%</text><text x="94" y="60">person</text></svg><p>Chọn cố định từ cao nhất.</p></div>
+              <div class="mini"><b>Temperature = 1,0</b><svg viewBox="0 0 120 64" aria-hidden="true"><path class="ax" d="M6 50 H114"/><rect class="pb" x="16" y="27.3" width="20" height="22.7" rx="1.5"/><text x="26" y="24.8">54%</text><text x="26" y="60">user</text><rect class="pb" x="50" y="36.1" width="20" height="13.9" rx="1.5"/><text x="60" y="33.6">33%</text><text x="60" y="60">account</text><rect class="pb" x="84" y="44.5" width="20" height="5.5" rx="1.5"/><text x="94" y="42.0">13%</text><text x="94" y="60">person</text></svg><p>Làm phẳng xác suất, tăng độ đa dạng.</p></div>
+            </div>
+          </article>
+          <article>
+            <header><small>Kết quả</small><h3>Đầu ra</h3></header>
+            <div class="body">
+              <div class="pick-box"><small>Từ được chọn</small><strong>“user”</strong></div>
+              <p>Dựa trên quy trình lấy mẫu và các tham số đã chọn.</p>
+            </div>
+          </article>
+        </div>
+        <p class="footer-bar"><span>Sơ đồ này dùng một danh sách từ minh họa khác với ví dụ đăng nhập</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · quy trình lấy mẫu</h3>
+          <ul>
+            <li>Sơ đồ là một lượt chọn từ, đi từ trái sang phải.</li>
+            <li>Đầu vào là câu đang viết, “This function authenticates the…”, cùng xác suất của từ tiếp theo: user 50%, account 30%, person 12%, banana 5%, cookie 3%. Danh sách này là minh họa của sơ đồ, khác danh sách user, account, credential ở slide Top-p.</li>
+            <li>Bước một, lọc top-p. Đường cong là xác suất cộng dồn. Top-p 0,5 cắt ngay sau user, nên chỉ giữ user. Top-p 0,85 cắt ở person, nên giữ user, account và person.</li>
+            <li>Bước hai, temperature. Bằng 0 thì toàn bộ xác suất dồn vào user, mô hình luôn chọn user. Bằng 1 thì ba từ còn lại chia theo tỷ lệ gốc: 50, 30, 12 chia cho tổng 92, ra khoảng 54, 33 và 13 phần trăm. Account và person vẫn có cơ hội.</li>
+            <li>Với các tham số trên sơ đồ, từ được chọn là user.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Thiết kế RQ3">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · thiết kế</p>
+          <h2 class="ask">Sơ đồ thiết kế thực nghiệm RQ3 (tham số sinh)</h2>
+        </header>
+        <div class="stages stagger">
+          <article><header><small>Bước 1</small><h3>Tập dữ liệu</h3></header><div class="body"><ul class="tiles"><li><i>{ }</i>200 Java</li><li><i>Py</i>200 Python</li><li><i>C</i>200 C</li></ul><p><b>600 mẫu code</b></p></div></article>
+          <article><header><small>Bước 2</small><h3>Prompt cố định</h3></header><div class="body"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path class="fill" d="M12 5h17l8 8v30H12z"/><path class="ln" d="M29 5v8h8M17 21h15M17 27h15M17 33h9"/></svg><p class="big-n">Few-shot</p><p>4 ví dụ mẫu. Không đổi kiểu prompt trong RQ này.</p></div></article>
+          <article><header><small>Bước 3</small><h3>Bốn mô hình</h3></header><div class="body"><ul class="tiles"><li class="k-cl"><i>CL</i>CodeLlama-7B</li><li class="k-sc"><i>SC</i>StarChat-16B</li><li class="k-g3"><i>3.5</i>GPT-3.5</li><li class="k-g4"><i>4</i>GPT-4</li></ul></div></article>
+          <article><header><small>Bước 4</small><h3>Lưới 9 cấu hình</h3></header><div class="body"><div class="grid9" role="img" aria-label="Lưới 3 mức Temperature nhân 3 mức Top-p"><span></span><b>0,5</b><b>0,75</b><b>1,0</b><b>0,1</b><i style="--a:0.10"></i><i style="--a:0.21"></i><i style="--a:0.32"></i><b>0,5</b><i style="--a:0.21"></i><i style="--a:0.32"></i><i style="--a:0.43"></i><b>1,0</b><i style="--a:0.32"></i><i style="--a:0.43"></i><i style="--a:0.54"></i><span class="axis">Hàng: Temperature<br>Cột: Top-p</span></div><p><b>3 × 3 = 9</b> cấu hình cho mỗi mô hình</p></div></article>
+          <article><header><small>Bước 5</small><h3>Chấm điểm</h3></header><div class="body"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect class="fill" x="5" y="7" width="27" height="21" rx="3"/><path class="ln" d="M10 14h17M10 20h10"/><circle class="ln" cx="30" cy="30" r="8"/><path class="ln thick" d="M36 36l7 7"/></svg><p><b>GPT-4 làm giám khảo</b></p><ol class="scale" aria-label="Thang điểm 1 đến 5"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol></div></article>
+        </div>
+        <p class="footer-bar"><span>Bảng điểm của đủ 9 cấu hình ở trang sau</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · thiết kế RQ3</h3>
+          <ul>
+            <li>Sơ đồ thí nghiệm đi năm bước, từ trái sang phải.</li>
+            <li>Sáu trăm mẫu: mỗi ngôn ngữ Java, Python và C là 200.</li>
+            <li>Prompt giữ cố định few-shot với bốn ví dụ, vì không có một kiểu prompt thắng mọi mô hình, và few-shot là cách các bài trước thường dùng để so.</li>
+            <li>Bốn mô hình: CodeLlama 7B, StarChat 16B, GPT-3.5 và GPT-4.</li>
+            <li>Mỗi mô hình chạy lưới chín ô: ba mức temperature 0,1, 0,5, 1 theo hàng, nhân ba mức top-p 0,5, 0,75, 1 theo cột. Ô càng đậm thì càng ngẫu nhiên.</li>
+            <li>GPT-4 chấm từng câu trên thang 1 đến 5.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Bảng RQ3">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · kết quả</p>
+          <h2>Điểm của bốn mô hình theo Top-p và Temperature</h2>
+        </header>
+        <div class="sheet wide">
+          <table>
+            <caption>Ô xanh là điểm cao nhất của mỗi mô hình ở từng ngôn ngữ. CodeLlama-I là CodeLlama-Instruct. Few-shot, GPT-4 chấm, thang 1–5.</caption>
+            <thead>
+              <tr><th rowspan="2">Top-p</th><th rowspan="2">Temperature</th><th class="g" colspan="3">CodeLlama-I</th><th class="g" colspan="3">StarChat-β</th><th class="g" colspan="3">GPT-3.5</th><th class="g" colspan="3">GPT-4</th></tr>
+              <tr><th class="sub g">Java</th><th class="sub">Python</th><th class="sub">C</th><th class="sub g">Java</th><th class="sub">Python</th><th class="sub">C</th><th class="sub g">Java</th><th class="sub">Python</th><th class="sub">C</th><th class="sub g">Java</th><th class="sub">Python</th><th class="sub">C</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="model" rowspan="3">0,5</td><td>0,1</td><td class="g">3,81</td><td>3,83</td><td>4,10</td><td class="g">2,49</td><td>2,42</td><td>2,72</td><td class="g">3,41</td><td>3,60</td><td>3,40</td><td class="g">4,44</td><td>4,25</td><td>4,33</td></tr>
+              <tr><td>0,5</td><td class="g">3,72</td><td>3,85</td><td>4,08</td><td class="g">2,47</td><td>2,36</td><td>2,70</td><td class="g">3,45</td><td>3,73</td><td>3,38</td><td class="g">4,47</td><td>4,30</td><td>4,31</td></tr>
+              <tr><td>1,0</td><td class="g top">3,91</td><td>3,81</td><td class="top">4,11</td><td class="g">2,49</td><td>2,29</td><td>2,75</td><td class="g">3,52</td><td>3,68</td><td>3,42</td><td class="g">4,45</td><td>4,31</td><td>4,29</td></tr>
+              <tr><td class="model" rowspan="3">0,75</td><td>0,1</td><td class="g">3,76</td><td class="top">3,87</td><td>4,02</td><td class="g">2,50</td><td>2,35</td><td>2,66</td><td class="g">3,54</td><td>3,66</td><td>3,35</td><td class="g">4,48</td><td>4,27</td><td>4,31</td></tr>
+              <tr><td>0,5</td><td class="g top">3,91</td><td>3,73</td><td>4,01</td><td class="g">2,45</td><td class="top">2,47</td><td class="top">2,80</td><td class="g">3,55</td><td>3,65</td><td>3,24</td><td class="g">4,46</td><td class="top">4,34</td><td>4,26</td></tr>
+              <tr><td>1,0</td><td class="g">3,80</td><td>3,79</td><td>3,88</td><td class="g">2,48</td><td>2,37</td><td>2,71</td><td class="g">3,46</td><td>3,64</td><td>3,41</td><td class="g">4,47</td><td>4,33</td><td class="top">4,36</td></tr>
+              <tr><td class="model" rowspan="3">1,0</td><td>0,1</td><td class="g">3,78</td><td>3,75</td><td>3,91</td><td class="g top">2,60</td><td>2,37</td><td>2,68</td><td class="g top">3,56</td><td class="top">3,97</td><td class="top">3,56</td><td class="g top">4,66</td><td>4,16</td><td>4,18</td></tr>
+              <tr><td>0,5</td><td class="g top">3,91</td><td>3,75</td><td>3,99</td><td class="g">2,53</td><td>2,45</td><td>2,77</td><td class="g">3,55</td><td>3,71</td><td>3,42</td><td class="g">4,43</td><td>4,27</td><td>4,33</td></tr>
+              <tr><td>1,0</td><td class="g">3,73</td><td>3,59</td><td>3,60</td><td class="g">2,54</td><td>2,38</td><td>2,69</td><td class="g">3,41</td><td>3,72</td><td>3,52</td><td class="g">4,40</td><td>4,18</td><td>4,33</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="footer-bar"><span>Ba ý rút từ bảng này ở trang sau</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · bảng RQ3</h3>
+          <ul>
+            <li>Bảng gộp cả bốn mô hình trên một trang để so. Mỗi hàng là một cấu hình top-p và temperature. Mỗi khối cột là một mô hình, gồm Java, Python và C.</li>
+            <li>Ô xanh là điểm cao nhất của mô hình đó ở từng ngôn ngữ. Các ô xanh rơi vào những hàng khác nhau, tùy mô hình và ngôn ngữ.</li>
+            <li>CodeLlama cao nhất ở Java là 3,91, ở Python là 3,87, ở C là 4,11. StarChat-β thấp hơn rõ: Java 2,60, Python 2,47, C 2,80.</li>
+            <li>GPT-3.5 cao nhất cả ba ngôn ngữ ở cùng hàng top-p 1, temperature 0,1: Java 3,56, Python 3,97, C 3,56.</li>
+            <li>GPT-4 trên Java cao nhất là 4,66, cũng ở top-p 1 và temperature 0,1. Python của GPT-4 cao nhất là 4,34, C là 4,36.</li>
+            <li>Đọc theo chiều ngang thì thấy: chênh giữa các mô hình lớn hơn nhiều so với chênh giữa các cấu hình của cùng một mô hình.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Kết luận RQ3">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ3 · kết luận</p>
+          <h2>Ba kết luận từ thí nghiệm tham số</h2>
+        </header>
+        <div class="judge-grid viz-cards stagger">
+          <article class="judge"><span class="icon">1</span><h3>Phụ thuộc mô hình và ngôn ngữ</h3><p>Không có một cấu hình top-p hay temperature duy nhất nào tối ưu cho mọi trường hợp. Cùng GPT-4, cùng top-p 0,5, hai ngôn ngữ đi ngược chiều nhau.</p>
+            <div class="viz"><svg viewBox="0 0 200 92" role="img" aria-label="GPT-4, top-p 0,5: Python tăng, C giảm khi temperature tăng"><line class="ax" x1="12" y1="80" x2="190" y2="80"/><polyline class="py" points="30,70.0 100,40.0 170,34.0"/><polyline class="cc" points="30,22.0 100,34.0 170,46.0"/><circle class="py-d" cx="30" cy="70.0" r="3.2"/><circle class="py-d" cx="100" cy="40.0" r="3.2"/><circle class="py-d" cx="170" cy="34.0" r="3.2"/><circle class="cc-d" cx="30" cy="22.0" r="3.2"/><circle class="cc-d" cx="100" cy="34.0" r="3.2"/><circle class="cc-d" cx="170" cy="46.0" r="3.2"/><text x="30" y="91">T 0,1</text><text x="100" y="91">T 0,5</text><text x="170" y="91">T 1,0</text></svg><p class="viz-cap"><span class="py-t">Python 4,25 → 4,30 → 4,31</span><br><span class="cc-t">C 4,33 → 4,31 → 4,29</span></p></div></article>
+          <article class="judge"><span class="icon">2</span><h3>Hai tham số ảnh hưởng tương đồng</h3><p>Top-p và temperature đều kiểm soát độ ngẫu nhiên và thay thế cho nhau. Chỉ nên chỉnh một trong hai.</p>
+            <div class="viz"><div class="knobs" aria-hidden="true"><div><b>Top-p</b><i></i></div><span>≈</span><div><b>Temperature</b><i></i></div></div><p class="viz-cap">Cùng điều khiển một thứ: thấp thì câu cố định, cao thì câu đa dạng.</p></div></article>
+          <article class="judge"><span class="icon">3</span><h3>Nhỏ hơn việc đổi prompt</h3><p>Với GPT-4, đổi hai tham số này thường chỉ làm điểm xê dịch khoảng 0,1 đến 0,3. Đổi kiểu prompt có thể kéo lệch hơn một điểm.</p>
+            <div class="viz swing">
+              <p><b>Đổi tham số</b><em>0,26</em><i style="--w:16%;--c:var(--sky)"></i><span>GPT-4, Java: 4,40 đến 4,66 qua 9 cấu hình</span></p>
+              <p><b>Đổi prompt</b><em>1,63</em><i style="--w:100%;--c:var(--amber)"></i><span>CodeLlama, Java: critique 2,15, few-shot 3,78</span></p>
+            </div></article>
+        </div>
+        <p class="footer-bar"><span>Tiếp theo câu hỏi về họ ngôn ngữ</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · kết luận RQ3</h3>
+          <ul>
+            <li>Ba kết luận, mỗi thẻ có một hình nhỏ.</li>
+            <li>Một, tác động phụ thuộc mô hình nền và ngôn ngữ. Không có một cấu hình top-p hay temperature đúng cho mọi trường hợp. Hình trong thẻ là GPT-4 với top-p 0,5: khi tăng temperature, Python đi lên 4,25, 4,30, 4,31, còn C đi xuống 4,33, 4,31, 4,29. Java gần như phẳng.</li>
+            <li>Hai, top-p và temperature có ảnh hưởng tương đồng vì cùng kiểm soát độ ngẫu nhiên. Nên chỉ chỉnh một tham số.</li>
+            <li>Ba, mức tác động nhỏ hơn nhiều so với việc đổi kiểu prompt. Thanh xanh: GPT-4 trên Java chỉ chạy từ 4,40 đến 4,66 qua chín cấu hình, lệch 0,26. Thanh cam: CodeLlama trên Java đổi từ few-shot 3,78 sang critique 2,15, lệch 1,63. Hai khoảng lệch này nhóm tính từ Bảng II và Bảng V của bài.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide l-rq" aria-label="Mở đầu RQ4">
+        <div class="rq-band">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> Câu hỏi nghiên cứu 4</p>
+          <h2><b>RQ4:</b> LLM tóm tắt mã nguồn viết bằng các loại ngôn ngữ lập trình khác nhau như thế nào?</h2>
+        </div>
+        <ul class="rq-sub stagger"><li>LLM có học tốt mọi ngôn ngữ lập trình như nhau không?</li><li>Họ lập trình và độ dồi dào của dữ liệu huấn luyện ảnh hưởng thế nào đến câu tóm tắt?</li></ul>
+        <p class="footer-bar"><span>Tiếp theo sơ đồ thiết kế thực nghiệm RQ4</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · mở đầu RQ4</h3>
+          <ul>
+            <li>Câu hỏi thứ tư: các mô hình tóm tắt mã nguồn như thế nào trên các loại ngôn ngữ lập trình khác nhau.</li>
+            <li>Lý do: ngôn ngữ lập trình khác nhau về kiểu, như hướng đối tượng hay hàm, và lượng code của mỗi ngôn ngữ trên mạng cũng khác nhau. Điều đó có thể làm LLM nắm các ngôn ngữ không đều.</li>
+            <li>Hai ý cần trả lời: LLM có học tốt mọi ngôn ngữ như nhau không, và họ lập trình cùng lượng dữ liệu huấn luyện ảnh hưởng thế nào.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Thiết kế RQ4">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ4 · thiết kế</p>
+          <h2 class="ask">Sơ đồ thiết kế thực nghiệm RQ4 (họ ngôn ngữ)</h2>
+        </header>
+        <div class="stages stagger">
+          <article><header><small>Bước 1</small><h3>Mười ngôn ngữ</h3></header><div class="body"><ul class="langs"><li class="f-oop">Java</li><li class="f-pp">C</li><li class="f-pp">Go</li><li class="f-sp">Python</li><li class="f-sp">Ruby</li><li class="f-sp">PHP</li><li class="f-sp">JavaScript</li><li class="f-fp">Erlang</li><li class="f-fp">Haskell</li><li class="f-lp">Prolog</li></ul><p><b>200 mẫu</b> mỗi ngôn ngữ</p></div></article>
+          <article><header><small>Bước 2</small><h3>Prompt cố định</h3></header><div class="body"><ul class="shots"><li>Ví dụ 1: code → comment</li><li>Ví dụ 2: code → comment</li><li>Ví dụ 3: code → comment</li><li>Ví dụ 4: code → comment</li><li class="now">Code cần tóm tắt → ?</li></ul><p>Few-shot với <b>4 ví dụ</b></p></div></article>
+          <article><header><small>Bước 3</small><h3>Bốn mô hình</h3></header><div class="body"><ul class="tiles"><li class="k-cl"><i>CL</i>CodeLlama-7B</li><li class="k-sc"><i>SC</i>StarChat-16B</li><li class="k-g3"><i>3.5</i>GPT-3.5</li><li class="k-g4"><i>4</i>GPT-4</li></ul></div></article>
+          <article><header><small>Bước 4</small><h3>Sinh và chấm</h3></header><div class="body"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect class="fill" x="5" y="7" width="27" height="21" rx="3"/><path class="ln" d="M10 14h17M10 20h10"/><circle class="ln" cx="30" cy="30" r="8"/><path class="ln thick" d="M36 36l7 7"/></svg><p><b>GPT-4 làm giám khảo</b></p><ol class="scale" aria-label="Thang điểm 1 đến 5"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol></div></article>
+          <article><header><small>Bước 5</small><h3>Năm họ ngôn ngữ</h3></header><div class="body"><div class="fam" role="img" aria-label="GPT-4, điểm trung bình theo họ ngôn ngữ"><span class="f-oop" style="--h:95%"><b>4,66</b><i>OOP</i></span><span class="f-pp" style="--h:46%"><b>4,27</b><i>PP</i></span><span class="f-sp" style="--h:48%"><b>4,28</b><i>SP</i></span><span class="f-fp" style="--h:41%"><b>4,23</b><i>FP</i></span><span class="f-lp" style="--h:19%"><b>4,05</b><i>LP</i></span></div><p>GPT-4, trung bình mỗi họ</p></div></article>
+        </div>
+        <p class="footer-bar"><span>Bảng điểm mười ngôn ngữ ở trang sau</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · thiết kế RQ4</h3>
+          <ul>
+            <li>Sơ đồ thí nghiệm năm bước.</li>
+            <li>Mười ngôn ngữ, mỗi ngôn ngữ 200 mẫu. Màu chấm trước tên là họ: Java hướng đối tượng; C và Go thủ tục; Python, Ruby, PHP, JavaScript là script; Erlang và Haskell là hàm; Prolog là logic.</li>
+            <li>Prompt cố định few-shot với bốn ví dụ, rồi đưa đoạn code cần tóm tắt.</li>
+            <li>Bốn mô hình sinh câu. GPT-4 chấm thang 1 đến 5.</li>
+            <li>Bước cuối đọc kết quả theo năm họ. Cột nhỏ trên hình là điểm GPT-4 trung bình mỗi họ, nhóm tự tính từ Bảng VI: OOP 4,66, PP 4,27, SP 4,28, FP 4,23, LP 4,05.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Bảng RQ4">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ4 · kết quả</p>
+          <h2>Hiệu quả của các LLM khi tóm tắt mã nguồn</h2>
+          <p class="sub-h">Các đoạn mã viết bằng nhiều ngôn ngữ lập trình khác nhau · CodeLlama-I = CodeLlama-Instruct</p>
+        </header>
+        <div class="sheet heat">
+          <table>
+            <colgroup><col class="m"><col span="10"></colgroup>
+            <caption>Few-shot, GPT-4 chấm, thang 1–5. Họ ngôn ngữ theo Bảng I của bài: C và Go là thủ tục.</caption>
+            <thead>
+              <tr><th rowspan="2">Mô hình</th><th>Hướng đối tượng (OOP)</th><th colspan="2">Lập trình thủ tục (PP)</th><th colspan="4">Lập trình kịch bản (SP)</th><th colspan="2">Lập trình hàm (FP)</th><th>Lập trình logic (LP)</th></tr>
+              <tr><th class="sub">Java</th><th class="sub">C</th><th class="sub">Go</th><th class="sub">Python</th><th class="sub">Ruby</th><th class="sub">PHP</th><th class="sub">JavaScript</th><th class="sub">Erlang</th><th class="sub">Haskell</th><th class="sub">Prolog</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="model">CodeLlama-I</td><td class="hi" style="background:#62a6b9">3,78</td><td class="hi" style="background:#569fb3">3,91</td><td class="hi" style="background:#5ba2b5">3,86</td><td class="hi" style="background:#65a7ba">3,75</td><td class="hi" style="background:#509bb0">3,98</td><td class="hi" style="background:#59a0b5">3,88</td><td class="hi" style="background:#4b98ae">4,03</td><td style="background:#7bb4c5">3,51</td><td style="background:#75b1c2">3,58</td><td style="background:#95c4d2">3,23</td></tr>
+              <tr><td class="model">StarChat-β</td><td style="background:#cee6ee">2,60</td><td style="background:#c7e1ea">2,68</td><td style="background:#add2dd">2,97</td><td style="background:#e4f2f8">2,37</td><td style="background:#bddbe5">2,79</td><td style="background:#c3dfe8">2,73</td><td style="background:#c8e2eb">2,67</td><td style="background:#c7e1ea">2,68</td><td style="background:#b5d7e1">2,88</td><td style="background:#e6f4f9">2,34</td></tr>
+              <tr><td class="model">GPT-3.5</td><td style="background:#76b2c3">3,56</td><td style="background:#76b2c3">3,56</td><td class="hi" style="background:#4192a9">4,14</td><td class="hi" style="background:#519cb1">3,97</td><td style="background:#6fadbf">3,64</td><td class="hi" style="background:#4f9ab0">3,99</td><td style="background:#79b3c4">3,53</td><td style="background:#76b1c2">3,57</td><td style="background:#82b8c8">3,44</td><td style="background:#83b9c9">3,42</td></tr>
+              <tr><td class="model">GPT-4</td><td class="hi" style="background:#127692">4,66</td><td class="hi" style="background:#3e90a7">4,18</td><td class="hi" style="background:#2d869f">4,36</td><td class="hi" style="background:#4091a8">4,16</td><td class="hi" style="background:#2c869f">4,37</td><td class="hi" style="background:#3289a1">4,31</td><td class="hi" style="background:#348aa2">4,29</td><td class="hi" style="background:#398da5">4,23</td><td class="hi" style="background:#3a8ea5">4,22</td><td class="hi" style="background:#4a97ad">4,05</td></tr>
+            </tbody>
+          </table>
+          <p class="heat-legend"><span>Điểm thấp hơn</span><i></i><span>Điểm cao hơn</span></p>
+        </div>
+        <p class="footer-bar"><span>Hai việc nên làm từ bảng này ở trang sau</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · bảng RQ4</h3>
+          <ul>
+            <li>Bảng là điểm few-shot, GPT-4 chấm. Màu càng đậm thì điểm càng cao. Hàng tiêu đề trên ghi họ: hướng đối tượng, thủ tục, kịch bản, hàm và logic.</li>
+            <li>Họ ngôn ngữ theo Bảng I của bài: Java là OOP; C và Go là thủ tục; Python, Ruby, PHP, JavaScript là kịch bản; Erlang, Haskell là hàm; Prolog là logic.</li>
+            <li>Hàng GPT-4 đậm nhất, đứng đầu mọi cột, từ Java 4,66 đến Prolog 4,05. Hàng StarChat nhạt nhất.</li>
+            <li>Cột Prolog nhạt nhất ở cả bốn mô hình: CodeLlama 3,23, StarChat 2,34, GPT-3.5 3,42, GPT-4 4,05.</li>
+            <li>CodeLlama cao hơn GPT-3.5 ở C, 3,91 so với 3,56, ở Ruby 3,98 so với 3,64, và ở JavaScript 4,03 so với 3,53.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="Việc làm từ RQ4">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ4 · việc làm</p>
+          <h2>Chọn mô hình theo độ phổ biến của ngôn ngữ</h2>
+        </header>
+        <div class="q-pair stagger">
+          <article>
+            <h3>Ngôn ngữ hiếm</h3>
+            <p>Đừng vội dùng LLM tổng quát cho ngôn ngữ đặc thù như Prolog. Các LLM hiện tại chưa tối ưu vì thiếu dữ liệu huấn luyện, và vì Prolog nêu quan hệ chứ không viết từng bước.</p>
+          </article>
+          <article>
+            <h3>Ngôn ngữ phổ biến</h3>
+            <p>Với C, Ruby và JavaScript, có thể tự chạy mô hình mã nguồn mở CodeLlama-7B local mà điểm tóm tắt vẫn cao hơn GPT-3.5: C 3,91 so với 3,56, Ruby 3,98 so với 3,64, JavaScript 4,03 so với 3,53.</p>
+          </article>
+        </div>
+        <p class="footer-bar"><span>Tiếp theo câu hỏi nghiên cứu thứ năm</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · việc làm từ RQ4</h3>
+          <ul>
+            <li>Hai việc làm.</li>
+            <li>Nếu hệ thống dùng ngôn ngữ hiếm như Prolog, đừng vội trông vào LLM tổng quát. Bài cho thấy cả bốn mô hình đều thấp nhất ở Prolog, một phần vì ít dữ liệu huấn luyện.</li>
+            <li>Với ngôn ngữ phổ biến như C, Ruby và JavaScript, có thể triển khai CodeLlama 7B local và vẫn cao hơn GPT-3.5. Các số là 3,91 so với 3,56 trên C, 3,98 so với 3,64 trên Ruby, 4,03 so với 3,53 trên JavaScript.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide l-rq" aria-label="Mở đầu RQ5">
+        <div class="rq-band">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> Câu hỏi nghiên cứu 5</p>
+          <h2><b>RQ5:</b> Khả năng sinh các loại tóm tắt mã nguồn theo các danh mục ý định khác nhau của các LLM như thế nào?</h2>
+        </div>
+        <ul class="rq-sub stagger"><li>Mỗi LLM có thế mạnh riêng đối với từng loại ý định chú thích hay không?</li><li>Liệu các mô hình mã nguồn mở nhỏ gọn có thể cạnh tranh với các LLM thương mại đắt đỏ khi tạo ra từng loại ý định tóm tắt cụ thể hay không?</li></ul>
+        <p class="footer-bar"><span>Tiếp theo sáu loại ý định chú thích theo COIN</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · mở đầu RQ5</h3>
+          <ul>
+            <li>Câu hỏi thứ năm: khả năng sinh các loại tóm tắt mã nguồn theo các danh mục ý định khác nhau của các LLM như thế nào.</li>
+            <li>Các nghiên cứu trước chia comment theo ý định người viết, như What, Why, How-to-use, How-it-is-done, Property và Others.</li>
+            <li>Hai vế. Mỗi mô hình có thế mạnh riêng theo loại chú thích không. Và mô hình mã nguồn mở nhỏ có cạnh tranh được LLM thương mại khi viết từng loại không.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="COIN">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ5 · COIN</p>
+          <h2>Sáu loại ý định chú thích theo COIN</h2>
+        </header>
+        <div class="coin stagger">
+          <article><span class="n">1</span><h3>What · chức năng</h3><p>Mô tả chức năng ở mức cao, không đi vào cách làm bên trong.</p><p class="ex"><b>Ví dụ:</b><q>Pushes an item onto the top of this stack.</q></p></article>
+          <article><span class="n">2</span><h3>Why · lý do thiết kế</h3><p>Giải thích vì sao viết vậy, khi mục đích bị thuật toán che mất. Dùng được cho hàm nạp chồng.</p><p class="ex"><b>Ví dụ:</b><q>Vì sao cần một trường hợp riêng để tránh lỗi.</q></p></article>
+          <article><span class="n">3</span><h3>How-it-is-done</h3><p>Mô tả thuật toán và luồng xử lý bên trong. Quan trọng khi code phức tạp.</p><p class="ex"><b>Ví dụ:</b><q>Shifts any subsequent elements to the left.</q></p></article>
+          <article><span class="n">4</span><h3>Property · ràng buộc</h3><p>Điều kiện trước, điều kiện sau, hoặc tính chất hiệu năng.</p><p class="ex"><b>Ví dụ:</b><q>This method is not a constant-time operation.</q></p></article>
+          <article><span class="n">5</span><h3>How-to-use</h3><p>Môi trường, phiên bản, hoặc thứ tự được phép gọi hàm.</p><p class="ex"><b>Ví dụ:</b><q>This method can be called only once per call to next().</q></p></article>
+          <article class="out"><span class="n">6</span><h3>Others · loại bỏ</h3><p>Không thuộc năm loại trên. Bị coi là nhiễu và không đưa vào thí nghiệm.</p><p class="ex"><b>Ví dụ:</b><q>The implementation is awesome.</q></p></article>
+        </div>
+        <p class="footer-bar"><span>Tiếp theo sơ đồ thiết kế thực nghiệm RQ5</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · COIN</h3>
+          <ul>
+            <li>Trước khi xem thí nghiệm, cần biết sáu loại ý định theo COIN. Dòng dưới mỗi thẻ là ví dụ.</li>
+            <li>COIN có sáu loại. What mô tả chức năng, ví dụ đẩy một phần tử lên đỉnh stack. Why giải thích lý do thiết kế. How-it-is-done mô tả cách làm, ví dụ dịch các phần tử phía sau sang trái. Property là ràng buộc, ví dụ không chạy trong thời gian hằng số. How-to-use là cách gọi, ví dụ chỉ được gọi một lần trong mỗi lần gọi next.</li>
+            <li>Others, ví dụ “The implementation is awesome”, không mang thông tin kỹ thuật. Bài coi đó là nhiễu và loại khỏi thí nghiệm.</li>
+          </ul>
+        </div>
+      </section>
+
+            <section class="slide deco" aria-label="Thiết kế RQ5">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ5 · thiết kế</p>
+          <h2 class="ask">Sơ đồ thiết kế thực nghiệm RQ5 (ý định chú thích mã nguồn)</h2>
+        </header>
+        <div class="stages stagger">
+          <article><header><small>Bước 1</small><h3>Dữ liệu</h3></header><div class="body"><ul class="tiles"><li class="pick"><i>{ }</i>CodeSearchNet · Java</li></ul><ul class="langs"><li>What</li><li>Why</li><li>How-it-is-done</li><li>Property</li><li>How-to-use</li></ul><p>Phân loại bằng COIN. Others bị loại.</p></div></article>
+          <article><header><small>Bước 2</small><h3>Rút mẫu</h3></header><div class="body"><p class="big-n">180 × 5<small>= 900 mẫu</small></p><p>Ngẫu nhiên 180 mẫu mỗi loại</p></div></article>
+          <article><header><small>Bước 3</small><h3>Prompt</h3></header><div class="body"><ul class="shots"><li>Ví dụ 1 · cùng loại</li><li>Ví dụ 2 · cùng loại</li><li>Ví dụ 3 · cùng loại</li><li>Ví dụ 4 · cùng loại</li><li class="now">Code cần tóm tắt → ?</li></ul><p>Few-shot, bốn ví dụ <b>cùng loại ý định</b>, lấy từ tập huấn luyện</p></div></article>
+          <article><header><small>Bước 4</small><h3>Bốn mô hình</h3></header><div class="body"><ul class="tiles"><li class="k-cl"><i>CL</i>CodeLlama-7B</li><li class="k-sc"><i>SC</i>StarChat-16B</li><li class="k-g3"><i>3.5</i>GPT-3.5</li><li class="k-g4"><i>4</i>GPT-4</li></ul></div></article>
+          <article><header><small>Bước 5</small><h3>Chấm</h3></header><div class="body"><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><rect class="fill" x="5" y="7" width="27" height="21" rx="3"/><path class="ln" d="M10 14h17M10 20h10"/><circle class="ln" cx="30" cy="30" r="8"/><path class="ln thick" d="M36 36l7 7"/></svg><p><b>GPT-4 làm giám khảo</b></p><ol class="scale" aria-label="Thang điểm 1 đến 5"><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ol></div></article>
+        </div>
+        <p class="footer-bar"><span>Thứ hạng từng loại ở trang sau</span><span class="pg"></span></p>
+        <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · thiết kế RQ5</h3>
+          <ul>
+            <li>Sơ đồ năm bước. Tập Java của CodeSearchNet được COIN chia theo ý định. Others đã bị loại.</li>
+            <li>Mỗi loại rút ngẫu nhiên 180 mẫu để các loại so được với nhau, tổng 900.</li>
+            <li>Few-shot dùng bốn ví dụ đúng cùng loại ý định. Không lấy ví dụ What để bảo mô hình viết Property.</li>
+            <li>Bốn mô hình sinh câu. GPT-4 chấm thang 1 đến 5.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="Bảng RQ5">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ5 · kết quả</p>
+          <h2 class="ask">GPT-4 dẫn đầu ba loại. CodeLlama dẫn đầu Why và Property.</h2>
+        </header>
+        <svg class="badge-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs>
+          <linearGradient id="bdRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.28" stop-color="#aeb6c4"/><stop offset="0.5" stop-color="#f4f6fa"/><stop offset="0.72" stop-color="#5b6372"/><stop offset="1" stop-color="#d7dce5"/></linearGradient>
+          <radialGradient id="bdFace" cx="0.38" cy="0.3" r="0.85"><stop offset="0" stop-color="#4a505e"/><stop offset="0.55" stop-color="#1d2028"/><stop offset="1" stop-color="#0a0b0f"/></radialGradient>
+          <linearGradient id="bdPlinth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f5f9"/><stop offset="1" stop-color="#9aa3b2"/></linearGradient>
+          <linearGradient id="icGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset="0.5" stop-color="#f2c54f"/><stop offset="1" stop-color="#b07a16"/></linearGradient>
+          <linearGradient id="icLilac" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#d9d1ff"/><stop offset="1" stop-color="#8f7ff0"/></linearGradient>
+          <linearGradient id="icAmber" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7b0"/><stop offset="0.55" stop-color="#f59e0b"/><stop offset="1" stop-color="#b45309"/></linearGradient>
+          <linearGradient id="icRose" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe4ea"/><stop offset="0.55" stop-color="#f472b6"/><stop offset="1" stop-color="#be123c"/></linearGradient>
+        </defs></svg><div class="rank5 stagger">
+          <article><h3>What</h3><ol><li class="r1" aria-label="Hạng 1: GPT-4, 4,40"><span class="tier" aria-hidden="true">1</span><span class="who-sc"><b>GPT-4</b><span class="sc">4,40</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M22.5 34 L24 23.5 L28.6 28 L32 20.5 L35.4 28 L40 23.5 L41.5 34 Z"/><rect class="emb" x="22.5" y="35.2" width="19" height="3" rx="1"/><path class="spark" d="M50 7 L51.2 10.8 L55 12 L51.2 13.2 L50 17 L48.8 13.2 L45 12 L48.8 10.8 Z"/></svg></li><li class="r2" aria-label="Hạng 2: CodeLlama, 4,15"><span class="tier" aria-hidden="true">2</span><span class="who-sc"><b>CodeLlama</b><span class="sc">4,15</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M23.5 25 L27.5 20.5 L36.5 20.5 L40.5 25 L32 38.5 Z"/><path class="emb-line" d="M23.5 25 H40.5 M27.5 20.5 L30 25 L32 38.5 L34 25 L36.5 20.5"/></svg></li><li class="r3" aria-label="Hạng 3: GPT-3.5, 3,61"><span class="tier" aria-hidden="true">3</span><span class="who-sc"><b>GPT-3.5</b><span class="sc">3,61</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M32 19.5 L40.5 22.8 V29 C40.5 34 37 37.8 32 39.5 C27 37.8 23.5 34 23.5 29 V22.8 Z"/><path class="emb-line" d="M28 29.2 L31 32.2 L36.2 26.4"/></svg></li><li class="r4" aria-label="Hạng 4: StarChat-β, 2,68"><span class="tier" aria-hidden="true">4</span><span class="who-sc"><b>StarChat-β</b><span class="sc">2,68</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><polygon class="emb" points="32.0,20.0 34.4,26.3 41.0,26.6 35.8,30.7 37.6,37.2 32.0,33.5 26.4,37.2 28.2,30.7 23.0,26.6 29.6,26.3"/></svg></li></ol></article>
+          <article><h3>Why</h3><ol><li class="r1" aria-label="Hạng 1: CodeLlama, 4,29"><span class="tier" aria-hidden="true">1</span><span class="who-sc"><b>CodeLlama</b><span class="sc">4,29</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M22.5 34 L24 23.5 L28.6 28 L32 20.5 L35.4 28 L40 23.5 L41.5 34 Z"/><rect class="emb" x="22.5" y="35.2" width="19" height="3" rx="1"/><path class="spark" d="M50 7 L51.2 10.8 L55 12 L51.2 13.2 L50 17 L48.8 13.2 L45 12 L48.8 10.8 Z"/></svg></li><li class="r2" aria-label="Hạng 2: GPT-4, 4,28"><span class="tier" aria-hidden="true">2</span><span class="who-sc"><b>GPT-4</b><span class="sc">4,28</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M23.5 25 L27.5 20.5 L36.5 20.5 L40.5 25 L32 38.5 Z"/><path class="emb-line" d="M23.5 25 H40.5 M27.5 20.5 L30 25 L32 38.5 L34 25 L36.5 20.5"/></svg></li><li class="r3" aria-label="Hạng 3: GPT-3.5, 3,54"><span class="tier" aria-hidden="true">3</span><span class="who-sc"><b>GPT-3.5</b><span class="sc">3,54</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M32 19.5 L40.5 22.8 V29 C40.5 34 37 37.8 32 39.5 C27 37.8 23.5 34 23.5 29 V22.8 Z"/><path class="emb-line" d="M28 29.2 L31 32.2 L36.2 26.4"/></svg></li><li class="r4" aria-label="Hạng 4: StarChat-β, 2,78"><span class="tier" aria-hidden="true">4</span><span class="who-sc"><b>StarChat-β</b><span class="sc">2,78</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><polygon class="emb" points="32.0,20.0 34.4,26.3 41.0,26.6 35.8,30.7 37.6,37.2 32.0,33.5 26.4,37.2 28.2,30.7 23.0,26.6 29.6,26.3"/></svg></li></ol></article>
+          <article><h3>How-it-is-done</h3><ol><li class="r1" aria-label="Hạng 1: GPT-4, 4,31"><span class="tier" aria-hidden="true">1</span><span class="who-sc"><b>GPT-4</b><span class="sc">4,31</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M22.5 34 L24 23.5 L28.6 28 L32 20.5 L35.4 28 L40 23.5 L41.5 34 Z"/><rect class="emb" x="22.5" y="35.2" width="19" height="3" rx="1"/><path class="spark" d="M50 7 L51.2 10.8 L55 12 L51.2 13.2 L50 17 L48.8 13.2 L45 12 L48.8 10.8 Z"/></svg></li><li class="r2" aria-label="Hạng 2: GPT-3.5, 3,97"><span class="tier" aria-hidden="true">2</span><span class="who-sc"><b>GPT-3.5</b><span class="sc">3,97</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M23.5 25 L27.5 20.5 L36.5 20.5 L40.5 25 L32 38.5 Z"/><path class="emb-line" d="M23.5 25 H40.5 M27.5 20.5 L30 25 L32 38.5 L34 25 L36.5 20.5"/></svg></li><li class="r3" aria-label="Hạng 3: CodeLlama, 3,85"><span class="tier" aria-hidden="true">3</span><span class="who-sc"><b>CodeLlama</b><span class="sc">3,85</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M32 19.5 L40.5 22.8 V29 C40.5 34 37 37.8 32 39.5 C27 37.8 23.5 34 23.5 29 V22.8 Z"/><path class="emb-line" d="M28 29.2 L31 32.2 L36.2 26.4"/></svg></li><li class="r4" aria-label="Hạng 4: StarChat-β, 2,77"><span class="tier" aria-hidden="true">4</span><span class="who-sc"><b>StarChat-β</b><span class="sc">2,77</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><polygon class="emb" points="32.0,20.0 34.4,26.3 41.0,26.6 35.8,30.7 37.6,37.2 32.0,33.5 26.4,37.2 28.2,30.7 23.0,26.6 29.6,26.3"/></svg></li></ol></article>
+          <article><h3>Property</h3><ol><li class="r1" aria-label="Hạng 1: CodeLlama, 4,19"><span class="tier" aria-hidden="true">1</span><span class="who-sc"><b>CodeLlama</b><span class="sc">4,19</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M22.5 34 L24 23.5 L28.6 28 L32 20.5 L35.4 28 L40 23.5 L41.5 34 Z"/><rect class="emb" x="22.5" y="35.2" width="19" height="3" rx="1"/><path class="spark" d="M50 7 L51.2 10.8 L55 12 L51.2 13.2 L50 17 L48.8 13.2 L45 12 L48.8 10.8 Z"/></svg></li><li class="r2" aria-label="Hạng 2: GPT-4, 4,06"><span class="tier" aria-hidden="true">2</span><span class="who-sc"><b>GPT-4</b><span class="sc">4,06</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M23.5 25 L27.5 20.5 L36.5 20.5 L40.5 25 L32 38.5 Z"/><path class="emb-line" d="M23.5 25 H40.5 M27.5 20.5 L30 25 L32 38.5 L34 25 L36.5 20.5"/></svg></li><li class="r3" aria-label="Hạng 3: GPT-3.5, 3,54"><span class="tier" aria-hidden="true">3</span><span class="who-sc"><b>GPT-3.5</b><span class="sc">3,54</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M32 19.5 L40.5 22.8 V29 C40.5 34 37 37.8 32 39.5 C27 37.8 23.5 34 23.5 29 V22.8 Z"/><path class="emb-line" d="M28 29.2 L31 32.2 L36.2 26.4"/></svg></li><li class="r4" aria-label="Hạng 4: StarChat-β, 2,94"><span class="tier" aria-hidden="true">4</span><span class="who-sc"><b>StarChat-β</b><span class="sc">2,94</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><polygon class="emb" points="32.0,20.0 34.4,26.3 41.0,26.6 35.8,30.7 37.6,37.2 32.0,33.5 26.4,37.2 28.2,30.7 23.0,26.6 29.6,26.3"/></svg></li></ol></article>
+          <article><h3>How-to-use</h3><ol><li class="r1" aria-label="Hạng 1: GPT-4, 4,22"><span class="tier" aria-hidden="true">1</span><span class="who-sc"><b>GPT-4</b><span class="sc">4,22</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M22.5 34 L24 23.5 L28.6 28 L32 20.5 L35.4 28 L40 23.5 L41.5 34 Z"/><rect class="emb" x="22.5" y="35.2" width="19" height="3" rx="1"/><path class="spark" d="M50 7 L51.2 10.8 L55 12 L51.2 13.2 L50 17 L48.8 13.2 L45 12 L48.8 10.8 Z"/></svg></li><li class="r2" aria-label="Hạng 2: GPT-3.5, 4,17"><span class="tier" aria-hidden="true">2</span><span class="who-sc"><b>GPT-3.5</b><span class="sc">4,17</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M23.5 25 L27.5 20.5 L36.5 20.5 L40.5 25 L32 38.5 Z"/><path class="emb-line" d="M23.5 25 H40.5 M27.5 20.5 L30 25 L32 38.5 L34 25 L36.5 20.5"/></svg></li><li class="r3" aria-label="Hạng 3: CodeLlama, 3,96"><span class="tier" aria-hidden="true">3</span><span class="who-sc"><b>CodeLlama</b><span class="sc">3,96</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><path class="emb" d="M32 19.5 L40.5 22.8 V29 C40.5 34 37 37.8 32 39.5 C27 37.8 23.5 34 23.5 29 V22.8 Z"/><path class="emb-line" d="M28 29.2 L31 32.2 L36.2 26.4"/></svg></li><li class="r4" aria-label="Hạng 4: StarChat-β, 2,52"><span class="tier" aria-hidden="true">4</span><span class="who-sc"><b>StarChat-β</b><span class="sc">2,52</span></span><svg class="tier-badge" viewBox="0 0 64 64" aria-hidden="true"><ellipse class="plinth-top" cx="32" cy="54" rx="15" ry="3.2"/><path class="plinth" d="M17 54 Q32 58.5 47 54 L44.5 59.5 Q32 63 19.5 59.5 Z"/><polygon class="ring" points="32.0,6.0 51.9,17.5 51.9,40.5 32.0,52.0 12.1,40.5 12.1,17.5"/><polygon class="ring-edge" points="32.0,6.8 51.2,17.9 51.2,40.1 32.0,51.2 12.8,40.1 12.8,17.9"/><polygon class="face" points="32.0,12.5 46.3,20.8 46.3,37.2 32.0,45.5 17.7,37.2 17.7,20.8"/><polygon class="glint" points="17.7,20.8 32.0,12.5 46.3,20.8 32,26"/><polygon class="emb" points="32.0,20.0 34.4,26.3 41.0,26.6 35.8,30.7 37.6,37.2 32.0,33.5 26.4,37.2 28.2,30.7 23.0,26.6 29.6,26.3"/></svg></li></ol></article>
+        </div>
+        <p class="tip"><b>Nhận xét</b> GPT-4 dẫn đầu What, How-it-is-done và How-to-use. CodeLlama-Instruct cao nhất ở Why và Property. StarChat-β đứng cuối cả năm cột. Thang điểm là 1 đến 5.</p>
+        <p class="footer-bar"><span>Việc làm từ thứ hạng này ở trang sau</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · bảng RQ5</h3>
+          <ul>
+            <li>Năm cột xếp từ điểm cao xuống thấp.</li>
+            <li>GPT-4 dẫn đầu What 4,40, How-it-is-done 4,31 và How-to-use 4,22.</li>
+            <li>CodeLlama dẫn đầu Why 4,29, chỉ hơn GPT-4 có 0,01, và dẫn đầu Property 4,19 so với 4,06.</li>
+            <li>StarChat đứng cuối cả năm cột, thấp nhất là How-to-use 2,52.</li>
+            <li>Tài liệu trình bày ghi thang 0 đến 5. Bài báo chấm từ 1 đến 5, nên slide ghi 1 đến 5.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide deco" aria-label="Việc làm từ RQ5">
+        <header class="s-head">
+          <p class="eyebrow"><span class="who m2">La Hoàng Tú</span> RQ5 · việc làm</p>
+          <h2>Chạy mô hình 7B local cho đúng loại comment</h2>
+        </header>
+        <div class="q-pair stagger">
+          <article>
+            <h3>Triển khai local</h3>
+            <p>Không nhất thiết trả phí API GPT-4 cho mọi comment. CodeLlama-7B chạy local viết chú thích Why và Property với chất lượng tương đương hoặc hơn GPT-4.</p>
+          </article>
+          <article>
+            <h3>Prompt đúng ý định</h3>
+            <p>Khi xây dựng công cụ tóm tắt, các ví dụ few-shot phải thuộc đúng loại đang cần: What, Why, Property hay loại khác. Ví dụ đúng loại giúp mô hình giữ đúng văn phong và nội dung.</p>
+          </article>
+        </div>
+        <p class="footer-bar"><span>Trang sau là đóng góp và hạn chế của bài, vẫn La Hoàng Tú</span><span class="pg"></span></p>
+                <div class="speaker-note sr" aria-hidden="true">
+          <h3>La Hoàng Tú · việc làm từ RQ5</h3>
+          <ul>
+            <li>Hai việc làm.</li>
+            <li>Không nhất thiết trả phí API GPT-4 để sinh mọi comment. CodeLlama 7B triển khai local viết được Why và Property, chất lượng tương đương hoặc hơn GPT-4 trong thí nghiệm few-shot trên Java.</li>
+            <li>Khi làm công cụ tóm tắt, ví dụ mồi phải đúng loại ý định. Muốn câu Property thì đưa ví dụ Property, không đưa ví dụ What.</li>
+            <li>Em sang phần đóng góp và hạn chế của bài.</li>
           </ul>
         </div>
       </section>
@@ -2204,7 +3024,7 @@
             </div>
           </div>
         </div>
-        <p class="tip"><b>Áp dụng</b> Bỏ BLEU khi kiểm thử nội bộ, chọn prompt theo mô hình, và có thể tự chạy CodeLlama 7B cho comment Why và Property.</p>
+        <p class="tip"><b>Áp dụng</b> Bỏ BLEU khi kiểm thử nội bộ. Ví dụ few-shot phải cùng loại ý định. Ngôn ngữ hiếm như Prolog đừng trông vào LLM tổng quát. C, Ruby, JavaScript và comment Why, Property có thể chạy CodeLlama 7B local.</p>
         <p class="footer-bar"><span>Võ Văn Hải nhận phần chạy lại của nhóm</span><span class="pg"></span></p>
         <div class="speaker-note sr" aria-hidden="true">
           <h3>La Hoàng Tú · chốt</h3>
@@ -2212,7 +3032,7 @@
             <li>Em chốt phần bài báo bằng ba đóng góp và ba hạn chế.</li>
             <li>Đóng góp một: GPT-4 làm giám khảo hợp với người hơn BLEU, ROUGE-L và BERTScore. Đóng góp hai: bài vẽ đủ năm prompt, hai tham số, mười ngôn ngữ thuộc năm họ, và năm loại ý định. Đóng góp ba: Erlang, Haskell và Prolog được công bố thêm cho cộng đồng.</li>
             <li>Hạn chế một: CodeLlama và StarChat không đặt temperature về 0, nên cả bài sinh câu ở 0,1, trừ câu hỏi thứ ba. Hạn chế hai: lấy câu đầu giúp comment gọn, nhưng có thể bỏ chi tiết ở câu sau. Hạn chế ba: gọi GPT-4 đắt, nên chỉ câu hỏi thứ tư chạy đủ mười ngôn ngữ, câu hỏi thứ năm chỉ Java.</li>
-            <li>Khi áp dụng: bỏ BLEU khi kiểm thử nội bộ, chọn prompt theo từng mô hình, và có thể tự chạy CodeLlama 7B cho comment Why và Property.</li>
+            <li>Khi áp dụng: bỏ BLEU khi kiểm thử nội bộ. Ví dụ few-shot phải cùng loại ý định đang cần. Ngôn ngữ hiếm như Prolog đừng trông vào LLM tổng quát. Với C, Ruby, JavaScript, và với comment Why cùng Property, có thể chạy CodeLlama 7B local.</li>
             <li>Em xin mời bạn Hải nói phần nhóm chạy lại.</li>
           </ul>
         </div>
