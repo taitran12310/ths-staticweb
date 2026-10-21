@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: Date Modified lấy commit cuối của từng file, không phải lúc checkout.
+          fetch-depth: 0
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

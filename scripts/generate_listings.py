@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Quét folder con và cập nhật bảng danh sách file trong từng index.html."""
+"""Quét folder con và cập nhật bảng danh sách file trong từng index.html.
+
+Date Modified lấy thời điểm commit cuối sửa từng file (author date, UTC+7).
+mtime trên đĩa không dùng được lúc deploy: checkout ghi mọi file cùng một lúc.
+"""
 
 from __future__ import annotations
 
 import html
 import json
 import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -31,7 +36,67 @@ def format_mtime(ts: float) -> str:
     return datetime.fromtimestamp(ts, tz=DISPLAY_TZ).strftime("%d/%m/%y, %H:%M:%S")
 
 
-def collect_entries(folder: Path) -> list[dict]:
+def git_output(args: list[str]) -> subprocess.CompletedProcess[str] | None:
+    try:
+        return subprocess.run(
+            ["git", *args],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+
+
+def ensure_full_git_history() -> bool:
+    """True khi đọc được lịch sử git. Shallow clone không đủ để biết lần sửa từng file."""
+    result = git_output(["rev-parse", "--is-inside-work-tree"])
+    if result is None or result.returncode != 0 or result.stdout.strip() != "true":
+        print("Không thấy git repo — Date Modified dùng mtime trên đĩa.")
+        return False
+
+    shallow = git_output(["rev-parse", "--is-shallow-repository"])
+    if shallow is not None and shallow.stdout.strip() == "true":
+        raise SystemExit(
+            "Kho git đang shallow. Checkout cần fetch-depth: 0 "
+            "để Date Modified là lần commit cuối của từng file, không phải lúc deploy."
+        )
+    return True
+
+
+def load_git_mtimes() -> dict[str, float]:
+    """Đường dẫn tương đối repo -> unix time của commit cuối cùng sửa file đó."""
+    result = git_output(
+        ["log", "--diff-filter=ACMR", "--pretty=format:%at", "--name-only"]
+    )
+    if result is None or result.returncode != 0:
+        return {}
+
+    mtimes: dict[str, float] = {}
+    current_ts: float | None = None
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            current_ts = None
+            continue
+        if current_ts is None and line.isdigit():
+            current_ts = float(line)
+            continue
+        if current_ts is None or line in mtimes:
+            continue
+        mtimes[line] = current_ts
+    return mtimes
+
+
+def file_timestamp(path: Path, git_mtimes: dict[str, float]) -> float:
+    rel = path.relative_to(ROOT).as_posix()
+    if rel in git_mtimes:
+        return git_mtimes[rel]
+    return path.stat().st_mtime
+
+
+def collect_entries(folder: Path, git_mtimes: dict[str, float]) -> list[dict]:
     entries: list[dict] = []
     for path in sorted(folder.iterdir(), key=lambda p: p.name.lower()):
         if not path.is_file():
@@ -46,7 +111,7 @@ def collect_entries(folder: Path) -> list[dict]:
                 "name": path.name,
                 "is_dir": False,
                 "size": format_size(stat.st_size),
-                "mtime": format_mtime(stat.st_mtime),
+                "mtime": format_mtime(file_timestamp(path, git_mtimes)),
                 "href": path.name,
             }
         )
@@ -147,13 +212,14 @@ def load_folder_titles() -> dict[str, str]:
 
 def main() -> None:
     folder_titles = load_folder_titles()
+    git_mtimes = load_git_mtimes() if ensure_full_git_history() else {}
     updated = 0
     for child in sorted(ROOT.iterdir()):
         if not child.is_dir() or child.name in SKIP_DIRS or child.name.startswith("."):
             continue
 
         title = folder_titles.get(child.name, child.name.replace("-", " ").title())
-        entries = collect_entries(child)
+        entries = collect_entries(child, git_mtimes)
         rows = render_rows(entries)
         page = build_page(
             title=title,
