@@ -9,31 +9,31 @@
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07111f;
-      --ink: #0b1220;
-      --muted: #4b5b70;
-      --soft: #eef4f8;
-      --line: #d5e0ea;
-      --teal: #0f766e;
-      --teal-2: #14b8a6;
-      --orange: #c2410c;
-      --orange-2: #f97316;
-      --blue: #1d4ed8;
-      --violet: #7c3aed;
-      --red: #dc2626;
-      --green: #16a34a;
-      --card: rgba(255, 255, 255, 0.9);
+      --bg: #062833;
+      --ink: #12303c;
+      --muted: #4b6670;
+      --soft: #f3fbfd;
+      --line: #d5eef2;
+      --teal: #0e7490;
+      --teal-2: #14b8c6;
+      --orange: #0f766e;
+      --orange-2: #2dd4bf;
+      --blue: #0369a1;
+      --violet: #0e6278;
+      --red: #b91c1c;
+      --green: #0d9488;
+      --card: #ffffff;
       --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
     }
     * { box-sizing: border-box; }
     html, body {
       margin: 0; height: 100%; overflow: hidden;
       background:
-        radial-gradient(1200px 700px at 10% -10%, #134e4a 0%, transparent 55%),
-        radial-gradient(900px 600px at 100% 0%, #7c2d12 0%, transparent 45%),
+        radial-gradient(900px 520px at 0% 0%, #0e6278 0%, transparent 55%),
+        radial-gradient(800px 480px at 100% 100%, #083344 0%, transparent 50%),
         var(--bg);
       color: var(--ink);
       font-family: "Be Vietnam Pro", system-ui, sans-serif;
@@ -46,29 +46,34 @@
       position: absolute; left: 50%; top: 50%;
       width: 1280px; height: 720px;
       transform: translate(-50%, -50%) scale(var(--s, 1));
-      border-radius: 22px; overflow: hidden;
-      background: #f7fafc;
-      box-shadow: 0 28px 80px rgba(0, 0, 0, .45);
+      border-radius: 10px; overflow: hidden;
+      background: #fff;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .38);
       isolation: isolate;
-    }
-    .deck::before {
-      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-      background:
-        linear-gradient(135deg, rgba(15,118,110,.07), transparent 40%),
-        linear-gradient(320deg, rgba(194,65,12,.06), transparent 35%),
-        radial-gradient(circle at 1px 1px, rgba(15,23,42,.06) 1px, transparent 0) 0 0 / 22px 22px;
     }
     .slide {
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
-      padding: 40px 56px 64px;
+      padding: 36px 48px 52px;
+      background: #fff;
       opacity: 0; visibility: hidden; pointer-events: none;
       transform: translateX(30px) scale(.99);
       transition: opacity .45s ease, transform .55s cubic-bezier(.22,1,.36,1), visibility .45s;
       z-index: 1;
     }
+    .slide::before {
+      content: ""; position: absolute; top: 0; right: 0; z-index: 0; pointer-events: none;
+      border-style: solid; border-width: 0 92px 92px 0;
+      border-color: transparent #0e7490 transparent transparent;
+    }
+    .slide::after {
+      content: ""; position: absolute; top: 0; right: 22px; z-index: 0; pointer-events: none;
+      border-style: solid; border-width: 0 46px 46px 0;
+      border-color: transparent #67e8f9 transparent transparent;
+    }
     .slide.active { opacity: 1; visibility: visible; pointer-events: auto; transform: none; z-index: 2; }
-    .slide.leaving { transform: translateX(-30px) scale(.99); }
+    .slide.leaving { opacity: 0; visibility: hidden; transform: translateX(-30px) scale(.99); }
+    .reveal, .title-grid { position: relative; z-index: 1; }
 
     .reveal > * {
       opacity: 0; transform: translateY(18px);
@@ -87,15 +92,15 @@
 
     .slide-label {
       display: inline-flex; align-items: center; gap: .5rem;
-      font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--teal); margin: 0 0 8px;
+      font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+      color: #0e7490; margin: 0 0 8px;
     }
-    .slide-label::before { content: ""; width: 22px; height: 3px; border-radius: 9px; background: linear-gradient(90deg, var(--teal), var(--orange)); }
-    .slide-label .no { color: var(--orange); }
+    .slide-label::before { content: ""; width: 22px; height: 3px; border-radius: 2px; background: #0e7490; }
+    .slide-label .no { color: #0369a1; }
 
-    h1, h2 { font-family: "Fraunces", Georgia, serif; margin: 0; line-height: 1.12; letter-spacing: -.02em; }
-    h1 { font-size: 48px; }
-    h2 { font-size: 33px; }
+    h1, h2 { font-family: "Be Vietnam Pro", system-ui, sans-serif; font-weight: 800; margin: 0; line-height: 1.12; letter-spacing: -.03em; }
+    h1 { font-size: 46px; }
+    h2 { font-size: 30px; }
     h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; color: var(--teal); }
     p { margin: 0; }
     .lead { margin-top: 12px; font-size: 19px; line-height: 1.5; color: var(--muted); max-width: 64ch; }
@@ -106,14 +111,14 @@
 
     /* Highlight quét màu khi slide hiện */
     .mark {
-      background: linear-gradient(120deg, rgba(253,186,116,.75), rgba(253,224,71,.6)) no-repeat 0 88% / 0% 38%;
+      background: linear-gradient(120deg, rgba(103,232,249,.85), rgba(165,243,252,.9)) no-repeat 0 88% / 0% 38%;
       transition: background-size .9s cubic-bezier(.22,1,.36,1) .55s;
       padding: 0 2px; border-radius: 3px;
     }
-    .mark.teal { background-image: linear-gradient(120deg, rgba(94,234,212,.75), rgba(153,246,228,.6)); }
+    .mark.teal { background-image: linear-gradient(120deg, rgba(34,211,238,.75), rgba(153,246,228,.85)); }
     .slide.active .mark { background-size: 100% 38%; }
     .grad-text {
-      background: linear-gradient(90deg, var(--teal), #0891b2 40%, var(--orange));
+      background: linear-gradient(90deg, #0e7490, #0891b2 50%, #14b8c6);
       -webkit-background-clip: text; background-clip: text; color: transparent;
       background-size: 200% 100%; animation: shine 6s linear infinite;
     }
@@ -126,37 +131,30 @@
     .fill { flex: 1; min-height: 0; }
 
     .card {
-      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
-      padding: 15px 17px; box-shadow: 0 10px 28px rgba(15,23,42,.05);
-      transition: transform .3s ease, box-shadow .3s ease;
+      background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+      padding: 15px 17px; box-shadow: none;
     }
-    .card:hover { transform: translateY(-3px); box-shadow: 0 18px 36px rgba(15,23,42,.1); }
     .card p, .card li { font-size: 15.5px; line-height: 1.45; }
-    .card.hot { background: linear-gradient(160deg, #fff7ed, #fff); border-color: #fdba74; }
-    .card.hot h3 { color: var(--orange); }
-    .card.cool { background: linear-gradient(160deg, #ecfeff, #fff); border-color: #99f6e4; }
-    .card.blue { background: linear-gradient(160deg, #eff6ff, #fff); border-color: #93c5fd; }
-    .card.blue h3 { color: var(--blue); }
-    .card.violet { background: linear-gradient(160deg, #f5f3ff, #fff); border-color: #c4b5fd; }
-    .card.violet h3 { color: var(--violet); }
-    .card.ink { background: linear-gradient(145deg, #0f172a, #134e4a); color: #e2e8f0; border: 0; }
-    .card.ink h3 { color: #5eead4; }
+    .card.hot, .card.cool, .card.blue, .card.violet { background: #f4fbfc; border-color: #b9e3ea; }
+    .card.hot h3, .card.cool h3, .card.blue h3, .card.violet h3 { color: #0e7490; }
+    .card.ink { background: linear-gradient(160deg, #083344, #0e7490); color: #ecfeff; border: 0; }
+    .card.ink h3 { color: #a5f3fc; }
 
     ul.bullets { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
     ul.bullets li { position: relative; padding-left: 20px; font-size: 16px; line-height: 1.42; }
     ul.bullets li::before {
       content: ""; position: absolute; left: 0; top: .5em; width: 8px; height: 8px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--teal), #2dd4bf); box-shadow: 0 0 0 3px rgba(15,118,110,.12);
+      background: linear-gradient(135deg, var(--teal), #5eead4); box-shadow: 0 0 0 3px rgba(20,108,58,.12);
     }
-    .card.hot ul.bullets li::before { background: linear-gradient(135deg, var(--orange), #fb923c); box-shadow: 0 0 0 3px rgba(194,65,12,.12); }
+    .card.hot ul.bullets li::before { background: linear-gradient(135deg, var(--orange), #06b6d4); box-shadow: 0 0 0 3px rgba(63,98,18,.12); }
 
     .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .badge {
       display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
-      font-size: 13px; font-weight: 700; background: rgba(15,118,110,.1); color: var(--teal);
-      border: 1px solid rgba(15,118,110,.2);
+      font-size: 13px; font-weight: 700; background: rgba(20,108,58,.1); color: var(--teal);
+      border: 1px solid rgba(20,108,58,.2);
     }
-    .badge.alt { background: rgba(194,65,12,.1); color: var(--orange); border-color: rgba(194,65,12,.22); }
+    .badge.alt { background: rgba(63,98,18,.1); color: var(--orange); border-color: rgba(63,98,18,.22); }
     .badge.blue { background: rgba(29,78,216,.08); color: var(--blue); border-color: rgba(29,78,216,.2); }
     .badge.shimmer { position: relative; overflow: hidden; }
     .badge.shimmer::after {
@@ -169,10 +167,10 @@
     /* Key message banner */
     .key {
       display: flex; align-items: center; gap: 14px;
-      padding: 12px 18px; border-radius: 14px;
-      background: linear-gradient(100deg, #0f172a, #134e4a 70%, #0f766e);
-      color: #ecfeff; font-size: 16.5px; line-height: 1.4;
-      box-shadow: 0 12px 30px rgba(15,118,110,.25);
+      padding: 12px 18px; border-radius: 8px;
+      background: linear-gradient(100deg, #083344, #0e7490 72%, #1493b3);
+      color: #f0fdfa; font-size: 16.5px; line-height: 1.4;
+      box-shadow: none;
       position: relative; overflow: hidden;
     }
     .key::after {
@@ -183,49 +181,56 @@
     @keyframes sweep { 40%, 100% { left: 110%; } }
     .key .ico {
       flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
-      background: rgba(94,234,212,.18); font-size: 19px;
+      background: #fff; font-size: 19px;
     }
-    .key b { color: #fde68a; }
+    .key .ico img { width: 26px; height: 26px; display: block; }
+    .h-ico { width: 24px; height: 24px; vertical-align: -5px; margin-right: 4px; display: inline-block; }
+    .h-ico.sm { width: 18px; height: 18px; vertical-align: -3px; margin-right: 2px; }
+    .key b { color: #a5f3fc; }
 
     .formula {
-      padding: 12px 16px; border-radius: 12px; background: #0f172a; color: #e2e8f0;
-      font-family: var(--mono); font-size: 15.5px; line-height: 1.6; border: 1px solid #1e293b;
+      padding: 12px 16px; border-radius: 8px; background: #0c4a5e; color: #e2e8f0;
+      font-family: var(--mono); font-size: 15.5px; line-height: 1.6; border: 1px solid #1a3d2a;
     }
-    .formula .c { color: #5eead4; } .formula .o { color: #fdba74; } .formula .b { color: #93c5fd; } .formula .g { color: #64748b; }
+    .formula .c { color: #99f6e4; } .formula .o { color: #67e8f9; } .formula .b { color: #99f6e4; } .formula .g { color: #64748b; }
 
     /* Tables */
     .reveal { flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .reveal > .slide-label { align-self: flex-start; }
     .table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; font-size: 15.5px; }
     .table th, .table td { padding: 11px 14px; text-align: left; border-bottom: 1px solid #e8eef4; }
-    .table th { background: #0f172a; color: #ecfeff; font-weight: 700; font-size: 13.5px; }
+    .table th { background: #0e6278; color: #f0fdfa; font-weight: 700; font-size: 13.5px; }
     .table tr:last-child td { border-bottom: 0; }
     .table tbody tr { transition: background .2s; }
     .table tbody tr:hover { background: #f0fdfa; }
     .table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
     .table tr.ours td { background: linear-gradient(90deg, rgba(204,251,241,.55), rgba(255,255,255,.6)); font-weight: 600; }
-    .table tr.sep td { border-top: 2px solid #0f172a; }
+    .table tr.sep td { border-top: 2px solid #0c4a5e; }
     .up { color: var(--green); font-weight: 800; font-size: .86em; margin-left: 3px; }
-    .best { background: #fef3c7 !important; box-shadow: inset 0 0 0 2px #f59e0b; border-radius: 6px; font-weight: 800; animation: glowbest 2.2s ease-in-out infinite; }
-    @keyframes glowbest { 50% { box-shadow: inset 0 0 0 2px #f59e0b, 0 0 14px rgba(245,158,11,.55); } }
+    .best { background: #cffafe !important; box-shadow: inset 0 0 0 2px #0e7490; border-radius: 6px; font-weight: 800; animation: glowbest 2.2s ease-in-out infinite; }
+    @keyframes glowbest { 50% { box-shadow: inset 0 0 0 2px #0e7490, 0 0 14px rgba(245,158,11,.55); } }
     .yes { color: var(--green); font-weight: 800; } .no { color: var(--red); font-weight: 800; }
 
     /* Stats */
     .stat {
-      text-align: center; padding: 16px 12px; border-radius: 16px; background: #fff;
-      border: 1px solid var(--line); position: relative; overflow: hidden;
+      text-align: center; padding: 16px 12px; border-radius: 12px; background: #f4fbfc;
+      border: 1px solid #d5eef2; position: relative; overflow: hidden;
     }
-    .stat::before { content: ""; position: absolute; inset: auto 0 0 0; height: 4px; background: linear-gradient(90deg, var(--teal), var(--orange)); }
-    .stat .value { font-family: "Fraunces", Georgia, serif; font-size: 40px; font-weight: 800; color: var(--teal); line-height: 1; }
-    .stat.o .value { color: var(--orange); }
-    .stat.b .value { color: var(--blue); }
+    .stat::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: #0e7490; }
+    .stat .value { font-family: "Be Vietnam Pro", system-ui, sans-serif; font-size: 36px; font-weight: 800; color: #0e7490; line-height: 1; }
+    .stat.o .value { color: #0f766e; }
+    .stat.b .value { color: #0369a1; }
+    .trend { display: inline-grid; place-items: center; width: .95em; height: .95em; border-radius: 50%; margin-right: .22em; vertical-align: -.1em; color: #fff; }
+    .trend svg { width: 66%; height: 66%; }
+    .trend.up { background: #16a34a; box-shadow: 0 4px 10px rgba(22,163,74,.3); }
+    .trend.down { background: #0369a1; box-shadow: 0 4px 10px rgba(3,105,161,.3); }
     .stat .label { margin-top: 8px; font-size: 14px; color: var(--muted); line-height: 1.35; }
 
     .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
     .chip i { font-style: normal; font-size: 11.5px; color: var(--muted); font-weight: 700; }
     .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 
-    .diagram { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; box-shadow: 0 10px 28px rgba(15,23,42,.04); }
+    .diagram { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; box-shadow: 0 10px 28px rgba(18,53,36,.04); }
     .diagram svg { width: 100%; height: auto; display: block; }
     .caption { margin-top: 6px; font-size: 13px; color: var(--muted); text-align: center; }
 
@@ -242,74 +247,144 @@
       width: 100%; display: block; border-radius: 12px; border: 1px solid var(--line);
       background: #fff; cursor: zoom-in; transition: transform .3s ease, box-shadow .3s ease;
     }
-    .figure-img:hover { transform: scale(1.01); box-shadow: 0 16px 40px rgba(15,23,42,.18); }
+    .figure-img:hover { transform: scale(1.01); box-shadow: 0 16px 40px rgba(18,53,36,.18); }
+    .art {
+      display: block; width: 100%; height: 100%; object-fit: cover;
+      border-radius: 14px; border: 1px solid #d5eef2; background: #fff;
+      box-shadow: 0 12px 28px rgba(8,51,68,.12); cursor: zoom-in;
+    }
+    .hero-art { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 22px; border: 6px solid #fff; box-shadow: 0 24px 50px rgba(8,51,68,.35); cursor: zoom-in; display: block; }
+    .problem-top { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: stretch; }
+    .problem-top .art { height: 150px; }
+    .art-row { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 14px; align-items: stretch; }
+    .art-row .art { min-height: 150px; object-fit: contain; }
 
     /* Title slide */
     .title-slide {
       justify-content: center;
       background:
-        radial-gradient(700px 420px at 12% 18%, rgba(45,212,191,.22), transparent 60%),
-        radial-gradient(560px 380px at 90% 80%, rgba(251,146,60,.18), transparent 55%),
-        linear-gradient(150deg, #f0fdfa 0%, #fff7ed 48%, #ffffff 100%);
+        linear-gradient(105deg, #ffffff 0 56%, #e7f6f8 56% 64%, #0e7490 64% 100%);
     }
-    .orb { position: absolute; border-radius: 50%; filter: blur(2px); opacity: .5; animation: float 8s ease-in-out infinite; pointer-events: none; }
-    .orb.a { width: 170px; height: 170px; background: #99f6e4; top: 6%; right: 38%; }
-    .orb.b { width: 110px; height: 110px; background: #fdba74; bottom: 14%; left: 4%; animation-delay: 1.2s; }
+    .title-slide::before, .title-slide::after { display: none; }
+    .orb { display: none; }
     @keyframes float { 50% { transform: translateY(-18px) scale(1.05); } }
     .title-grid { display: grid; grid-template-columns: 1.25fr .9fr; gap: 28px; align-items: center; position: relative; z-index: 1; }
     .meta { margin-top: 22px; display: grid; gap: 6px; font-size: 15.5px; color: var(--muted); }
     .meta strong { color: var(--ink); }
 
     /* Agenda */
-    .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; margin-top: 28px; }
-    .agenda-item {
-      display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
-      padding: 22px 20px; border-radius: 14px; background: var(--card); border: 1px solid var(--line);
-      cursor: pointer; transition: transform .25s, border-color .25s, box-shadow .25s;
+    .agenda-wrap { display: grid; grid-template-columns: 330px 1fr; gap: 20px; margin-top: 18px; height: 540px; }
+    .agenda-hero {
+      position: relative; overflow: hidden; border-radius: 18px; padding: 24px 24px 20px;
+      display: flex; flex-direction: column; color: #ecfeff;
+      background:
+        radial-gradient(circle at 110% -10%, rgba(103,232,249,.35), transparent 55%),
+        radial-gradient(circle at -20% 120%, rgba(20,184,198,.35), transparent 50%),
+        linear-gradient(160deg, #083344, #0e7490);
+      box-shadow: 0 18px 40px rgba(8,51,68,.28);
     }
-    .agenda-item:hover { transform: translateX(4px); border-color: var(--teal-2); box-shadow: 0 10px 24px rgba(15,118,110,.12); }
-    .agenda-item .n { width: 46px; height: 46px; border-radius: 12px; font-size: 17px; display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--teal), var(--teal-2)); }
-    .agenda-item:nth-child(even) .n { background: linear-gradient(135deg, var(--orange), var(--orange-2)); }
-    .agenda-item strong { display: block; font-size: 19px; }
-    .agenda-item span { font-size: 15px; color: var(--muted); }
-    .agenda-item .go { color: var(--teal); font-weight: 800; opacity: .5; }
+    .agenda-hero::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .18;
+      background-image: radial-gradient(#a5f3fc 1.2px, transparent 1.2px); background-size: 18px 18px;
+      mask-image: linear-gradient(180deg, #000, transparent 70%);
+    }
+    .agenda-hero > * { position: relative; }
+    .agenda-hero .kicker { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #67e8f9; }
+    .agenda-hero .total { font-size: 76px; line-height: 1; font-weight: 800; margin-top: 10px; letter-spacing: -.03em;
+      background: linear-gradient(180deg, #fff, #a5f3fc); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .agenda-hero .total small { font-size: 22px; font-weight: 700; color: #a5f3fc; -webkit-text-fill-color: #a5f3fc; margin-left: 6px; letter-spacing: 0; }
+    .agenda-hero p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.5; color: #cffafe; }
+    .agenda-hero .agenda-art { display: block; width: 100%; height: 128px; margin: 14px 0; object-fit: cover; border-radius: 12px; border: 2px solid rgba(165,243,252,.35); background: #fff; cursor: zoom-in; }
+    .agenda-hero .flow { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+    .agenda-hero .flow div {
+      display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 10px;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(165,243,252,.22); font-size: 13.5px; font-weight: 600;
+    }
+    .agenda-hero .flow b { width: 22px; height: 22px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; background: #22d3ee; color: #083344; font-size: 11px; }
+
+    .agenda { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 14px 16px; }
+    .agenda-item {
+      position: relative; overflow: hidden;
+      display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+      padding: 16px 16px 16px 22px; border-radius: 16px; cursor: pointer;
+      background: linear-gradient(135deg, #fff 60%, #f0fbfc); border: 1px solid #d5eef2; color: var(--ink);
+      box-shadow: 0 8px 18px rgba(14,116,144,.07);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .agenda-item::before {
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+      background: linear-gradient(180deg, #22d3ee, #0e7490);
+    }
+    .agenda-item::after {
+      content: attr(data-no); position: absolute; right: 12px; bottom: -14px;
+      font-size: 72px; font-weight: 800; line-height: 1; color: #0e7490; opacity: .06; pointer-events: none;
+    }
+    .agenda-item:hover { transform: translateY(-3px); border-color: #67e8f9; box-shadow: 0 16px 30px rgba(14,116,144,.16); }
+    .agenda-item .n {
+      position: relative; width: 60px; height: 60px; border-radius: 16px;
+      display: grid; place-items: center; background: #ecfeff; border: 1px solid #a5f3fc;
+    }
+    .agenda-item .n img { width: 38px; height: 38px; }
+    .agenda-item .n em {
+      position: absolute; top: -7px; left: -7px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 99px;
+      display: grid; place-items: center; font-style: normal; font-size: 10.5px; font-weight: 800; color: #fff;
+      background: #0e7490; box-shadow: 0 0 0 3px #fff;
+    }
+    .agenda-item:nth-child(3n+2) .n em { background: #0f766e; }
+    .agenda-item:nth-child(3n) .n em { background: #0369a1; }
+    .agenda-item strong { display: block; font-size: 18px; color: #12303c; margin-bottom: 3px; }
+    .agenda-item span { font-size: 14.5px; color: var(--muted); line-height: 1.4; }
+    .agenda-item .go {
+      width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+      color: #0e7490; background: #e0f7fa; font-size: 18px; font-weight: 800;
+      transition: transform .25s ease, background .25s ease, color .25s ease;
+    }
+    .agenda-item:hover .go { transform: translateX(3px); background: #0e7490; color: #fff; }
+    .agenda-item.qa { background: linear-gradient(135deg, #083344, #0e7490); border-color: #0e7490; }
+    .agenda-item.qa strong { color: #fff; }
+    .agenda-item.qa span { color: #a5f3fc; }
+    .agenda-item.qa::after { color: #fff; opacity: .08; }
+    .agenda-item.qa .n { background: #fff; border-color: #fff; }
+    .agenda-item.qa .go { background: rgba(255,255,255,.15); color: #fff; }
 
     /* Problem flow */
     .pflow { display: grid; grid-template-columns: 1fr 44px 1fr 44px 1fr; align-items: center; gap: 6px; }
-    .pnode { border-radius: 16px; padding: 16px 14px; text-align: center; border: 1px solid var(--line); background: #fff; min-height: 128px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
-    .pnode .big { font-size: 30px; }
+    .pnode { border-radius: 14px; padding: 16px 14px; text-align: center; border: 1px solid #d5eef2; background: #f4fbfc; min-height: 128px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+    .pnode .big { width: 52px; height: 52px; padding: 7px; margin: 0 auto 2px; border-radius: 50%; background: #fff; box-shadow: 0 4px 12px rgba(8,51,68,.14); }
     .pnode strong { font-size: 17px; }
     .pnode span { font-size: 14px; color: var(--muted); line-height: 1.35; }
-    .pnode.cost { background: #fef2f2; border-color: #fca5a5; }
-    .pnode.bad { background: #fff7ed; border-color: #fdba74; }
-    .pnode.ok { background: #ecfeff; border-color: #99f6e4; }
+    .pnode.cost { background: #0e7490; border-color: #0e7490; color: #f0fdfa; }
+    .pnode.cost span { color: #ccfbf1; }
+    .pnode.bad { background: #ecfeff; border-color: #a5f3fc; }
+    .pnode.ok { background: #083344; border-color: #083344; color: #fff; }
+    .pnode.ok span { color: #ccfbf1; }
     .parrow { font-size: 26px; font-weight: 800; color: var(--teal); text-align: center; }
     .slide.active .parrow { animation: nudge 1.4s ease-in-out infinite; }
     @keyframes nudge { 50% { transform: translateX(5px); } }
 
     .bubble { position: relative; padding: 12px 15px; border-radius: 14px; font-size: 15px; line-height: 1.45; }
-    .bubble.q { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .bubble.q { background: #f0fdfa; border: 1px solid #ccfbf1; }
     .bubble.wrong { background: #fef2f2; border: 1px solid #fecaca; }
-    .bubble.right { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .bubble.right { background: #f0fdfa; border: 1px solid #ccfbf1; }
     .bubble .who { display: block; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
 
     /* Algorithm */
     .algo {
-      background: #0b1220; color: #cbd5e1; border-radius: 14px; padding: 14px 18px;
-      font-family: var(--mono); font-size: 13.4px; line-height: 1.62; border: 1px solid #1e293b;
+      background: #083344; color: #cbd5e1; border-radius: 14px; padding: 14px 18px;
+      font-family: var(--mono); font-size: 13.4px; line-height: 1.62; border: 1px solid #1a3d2a;
       counter-reset: ln; position: relative; overflow: hidden;
     }
     .algo .ln { display: block; padding-left: 30px; position: relative; border-radius: 6px; transition: background .3s; }
     .algo .ln[data-n]::before { content: attr(data-n); position: absolute; left: 0; width: 20px; text-align: right; color: #475569; }
-    .algo .kw { color: #f472b6; font-weight: 600; } .algo .fn { color: #5eead4; } .algo .cm { color: #64748b; font-style: italic; }
-    .algo .st { color: #fdba74; font-weight: 600; }
-    .algo .ln.step { color: #fde68a; margin-top: 4px; }
-    .algo .ln.hl { background: rgba(94,234,212,.08); }
+    .algo .kw { color: #a3e635; font-weight: 600; } .algo .fn { color: #99f6e4; } .algo .cm { color: #64748b; font-style: italic; }
+    .algo .st { color: #67e8f9; font-weight: 600; }
+    .algo .ln.step { color: #a5f3fc; margin-top: 4px; }
+    .algo .ln.hl { background: rgba(134,239,172,.08); }
     .algo .ln.err { background: rgba(220,38,38,.2); box-shadow: inset 3px 0 0 #f87171; }
-    .algo .ln.fix { background: rgba(22,163,74,.2); box-shadow: inset 3px 0 0 #4ade80; }
+    .algo .ln.fix { background: rgba(22,163,74,.2); box-shadow: inset 3px 0 0 #5eead4; }
     .algo .file { display: block; color: #94a3b8; font-size: 12px; margin-bottom: 4px; letter-spacing: .03em; }
-    .imp-n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: #fff; font-size: 13px; font-weight: 800; margin-right: 6px; background: linear-gradient(135deg, var(--violet), #a78bfa); vertical-align: 1px; }
-    .tag-new { display: inline-block; padding: 2px 9px; border-radius: 999px; background: linear-gradient(90deg, var(--violet), #db2777); color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: .06em; vertical-align: 3px; }
+    .imp-n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; color: #fff; font-size: 13px; font-weight: 800; margin-right: 6px; background: #0e7490; vertical-align: 1px; }
+    .tag-new { display: inline-block; padding: 2px 9px; border-radius: 4px; background: #0e6278; color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: .06em; vertical-align: 3px; }
 
     /* Ranking viz */
     .rank { display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; gap: 6px; align-items: center; }
@@ -318,34 +393,34 @@
     .ev { display: flex; justify-content: space-between; gap: 8px; padding: 6px 9px; margin-bottom: 5px; border-radius: 8px; background: #f8fafc; font-size: 13px; font-weight: 600; }
     .ev:last-child { margin-bottom: 0; }
     .ev .sc { color: var(--teal); font-variant-numeric: tabular-nums; font-family: var(--mono); }
-    .ev.keep { background: #ecfeff; border: 1px solid #99f6e4; }
+    .ev.keep { background: #f0fdfa; border: 1px solid #ccfbf1; }
     .ev.drop { opacity: .45; text-decoration: line-through; background: #fef2f2; }
     .rop { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--teal); color: #fff; font-weight: 800; margin: auto; }
 
     /* Bars */
     .hbar { display: grid; grid-template-columns: 150px 1fr 64px; gap: 10px; align-items: center; font-size: 14.5px; margin-bottom: 9px; }
     .hbar .track { height: 22px; background: #e2e8f0; border-radius: 999px; overflow: hidden; position: relative; }
-    .hbar .fillbar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--teal), #2dd4bf); transition: width 1.1s cubic-bezier(.22,1,.36,1) .35s; }
-    .hbar .fillbar.o { background: linear-gradient(90deg, var(--orange), #fb923c); }
+    .hbar .fillbar { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--teal), #5eead4); transition: width 1.1s cubic-bezier(.22,1,.36,1) .35s; }
+    .hbar .fillbar.o { background: linear-gradient(90deg, var(--orange), #06b6d4); }
     .hbar .fillbar.g { background: linear-gradient(90deg, #64748b, #94a3b8); }
     .hbar .fillbar.b { background: linear-gradient(90deg, var(--blue), #60a5fa); }
     .slide.active .hbar .fillbar { width: var(--w); }
     .hbar b { font-variant-numeric: tabular-nums; text-align: right; }
 
     /* Grouped bar chart */
-    .gchart { display: flex; align-items: flex-end; gap: 18px; height: 280px; padding: 10px 12px 0; border-bottom: 2px solid #0f172a; position: relative; }
+    .gchart { display: flex; align-items: flex-end; gap: 18px; height: 280px; padding: 10px 12px 0; border-bottom: 2px solid #0e6278; position: relative; }
     .gchart .grp { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 100%; position: relative; }
     .gchart .bar { width: 40%; max-width: 46px; border-radius: 8px 8px 0 0; position: relative; height: 0; transition: height .9s cubic-bezier(.22,1,.36,1); }
     .gchart .bar.mini { background: linear-gradient(180deg, #94a3b8, #64748b); }
-    .gchart .bar.drag { background: linear-gradient(180deg, #2dd4bf, #0f766e); box-shadow: 0 6px 18px rgba(15,118,110,.3); }
+    .gchart .bar.drag { background: linear-gradient(180deg, #5eead4, #0e6278); box-shadow: none; }
     .gchart .bar span { position: absolute; top: -21px; left: 50%; transform: translateX(-50%); font-size: 12.5px; font-weight: 700; white-space: nowrap; }
-    .gchart .delta { position: absolute; top: -4px; left: 50%; transform: translate(-50%, -100%); background: #16a34a; color: #fff; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 999px; opacity: 0; transition: opacity .4s 1s; white-space: nowrap; }
+    .gchart .delta { position: absolute; top: -4px; left: 50%; transform: translate(-50%, -100%); background: #0d9488; color: #fff; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 999px; opacity: 0; transition: opacity .4s 1s; white-space: nowrap; }
     .gchart.on .delta { opacity: 1; }
     .glabels { display: flex; gap: 18px; padding: 8px 12px 0; }
     .glabels div { flex: 1; text-align: center; font-size: 13px; font-weight: 700; color: var(--muted); }
     .tabs { display: inline-flex; gap: 4px; padding: 4px; background: #e2e8f0; border-radius: 999px; }
     .tabs button { appearance: none; border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); cursor: pointer; transition: .2s; }
-    .tabs button.on { background: #0f172a; color: #fff; box-shadow: 0 4px 12px rgba(15,23,42,.25); }
+    .tabs button.on { background: #0e6278; color: #fff; box-shadow: none; }
     .legend { display: flex; gap: 14px; font-size: 13px; font-weight: 600; color: var(--muted); align-items: center; flex-wrap: wrap; }
     .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; }
 
@@ -358,19 +433,19 @@
     .lchart.on .pt { opacity: 1; transition-delay: 1s; }
 
     /* Graph SVG */
-    .kg { background: linear-gradient(160deg, #0f172a, #134e4a 70%, #0f766e); border-radius: 16px; padding: 10px; position: relative; overflow: hidden; }
+    .kg { background: linear-gradient(160deg, #0a4a5c, #0e7490 70%, #18b0c8); border-radius: 8px; padding: 10px; position: relative; overflow: hidden; }
     .kg svg { width: 100%; height: auto; display: block; }
-    .kg .tag { position: absolute; top: 10px; left: 12px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #5eead4; }
+    .kg .tag { position: absolute; top: 10px; left: 12px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #99f6e4; }
 
     /* Privacy */
     .pv { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
     .pv-step { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 10px; text-align: center; position: relative; }
     .pv-step:not(:last-child)::after { content: "➜"; position: absolute; right: -12px; top: 38%; color: var(--teal); font-size: 15px; z-index: 2; }
     .pv-step .n { width: 26px; height: 26px; margin: 0 auto 6px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-items: center; }
-    .pv-step.alert { background: #fff7ed; border-color: #fdba74; } .pv-step.alert .n { background: var(--orange); }
-    .pv-step.safe { background: #ecfeff; border-color: #99f6e4; }
-    .pv-step.cloud { background: linear-gradient(160deg, #0f172a, #134e4a); color: #ecfeff; border: 0; }
-    .pv-step.cloud span { color: #99f6e4; }
+    .pv-step.alert { background: #ecfeff; border-color: #67e8f9; } .pv-step.alert .n { background: var(--orange); }
+    .pv-step.safe { background: #f0fdfa; border-color: #ccfbf1; }
+    .pv-step.cloud { background: linear-gradient(160deg, #0c4a5e, #0e7490); color: #f0fdfa; border: 0; }
+    .pv-step.cloud span { color: #ccfbf1; }
     .pv-step strong { display: block; font-size: 14.5px; margin-bottom: 3px; }
     .pv-step span { font-size: 12.5px; color: var(--muted); line-height: 1.3; display: block; }
     .pii { background: #fee2e2; color: #b91c1c; border-radius: 4px; padding: 0 3px; position: relative; }
@@ -378,42 +453,56 @@
     .slide.active .pii::after { width: 100%; }
 
     .vs { display: grid; grid-template-columns: 1fr 52px 1fr; gap: 12px; align-items: stretch; }
-    .vs .mid { align-self: center; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--teal), var(--orange)); box-shadow: 0 8px 24px rgba(15,118,110,.3); }
+    .vs .mid { align-self: center; width: 50px; height: 50px; border-radius: 8px; display: grid; place-items: center; font-weight: 800; color: #fff; background: #0e7490; box-shadow: none; }
     .slide.active .vs .mid { animation: spin 8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .qa-hero {
-      flex: 1; display: grid; place-items: center; text-align: center; border-radius: 20px;
-      background: radial-gradient(500px 220px at 50% 30%, rgba(45,212,191,.25), transparent 70%), linear-gradient(160deg, #0f172a, #134e4a);
-      color: #ecfeff; position: relative; overflow: hidden; min-height: 180px;
+      flex: 1; display: grid; place-items: center; text-align: center; border-radius: 16px;
+      background: linear-gradient(120deg, #083344, #0e7490 68%, #1493b3);
+      color: #f0fdfa; position: relative; overflow: hidden; min-height: 180px;
     }
-    .qa-hero::after { content: ""; position: absolute; width: 220%; height: 220%; background: conic-gradient(from 0deg, transparent, rgba(94,234,212,.14), transparent 30%); animation: swirl 10s linear infinite; }
+    .qa-hero::after { content: ""; position: absolute; width: 220%; height: 220%; background: conic-gradient(from 0deg, transparent, rgba(103,232,249,.18), transparent 30%); animation: swirl 10s linear infinite; }
     @keyframes swirl { to { transform: rotate(360deg); } }
+    .qa-hero.with-art {
+      background:
+        linear-gradient(90deg, rgba(8,51,68,.92) 0%, rgba(8,51,68,.55) 45%, rgba(8,51,68,.15) 100%),
+        url("assets/drag/gen-end.jpg") center / cover no-repeat;
+      place-items: center start; text-align: left; padding: 0 48px;
+    }
+    .qa-hero.with-art::after { display: none; }
     .qa-hero .inner { position: relative; z-index: 1; }
-    .qa-hero strong { font-family: "Fraunces", Georgia, serif; font-size: 58px; display: block; }
-    .qa-hero p { margin-top: 6px; font-size: 19px; color: #99f6e4; }
+    .qa-hero strong { font-family: "Be Vietnam Pro", system-ui, sans-serif; font-size: 58px; font-weight: 800; display: block; }
+    .qa-hero p { margin-top: 6px; font-size: 19px; color: #a5f3fc; }
 
     /* Footer + nav */
     .footer-bar {
-      position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; height: 46px;
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; height: 40px;
       display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 0 22px;
-      background: rgba(255,255,255,.92); border-top: 1px solid var(--line); backdrop-filter: blur(10px);
-      font-size: 13px; color: var(--muted);
+      background: #fff; border-top: 1px solid #d5eef2;
+      font-size: 13px; color: #4b6670;
     }
     .footer-left { display: flex; align-items: center; gap: 10px; }
-    .back-link { padding: 5px 11px; border-radius: 10px; border: 1px solid rgba(15,118,110,.3); background: rgba(15,118,110,.08); color: var(--teal); font-weight: 700; text-decoration: none; }
-    .back-link:hover { border-color: var(--teal); }
-    .progress-track { flex: 1; max-width: 320px; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--teal), var(--orange)); border-radius: inherit; transition: width .45s cubic-bezier(.22,1,.36,1); }
-    #pageLabel { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+    .page-back {
+      position: fixed; top: 16px; left: 16px; z-index: 40;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 999px;
+      background: #0e7490; color: #fff; font-weight: 700; font-size: 14px;
+      text-decoration: none; box-shadow: 0 8px 22px rgba(8,51,68,.28);
+    }
+    .page-back:hover { background: #0c6580; }
+    .progress-track { flex: 1; max-width: 320px; height: 6px; background: #e0f2f5; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #0e7490, #22d3ee); border-radius: inherit; transition: width .45s cubic-bezier(.22,1,.36,1); }
+    #pageLabel { font-weight: 800; font-variant-numeric: tabular-nums; color: #0e7490; }
 
     .nav { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 8px; z-index: 30; }
-    .nav button { appearance: none; border: 0; width: 44px; height: 44px; border-radius: 999px; background: #fff; color: var(--ink); box-shadow: 0 10px 28px rgba(0,0,0,.3); cursor: pointer; font-size: 22px; font-weight: 700; transition: transform .2s, background .2s; }
-    .nav button:hover:not(:disabled) { background: #ecfeff; color: var(--teal); transform: translateY(-2px); }
+    .nav button { appearance: none; border: 0; width: 44px; height: 44px; border-radius: 999px; background: #0e7490; color: #fff; box-shadow: 0 10px 28px rgba(8,51,68,.3); cursor: pointer; font-size: 22px; font-weight: 700; transition: transform .2s, background .2s; }
+    .nav button:hover:not(:disabled) { background: #0c6580; transform: translateY(-2px); }
     .nav button:disabled { opacity: .35; cursor: default; }
-    .hint { position: fixed; left: 16px; bottom: 16px; color: #94a3b8; font-size: 12.5px; z-index: 30; }
-    .hint kbd { padding: 1px 6px; border-radius: 5px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-size: 11.5px; }
-    .hint a { color: #5eead4; }
+    .hint { display: none; }
+    :fullscreen .page-back, :fullscreen .nav { display: none; }
+    :-webkit-full-screen .page-back, :-webkit-full-screen .nav { display: none; }
+    :fullscreen .deck { border-radius: 0; box-shadow: none; }
 
     .lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,.88); display: none; place-items: center; padding: 3vmin; cursor: zoom-out; }
     .lightbox.open { display: grid; animation: fadein .25s ease; }
@@ -423,7 +512,7 @@
     @media (max-width: 760px) { .hint { display: none; } }
     @media print {
       html, body { overflow: visible; background: #fff; }
-      .nav, .hint, .lightbox { display: none !important; }
+      .nav, .hint, .lightbox, .page-back { display: none !important; }
       .deck { position: relative; left: 0; top: 0; transform: none; box-shadow: none; height: auto; border-radius: 0; }
       .slide { position: relative; opacity: 1; visibility: visible; transform: none; height: 720px; page-break-after: always; }
       .reveal > *, .pop { opacity: 1 !important; transform: none !important; }
@@ -436,13 +525,12 @@
 </head>
 <body>
   <a class="skip" href="#deck">Bỏ qua đến slide</a>
+  <a class="page-back" href="./index.html">← Back</a>
 
   <main class="deck" id="deck" aria-live="polite">
 
     <!-- 1. Tiêu đề -->
     <section class="slide title-slide active" id="s-title" aria-label="Tiêu đề">
-      <div class="orb a" aria-hidden="true"></div>
-      <div class="orb b" aria-hidden="true"></div>
       <div class="title-grid">
         <div class="reveal">
           <div class="badge-row">
@@ -454,37 +542,12 @@
           <p class="lead">Chắt lọc tri thức RAG từ mô hình lớn sang mô hình nhỏ bằng <span class="mark">chứng cứ xếp hạng</span> và <span class="mark teal">đồ thị tri thức</span> — giảm ảo giác, tăng độ chính xác, bảo vệ riêng tư.</p>
           <div class="meta">
             <div><strong>Tác giả:</strong> Jennifer Chen*, Aidar Myrzakhan*, Yaxin Luo, Hassaan M. Khan, Sondos M. Bsharat, Zhiqiang Shen§</div>
-            <div><strong>Người trình bày:</strong> Trần Tuấn Tài · Giải thuật nâng cao — ThS HUIT</div>
+            <div><strong>Người trình bày:</strong> Trần Tuấn Tài, La Hoàng Tú, Võ Văn Hải</div>
             <div><strong>Mã nguồn:</strong> github.com/VILA-Lab/DRAG</div>
           </div>
         </div>
         <div class="pop" style="--d:.2">
-          <svg viewBox="0 0 420 420" role="img" aria-label="Minh họa LLM thầy chắt lọc tri thức cho SLM trò">
-            <defs>
-              <linearGradient id="tCloud" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#134e4a"/></linearGradient>
-              <linearGradient id="tStud" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#ecfeff"/></linearGradient>
-              <path id="pathA" d="M150 140 C 120 220, 120 250, 170 300"/>
-              <path id="pathB" d="M270 140 C 300 220, 300 250, 250 300"/>
-            </defs>
-            <rect x="80" y="30" width="260" height="120" rx="26" fill="url(#tCloud)"/>
-            <text x="210" y="78" text-anchor="middle" fill="#5eead4" font-size="22" font-weight="800">LLM Teacher</text>
-            <text x="210" y="104" text-anchor="middle" fill="#94a3b8" font-size="14">Cloud · GPT-4o, Claude…</text>
-            <text x="210" y="128" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="700">sinh evidence + graph</text>
-            <use href="#pathA" stroke="#2dd4bf" stroke-width="3" fill="none" class="flow-line"/>
-            <use href="#pathB" stroke="#fb923c" stroke-width="3" fill="none" class="flow-line"/>
-            <circle r="7" cx="0" cy="0" fill="#2dd4bf"><animateMotion dur="2.2s" begin="0s" repeatCount="indefinite"><mpath href="#pathA"/></animateMotion></circle>
-            <circle r="7" cx="0" cy="0" fill="#fb923c"><animateMotion dur="2.8s" begin="0s" repeatCount="indefinite"><mpath href="#pathB"/></animateMotion></circle>
-            <rect x="95" y="190" width="72" height="30" rx="8" fill="#ecfeff" stroke="#14b8a6"/>
-            <text x="131" y="210" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0f766e">Evidence</text>
-            <rect x="255" y="190" width="72" height="30" rx="8" fill="#fff7ed" stroke="#f97316"/>
-            <text x="291" y="210" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c2410c">Graph</text>
-            <g class="breathe">
-              <rect x="120" y="295" width="180" height="96" rx="22" fill="url(#tStud)" stroke="#14b8a6" stroke-width="2.5"/>
-              <text x="210" y="335" text-anchor="middle" fill="#0f766e" font-size="20" font-weight="800">SLM Student</text>
-              <text x="210" y="360" text-anchor="middle" fill="#64748b" font-size="13">Local · 2B–9B</text>
-              <text x="210" y="380" text-anchor="middle" fill="#16a34a" font-size="13" font-weight="800">✓ trả lời có căn cứ</text>
-            </g>
-          </svg>
+          <img class="hero-art" src="assets/drag/gen-hero.jpg" alt="Minh họa LLM thầy trên cloud chắt lọc tài liệu và đồ thị tri thức cho SLM trò trên laptop" data-zoom>
         </div>
       </div>
     </section>
@@ -494,15 +557,28 @@
       <div class="reveal">
         <p class="slide-label">Nội dung trình bày</p>
         <h2>Bảy phần, đi đúng mạch của bài báo</h2>
-        <div class="agenda">
-          <div class="agenda-item" data-goto="s-problem"><div class="n">01</div><div><strong>Đặt vấn đề</strong><span>RAG đắt đỏ · SLM dễ ảo giác</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-idea"><div class="n">02</div><div><strong>Ý tưởng cốt lõi</strong><span>Thầy (LLM) chắt lọc — Trò (SLM) trả lời</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-arch"><div class="n">03</div><div><strong>Phương pháp 4 bước</strong><span>Evidence · Ranking · Graph · SLM</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-setup"><div class="n">04</div><div><strong>Thiết lập thực nghiệm</strong><span>5 teacher · 7 student · 6 benchmark</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-sota"><div class="n">05</div><div><strong>Kết quả &amp; ablation</strong><span>+27.7% · K≈15 · GPT-4o dạy tốt nhất</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-privacy"><div class="n">06</div><div><strong>Bảo vệ quyền riêng tư</strong><span>Giảm 95.7% rò rỉ PII</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-contrib"><div class="n">07</div><div><strong>Hạn chế &amp; đề xuất cải tiến</strong><span>Phản biện · DRAG+ với 6 cải tiến</span></div><span class="go">›</span></div>
-          <div class="agenda-item" data-goto="s-end"><div class="n">QA</div><div><strong>Kết luận &amp; hỏi đáp</strong><span>Thảo luận mở</span></div><span class="go">›</span></div>
+        <div class="agenda-wrap">
+          <aside class="agenda-hero">
+            <span class="kicker">Lộ trình trình bày</span>
+            <div class="total">07<small>phần</small></div>
+            <p>Từ bài toán, ý tưởng Teacher–Student, phương pháp 4 bước đến kết quả, quyền riêng tư và phản biện.</p>
+            <img class="agenda-art" src="assets/drag/gen-teacher-student.jpg" alt="" data-zoom>
+            <div class="flow">
+              <div><b>1</b>Vấn đề &amp; ý tưởng</div>
+              <div><b>2</b>Phương pháp &amp; thực nghiệm</div>
+              <div><b>3</b>Đánh giá &amp; cải tiến</div>
+            </div>
+          </aside>
+          <div class="agenda">
+            <div class="agenda-item" data-goto="s-problem" data-no="01"><div class="n"><em>01</em><img src="assets/drag/icons/warning.png" alt=""></div><div><strong>Đặt vấn đề</strong><span>RAG đắt đỏ · SLM dễ ảo giác</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-idea" data-no="02"><div class="n"><em>02</em><img src="assets/drag/icons/bulb.png" alt=""></div><div><strong>Ý tưởng cốt lõi</strong><span>Thầy (LLM) chắt lọc — Trò (SLM) trả lời</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-arch" data-no="03"><div class="n"><em>03</em><img src="assets/drag/icons/gear.png" alt=""></div><div><strong>Phương pháp 4 bước</strong><span>Evidence · Ranking · Graph · SLM</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-setup" data-no="04"><div class="n"><em>04</em><img src="assets/drag/icons/flask.png" alt=""></div><div><strong>Thiết lập thực nghiệm</strong><span>5 teacher · 7 student · 6 benchmark</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-sota" data-no="05"><div class="n"><em>05</em><img src="assets/drag/icons/chart.png" alt=""></div><div><strong>Kết quả &amp; ablation</strong><span>+27.7% · K≈15 · GPT-4o dạy tốt nhất</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-privacy" data-no="06"><div class="n"><em>06</em><img src="assets/drag/icons/shield.png" alt=""></div><div><strong>Bảo vệ quyền riêng tư</strong><span>Giảm 95.7% rò rỉ PII</span></div><span class="go">›</span></div>
+            <div class="agenda-item" data-goto="s-contrib" data-no="07"><div class="n"><em>07</em><img src="assets/drag/icons/scale.png" alt=""></div><div><strong>Hạn chế &amp; đề xuất cải tiến</strong><span>Phản biện · DRAG+ với 6 cải tiến</span></div><span class="go">›</span></div>
+            <div class="agenda-item qa" data-goto="s-end" data-no="QA"><div class="n"><em>QA</em><img src="assets/drag/icons/question.png" alt=""></div><div><strong>Kết luận &amp; hỏi đáp</strong><span>Thảo luận mở</span></div><span class="go">›</span></div>
+          </div>
         </div>
       </div>
     </section>
@@ -512,12 +588,15 @@
       <div class="reveal">
         <p class="slide-label"><span class="no">01</span> Đặt vấn đề</p>
         <h2>RAG mạnh nhưng <span class="t-red">đắt</span> — SLM rẻ nhưng <span class="t-orange">ảo giác</span></h2>
-        <div class="pflow mt">
-          <div class="pnode ok"><div class="big">❓</div><strong>Người dùng hỏi</strong><span>Cần câu trả lời<br>đúng sự thật</span></div>
-          <div class="parrow" aria-hidden="true">→</div>
-          <div class="pnode cost"><div class="big">☁️</div><strong>RAG + LLM lớn</strong><span>Chính xác hơn, nhưng <b>tốn tài nguyên</b>,<br>phải duy trì kho tri thức lớn</span></div>
-          <div class="parrow" aria-hidden="true">⇄</div>
-          <div class="pnode bad"><div class="big">📱</div><strong>SLM chạy cục bộ</strong><span>Rẻ, riêng tư, nhưng dễ sinh<br>câu <b>nghe hợp lý mà sai</b></span></div>
+        <div class="problem-top mt">
+          <div class="pflow">
+            <div class="pnode ok"><img class="big" src="assets/drag/icons/question.png" alt=""><strong>Người dùng hỏi</strong><span>Cần câu trả lời<br>đúng sự thật</span></div>
+            <div class="parrow" aria-hidden="true">→</div>
+            <div class="pnode cost"><img class="big" src="assets/drag/icons/cloud.png" alt=""><strong>RAG + LLM lớn</strong><span>Chính xác hơn, nhưng <b>tốn tài nguyên</b>,<br>phải duy trì kho tri thức lớn</span></div>
+            <div class="parrow" aria-hidden="true">⇄</div>
+            <div class="pnode bad"><img class="big" src="assets/drag/icons/phone.png" alt=""><strong>SLM chạy cục bộ</strong><span>Rẻ, riêng tư, nhưng dễ sinh<br>câu <b>nghe hợp lý mà sai</b></span></div>
+          </div>
+          <img class="art" src="assets/drag/gen-problem.jpg" alt="Bên trái: máy chủ và LLM lớn tốn tiền; bên phải: SLM nhỏ bối rối trả lời sai" data-zoom>
         </div>
         <div class="grid-2 mt">
           <div class="card">
@@ -534,7 +613,7 @@
             </ul>
           </div>
         </div>
-        <div class="key mt"><span class="ico">❔</span><span>Câu hỏi của bài báo: làm sao để <b>SLM có năng lực RAG của LLM</b> mà không phải fine-tune, không tốn kém và không lộ dữ liệu người dùng?</span></div>
+        <div class="key mt"><span class="ico"><img src="assets/drag/icons/question.png" alt=""></span><span>Câu hỏi của bài báo: làm sao để <b>SLM có năng lực RAG của LLM</b> mà không phải fine-tune, không tốn kém và không lộ dữ liệu người dùng?</span></div>
       </div>
     </section>
 
@@ -548,13 +627,13 @@
             <h3>Naive RAG — truy xuất tài liệu d từ kho D</h3>
             <div class="formula">p(y | x) = Σ<sub>d∈D</sub> <span class="c">p<sub>θr</sub>(d | x)</span> · <span class="o">p<sub>θg</sub>(y | x, d)</span></div>
             <svg viewBox="0 0 520 110" class="mt-s" role="img" aria-label="Sơ đồ Naive RAG">
-              <rect x="5" y="35" width="80" height="40" rx="10" fill="#eff6ff" stroke="#93c5fd"/><text x="45" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">query x</text>
-              <line x1="85" y1="55" x2="140" y2="55" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
-              <rect x="140" y="20" width="130" height="70" rx="12" fill="#ecfeff" stroke="#14b8a6"/><text x="205" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#0f766e">Retriever</text><text x="205" y="70" text-anchor="middle" font-size="12" fill="#64748b">encoder + index</text>
-              <line x1="270" y1="55" x2="320" y2="55" stroke="#0f766e" stroke-width="2.5" class="flow-line"/>
+              <rect x="5" y="35" width="80" height="40" rx="10" fill="#f0fdfa" stroke="#99f6e4"/><text x="45" y="60" text-anchor="middle" font-size="14" font-weight="700" fill="#0e6278">query x</text>
+              <line x1="85" y1="55" x2="140" y2="55" stroke="#0891b2" stroke-width="2.5" class="flow-line"/>
+              <rect x="140" y="20" width="130" height="70" rx="12" fill="#f0fdfa" stroke="#14b8c6"/><text x="205" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#0891b2">Retriever</text><text x="205" y="70" text-anchor="middle" font-size="12" fill="#64748b">encoder + index</text>
+              <line x1="270" y1="55" x2="320" y2="55" stroke="#0891b2" stroke-width="2.5" class="flow-line"/>
               <g><rect x="320" y="18" width="34" height="44" rx="4" fill="#fff" stroke="#94a3b8"/><rect x="328" y="26" width="34" height="44" rx="4" fill="#fff" stroke="#94a3b8"/><rect x="336" y="34" width="34" height="44" rx="4" fill="#fff" stroke="#64748b"/><text x="345" y="100" text-anchor="middle" font-size="12" fill="#64748b">top-k d</text></g>
-              <line x1="372" y1="55" x2="410" y2="55" stroke="#c2410c" stroke-width="2.5" class="flow-line"/>
-              <rect x="410" y="20" width="105" height="70" rx="12" fill="#fff7ed" stroke="#f97316"/><text x="462" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#c2410c">Generator</text><text x="462" y="70" text-anchor="middle" font-size="12" fill="#64748b">→ y</text>
+              <line x1="372" y1="55" x2="410" y2="55" stroke="#164e63" stroke-width="2.5" class="flow-line"/>
+              <rect x="410" y="20" width="105" height="70" rx="12" fill="#ecfeff" stroke="#0e7490"/><text x="462" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="#164e63">Generator</text><text x="462" y="70" text-anchor="middle" font-size="12" fill="#64748b">→ y</text>
             </svg>
           </div>
           <div class="card hot">
@@ -562,16 +641,16 @@
             <div class="formula">p(y | x) = Σ<sub>z⊆G</sub> <span class="c">p<sub>θr</sub>(z | x)</span> · <span class="o">p<sub>θg</sub>(y | x, z)</span></div>
             <svg viewBox="0 0 520 110" class="mt-s" role="img" aria-label="Đồ thị tri thức và đồ thị con">
               <g stroke="#cbd5e1" stroke-width="2"><line x1="60" y1="30" x2="150" y2="55"/><line x1="150" y1="55" x2="90" y2="95"/><line x1="150" y1="55" x2="250" y2="30"/><line x1="250" y1="30" x2="330" y2="70"/><line x1="330" y1="70" x2="250" y2="95"/><line x1="330" y1="70" x2="440" y2="45"/><line x1="440" y1="45" x2="480" y2="95"/></g>
-              <g stroke="#f97316" stroke-width="3.5" class="blink"><line x1="250" y1="30" x2="330" y2="70"/><line x1="330" y1="70" x2="250" y2="95"/></g>
+              <g stroke="#0e7490" stroke-width="3.5" class="blink"><line x1="250" y1="30" x2="330" y2="70"/><line x1="330" y1="70" x2="250" y2="95"/></g>
               <g fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"><circle cx="60" cy="30" r="11"/><circle cx="150" cy="55" r="11"/><circle cx="90" cy="95" r="11"/><circle cx="440" cy="45" r="11"/><circle cx="480" cy="95" r="11"/></g>
-              <g fill="#fdba74" stroke="#c2410c" stroke-width="2"><circle cx="250" cy="30" r="13"/><circle cx="330" cy="70" r="13"/><circle cx="250" cy="95" r="13"/></g>
-              <text x="372" y="102" font-size="12.5" font-weight="700" fill="#c2410c">subgraph z</text>
+              <g fill="#67e8f9" stroke="#164e63" stroke-width="2"><circle cx="250" cy="30" r="13"/><circle cx="330" cy="70" r="13"/><circle cx="250" cy="95" r="13"/></g>
+              <text x="372" y="102" font-size="12.5" font-weight="700" fill="#164e63">subgraph z</text>
             </svg>
           </div>
         </div>
         <div class="grid-2 mt">
-          <div class="key"><span class="ico">🔍</span><span><b>θr</b> — phân phối truy xuất: chấm độ liên quan của tài liệu / đồ thị con với câu hỏi.</span></div>
-          <div class="key"><span class="ico">✍️</span><span><b>θg</b> — phân phối sinh: tạo câu trả lời y dựa trên x và ngữ cảnh truy xuất.</span></div>
+          <div class="key"><span class="ico"><img src="assets/drag/icons/search.png" alt=""></span><span><b>θr</b> — phân phối truy xuất: chấm độ liên quan của tài liệu / đồ thị con với câu hỏi.</span></div>
+          <div class="key"><span class="ico"><img src="assets/drag/icons/pen.png" alt=""></span><span><b>θg</b> — phân phối sinh: tạo câu trả lời y dựa trên x và ngữ cảnh truy xuất.</span></div>
         </div>
         <div class="card mt" style="border-left:5px solid var(--orange)">
           <p style="font-size:16.5px">DRAG giao <b class="t-teal">phần truy xuất (θr)</b> cho LLM thầy trên cloud, tức là thầy sinh evidence và đồ thị; <b class="t-orange">phần sinh câu (θg)</b> do SLM trò đảm nhận ngay trên thiết bị. Cả hai dạng ngữ cảnh (văn bản d và đồ thị z) đều được dùng.</p>
@@ -596,7 +675,7 @@
             <tr class="ours sep"><td><b>DRAG (bài này)</b></td><td>LLM thầy sinh <b>evidence xếp hạng + đồ thị</b> cho SLM trò</td><td><span class="best">&nbsp;Không&nbsp;</span></td><td class="yes">Có</td><td class="yes">Có</td></tr>
           </tbody>
         </table>
-        <div class="key mt"><span class="ico">💡</span><span>Điểm khác biệt: DRAG <b>không huấn luyện lại</b> mô hình nào. LLM lớn đóng vai “bộ truy xuất thông minh”, SLM chỉ đọc ngữ cảnh đã tinh lọc.</span></div>
+        <div class="key mt"><span class="ico"><img src="assets/drag/icons/bulb.png" alt=""></span><span>Điểm khác biệt: DRAG <b>không huấn luyện lại</b> mô hình nào. LLM lớn đóng vai “bộ truy xuất thông minh”, SLM chỉ đọc ngữ cảnh đã tinh lọc.</span></div>
       </div>
     </section>
 
@@ -608,48 +687,54 @@
         <div class="diagram mt">
           <svg viewBox="0 0 1160 230" role="img" aria-label="Mô hình Teacher–Student của DRAG">
             <defs>
-              <marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#0f766e"/></marker>
-              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#134e4a"/></linearGradient>
+              <marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#0891b2"/></marker>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c4a5e"/><stop offset="1" stop-color="#0e7490"/></linearGradient>
             </defs>
-            <rect x="0" y="0" width="560" height="230" rx="16" fill="#0f172a" opacity=".04"/>
-            <text x="20" y="24" font-size="13" font-weight="800" fill="#0f766e" letter-spacing="1">☁ CLOUD</text>
-            <rect x="600" y="0" width="560" height="230" rx="16" fill="#f97316" opacity=".05"/>
-            <text x="1080" y="24" font-size="13" font-weight="800" fill="#c2410c" letter-spacing="1">📱 LOCAL</text>
+            <rect x="0" y="0" width="560" height="230" rx="16" fill="#0c4a5e" opacity=".04"/>
+            <image href="assets/drag/icons/cloud.png" x="18" y="9" width="20" height="20"/>
+            <text x="44" y="24" font-size="13" font-weight="800" fill="#0891b2" letter-spacing="1">CLOUD</text>
+            <rect x="600" y="0" width="560" height="230" rx="16" fill="#0e7490" opacity=".05"/>
+            <image href="assets/drag/icons/phone.png" x="1078" y="9" width="20" height="20"/>
+            <text x="1102" y="24" font-size="13" font-weight="800" fill="#164e63" letter-spacing="1">LOCAL</text>
 
-            <rect x="20" y="80" width="120" height="70" rx="14" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
-            <text x="80" y="112" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">Câu hỏi q</text>
+            <rect x="20" y="80" width="120" height="70" rx="14" fill="#f0fdfa" stroke="#99f6e4" stroke-width="2"/>
+            <text x="80" y="112" text-anchor="middle" font-size="15" font-weight="800" fill="#0e6278">Câu hỏi q</text>
             <text x="80" y="132" text-anchor="middle" font-size="12" fill="#64748b">(đã gỡ PII)</text>
-            <line x1="140" y1="115" x2="180" y2="115" stroke="#0f766e" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
+            <line x1="140" y1="115" x2="180" y2="115" stroke="#0891b2" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
 
             <rect x="185" y="40" width="250" height="150" rx="18" fill="url(#g1)"/>
-            <text x="310" y="74" text-anchor="middle" font-size="18" font-weight="800" fill="#5eead4">LLM Teacher (M_large)</text>
-            <text x="310" y="96" text-anchor="middle" font-size="12.5" fill="#94a3b8">không trả đáp án — chỉ cung cấp tri thức</text>
-            <rect x="205" y="118" width="100" height="48" rx="10" fill="#134e4a" stroke="#2dd4bf"/>
-            <text x="255" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#ecfeff">N evidence</text>
-            <text x="255" y="157" text-anchor="middle" font-size="11" fill="#99f6e4">+ xếp hạng</text>
-            <rect x="315" y="118" width="100" height="48" rx="10" fill="#134e4a" stroke="#fdba74"/>
-            <text x="365" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#ecfeff">(a, b, r)</text>
-            <text x="365" y="157" text-anchor="middle" font-size="11" fill="#fed7aa">đồ thị</text>
-            <line x1="435" y1="115" x2="625" y2="115" stroke="#0f766e" stroke-width="3" marker-end="url(#ar1)" class="flow-line"/>
-            <text x="530" y="100" text-anchor="middle" font-size="13" font-weight="800" fill="#0f766e">DISTILLATION</text>
-            <text x="530" y="140" text-anchor="middle" font-size="12" fill="#64748b">top-K evidence ± top-K quan hệ</text>
+            <text x="310" y="74" text-anchor="middle" font-size="18" font-weight="800" fill="#99f6e4">LLM Teacher (M_large)</text>
+            <text x="310" y="96" text-anchor="middle" font-size="11.5" fill="#a5c6cf">không trả đáp án · chỉ cung cấp tri thức</text>
+            <rect x="205" y="118" width="100" height="48" rx="10" fill="#0e7490" stroke="#5eead4"/>
+            <text x="255" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#f0fdfa">N evidence</text>
+            <text x="255" y="157" text-anchor="middle" font-size="11" fill="#ccfbf1">+ xếp hạng</text>
+            <rect x="315" y="118" width="100" height="48" rx="10" fill="#0e7490" stroke="#67e8f9"/>
+            <text x="365" y="140" text-anchor="middle" font-size="13" font-weight="700" fill="#f0fdfa">(a, b, r)</text>
+            <text x="365" y="157" text-anchor="middle" font-size="11" fill="#a5f3fc">đồ thị</text>
+            <line x1="435" y1="115" x2="625" y2="115" stroke="#0891b2" stroke-width="3" marker-end="url(#ar1)" class="flow-line"/>
+            <rect x="470" y="84" width="120" height="22" rx="11" fill="#fff" stroke="#67e8f9"/>
+            <text x="530" y="99" text-anchor="middle" font-size="12" font-weight="800" fill="#0891b2" letter-spacing=".5">DISTILLATION</text>
+            <rect x="465" y="126" width="130" height="40" rx="10" fill="#fff" stroke="#d5eef2"/>
+            <text x="530" y="142" text-anchor="middle" font-size="12" fill="#4b6670">top-K evidence</text>
+            <text x="530" y="158" text-anchor="middle" font-size="12" fill="#4b6670">± top-K quan hệ</text>
 
-            <rect x="630" y="55" width="210" height="120" rx="16" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
-            <text x="735" y="92" text-anchor="middle" font-size="15" font-weight="800" fill="#9a3412">Ngữ cảnh tinh lọc</text>
+            <rect x="630" y="55" width="210" height="120" rx="16" fill="#ecfeff" stroke="#67e8f9" stroke-width="2"/>
+            <text x="735" y="92" text-anchor="middle" font-size="15" font-weight="800" fill="#0e6278">Ngữ cảnh tinh lọc</text>
             <text x="735" y="116" text-anchor="middle" font-size="12.5" fill="#78716c">D_filtered</text>
             <text x="735" y="136" text-anchor="middle" font-size="12.5" fill="#78716c">{(a_j, b_j, r_j)}, j = 1..K</text>
-            <line x1="840" y1="115" x2="880" y2="115" stroke="#0f766e" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
+            <line x1="840" y1="115" x2="880" y2="115" stroke="#0891b2" stroke-width="2.5" marker-end="url(#ar1)" class="flow-line"/>
 
             <g class="breathe">
-              <rect x="885" y="40" width="255" height="150" rx="18" fill="#ecfeff" stroke="#14b8a6" stroke-width="2.5"/>
-              <text x="1012" y="78" text-anchor="middle" font-size="18" font-weight="800" fill="#0f766e">SLM Student (M_small)</text>
+              <rect x="885" y="40" width="255" height="150" rx="18" fill="#f0fdfa" stroke="#14b8c6" stroke-width="2.5"/>
+              <text x="1012" y="78" text-anchor="middle" font-size="18" font-weight="800" fill="#0891b2">SLM Student (M_small)</text>
               <text x="1012" y="100" text-anchor="middle" font-size="12.5" fill="#64748b">2B – 9B tham số</text>
-              <rect x="925" y="120" width="175" height="44" rx="10" fill="#0f766e"/>
-              <text x="1012" y="148" text-anchor="middle" font-size="15" font-weight="800" fill="#ecfeff">ŷ ← M_small(q, context)</text>
+              <rect x="900" y="120" width="225" height="44" rx="10" fill="#0891b2"/>
+              <text x="1012" y="147" text-anchor="middle" font-size="14" font-weight="800" fill="#f0fdfa">ŷ ← M_small(q, context)</text>
             </g>
           </svg>
         </div>
-        <div class="grid-3 mt">
+        <div class="art-row mt">
+          <img class="art pop" style="--d:.2" src="assets/drag/gen-teacher-student.jpg" alt="Robot thầy trên mây đưa hồ sơ evidence và đồ thị cho robot trò, che dấu hỏi để không lộ đáp án" data-zoom>
           <div class="card cool pop" style="--d:.3"><h3>① LLM = retriever mạnh hơn</h3><p>Theo tác giả, một LLM được huấn luyện tốt là bộ truy xuất mạnh và hiệu quả hơn “query encoder + document index” cho SLM.</p></div>
           <div class="card hot pop" style="--d:.45"><h3>② Thầy không làm hộ</h3><p>Teacher chỉ đưa <b>evidence</b> và <b>đồ thị</b>; prompt có câu “Do not give the answer away directly”.</p></div>
           <div class="card blue pop" style="--d:.6"><h3>③ Không fine-tune</h3><p>Chỉ cần prompt. Trò có thể là mô hình chuyên miền, chạy cục bộ, nhận câu hỏi đã ẩn danh.</p></div>
@@ -673,7 +758,7 @@
             <tr><td><b>Riêng tư</b></td><td>Gửi nguyên câu hỏi lên cloud</td><td class="t-teal"><b>SLM gỡ PII trước khi gửi</b></td></tr>
           </tbody>
         </table>
-        <div class="key mt"><span class="ico">🎯</span><span>Mục tiêu: SLM <b>bắt chước lối suy luận dựa trên chứng cứ</b> của thầy, thay vì tự “nhớ” hoặc tự truy xuất từ đầu.</span></div>
+        <div class="key mt"><span class="ico"><img src="assets/drag/icons/target.png" alt=""></span><span>Mục tiêu: SLM <b>bắt chước lối suy luận dựa trên chứng cứ</b> của thầy, thay vì tự “nhớ” hoặc tự truy xuất từ đầu.</span></div>
       </div>
     </section>
 
@@ -731,7 +816,7 @@
                 <tr><td><b>context</b></td><td>Evidence, đồ thị, hoặc cả hai</td></tr>
               </tbody>
             </table>
-            <div class="key"><span class="ico">⚙️</span><span>Chi phí nặng (bước 1–3) nằm ở <b>cloud</b>; SLM chỉ làm <b>một lần suy luận</b>.</span></div>
+            <div class="key"><span class="ico"><img src="assets/drag/icons/gear.png" alt=""></span><span>Chi phí nặng (bước 1–3) nằm ở <b>cloud</b>; SLM chỉ làm <b>một lần suy luận</b>.</span></div>
           </div>
         </div>
       </div>
@@ -761,7 +846,7 @@
                 <h4>Điểm kép</h4>
                 <div class="ev"><span>cos(e₁, q)</span><span class="sc">0.81</span></div>
                 <div class="ev"><span>rank<sub>LLM</sub>(d₁)</span><span class="sc">0.92</span></div>
-                <div class="ev" style="background:#0f172a;color:#ecfeff;justify-content:center">s₁ = 1.73</div>
+                <div class="ev" style="background:#0c4a5e;color:#f0fdfa;justify-content:center">s₁ = 1.73</div>
               </div>
               <div class="rop">→</div>
               <div class="rcol">
@@ -780,7 +865,7 @@
           <span class="o">s<sub>i</sub> = score<sub>i</sub><sup>(sim)</sup> + rank<sub>LLM</sub>(d<sub>i</sub>)</span> &nbsp;<span class="g">(4)</span> &nbsp;&nbsp;│&nbsp;&nbsp;
           loại <span class="b">X = N − K</span> evidence điểm thấp nhất → <span class="c">D<sub>filtered</sub> ⊂ D</span> &nbsp;<span class="g">(5)</span>
         </div>
-        <div class="key mt"><span class="ico">⚖️</span><span>Cosine bắt <b>độ gần ngữ nghĩa</b>, LLM bắt <b>mức phù hợp ngữ cảnh</b> — hai tín hiệu bổ sung nhau, cộng với trọng số bằng nhau.</span></div>
+        <div class="key mt"><span class="ico"><img src="assets/drag/icons/scale.png" alt=""></span><span>Cosine bắt <b>độ gần ngữ nghĩa</b>, LLM bắt <b>mức phù hợp ngữ cảnh</b> — hai tín hiệu bổ sung nhau, cộng với trọng số bằng nhau.</span></div>
       </div>
     </section>
 
@@ -793,33 +878,35 @@
           <div class="kg">
             <span class="tag">Multigraph · nhiều cạnh giữa 2 nút</span>
             <svg viewBox="0 0 520 250" role="img" aria-label="Multigraph có hai cạnh giữa nymphs và adults">
-              <path d="M130 120 Q 260 40 390 120" stroke="#5eead4" stroke-width="2.5" fill="none" class="flow-line"/>
-              <path d="M130 120 Q 260 200 390 120" stroke="#fdba74" stroke-width="2.5" fill="none" class="flow-line"/>
-              <text x="260" y="62" text-anchor="middle" fill="#99f6e4" font-size="12.5">“resemble the adult stage”</text>
-              <text x="260" y="192" text-anchor="middle" fill="#fed7aa" font-size="12.5">“transition directly into adults”</text>
-              <line x1="130" y1="120" x2="130" y2="215" stroke="#93c5fd" stroke-width="2" class="flow-line"/>
-              <text x="140" y="175" fill="#bfdbfe" font-size="12">characteristic of</text>
-              <g class="breathe"><circle cx="130" cy="120" r="40" fill="#134e4a" stroke="#5eead4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">nymphs</text></g>
-              <circle cx="390" cy="120" r="40" fill="#7c2d12" stroke="#fdba74" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#fff7ed" font-size="14" font-weight="800">adults</text>
-              <rect x="40" y="215" width="180" height="30" rx="15" fill="#1e3a8a" stroke="#93c5fd"/><text x="130" y="235" text-anchor="middle" fill="#eff6ff" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
+              <path d="M130 120 Q 260 40 390 120" stroke="#99f6e4" stroke-width="2.5" fill="none" class="flow-line"/>
+              <path d="M130 120 Q 260 200 390 120" stroke="#67e8f9" stroke-width="2.5" fill="none" class="flow-line"/>
+              <text x="260" y="62" text-anchor="middle" fill="#ccfbf1" font-size="12.5">“resemble the adult stage”</text>
+              <text x="260" y="192" text-anchor="middle" fill="#a5f3fc" font-size="12.5">“transition directly into adults”</text>
+              <line x1="130" y1="120" x2="130" y2="215" stroke="#99f6e4" stroke-width="2" class="flow-line"/>
+              <text x="140" y="175" fill="#ccfbf1" font-size="12">characteristic of</text>
+              <g class="breathe"><circle cx="130" cy="120" r="40" fill="#0e7490" stroke="#99f6e4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#f0fdfa" font-size="14" font-weight="800">nymphs</text></g>
+              <circle cx="390" cy="120" r="40" fill="#134e4a" stroke="#67e8f9" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">adults</text>
+              <rect x="40" y="215" width="180" height="30" rx="15" fill="#0e6278" stroke="#99f6e4"/><text x="130" y="235" text-anchor="middle" fill="#f0fdfa" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
             </svg>
           </div>
           <div class="kg">
             <span class="tag">Simple graph · gộp cạnh trùng</span>
             <svg viewBox="0 0 520 250" role="img" aria-label="Simple graph sau khi gộp cạnh">
-              <line x1="130" y1="120" x2="390" y2="120" stroke="#fde68a" stroke-width="4" class="flow-line"/>
-              <rect x="170" y="70" width="180" height="38" rx="10" fill="#0f172a" stroke="#fde68a"/>
-              <text x="260" y="86" text-anchor="middle" fill="#fde68a" font-size="11.5">“Nymphs transition directly into</text>
-              <text x="260" y="100" text-anchor="middle" fill="#fde68a" font-size="11.5">adults and resemble the adult stage”</text>
-              <line x1="130" y1="120" x2="130" y2="215" stroke="#93c5fd" stroke-width="2" class="flow-line"/>
-              <g class="breathe"><circle cx="130" cy="120" r="40" fill="#134e4a" stroke="#5eead4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">nymphs</text></g>
-              <circle cx="390" cy="120" r="40" fill="#7c2d12" stroke="#fdba74" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#fff7ed" font-size="14" font-weight="800">adults</text>
-              <rect x="40" y="215" width="180" height="30" rx="15" fill="#1e3a8a" stroke="#93c5fd"/><text x="130" y="235" text-anchor="middle" fill="#eff6ff" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
-              <text x="400" y="225" text-anchor="middle" fill="#86efac" font-size="14" font-weight="800">2 cạnh → 1 cạnh</text>
+              <line x1="130" y1="120" x2="390" y2="120" stroke="#a5f3fc" stroke-width="4" class="flow-line"/>
+              <line x1="260" y1="64" x2="260" y2="118" stroke="#a5f3fc" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <rect x="125" y="18" width="270" height="46" rx="10" fill="#0c4a5e" stroke="#a5f3fc"/>
+              <text x="260" y="37" text-anchor="middle" fill="#a5f3fc" font-size="12">“Nymphs transition directly into</text>
+              <text x="260" y="54" text-anchor="middle" fill="#a5f3fc" font-size="12">adults and resemble the adult stage”</text>
+              <line x1="130" y1="120" x2="130" y2="215" stroke="#99f6e4" stroke-width="2" class="flow-line"/>
+              <g class="breathe"><circle cx="130" cy="120" r="40" fill="#0e7490" stroke="#99f6e4" stroke-width="2"/><text x="130" y="125" text-anchor="middle" fill="#f0fdfa" font-size="14" font-weight="800">nymphs</text></g>
+              <circle cx="390" cy="120" r="40" fill="#134e4a" stroke="#67e8f9" stroke-width="2"/><text x="390" y="125" text-anchor="middle" fill="#ecfeff" font-size="14" font-weight="800">adults</text>
+              <rect x="40" y="215" width="180" height="30" rx="15" fill="#0e6278" stroke="#99f6e4"/><text x="130" y="235" text-anchor="middle" fill="#f0fdfa" font-size="12.5" font-weight="700">incomplete metamorphosis</text>
+              <text x="400" y="225" text-anchor="middle" fill="#99f6e4" font-size="14" font-weight="800">2 cạnh → 1 cạnh</text>
             </svg>
           </div>
         </div>
-        <div class="grid-3 mt">
+        <div class="art-row mt">
+          <img class="art" src="assets/drag/gen-graph.jpg" alt="Chồng tài liệu dài đi qua phễu lọc thành đồ thị tri thức gọn, các cạnh trùng được gộp lại" data-zoom>
           <div class="card hot"><h3>Trích bộ ba</h3><p>R<sub>i</sub> = {(a, b, r)}: nút là thực thể, cạnh mang nhãn quan hệ. Xếp hạng giống bước 2 → giữ <b>top K</b>.</p></div>
           <div class="card cool"><h3>Gộp cạnh bằng prompt</h3><p>“Combine the provided statements into one summarized statement. Be concise without losing any information.”</p></div>
           <div class="card blue"><h3>Đánh đổi</h3><p>Mất một phần thông tin so với văn bản gốc, nhưng <span class="mark teal">ít token hơn ~18%</span> → SLM suy luận nhẹ hơn.</p></div>
@@ -865,17 +952,17 @@
         <div style="display:grid;grid-template-columns:1fr 1.25fr;gap:16px;margin-top:14px">
           <div style="display:grid;gap:12px;align-content:start">
             <div class="card ink">
-              <h3>☁ Teacher LLMs</h3>
+              <h3><img class="h-ico" src="assets/drag/icons/cloud.png" alt=""> Teacher LLMs</h3>
               <div class="chips">
-                <span class="chip" style="background:#134e4a;color:#ecfeff;border-color:#2dd4bf">GPT-4o</span>
-                <span class="chip" style="background:#134e4a;color:#ecfeff;border-color:#2dd4bf">Claude 3.5 Sonnet</span>
-                <span class="chip" style="background:#134e4a;color:#ecfeff;border-color:#2dd4bf">DeepSeek-V3</span>
-                <span class="chip" style="background:#134e4a;color:#ecfeff;border-color:#2dd4bf">LLaMA-3.3-70B</span>
-                <span class="chip" style="background:#134e4a;color:#ecfeff;border-color:#2dd4bf">Gemini 1.5 Flash</span>
+                <span class="chip" style="background:#0e7490;color:#f0fdfa;border-color:#5eead4">GPT-4o</span>
+                <span class="chip" style="background:#0e7490;color:#f0fdfa;border-color:#5eead4">Claude 3.5 Sonnet</span>
+                <span class="chip" style="background:#0e7490;color:#f0fdfa;border-color:#5eead4">DeepSeek-V3</span>
+                <span class="chip" style="background:#0e7490;color:#f0fdfa;border-color:#5eead4">LLaMA-3.3-70B</span>
+                <span class="chip" style="background:#0e7490;color:#f0fdfa;border-color:#5eead4">Gemini 1.5 Flash</span>
               </div>
             </div>
             <div class="card hot">
-              <h3>📱 Student SLMs</h3>
+              <h3><img class="h-ico" src="assets/drag/icons/phone.png" alt=""> Student SLMs</h3>
               <div class="chips">
                 <span class="chip">Gemma-2 <i>2B</i></span><span class="chip">Phi-3.5-mini <i>3.8B</i></span>
                 <span class="chip">Qwen2.5 <i>3B</i></span><span class="chip">LLaMA-3.2 <i>3B</i></span>
@@ -883,7 +970,7 @@
                 <span class="chip">Gemma-2 <i>9B</i></span>
               </div>
             </div>
-            <div class="key"><span class="ico">🧪</span><span><b>Zero-shot</b> · lm-evaluation-harness · <b>4 × RTX 4090</b> · K ∈ {5, 10, 15, 20}</span></div>
+            <div class="key"><span class="ico"><img src="assets/drag/icons/flask.png" alt=""></span><span><b>Zero-shot</b> · lm-evaluation-harness · <b>4 × RTX 4090</b> · K ∈ {5, 10, 15, 20}</span></div>
           </div>
           <table class="table">
             <thead><tr><th>Benchmark</th><th>Nội dung</th><th>Loại</th></tr></thead>
@@ -922,9 +1009,9 @@
             </tbody>
           </table>
           <div style="display:grid;gap:12px;align-content:start">
-            <div class="stat"><div class="value"><span class="count" data-to="27.7" data-dec="1" data-pre="+">0</span>%</div><div class="label">Cao nhất so với MiniRAG, cùng backbone (ARC-C)</div></div>
+            <div class="stat"><div class="value"><span class="trend up" aria-label="tăng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><span class="count" data-to="27.7" data-dec="1">0</span>%</div><div class="label">Cao nhất so với MiniRAG, cùng backbone (ARC-C)</div></div>
             <div class="stat o"><div class="value"><span class="count" data-to="94.1" data-dec="1">0</span>%</div><div class="label">ARC-C tốt nhất (Phi-3.5-mini) — Self-RAG 67.3%</div></div>
-            <div class="stat b"><div class="value"><span class="count" data-to="23.9" data-dec="1" data-pre="+">0</span>%</div><div class="label">MedMCQA, Gemma-2-2B so với MiniRAG</div></div>
+            <div class="stat b"><div class="value"><span class="trend up" aria-label="tăng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span><span class="count" data-to="23.9" data-dec="1">0</span>%</div><div class="label">MedMCQA, Gemma-2-2B so với MiniRAG</div></div>
           </div>
         </div>
         <p class="caption" style="text-align:left">“↑” = mức tăng so với phương pháp khác dùng cùng backbone và cấu hình suy luận. Bảng rút gọn; 3 cặp MiniRAG/DRAG còn lại ở slide sau.</p>
@@ -942,13 +1029,13 @@
             <button type="button" data-ds="med">MedMCQA</button>
             <button type="button" data-ds="mmlu">MMLU</button>
           </div>
-          <div class="legend"><span><i style="background:#64748b"></i>MiniRAG</span><span><i style="background:#0f766e"></i>DRAG (evidence)</span><span><i style="background:#16a34a;border-radius:999px"></i>Mức tăng</span></div>
+          <div class="legend"><span><i style="background:#64748b"></i>MiniRAG</span><span><i style="background:#0891b2"></i>DRAG (evidence)</span><span><i style="background:#0d9488;border-radius:999px"></i>Mức tăng</span></div>
         </div>
         <div class="card mt" style="padding:34px 18px 12px">
           <div class="gchart" id="miniChart"></div>
           <div class="glabels" id="miniLabels"></div>
         </div>
-        <div class="key mt"><span class="ico">📈</span><span>Mức tăng lớn nhất rơi vào <b>SLM yếu</b> (GLM-edge-1.5B, Llama-3.2-3B): mô hình càng nhỏ càng hưởng lợi từ ngữ cảnh do thầy chắt lọc.</span></div>
+        <div class="key mt"><span class="ico"><img src="assets/drag/icons/chart.png" alt=""></span><span>Mức tăng lớn nhất rơi vào <b>SLM yếu</b> (GLM-edge-1.5B, Llama-3.2-3B): mô hình càng nhỏ càng hưởng lợi từ ngữ cảnh do thầy chắt lọc.</span></div>
       </div>
     </section>
 
@@ -993,7 +1080,7 @@
             <h3>MedMCQA — trung bình 7 SLM, cấu hình Evidence (K = 15)</h3>
             <p class="muted" style="font-size:13px;margin-bottom:12px">Tính từ Bảng 3 của bài báo</p>
             <div class="hbar"><span>Không ngữ cảnh</span><div class="track"><div class="fillbar g" style="--w:53.27%"></div></div><b>53.27</b></div>
-            <div class="hbar"><span>🥇 GPT-4o</span><div class="track"><div class="fillbar" style="--w:73.34%"></div></div><b>73.34</b></div>
+            <div class="hbar"><span><img class="h-ico sm" src="assets/drag/icons/medal.png" alt=""> GPT-4o</span><div class="track"><div class="fillbar" style="--w:73.34%"></div></div><b>73.34</b></div>
             <div class="hbar"><span>Claude 3.5 Sonnet</span><div class="track"><div class="fillbar b" style="--w:68.70%"></div></div><b>68.70</b></div>
             <div class="hbar"><span>DeepSeek-V3</span><div class="track"><div class="fillbar b" style="--w:68.48%"></div></div><b>68.48</b></div>
             <div class="hbar"><span>LLaMA-3.3-70B</span><div class="track"><div class="fillbar b" style="--w:67.97%"></div></div><b>67.97</b></div>
@@ -1011,7 +1098,7 @@
                 <tr><td>Gemini 1.5 Flash</td><td class="num">90.3</td><td class="num">69.9</td><td class="num">39.5</td><td class="num">78.9</td></tr>
               </tbody>
             </table>
-            <div class="key"><span class="ico">🎓</span><span>Claude giải GPQA giỏi hơn GPT-4o, nhưng evidence của GPT-4o <b>có cấu trúc và bám sự thật hơn</b> → trò học tốt hơn.</span></div>
+            <div class="key"><span class="ico"><img src="assets/drag/icons/grad.png" alt=""></span><span>Claude giải GPQA giỏi hơn GPT-4o, nhưng evidence của GPT-4o <b>có cấu trúc và bám sự thật hơn</b> → trò học tốt hơn.</span></div>
             <p class="muted" style="font-size:13.5px">Trò giỏi nhất chỉ kém GPT-4o khoảng <b>2.0–2.5%</b> trên ARC-C và MedMCQA.</p>
           </div>
         </div>
@@ -1026,9 +1113,9 @@
         <div class="grid-3 mt" style="grid-template-columns:.9fr 1.15fr .95fr">
           <div class="card">
             <h3>Bảng 5 — Token mỗi mục</h3>
-            <div style="display:flex;align-items:flex-end;justify-content:center;gap:34px;height:190px;margin-top:6px;border-bottom:2px solid #0f172a">
-              <div style="text-align:center"><b style="font-size:20px">26.30</b><div class="vbar" style="--h:170px;width:64px;background:linear-gradient(180deg,#2dd4bf,#0f766e);border-radius:10px 10px 0 0"></div></div>
-              <div style="text-align:center"><b style="font-size:20px" class="t-orange">21.55</b><div class="vbar" style="--h:139px;width:64px;background:linear-gradient(180deg,#fdba74,#c2410c);border-radius:10px 10px 0 0"></div></div>
+            <div style="display:flex;align-items:flex-end;justify-content:center;gap:34px;height:190px;margin-top:6px;border-bottom:2px solid #0c4a5e">
+              <div style="text-align:center"><b style="font-size:20px">26.30</b><div class="vbar" style="--h:170px;width:64px;background:linear-gradient(180deg,#5eead4,#0891b2);border-radius:10px 10px 0 0"></div></div>
+              <div style="text-align:center"><b style="font-size:20px" class="t-orange">21.55</b><div class="vbar" style="--h:139px;width:64px;background:linear-gradient(180deg,#67e8f9,#164e63);border-radius:10px 10px 0 0"></div></div>
             </div>
             <div style="display:flex;justify-content:center;gap:34px;font-size:13.5px;font-weight:700;margin-top:6px"><span style="width:64px;text-align:center">Evidence</span><span style="width:64px;text-align:center">Graph</span></div>
             <p class="mt-s" style="text-align:center"><span class="best">&nbsp;↓ 18.1% token&nbsp;</span></p>
@@ -1057,7 +1144,7 @@
               <div class="hbar" style="grid-template-columns:86px 1fr 48px"><span>+ Comb.</span><div class="track"><div class="fillbar b" style="--w:45.63%"></div></div><b>45.6</b></div>
               <p class="muted" style="font-size:12.5px">BLOOM-7B: 26 → 32.43 (evidence)</p>
             </div>
-            <div class="key" style="font-size:14.5px"><span class="ico">⚖️</span><span>Cần chính xác → <b>Evidence</b>. Tài nguyên hạn chế / thời gian thực → <b>Graph</b>.</span></div>
+            <div class="key" style="font-size:14.5px"><span class="ico"><img src="assets/drag/icons/scale.png" alt=""></span><span>Cần chính xác → <b>Evidence</b>. Tài nguyên hạn chế / thời gian thực → <b>Graph</b>.</span></div>
           </div>
         </div>
       </div>
@@ -1082,11 +1169,12 @@
             <div class="bubble right mt-s" style="font-size:14px"><span class="who t-green">Sau khi SLM lọc</span>What amino acids cannot provide a substrate for gluconeogenesis? → đáp án <b>(a) Leucine and lysine ✓</b></div>
           </div>
           <div style="display:grid;gap:12px;align-content:start">
+            <img class="art" style="height:150px" src="assets/drag/gen-privacy.jpg" alt="SLM trên điện thoại gỡ dữ liệu cá nhân, gửi câu hỏi ẩn danh qua kênh khóa an toàn tới LLM trên cloud" data-zoom>
             <div class="grid-2" style="gap:10px">
               <div class="stat o"><div class="value"><span class="count" data-to="15090" data-sep="1">0</span></div><div class="label">PII được chèn vào</div></div>
               <div class="stat"><div class="value"><span class="count" data-to="649">0</span></div><div class="label">PII còn sót</div></div>
             </div>
-            <div class="stat b"><div class="value"><span class="count" data-to="95.7" data-dec="1" data-pre="−">0</span>%</div><div class="label">rò rỉ PII — và độ chính xác <b>vẫn tăng</b>: Gemma-2-9B 69.73 → 76.49, Gemma-2-2B +11.29 (Bảng 4)</div></div>
+            <div class="stat b"><div class="value"><span class="trend down" aria-label="giảm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span><span class="count" data-to="95.7" data-dec="1">0</span>%</div><div class="label">rò rỉ PII — và độ chính xác <b>vẫn tăng</b>: Gemma-2-9B 69.73 → 76.49, Gemma-2-2B +11.29 (Bảng 4)</div></div>
           </div>
         </div>
       </div>
@@ -1099,7 +1187,7 @@
         <h2>Ba đóng góp chính — và những giới hạn cần lưu ý</h2>
         <div class="grid-2 mt">
           <div class="card cool">
-            <h3>✅ Đóng góp</h3>
+            <h3><img class="h-ico" src="assets/drag/icons/check.png" alt=""> Đóng góp</h3>
             <ul class="bullets">
               <li><b>Khung chưng cất RAG</b> dựa trên evidence + đồ thị tri thức, không fine-tune, giảm ảo giác cho SLM</li>
               <li><b>Benchmark rò rỉ riêng tư</b> + cơ chế SLM ẩn danh câu hỏi trước khi gọi cloud</li>
@@ -1107,7 +1195,7 @@
             </ul>
           </div>
           <div class="card hot">
-            <h3>⚠️ Hạn chế (tác giả tự nêu)</h3>
+            <h3><img class="h-ico" src="assets/drag/icons/warning.png" alt=""> Hạn chế (tác giả tự nêu)</h3>
             <ul class="bullets">
               <li>Mất tri thức <b>ngầm, tinh tế</b> của thầy — nhất là bài toán mở, sáng tạo</li>
               <li><b>Chi phí chưng cất</b> lớn: mỗi câu hỏi phải sinh + xếp hạng evidence, dựng đồ thị</li>
@@ -1116,9 +1204,12 @@
             </ul>
           </div>
         </div>
-        <div class="card blue mt">
-          <h3>🔎 Góc nhìn phản biện của người trình bày</h3>
-          <p>Mức “+26.8% so với Self-RAG” so <b>94.1% của Phi-3.5</b> với 67.3% của SelfRAG-LLaMA-2-7B — khác backbone. So cùng họ LLaMA-2-7B, mức tăng là <b>+18.9</b> (86.2 vs 67.3). Ngoài ra, thầy vẫn cần gọi cloud cho <b>mỗi câu hỏi</b>, nên DRAG giảm chi phí suy luận phía SLM chứ không bỏ được LLM.</p>
+        <div class="mt" style="display:grid;grid-template-columns:1fr 360px;gap:14px;align-items:stretch">
+          <div class="card blue">
+            <h3><img class="h-ico" src="assets/drag/icons/search.png" alt=""> Góc nhìn phản biện của người trình bày</h3>
+            <p>Mức “+26.8% so với Self-RAG” so <b>94.1% của Phi-3.5</b> với 67.3% của SelfRAG-LLaMA-2-7B — khác backbone. So cùng họ LLaMA-2-7B, mức tăng là <b>+18.9</b> (86.2 vs 67.3). Ngoài ra, thầy vẫn cần gọi cloud cho <b>mỗi câu hỏi</b>, nên DRAG giảm chi phí suy luận phía SLM chứ không bỏ được LLM.</p>
+          </div>
+          <img class="art" style="height:200px;object-fit:contain" src="assets/drag/gen-tradeoff.jpg" alt="Cân đóng góp (đồ thị, khiên riêng tư, biểu đồ tăng) và hạn chế (chi phí, lộ đáp án, thiên lệch), robot cầm kính lúp soi xét" data-zoom>
         </div>
       </div>
     </section>
@@ -1163,7 +1254,7 @@
               <li>Cộng <b>hạng thô</b> (không phải điểm như công thức 4) → nên dùng <b>RRF</b> hoặc điểm chuẩn hóa có trọng số α</li>
               <li>Thêm tín hiệu thứ ba: <b>cross-encoder reranker chạy cục bộ</b> (vd. bge-reranker)</li>
             </ul></div>
-            <div class="key" style="font-size:14.5px"><span class="ico">🔬</span><span>Cần <b>chạy lại</b> để biết bài báo có dùng đúng đoạn code này không và kết quả thay đổi ra sao.</span></div>
+            <div class="key" style="font-size:14.5px"><span class="ico"><img src="assets/drag/icons/microscope.png" alt=""></span><span>Cần <b>chạy lại</b> để biết bài báo có dùng đúng đoạn code này không và kết quả thay đổi ra sao.</span></div>
           </div>
         </div>
       </div>
@@ -1177,30 +1268,30 @@
         <div class="diagram mt">
           <svg viewBox="0 0 1160 210" role="img" aria-label="Pipeline DRAG+ đề xuất">
             <defs>
-              <marker id="arP" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#7c3aed"/></marker>
-              <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f172a"/><stop offset="1" stop-color="#134e4a"/></linearGradient>
+              <marker id="arP" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#0e6278"/></marker>
+              <linearGradient id="gP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c4a5e"/><stop offset="1" stop-color="#0e7490"/></linearGradient>
             </defs>
-            <path d="M415 88 C 520 34, 970 34, 1075 88" fill="none" stroke="#16a34a" stroke-width="2.5" class="flow-line" marker-end="url(#arP)"/>
-            <text x="745" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#16a34a" stroke="#fff" stroke-width="6" paint-order="stroke">SLM đủ tự tin (p ≥ τ) → trả lời ngay, không gọi cloud</text>
+            <path d="M415 88 C 520 34, 970 34, 1075 88" fill="none" stroke="#0d9488" stroke-width="2.5" class="flow-line" marker-end="url(#arP)"/>
+            <text x="745" y="40" text-anchor="middle" font-size="13" font-weight="800" fill="#0d9488" stroke="#fff" stroke-width="6" paint-order="stroke">SLM đủ tự tin (p ≥ τ) → trả lời ngay, không gọi cloud</text>
             <path d="M580 172 C 650 190, 840 190, 910 172" fill="none" stroke="#0891b2" stroke-width="2.5" class="flow-line" marker-end="url(#arP)"/>
             <text x="745" y="203" text-anchor="middle" font-size="12.5" font-weight="800" fill="#0891b2" stroke="#fff" stroke-width="6" paint-order="stroke">cache hit → dùng lại evidence cũ</text>
             <g font-weight="800" text-anchor="middle">
-              <rect x="10" y="90" width="140" height="80" rx="14" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
-              <text x="80" y="126" font-size="14" fill="#9a3412">Câu hỏi</text><text x="80" y="146" font-size="12" font-weight="600" fill="#78716c">có thể chứa PII</text>
-              <rect x="175" y="90" width="140" height="80" rx="14" fill="#ecfeff" stroke="#14b8a6" stroke-width="2"/>
-              <text x="245" y="122" font-size="13.5" fill="#0f766e">⑥ Lọc PII 2 lớp</text><text x="245" y="142" font-size="11.5" font-weight="600" fill="#64748b">NER/regex + SLM</text>
-              <rect x="340" y="90" width="150" height="80" rx="14" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
-              <text x="415" y="122" font-size="13.5" fill="#15803d">② Cổng tự tin</text><text x="415" y="142" font-size="11.5" font-weight="600" fill="#64748b">SLM thử trả lời trước</text>
-              <rect x="515" y="90" width="130" height="80" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+              <rect x="10" y="90" width="140" height="80" rx="14" fill="#ecfeff" stroke="#67e8f9" stroke-width="2"/>
+              <text x="80" y="126" font-size="14" fill="#0e6278">Câu hỏi</text><text x="80" y="146" font-size="12" font-weight="600" fill="#78716c">có thể chứa PII</text>
+              <rect x="175" y="90" width="140" height="80" rx="14" fill="#f0fdfa" stroke="#14b8c6" stroke-width="2"/>
+              <text x="245" y="122" font-size="13.5" fill="#0891b2">⑥ Lọc PII 2 lớp</text><text x="245" y="142" font-size="11.5" font-weight="600" fill="#64748b">NER/regex + SLM</text>
+              <rect x="340" y="90" width="150" height="80" rx="14" fill="#f0fdfa" stroke="#0d9488" stroke-width="2"/>
+              <text x="415" y="122" font-size="13.5" fill="#0891b2">② Cổng tự tin</text><text x="415" y="142" font-size="11.5" font-weight="600" fill="#64748b">SLM thử trả lời trước</text>
+              <rect x="515" y="90" width="130" height="80" rx="14" fill="#f0fdfa" stroke="#0891b2" stroke-width="2"/>
               <text x="580" y="122" font-size="13.5" fill="#0e7490">③ Cache</text><text x="580" y="142" font-size="11.5" font-weight="600" fill="#64748b">theo embedding</text>
               <rect x="670" y="90" width="150" height="80" rx="14" fill="url(#gP)"/>
-              <text x="745" y="122" font-size="13.5" fill="#5eead4">LLM Teacher</text><text x="745" y="142" font-size="11.5" font-weight="600" fill="#94a3b8">sinh N evidence</text>
-              <rect x="845" y="90" width="130" height="80" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+              <text x="745" y="122" font-size="13.5" fill="#99f6e4">LLM Teacher</text><text x="745" y="142" font-size="11.5" font-weight="600" fill="#94a3b8">sinh N evidence</text>
+              <rect x="845" y="90" width="130" height="80" rx="14" fill="#f0fdfa" stroke="#0e6278" stroke-width="2"/>
               <text x="910" y="116" font-size="13" fill="#6d28d9">① RRF rerank</text><text x="910" y="134" font-size="13" fill="#6d28d9">④ K thích nghi</text><text x="910" y="152" font-size="11.5" font-weight="600" fill="#64748b">+ cross-encoder</text>
               <rect x="1000" y="90" width="150" height="80" rx="14" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
-              <text x="1075" y="116" font-size="13" fill="#b91c1c">⑤ Lọc rò rỉ</text><text x="1075" y="134" font-size="13" fill="#0f766e">→ SLM trả lời</text><text x="1075" y="152" font-size="11.5" font-weight="600" fill="#64748b">ŷ ← M_small(q, ctx)</text>
+              <text x="1075" y="116" font-size="13" fill="#b91c1c">⑤ Lọc rò rỉ</text><text x="1075" y="134" font-size="13" fill="#0891b2">→ SLM trả lời</text><text x="1075" y="152" font-size="11.5" font-weight="600" fill="#64748b">ŷ ← M_small(q, ctx)</text>
             </g>
-            <g stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arP)">
+            <g stroke="#0e6278" stroke-width="2.5" marker-end="url(#arP)">
               <line x1="150" y1="130" x2="171" y2="130"/><line x1="315" y1="130" x2="336" y2="130"/><line x1="490" y1="130" x2="511" y2="130"/>
               <line x1="645" y1="130" x2="666" y2="130"/><line x1="820" y1="130" x2="841" y2="130"/><line x1="975" y1="130" x2="996" y2="130"/>
             </g>
@@ -1248,10 +1339,10 @@
         <h2>DRAG đưa năng lực RAG vào SLM: <span class="grad-text">chính xác hơn, nhẹ hơn, riêng tư hơn</span></h2>
         <div class="grid-3 mt">
           <div class="stat"><div class="value">4 bước</div><div class="label">Evidence → Ranking → Graph → SLM, không fine-tune</div></div>
-          <div class="stat o"><div class="value">+27.7%</div><div class="label">so với MiniRAG cùng backbone; K ≈ 15 là đủ</div></div>
-          <div class="stat b"><div class="value">−95.7%</div><div class="label">rò rỉ PII mà độ chính xác vẫn tăng</div></div>
+          <div class="stat o"><div class="value"><span class="trend up" aria-label="tăng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>27.7%</div><div class="label">độ chính xác so với MiniRAG cùng backbone; K ≈ 15 là đủ</div></div>
+          <div class="stat b"><div class="value"><span class="trend down" aria-label="giảm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>95.7%</div><div class="label">rò rỉ PII mà độ chính xác vẫn tăng</div></div>
         </div>
-        <div class="qa-hero mt">
+        <div class="qa-hero with-art mt">
           <div class="inner">
             <strong>Q &amp; A</strong>
             <p>Cảm ơn thầy cô và các bạn đã lắng nghe · Xin nhận câu hỏi</p>
@@ -1262,8 +1353,6 @@
 
     <footer class="footer-bar">
       <div class="footer-left">
-        <a class="back-link" href="./index.html">← Back</a>
-        <a class="back-link" href="./DRAG_DocHieu.html">📖 Bản đọc hiểu</a>
         <span>DRAG · ACL 2025 · Distilling RAG for SLMs</span>
       </div>
       <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
@@ -1271,7 +1360,6 @@
     </footer>
   </main>
 
-  <p class="hint"><kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd> chuyển slide · <kbd>F</kbd> toàn màn hình · bấm hình để phóng to</p>
   <div class="nav" role="group" aria-label="Điều hướng slide">
     <button type="button" id="prevBtn" aria-label="Slide trước">‹</button>
     <button type="button" id="nextBtn" aria-label="Slide sau">›</button>
@@ -1290,10 +1378,17 @@
       let index = Math.min(total - 1, Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
 
       function fit() {
-        const s = Math.min(innerWidth / 1280, innerHeight / 720) * 0.97;
-        deck.style.setProperty("--s", s.toFixed(4));
+      const full = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      const topGap = full ? 0 : 64;
+      const bottomGap = full ? 0 : 76;
+      const side = full ? 0 : 24;
+      const s = Math.min((innerWidth - side) / 1280, (innerHeight - topGap - bottomGap) / 720);
+      deck.style.setProperty("--s", s.toFixed(4));
+      deck.style.top = `calc(50% + ${(topGap - bottomGap) / 2}px)`;
       }
       addEventListener("resize", fit);
+      document.addEventListener("fullscreenchange", fit);
+      document.addEventListener("webkitfullscreenchange", fit);
       fit();
 
       /* ---------- Count-up ---------- */
@@ -1383,12 +1478,12 @@
           grid += `<text x="${xs(i)}" y="${H - B + 20}" text-anchor="middle" font-size="12.5" fill="#334155" font-weight="${x === 15 ? 800 : 500}">${x}</text>`;
         });
         const i15 = d.x.indexOf(15);
-        const band = `<rect x="${xs(i15) - 22}" y="${T}" width="44" height="${H - T - B}" fill="#fde68a" opacity=".45" rx="8"/><text x="${xs(i15)}" y="${T + 14}" text-anchor="middle" font-size="12" font-weight="800" fill="#b45309">K = 15</text>`;
+        const band = `<rect x="${xs(i15) - 22}" y="${T}" width="44" height="${H - T - B}" fill="#a5f3fc" opacity=".45" rx="8"/><text x="${xs(i15)}" y="${T + 14}" text-anchor="middle" font-size="12" font-weight="800" fill="#164e63">K = 15</text>`;
         const path = (arr) => arr.map((v, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join(" ");
         const series = [
-          { k: "e", name: "Evidence only", color: "#0f766e" },
-          { k: "c", name: "Combined", color: "#1d4ed8" },
-          { k: "g", name: "Graph only", color: "#c2410c" }
+          { k: "e", name: "Evidence only", color: "#0891b2" },
+          { k: "c", name: "Combined", color: "#0e7490" },
+          { k: "g", name: "Graph only", color: "#164e63" }
         ];
         const lines = series.map((s) => `
           <path class="ln-path" pathLength="1" d="${path(d[s.k])}" stroke="${s.color}"/>
