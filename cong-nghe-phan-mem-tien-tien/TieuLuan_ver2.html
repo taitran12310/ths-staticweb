@@ -86,6 +86,12 @@
     .brand { display: flex; flex-direction: column; gap: 0.1rem; min-width: 12rem; }
     .brand strong { font-size: 0.95rem; }
     .brand span { color: #cbd5e1; font-size: 0.78rem; }
+    .appbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem;
+    }
     .modes {
       display: flex;
       padding: 0.2rem;
@@ -103,6 +109,19 @@
       cursor: pointer;
     }
     .modes button[aria-pressed="true"] { background: #fff; color: var(--navy); }
+    .export-pdf {
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      font: inherit;
+      font-weight: 700;
+      padding: 0.45rem 0.95rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .export-pdf:hover { background: rgba(255, 255, 255, 0.18); }
+    .export-pdf:disabled { opacity: 0.5; cursor: wait; }
 
     /* ---------- PDF ---------- */
     .pdf-view[hidden] { display: none !important; }
@@ -1968,6 +1987,92 @@
       .prompt-ex { grid-auto-flow: row; }
       .slide .code-ex { white-space: pre-wrap; }
     }
+
+    /* ---------- Xuất PDF slide (Save as PDF) ---------- */
+    @page {
+      size: 13.333in 7.5in;
+      margin: 0;
+    }
+    @media print {
+      html, body {
+        width: 13.333in !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body.mode-slide,
+      body.mode-pdf,
+      body.is-printing {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .skip,
+      .appbar,
+      .pdf-view,
+      .deck-tools,
+      .notes,
+      .progress,
+      #slideStatus,
+      #fireworks,
+      .speaker-note {
+        display: none !important;
+      }
+      .stage,
+      .deck-wrap,
+      .deck {
+        display: block !important;
+        position: static !important;
+        width: 13.333in !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+        aspect-ratio: auto !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        background: transparent !important;
+        container-type: normal !important;
+      }
+      .slide {
+        position: relative !important;
+        inset: auto !important;
+        display: flex !important;
+        width: 13.333in !important;
+        height: 7.5in !important;
+        max-height: 7.5in !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        font-size: calc(13.333in * 0.0142) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .slide[hidden] { display: flex !important; }
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+      .slide *,
+      .slide *::before,
+      .slide *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      .fig1 .dot { display: none !important; }
+    }
   </style>
 </head>
 <body class="mode-slide">
@@ -1978,10 +2083,13 @@
       <strong>Tiểu luận · Nhóm 4</strong>
       <span>Trần Tuấn Tài · La Hoàng Tú · Võ Văn Hải</span>
     </div>
-    <nav class="modes" aria-label="Chuyển giữa slide và PDF">
-      <button type="button" id="modeSlide" aria-pressed="true">Slide trình bày</button>
-      <button type="button" id="modePdf" aria-pressed="false">PDF gốc</button>
-    </nav>
+    <div class="appbar-actions">
+      <nav class="modes" aria-label="Chuyển giữa slide và PDF">
+        <button type="button" id="modeSlide" aria-pressed="true">Slide trình bày</button>
+        <button type="button" id="modePdf" aria-pressed="false">PDF gốc</button>
+      </nav>
+      <button type="button" class="export-pdf" id="exportPdfBtn" title="Xuất toàn bộ slide ra PDF (không gồm PDF gốc)">Xuất PDF slide</button>
+    </div>
   </header>
 
   <div class="pdf-view" id="pdfView" hidden>
@@ -3111,7 +3219,7 @@
     <div class="notes" id="notePanel" hidden></div>
     <div class="deck-tools">
       <button type="button" class="note-toggle" id="noteToggle" aria-pressed="false" aria-controls="notePanel">Chi tiết</button>
-      <p class="hint">← → hoặc Space để chuyển slide · N chi tiết · F toàn màn hình</p>
+      <p class="hint">← → hoặc Space để chuyển slide · N chi tiết · F toàn màn hình · nút «Xuất PDF slide» ở thanh trên</p>
       <div class="nav" role="group" aria-label="Điều hướng slide">
         <button type="button" id="prevBtn" aria-label="Slide trước">‹</button>
         <button type="button" id="nextBtn" aria-label="Slide sau">›</button>
@@ -3127,6 +3235,7 @@
     const body = document.body;
     const modeSlideBtn = document.getElementById("modeSlide");
     const modePdfBtn = document.getElementById("modePdf");
+    const exportPdfBtn = document.getElementById("exportPdfBtn");
     const pdfView = document.getElementById("pdfView");
     const pdfFrame = document.getElementById("pdfFrame");
     const slides = [...document.querySelectorAll(".slide")];
@@ -3139,6 +3248,7 @@
     const progress = document.getElementById("deckProgress");
     const total = slides.length;
     let index = 0;
+    let printing = false;
 
     const pad = (n) => String(n).padStart(2, "0");
     slides.forEach((slide, i) => {
@@ -3372,8 +3482,65 @@
       fsBtn.setAttribute("aria-label", on ? "Thoát toàn màn hình" : "Toàn màn hình");
     }
 
+    function exportSlidesPdf() {
+      if (printing) return;
+      printing = true;
+      exportPdfBtn.disabled = true;
+
+      const prevIndex = index;
+      const wasPdf = body.classList.contains("mode-pdf");
+      const prevTitle = document.title;
+      const notesOpen = body.classList.contains("show-notes");
+
+      if (fullscreenElement()) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+      setMode("slide");
+      body.classList.remove("show-notes");
+      notePanel.hidden = true;
+      body.classList.add("is-printing");
+      slides.forEach((slide) => {
+        slide.hidden = false;
+        slide.classList.add("active");
+      });
+      fireworks.stop();
+      document.title = `Slide tiểu luận — Tóm tắt mã nguồn LLM (${total} trang)`;
+
+      let done = false;
+      const restore = () => {
+        if (done) return;
+        done = true;
+        printing = false;
+        exportPdfBtn.disabled = false;
+        body.classList.remove("is-printing");
+        document.title = prevTitle;
+        if (notesOpen) {
+          body.classList.add("show-notes");
+          noteToggle.setAttribute("aria-pressed", "true");
+        }
+        show(prevIndex);
+        if (wasPdf) setMode("pdf");
+      };
+
+      window.addEventListener("afterprint", restore, { once: true });
+      const mql = window.matchMedia("print");
+      const onPrintChange = (e) => {
+        if (!e.matches) {
+          restore();
+          mql.removeEventListener?.("change", onPrintChange);
+          mql.removeListener?.(onPrintChange);
+        }
+      };
+      if (mql.addEventListener) mql.addEventListener("change", onPrintChange);
+      else if (mql.addListener) mql.addListener(onPrintChange);
+      setTimeout(restore, 120000);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => window.print());
+      });
+    }
+
     modeSlideBtn.addEventListener("click", () => setMode("slide"));
     modePdfBtn.addEventListener("click", () => setMode("pdf"));
+    exportPdfBtn.addEventListener("click", exportSlidesPdf);
     prevBtn.addEventListener("click", goPrev);
     nextBtn.addEventListener("click", goNext);
     fsBtn.addEventListener("click", toggleFullscreen);
