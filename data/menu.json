@@ -44,6 +44,36 @@
       "icon": "network",
       "term": "Học kỳ 1",
       "schoolYear": "2026–2027"
+    },
+    {
+      "id": "thi-giac-may-tinh-va-nhan-dang-mau",
+      "title": "Thị giác máy tính và nhận dạng mẫu",
+      "shortTitle": "Thị giác",
+      "description": "Bài tập, slide và ghi chú môn học",
+      "path": "thi-giac-may-tinh-va-nhan-dang-mau/",
+      "icon": "vision",
+      "term": "Học kỳ 1",
+      "schoolYear": "2026–2027"
+    },
+    {
+      "id": "triet-hoc",
+      "title": "Triết học",
+      "shortTitle": "Triết học",
+      "description": "Ghi chú buổi học và tài liệu tham khảo",
+      "path": "triet-hoc/",
+      "icon": "philosophy",
+      "term": "Học kỳ 1",
+      "schoolYear": "2026–2027"
+    },
+    {
+      "id": "toan-cho-tin-hoc",
+      "title": "Toán cho tin học",
+      "shortTitle": "Toán TH",
+      "description": "Bài tập và tài liệu môn học",
+      "path": "toan-cho-tin-hoc/",
+      "icon": "math",
+      "term": "Học kỳ 1",
+      "schoolYear": "2026–2027"
     }
   ]
 }

@@ -95,7 +95,7 @@ python3 scripts/generate_listings.py
 }
 ```
 
-`icon` nhận một trong: `algorithm`, `code`, `research`, `network`, `folder`.  
+`icon` nhận một trong: `algorithm`, `code`, `research`, `network`, `vision`, `philosophy`, `math`, `folder`.  
 `term` / `schoolYear` gắn theo từng môn — học kỳ sau thêm môn mới với giá trị khác, không sửa chung toàn site.
 
 4. Chạy `python3 scripts/generate_listings.py`.

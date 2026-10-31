@@ -27,7 +27,7 @@ DISPLAY_TZ = ZoneInfo("Asia/Ho_Chi_Minh")  # UTC+7
 DEFAULT_SITE_URL = "https://taitran12310.github.io/ths-staticweb/"
 TONES = ("mint", "peach", "butter", "sky")
 # Môn có icon clay riêng trong assets/course-<icon>.webp
-CLAY_ICONS = {"algorithm", "code", "research", "network"}
+CLAY_ICONS = {"algorithm", "code", "research", "network", "vision", "philosophy", "math"}
 UNIVERSITY = {
     "@type": "CollegeOrUniversity",
     "@id": "https://huit.edu.vn/#org",
@@ -207,12 +207,12 @@ SPRITE = """<svg class="sprite" aria-hidden="true" focusable="false">
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
   <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
 </svg>"""
 
-THEME_BOOT = """<script>(function(){var t=null;try{t=localStorage.getItem("ths-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t})();</script>"""
+COURSES_PER_PAGE = 4
 
-FONT_CSS = "https://fonts.googleapis.com/css2?family=Nunito:wght@500..800&amp;display=swap"
-
+THEME_BOOT = """<script>(function(){var d=document.documentElement,t=null,n=null;d.classList.add("js");try{t=localStorage.getItem("ths-theme");n=localStorage.getItem("ths-nav")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;if(n==="collapsed"||n==="expanded")d.dataset.nav=n})();</script>"""
 
 def icon(name: str, cls: str = "icon") -> str:
     return f'<svg class="{cls}" aria-hidden="true"><use href="#i-{name}"/></svg>'
@@ -251,12 +251,10 @@ def head(*, title: str, description: str, canonical: str, prefix: str, site: dic
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="icon" href="{prefix}favicon.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="{prefix}apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="{prefix}assets/fonts/nunito-latin.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="{prefix}assets/fonts/nunito-vietnamese.woff2" crossorigin>
 {extra}<link rel="stylesheet" href="{prefix}css/site.css">
-<link rel="stylesheet" href="{FONT_CSS}" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="{FONT_CSS}"></noscript>
-<script src="{prefix}js/site.js" defer></script>
+<script src="{prefix}js/site.js?v={int((ROOT / 'js' / 'site.js').stat().st_mtime)}" defer></script>
 {json_ld(ld)}
 </head>"""
 
@@ -288,23 +286,36 @@ def nav_label(full: str, short: str | None = None) -> str:
     )
 
 
+def nav_badge(count: int, *, unit: str = "tài liệu") -> str:
+    empty = " side-nav__badge--empty" if count == 0 else ""
+    label = f"{count} {unit}"
+    return f'<span class="side-nav__badge{empty}" aria-label="{e(label)}">{count}</span>'
+
+
 def sidebar(prefix: str, courses: list[dict], active: str | None, site: dict) -> str:
     home_cur = ' aria-current="page"' if active is None else ""
     items = [
-        f'<li><a href="{prefix}index.html"{home_cur}><span class="side-nav__icon tone-sky">{icon("home")}</span>'
-        f"{nav_label('Trang chủ')}</a></li>"
+        f'<li><a href="{prefix}index.html"{home_cur} title="Trang chủ" aria-label="Trang chủ, {len(courses)} môn">'
+        f'<span class="side-nav__icon tone-sky">{icon("home")}</span>'
+        f"{nav_label('Trang chủ')}{nav_badge(len(courses), unit='môn')}</a></li>"
     ]
     for c in courses:
         cur = ' aria-current="page"' if c["id"] == active else ""
+        n = len(c.get("entries") or [])
         items.append(
-            f'<li><a href="{prefix}{c["href"]}"{cur} title="{e(c["title"])}">'
+            f'<li><a href="{prefix}{c["href"]}"{cur} title="{e(c["title"])}" '
+            f'aria-label="{e(c["title"])}, {n} tài liệu">'
             f'<span class="side-nav__icon tone-{c["tone"]}">'
             f'{course_tile(c, prefix, 32)}</span>'
-            f'{nav_label(c["title"], c.get("shortTitle"))}</a></li>'
+            f'{nav_label(c["title"], c.get("shortTitle"))}'
+            f"{nav_badge(n)}</a></li>"
         )
     return f"""<aside class="sidebar" aria-label="Điều hướng">
-  <a class="brand" href="{prefix}index.html"><img src="{prefix}assets/logo-80.webp" width="40" height="40" alt="" decoding="async"><span>{e(site.get('brand', 'ThS HUIT'))}</span></a>
-  <nav class="side-nav" aria-label="Môn học"><ul>
+  <div class="side-top">
+    <span class="side-top__label">Danh mục</span>
+    <button type="button" class="side-toggle" data-nav-toggle aria-controls="side-nav" aria-expanded="true" aria-label="Thu gọn menu" title="Thu gọn menu">{icon("panel")}</button>
+  </div>
+  <nav class="side-nav" id="side-nav" aria-label="Môn học"><ul>
     {"".join(items)}
   </ul></nav>
   <div class="side-card">
@@ -316,12 +327,51 @@ def sidebar(prefix: str, courses: list[dict], active: str | None, site: dict) ->
 
 
 def search_box(*, target: str, placeholder: str, unit: str) -> str:
-    return f"""<label class="search">
+    return f"""<label class="search" id="site-search">
       <span class="sr-only">{e(placeholder)}</span>
       {icon("search")}
       <input type="search" placeholder="{e(placeholder)}" autocomplete="off" data-filter="{target}" data-filter-count="#result-count" data-filter-empty="#no-result" data-filter-unit="{unit}">
       <kbd aria-hidden="true">/</kbd>
     </label>"""
+
+
+def site_header(*, prefix: str, site: dict, page_title: str, search: str) -> str:
+    toggle = (
+        '<button type="button" class="icon-btn search-toggle" data-search-toggle aria-controls="site-search" '
+        f'aria-expanded="false" aria-label="Mở ô tìm kiếm" title="Tìm kiếm">{icon("search")}</button>'
+        if search
+        else ""
+    )
+    return f"""<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="{prefix}index.html"><img src="{prefix}assets/logo-80.webp" width="40" height="40" alt="" decoding="async"><span>{e(site.get('brand', 'ThS HUIT'))}</span></a>
+    <span class="site-header__sep" aria-hidden="true"></span>
+    <div class="site-header__page">{page_title}</div>
+    {search}
+    {toggle}
+    {theme_toggle()}
+  </div>
+</header>"""
+
+
+def pager(total: int, size: int) -> str:
+    pages = max(1, -(-total // size))
+    current = ' aria-current="page"'
+    nums = "".join(
+        f'<li><button type="button" class="pager__num" data-page="{i}"'
+        f'{current if i == 1 else ""} aria-label="Trang {i}">{i}</button></li>'
+        for i in range(1, pages + 1)
+    )
+    hidden = " hidden" if pages <= 1 else ""
+    return (
+        f'<nav class="pager" aria-label="Phân trang môn học" data-pager-for="#course-list"{hidden}>'
+        f'<button type="button" class="pager__step" data-page-step="-1" aria-label="Trang trước" disabled>'
+        f'{icon("chevron", "icon icon--flip")}</button>'
+        f'<ol class="pager__list">{nums}</ol>'
+        f'<button type="button" class="pager__step" data-page-step="1" aria-label="Trang sau"'
+        f'{" disabled" if pages <= 1 else ""}>{icon("chevron")}</button>'
+        "</nav>"
+    )
 
 
 def footer(site: dict, prefix: str, updated: float | None) -> str:
@@ -445,15 +495,16 @@ def build_home(site: dict, courses: list[dict]) -> str:
     )
     head_html = head(title=f"{title} | {site.get('brand', 'ThS HUIT')}", description=desc, canonical=base, prefix="", site=site, ld=ld, extra=preload)
 
-    body = f"""<div class="shell">
+    header = site_header(
+        prefix="",
+        site=site,
+        page_title='<p class="page-label" data-ellipsis-tip title="Trang chủ">Trang chủ</p>',
+        search=search_box(target="#course-list", placeholder="Tìm môn học…", unit="môn học"),
+    )
+    body = f"""{header}
+<div class="shell">
 {sidebar("", courses, None, site)}
 <main class="main" id="main-content">
-  <header class="main-head">
-    <p class="page-label">Trang chủ</p>
-    {search_box(target="#course-list", placeholder="Tìm môn học…", unit="môn học")}
-    {theme_toggle()}
-  </header>
-
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__body">
       <p class="hero__kicker">{icon("book", "icon icon--sm")}Tài liệu học tập</p>
@@ -473,9 +524,10 @@ def build_home(site: dict, courses: list[dict]) -> str:
       <h2 id="courses-title">Môn học</h2>
       <span class="result-count" id="result-count" aria-live="polite">{len(courses)} môn học</span>
     </div>
-    <ul class="course-grid" id="course-list">
+    <ul class="course-grid" id="course-list" data-page-size="{COURSES_PER_PAGE}">
       {"".join(cards)}
     </ul>
+    {pager(len(courses), COURSES_PER_PAGE)}
     <div class="panel empty" id="no-result" hidden>
       <strong>Không có môn học phù hợp</strong>
       <span>Thử từ khoá khác hoặc nhấn Esc để xoá tìm kiếm.</span>
@@ -600,19 +652,16 @@ def build_course(site: dict, courses: list[dict], c: dict) -> str:
     }
     head_html = head(title=f"{title} | {site.get('brand', 'ThS HUIT')}", description=meta_desc, canonical=c["url"], prefix="../", site=site, ld=ld)
 
-    body = f"""<div class="shell">
-{sidebar("../", courses, c["id"], site)}
-<main class="main" id="main-content">
-  <header class="main-head">
-    <nav aria-label="Breadcrumb"><ol class="breadcrumb">
+    crumbs = f"""<nav aria-label="Breadcrumb"><ol class="breadcrumb">
       <li><a href="../index.html">{icon("home", "icon icon--sm")}Trang chủ</a></li>
       <li aria-hidden="true">{icon("chevron", "icon icon--sm")}</li>
-      <li><span aria-current="page">{e(title)}</span></li>
-    </ol></nav>
-    {search}
-    {theme_toggle()}
-  </header>
-
+      <li><span aria-current="page" data-ellipsis-tip title="{e(title)}">{e(title)}</span></li>
+    </ol></nav>"""
+    header = site_header(prefix="../", site=site, page_title=crumbs, search=search)
+    body = f"""{header}
+<div class="shell">
+{sidebar("../", courses, c["id"], site)}
+<main class="main" id="main-content">
   <section class="hero hero--compact tone-{c["tone"]}" aria-labelledby="course-title">
     <span class="hero__tile">{course_tile(c, "../", 96, lazy=False)}</span>
     <div class="hero__body">
