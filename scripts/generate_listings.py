@@ -137,7 +137,7 @@ def collect_entries(folder: Path, git_mtimes: dict[str, float]) -> list[dict]:
     entries: list[dict] = []
     if not folder.is_dir():
         return entries
-    for path in sorted(folder.iterdir(), key=lambda p: p.name.lower()):
+    for path in folder.iterdir():
         if not path.is_file() or path.name in SKIP_NAMES or path.name.startswith("."):
             continue
         if path.suffix.lower() != ".html":
@@ -153,6 +153,8 @@ def collect_entries(folder: Path, git_mtimes: dict[str, float]) -> list[dict]:
                 "href": path.name,
             }
         )
+    # Mới chỉnh sửa trước; cùng ngày thì theo tên để ổn định.
+    entries.sort(key=lambda x: (-x["ts"], x["name"].lower()))
     return entries
 
 
