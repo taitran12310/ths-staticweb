@@ -77,6 +77,16 @@ Rồi mở `http://localhost:8080/`.
 python3 scripts/generate_listings.py
 ```
 
+Script chỉ ghi lại file khi nội dung thực sự đổi. Khi thêm bài một môn, thường chỉ đổi:
+
+- file nội dung mới
+- `<môn>/index.html` (danh sách file môn đó)
+- `index.html` (card + thống kê trang chủ)
+- `data/listings.js` (số liệu badge sidebar — một file cho cả HTTP và `file://`)
+- `sitemap.xml` / `llms.txt`
+
+Các `*/index.html` môn khác **không** còn bị đụng vì sidebar không bake số tài liệu chéo nữa. Badge do `site.js` nạp `listings.js` qua thẻ `<script>`.
+
 ## Thêm mục mới
 
 1. Tạo folder, ví dụ `ten-muc/`.

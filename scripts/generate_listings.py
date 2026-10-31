@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Sinh trang chủ, trang danh sách từng môn, sitemap.xml, robots.txt và llms.txt.
+"""Sinh trang chủ, trang danh sách từng môn, sitemap/SEO và data/listings.js.
 
-Mọi nội dung được render sẵn thành HTML tĩnh (không phụ thuộc JS) để công cụ tìm kiếm
-và AI crawler đọc được, đồng thời mở trực tiếp bằng file:// vẫn chạy.
+Listing chính (file list, card môn, JSON-LD) vẫn HTML tĩnh để crawler / file:// đọc được.
+Badge sidebar không bake count vào mọi trang môn — site.js nạp data/listings.js để điền,
+tránh commit đụng toàn bộ */index.html khi chỉ thêm bài một môn.
 
 Date Modified lấy thời điểm commit cuối sửa từng file (author date, UTC+7).
 mtime trên đĩa không dùng được lúc deploy: checkout ghi mọi file cùng một lúc.
@@ -10,6 +11,7 @@ mtime trên đĩa không dùng được lúc deploy: checkout ghi mọi file cù
 
 from __future__ import annotations
 
+import hashlib
 import html
 import json
 import os
@@ -21,6 +23,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 MENU_JSON = ROOT / "data" / "menu.json"
+LISTINGS_JS = ROOT / "data" / "listings.js"
 SKIP_NAMES = {"index.html", ".DS_Store", "files.json"}
 SKIP_DIRS = {".git", "css", "js", "scripts", ".github", "data", "assets"}
 DISPLAY_TZ = ZoneInfo("Asia/Ho_Chi_Minh")  # UTC+7
@@ -34,6 +37,8 @@ UNIVERSITY = {
     "name": "Trường Đại học Công Thương TP. Hồ Chí Minh (HUIT)",
     "url": "https://huit.edu.vn/",
 }
+def site_js_hash() -> str:
+    return hashlib.sha1((ROOT / "js" / "site.js").read_bytes()).hexdigest()[:8]
 
 
 # ---------------------------------------------------------------- dữ liệu file
@@ -254,7 +259,7 @@ def head(*, title: str, description: str, canonical: str, prefix: str, site: dic
 <link rel="preload" as="font" type="font/woff2" href="{prefix}assets/fonts/nunito-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="{prefix}assets/fonts/nunito-vietnamese.woff2" crossorigin>
 {extra}<link rel="stylesheet" href="{prefix}css/site.css">
-<script src="{prefix}js/site.js?v={int((ROOT / 'js' / 'site.js').stat().st_mtime)}" defer></script>
+<script src="{prefix}js/site.js?v={site_js_hash()}" defer></script>
 {json_ld(ld)}
 </head>"""
 
@@ -286,31 +291,32 @@ def nav_label(full: str, short: str | None = None) -> str:
     )
 
 
-def nav_badge(count: int, *, unit: str = "tài liệu") -> str:
-    empty = " side-nav__badge--empty" if count == 0 else ""
-    label = f"{count} {unit}"
-    return f'<span class="side-nav__badge{empty}" aria-label="{e(label)}">{count}</span>'
+def nav_badge_slot(*, kind: str, course_id: str | None = None) -> str:
+    """Placeholder — site.js điền số từ listings.js (không bake count vào HTML)."""
+    attrs = f' data-badge="{e(kind)}"'
+    if course_id:
+        attrs += f' data-course-id="{e(course_id)}"'
+    return f'<span class="side-nav__badge side-nav__badge--pending"{attrs} aria-hidden="true"></span>'
 
 
 def sidebar(prefix: str, courses: list[dict], active: str | None, site: dict) -> str:
     home_cur = ' aria-current="page"' if active is None else ""
     items = [
-        f'<li><a href="{prefix}index.html"{home_cur} title="Trang chủ" aria-label="Trang chủ, {len(courses)} môn">'
+        f'<li><a href="{prefix}index.html"{home_cur} title="Trang chủ" aria-label="Trang chủ" data-nav-home>'
         f'<span class="side-nav__icon tone-sky">{icon("home")}</span>'
-        f"{nav_label('Trang chủ')}{nav_badge(len(courses), unit='môn')}</a></li>"
+        f"{nav_label('Trang chủ')}{nav_badge_slot(kind='home')}</a></li>"
     ]
     for c in courses:
         cur = ' aria-current="page"' if c["id"] == active else ""
-        n = len(c.get("entries") or [])
         items.append(
             f'<li><a href="{prefix}{c["href"]}"{cur} title="{e(c["title"])}" '
-            f'aria-label="{e(c["title"])}, {n} tài liệu">'
+            f'aria-label="{e(c["title"])}" data-nav-course="{e(c["id"])}">'
             f'<span class="side-nav__icon tone-{c["tone"]}">'
             f'{course_tile(c, prefix, 32)}</span>'
             f'{nav_label(c["title"], c.get("shortTitle"))}'
-            f"{nav_badge(n)}</a></li>"
+            f'{nav_badge_slot(kind="course", course_id=c["id"])}</a></li>'
         )
-    return f"""<aside class="sidebar" aria-label="Điều hướng">
+    return f"""<aside class="sidebar" aria-label="Điều hướng" data-listings-js="{prefix}data/listings.js">
   <div class="side-top">
     <span class="side-top__label">Danh mục</span>
     <button type="button" class="side-toggle" data-nav-toggle aria-controls="side-nav" aria-expanded="true" aria-label="Thu gọn menu" title="Thu gọn menu">{icon("panel")}</button>
@@ -728,23 +734,68 @@ def write_llms_txt(site: dict, courses: list[dict]) -> None:
     (ROOT / "llms.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_if_changed(path: Path, text: str) -> bool:
+    if path.exists() and path.read_text(encoding="utf-8") == text:
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return True
+
+
+def build_listings_payload(courses: list[dict]) -> dict:
+    # Không gắn timestamp: để write_if_changed bỏ qua khi số liệu không đổi.
+    return {
+        "courseCount": len(courses),
+        "courses": {c["id"]: {"count": len(c["entries"])} for c in courses},
+    }
+
+
+def write_listings_js(courses: list[dict]) -> bool:
+    payload = build_listings_payload(courses)
+    # Một file duy nhất: chạy được cả HTTP và file:// qua <script src>.
+    js_text = "globalThis.__THS_LISTINGS = " + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n"
+    return write_if_changed(LISTINGS_JS, js_text)
+
+
 def main() -> None:
     git_mtimes = load_git_mtimes() if ensure_full_git_history() else {}
     site, courses = load_site(git_mtimes)
+    wrote = 0
 
-    (ROOT / "index.html").write_text(build_home(site, courses), encoding="utf-8")
-    print(f"✓ index.html ({len(courses)} môn)")
+    if write_if_changed(ROOT / "index.html", build_home(site, courses)):
+        wrote += 1
+        print(f"✓ index.html ({len(courses)} môn)")
+    else:
+        print(f"· index.html không đổi ({len(courses)} môn)")
+
     for c in courses:
         folder = ROOT / c["id"]
         if not folder.is_dir():
             print(f"! Bỏ qua {c['id']}: chưa có thư mục")
             continue
-        (folder / "index.html").write_text(build_course(site, courses, c), encoding="utf-8")
-        print(f"✓ {c['id']}/index.html ({len(c['entries'])} mục)")
+        path = folder / "index.html"
+        if write_if_changed(path, build_course(site, courses, c)):
+            wrote += 1
+            print(f"✓ {c['id']}/index.html ({len(c['entries'])} mục)")
+        else:
+            print(f"· {c['id']}/index.html không đổi ({len(c['entries'])} mục)")
 
+    if write_listings_js(courses):
+        wrote += 1
+        print("✓ data/listings.js")
+    else:
+        print("· data/listings.js không đổi")
+
+    # sitemap / robots / llms: luôn ghi qua helper riêng (so sánh bên trong)
+    before_sm = (ROOT / "sitemap.xml").read_text(encoding="utf-8") if (ROOT / "sitemap.xml").exists() else None
+    before_ll = (ROOT / "llms.txt").read_text(encoding="utf-8") if (ROOT / "llms.txt").exists() else None
     write_sitemap(site, courses)
     write_llms_txt(site, courses)
-    print("✓ sitemap.xml, robots.txt, llms.txt")
+    if before_sm != (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+        wrote += 1
+    if before_ll != (ROOT / "llms.txt").read_text(encoding="utf-8"):
+        wrote += 1
+    print(f"✓ sitemap.xml, robots.txt, llms.txt ({wrote} file nội dung đổi)")
 
 
 if __name__ == "__main__":

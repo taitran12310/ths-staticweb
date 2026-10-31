@@ -250,4 +250,75 @@
       });
     });
   }
+
+  /* ---------- Badge sidebar từ data/listings.js (HTTP + file://) ---------- */
+  function fillBadge(el, count, unit) {
+    if (!el) return;
+    const n = Number(count) || 0;
+    el.textContent = String(n);
+    el.classList.remove("side-nav__badge--pending");
+    el.classList.toggle("side-nav__badge--empty", n === 0);
+    el.removeAttribute("aria-hidden");
+    el.setAttribute("aria-label", `${n} ${unit}`);
+  }
+
+  function applyListings(data) {
+    if (!data || typeof data !== "object") return;
+    const courseCount = data.courseCount;
+    const courses = data.courses || {};
+
+    document.querySelectorAll("[data-badge='home']").forEach((badge) => {
+      fillBadge(badge, courseCount, "môn");
+      const link = badge.closest("a");
+      if (link) link.setAttribute("aria-label", `Trang chủ, ${Number(courseCount) || 0} môn`);
+    });
+
+    document.querySelectorAll("[data-badge='course']").forEach((badge) => {
+      const id = badge.dataset.courseId;
+      const entry = id ? courses[id] : null;
+      const count = entry && entry.count != null ? entry.count : 0;
+      fillBadge(badge, count, "tài liệu");
+      const link = badge.closest("a");
+      if (link) {
+        const title = link.getAttribute("title") || link.dataset.navCourse || id || "Môn học";
+        link.setAttribute("aria-label", `${title}, ${Number(count) || 0} tài liệu`);
+      }
+    });
+  }
+
+  function loadListingsViaScript(jsSrc) {
+    return new Promise((resolve, reject) => {
+      if (!jsSrc) {
+        reject(new Error("missing listings.js"));
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = jsSrc;
+      s.async = true;
+      s.onload = () => {
+        const data = globalThis.__THS_LISTINGS;
+        s.remove();
+        if (data && typeof data === "object") resolve(data);
+        else reject(new Error("listings.js empty"));
+      };
+      s.onerror = () => {
+        s.remove();
+        reject(new Error("listings.js failed"));
+      };
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadSidebarBadges() {
+    const sidebar = document.querySelector(".sidebar[data-listings-js]");
+    if (!sidebar) return;
+    const jsSrc = sidebar.getAttribute("data-listings-js");
+    loadListingsViaScript(jsSrc)
+      .then(applyListings)
+      .catch(() => {
+        /* listings thiếu → giữ placeholder */
+      });
+  }
+
+  loadSidebarBadges();
 })();

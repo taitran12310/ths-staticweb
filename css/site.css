@@ -492,6 +492,13 @@ html[data-nav="collapsed"] .shell {
   box-shadow: none;
 }
 
+.side-nav__badge--pending {
+  background: color-mix(in oklab, var(--ink-2) 14%, transparent);
+  color: transparent;
+  box-shadow: none;
+  min-width: 1.45rem;
+}
+
 .side-nav a[aria-current="page"] .side-nav__badge:not(.side-nav__badge--empty) {
   background: var(--coral);
   color: var(--on-coral);

@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buổi 2 — Độ đo trung tâm: đọc hiểu và bài tập</title>
+  <meta name="description" content="Buổi 2 Phân tích mạng xã hội: đọc hiểu Das, Samanta và Pal (2018) về các độ đo trung tâm, kèm bài tập tính tay trên đồ thị 10 đỉnh.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <style>
+:root {
+  --ink: #1c1915;
+  --muted: #5c564e;
+  --paper: #f6f3ec;
+  --card: #fffdf8;
+  --line: #e2d9cc;
+  --teal: #0f3d4c;
+  --teal-soft: #e7f1f4;
+  --clay: #9a3b24;
+  --clay-soft: #f8ebe6;
+  --gold: #8a5a12;
+  --gold-soft: #f8f1e2;
+  --max: 68rem;
+  --serif: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+a {
+  color: var(--teal);
+}
+
+a:hover {
+  color: var(--clay);
+}
+
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  background: var(--ink);
+  color: white;
+  padding: 0.4rem 0.7rem;
+  z-index: 5;
+}
+
+.skip:focus {
+  top: 0.75rem;
+}
+
+.site-header {
+  background: var(--teal);
+  color: #f6f3ec;
+}
+
+.site-header a {
+  color: #f6f3ec;
+}
+
+.header-inner,
+.footer-inner,
+.wrap {
+  width: min(var(--max), calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.site-header .header-inner {
+  padding: 1.25rem 0 1rem;
+}
+
+.kicker {
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+h1 {
+  margin: 0.2rem 0 0.4rem;
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+}
+
+.lede {
+  margin: 0;
+  max-width: 46rem;
+  color: #efe7da;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding-bottom: 0.9rem;
+  font-size: 0.95rem;
+}
+
+.site-nav a {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav a[aria-current="page"] {
+  border-bottom-color: #f0c9a0;
+}
+
+main {
+  padding: 1.5rem 0 3rem;
+}
+
+.toc {
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 0.9rem 1.1rem 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.toc h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.toc ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  columns: 2;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+section {
+  margin: 0 0 1.6rem;
+}
+
+h2 {
+  font-size: 1.55rem;
+  margin: 1.4rem 0 0.6rem;
+  padding-top: 0.4rem;
+}
+
+h3 {
+  font-size: 1.22rem;
+  margin: 1.2rem 0 0.4rem;
+  color: var(--teal);
+}
+
+h4 {
+  font-size: 1.05rem;
+  margin: 0.9rem 0 0.3rem;
+}
+
+p,
+ul,
+ol {
+  margin-top: 0.4rem;
+}
+
+.card,
+.note,
+.formula,
+.table-wrap,
+figure {
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.note,
+.card {
+  padding: 0.85rem 1rem;
+  margin: 0.8rem 0;
+}
+
+.note strong,
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.note.gold {
+  background: var(--gold-soft);
+  border-color: #ead7b4;
+}
+
+.note.clay {
+  background: var(--clay-soft);
+  border-color: #efd2c8;
+}
+
+.formula {
+  padding: 0.75rem 1rem;
+  margin: 0.7rem 0;
+  font-family: var(--serif);
+  overflow-x: auto;
+}
+
+.formula p {
+  margin: 0.2rem 0;
+}
+
+cite {
+  font-style: normal;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 0.8rem 0 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+
+caption {
+  text-align: left;
+  font-weight: 650;
+  padding: 0.7rem 0.8rem 0.35rem;
+}
+
+th,
+td {
+  border-top: 1px solid var(--line);
+  padding: 0.38rem 0.55rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+th {
+  background: var(--teal-soft);
+}
+
+td.num,
+th.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+th.num {
+  white-space: normal;
+  min-width: 6.5rem;
+}
+
+td.on {
+  background: #d9ebe3;
+  font-weight: 700;
+  text-align: center;
+}
+
+td.zero {
+  color: var(--muted);
+  text-align: center;
+}
+
+.paths {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.matrix td,
+.matrix th {
+  text-align: center;
+  min-width: 2rem;
+}
+
+figure {
+  margin: 0.8rem 0 1rem;
+  padding: 0.6rem 0.6rem 0.2rem;
+}
+
+figcaption {
+  padding: 0.45rem 0.4rem 0.7rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.graph {
+  width: 100%;
+  height: auto;
+  max-width: 42rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.graph .edge {
+  stroke: #3d3832;
+  stroke-width: 2.4;
+}
+
+.graph .node {
+  fill: #143d4f;
+}
+
+.graph .label {
+  fill: #fffdf8;
+  font: 700 18px var(--sans);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.rank-high {
+  background: #f8ebe6;
+  font-weight: 700;
+}
+
+ol.steps {
+  padding-left: 1.2rem;
+}
+
+ol.steps li + li {
+  margin-top: 0.35rem;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.footer-inner {
+  padding: 1rem 0 1.4rem;
+}
+
+@media (max-width: 800px) {
+  .toc ol,
+  .pair {
+    columns: 1;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .site-header,
+  .site-nav,
+  .skip,
+  footer {
+    background: white;
+    color: black;
+  }
+
+  .site-header a,
+  .lede {
+    color: black;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+
+.part-divider {
+  margin: 2.2rem 0 1.4rem;
+  padding: 1rem 1.1rem;
+  background: var(--teal);
+  color: #f6f3ec;
+  border: none;
+}
+
+.part-divider h2 {
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  font-size: clamp(1.35rem, 2.4vw, 1.8rem);
+}
+
+.part-divider p {
+  margin: 0.35rem 0 0;
+  color: #efe7da;
+  max-width: 46rem;
+}
+
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Đi tới nội dung</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <p class="kicker">Phân tích mạng xã hội · Buổi 2</p>
+      <h1>Độ đo trung tâm trên mạng xã hội</h1>
+      <p class="lede">Đọc hiểu bài báo <cite>Study on centrality measures in social networks: a survey</cite> (Das, Samanta và Pal, 2018), rồi tính tay các độ đo trên một đồ thị vô hướng 10 đỉnh.</p>
+      <nav class="site-nav" aria-label="Hai phần buổi 2">
+        <a href="#bai-bao">Bài báo</a>
+        <a href="#bai-tap">Bài tập tính tay</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="wrap">
+      <nav class="toc" aria-label="Mục lục">
+        <h2>Mục lục</h2>
+        <ol>
+          <li><a href="#bai-bao">Phần A — Bài báo</a></li>
+          <li><a href="#nguon">Nguồn và cách đọc</a></li>
+          <li><a href="#tomtat">Tóm tắt</a></li>
+          <li><a href="#gioi-thieu">1. Vì sao phải đo trung tâm</a></li>
+          <li><a href="#lich-su">2. Các mốc phát triển</a></li>
+          <li><a href="#khai-niem">3. Khái niệm nền</a></li>
+          <li><a href="#phan-loai">4. Phân loại độ đo</a></li>
+          <li><a href="#muoi-bon">4.1–4.14. Mười bốn độ đo</a></li>
+          <li><a href="#bang-so-sanh">Bảng so sánh</a></li>
+          <li><a href="#ung-dung">5. Ứng dụng</a></li>
+          <li><a href="#ket-luan">6. Kết luận và hướng mở</a></li>
+          <li><a href="#lien-he">Liên hệ với bài giảng</a></li>
+          <li><a href="#bai-tap">Phần B — Bài tập tính tay</a></li>
+          <li><a href="#do-thi">Đồ thị</a></li>
+          <li><a href="#ma-tran">Ma trận kề</a></li>
+          <li><a href="#bac">Degree (bậc)</a></li>
+          <li><a href="#khoang-cach">Khoảng cách</a></li>
+          <li><a href="#closeness">Closeness (gần)</a></li>
+          <li><a href="#harmonic">Harmonic (điều hòa)</a></li>
+          <li><a href="#betweenness">Betweenness (trung gian)</a></li>
+          <li><a href="#eigenvector">Eigenvector (vector riêng)</a></li>
+          <li><a href="#katz">Katz (bước đi chiết khấu)</a></li>
+          <li><a href="#pagerank">PageRank (hạng trang)</a></li>
+          <li><a href="#hits">HITS (hub và authority)</a></li>
+          <li><a href="#so-sanh">So sánh</a></li>
+        </ol>
+      </nav>
+
+      <header class="part-divider" id="bai-bao">
+        <h2>Phần A — Đọc hiểu bài báo</h2>
+        <p>Diễn giải Das, Samanta và Pal (2018) theo từng mục, để đọc song song với PDF.</p>
+      </header>
+
+<section id="nguon">
+        <h2>Nguồn và cách đọc</h2>
+        <div class="card">
+          <p><strong>Das, K., Samanta, S., &amp; Pal, M. (2018).</strong> Study on centrality measures in social networks: a survey. <em>Social Network Analysis and Mining, 8</em>, 13.</p>
+          <p>DOI: <a href="https://doi.org/10.1007/s13278-018-0493-2">10.1007/s13278-018-0493-2</a>. Tạp chí Springer. Nhận bài 29/9/2017, sửa 19/2/2018, chấp nhận 19/2/2018. Từ khóa: social networks, centrality, degree, neighbor, k-shell.</p>
+          <p>Tác giả công tác tại Đại học Vidyasagar (Midnapore) và Trường Tamralipta Mahavidyalaya (Tamluk), Ấn Độ. Liên hệ: Sovan Samanta.</p>
+        </div>
+        <p>Bài dài 11 trang, chia 6 mục: dẫn nhập, lịch sử, khái niệm, 14 độ đo, ứng dụng, kết luận. Trang này đi đúng thứ tự đó. Công thức được viết lại cho dễ đọc; phần chữ là diễn giải để hiểu bài, đọc đối chiếu với PDF gốc trong thư mục.</p>
+      </section>
+
+      <section id="tomtat">
+        <h2>Tóm tắt</h2>
+        <p>Mạng xã hội là nơi mọi người kết nối với nhau. Câu hỏi cơ bản: <strong>ai là người then chốt</strong> trong mạng đó. Trải nhiều thập kỷ, người ta đã đề xuất nhiều độ đo trung tâm khác nhau. Bài khảo sát lần lượt nhắc định nghĩa toán học, cách từng độ đo được xây, rồi nêu ứng dụng trong sinh học, nghiên cứu khoa học, an ninh, giao thông, vận tải, lạm dụng chất và lớp học. Cuối bài, các tác giả hướng tới mạng xã hội mờ, nơi cả tác nhân lẫn quan hệ đều không còn là có hoặc không một cách tuyệt đối.</p>
+      </section>
+
+      <section id="gioi-thieu">
+        <h2>1. Vì sao phải đo trung tâm</h2>
+        <p>Một mạng xã hội là tập cá nhân hoặc nhóm, nối với nhau bởi một quan hệ nào đó. Mạng có thể ở ngoài đời hoặc trên mạng. Gia đình, nhóm nông dân trong một làng, nhóm doanh nhân là những mạng ngoài đời quen thuộc. Điện thoại thông minh và các ứng dụng làm cho Twitter, Facebook, LinkedIn trở thành nơi hàng triệu người trao đổi tin. Cá nhân, đồng nghiệp, tổ chức cùng nằm trên một mặt phẳng liên kết. Nền đó dùng để bán hàng, phát tin, và nhiều việc khác. Muốn làm những việc ấy cho đúng chỗ, phải chỉ ra đỉnh quan trọng, đỉnh trung tâm, đỉnh có ảnh hưởng.</p>
+        <p>Các tác giả minh họa bằng những hình ảnh đời thường: trong một câu lạc bộ 100 người, người ta nghĩ chủ tịch là trung tâm; trong hệ thống ngân hàng nhiều chi nhánh, trụ sở chính là trung tâm; trong lớp, lớp trưởng là học sinh trung tâm; trong trường, hiệu trưởng là người trung tâm so với giáo viên. Đó là trực giác. Đo lường là cách biến trực giác ấy thành một con số trên đồ thị.</p>
+        <p>Khi dữ liệu lớn, tính một độ đo có thể tốn thời gian và khó diễn giải. Độ đo trung tâm vẫn là công cụ để tìm phần tử then chốt: nơi virus hoặc bệnh có thể lan, nơi tin tức được phát đi. Không có độ đo nào hợp với mọi bài toán, và độ phức tạp tính toán là một phần của việc chọn công cụ. Mỗi độ đo xuất phát từ một cách hiểu khác nhau về “quan trọng”: quan trọng vì có nhiều liên kết, vì đứng trên đường đi ngắn, vì được hàng xóm quan trọng chỉ tới, vì nằm ở lõi của mạng.</p>
+        <p>Bố cục bài: mục 2 kể các mốc, mục 3 chốt ngôn ngữ đồ thị, mục 4 trình bày 14 độ đo theo nhóm cùng hạn chế và vùng ứng dụng, mục 5 đi vào vài lĩnh vực cụ thể, mục 6 là kết luận và việc các tác giả định làm tiếp.</p>
+      </section>
+
+      <section id="lich-su">
+        <h2>2. Các mốc phát triển</h2>
+        <p>Độ đo mới xuất hiện vì người ta gặp bài toán mới. Sơ đồ dưới đây là phần chữ của Figure 1 trong bài: ai góp gì, theo trình tự thời gian mà bài muốn người đọc nhớ.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các mốc được bài nhấn trong Figure 1 và mục 2</caption>
+            <thead>
+              <tr>
+                <th>Năm</th>
+                <th>Tác giả</th>
+                <th>Đóng góp được bài nhắc</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1948, 1950</td>
+                <td>Bavelas</td>
+                <td>Định nghĩa sớm về độ trung tâm, áp vào mạng truyền thông.</td>
+              </tr>
+              <tr>
+                <td>1953</td>
+                <td>Shimbel</td>
+                <td>Stress centrality: lượng thông tin đi qua một đỉnh, dựa trên đường đi ngắn nhất.</td>
+              </tr>
+              <tr>
+                <td>1953</td>
+                <td>Katz</td>
+                <td>Katz centrality (bước đi chiết khấu): mức ảnh hưởng tương đối, đếm các bước đi có chiết khấu.</td>
+              </tr>
+              <tr>
+                <td>1965</td>
+                <td>Beauchamp</td>
+                <td>Chỉ ra giới hạn của chỉ số Bavelas và đề xuất chỉ số cải tiến cho cả đỉnh lẫn đồ thị.</td>
+              </tr>
+              <tr>
+                <td>1966</td>
+                <td>Sabidussi</td>
+                <td>Phản biện Beauchamp, đưa định nghĩa chặt và kiểm tra các chỉ số đã biết.</td>
+              </tr>
+              <tr>
+                <td>1972, 2007</td>
+                <td>Bonacich</td>
+                <td>Đề xuất vector riêng làm độ trung tâm; sau đó bàn các tính chất riêng của nó.</td>
+              </tr>
+              <tr>
+                <td>1974</td>
+                <td>Nieminen</td>
+                <td>Chỉnh một số tiên đề của Sabidussi; chỉ số dựa trên bậc của đồ thị vô hướng.</td>
+              </tr>
+              <tr>
+                <td>1978, 1979</td>
+                <td>Freeman</td>
+                <td>Ba mô hình: độ trung tâm tuyệt đối của một vị trí, độ trung tâm so sánh, và mức tập trung của cả mạng. Ba đại lượng kinh điển là Degree (bậc), Closeness (gần) và Betweenness (trung gian). Thử trên nhóm nhỏ.</td>
+              </tr>
+              <tr>
+                <td>1989</td>
+                <td>Stephenson và Zelen</td>
+                <td>Information centrality: tin có thể truyền theo mọi đường, không chỉ đường ngắn nhất.</td>
+              </tr>
+              <tr>
+                <td>1991</td>
+                <td>Freeman, Borgatti, White</td>
+                <td>Betweenness theo dòng chảy trên mạng, gần tinh thần Freeman nhưng khác công thức gốc.</td>
+              </tr>
+              <tr>
+                <td>1994</td>
+                <td>White và Borgatti</td>
+                <td>Đưa betweenness địa trắc từ đồ thị vô hướng sang đồ thị có hướng.</td>
+              </tr>
+              <tr>
+                <td>1997</td>
+                <td>Borgatti và Everett</td>
+                <td>Mở độ đo chuẩn từ cá nhân sang nhóm và lớp.</td>
+              </tr>
+              <tr>
+                <td>1999</td>
+                <td>Everett và Borgatti</td>
+                <td>Cùng hướng: trung tâm của một tập đỉnh, không chỉ của một đỉnh.</td>
+              </tr>
+              <tr>
+                <td>2001</td>
+                <td>Brandes</td>
+                <td>Thuật toán betweenness nhanh hơn, giảm cả thời gian lẫn bộ nhớ khi so sánh.</td>
+              </tr>
+              <tr>
+                <td>2001</td>
+                <td>Newman</td>
+                <td>Khái quát độ đo kiểu Freeman sang mạng có trọng số.</td>
+              </tr>
+              <tr>
+                <td>2003</td>
+                <td>Costenbader và Valente</td>
+                <td>Độ ổn định của các độ đo khi mạng chỉ được lấy mẫu một phần.</td>
+              </tr>
+              <tr>
+                <td>2005</td>
+                <td>Estrada và Rodriguez-Velazquez</td>
+                <td>Subgraph centrality: đếm số lần một đỉnh tham gia các đồ thị con liên thông, qua các bước đi đóng.</td>
+              </tr>
+              <tr>
+                <td>2006</td>
+                <td>Rodriguez và cộng sự</td>
+                <td>Functional centrality: tổng quát hóa subgraph centrality bằng cách đánh trọng số các bước đi đóng.</td>
+              </tr>
+              <tr>
+                <td>2006</td>
+                <td>Borgatti</td>
+                <td>Tìm tập người chơi then chốt, không chỉ xếp hạng từng đỉnh.</td>
+              </tr>
+              <tr>
+                <td>2009–2010</td>
+                <td>Opsahl và cộng sự</td>
+                <td>Chỉnh degree và đường đi ngắn cho mạng có trọng số, kết hợp số liên kết và sức mạnh liên kết.</td>
+              </tr>
+              <tr>
+                <td>2010</td>
+                <td>Joyce và cộng sự</td>
+                <td>Leverage centrality, minh họa trên mạng não người.</td>
+              </tr>
+              <tr>
+                <td>2010</td>
+                <td>Kitsak và cộng sự</td>
+                <td>Phân rã k-shell: người lan tỏa hiệu quả nằm ở lõi, không nhất thiết là đỉnh bậc cao nhất.</td>
+              </tr>
+              <tr>
+                <td>2013</td>
+                <td>Zeng và Zhang</td>
+                <td>Mixed degree decomposition, dùng cả bậc còn lại lẫn bậc đã bị bóc.</td>
+              </tr>
+              <tr>
+                <td>2014</td>
+                <td>Liu và cộng sự</td>
+                <td>Xếp hạng phân biệt hơn nhờ k-shell và khoảng cách từ đỉnh tới lõi.</td>
+              </tr>
+              <tr>
+                <td>2014</td>
+                <td>Bae và Kim</td>
+                <td>Neighborhood coreness: xét đồng thời bậc và độ lõi của chính đỉnh cùng hàng xóm.</td>
+              </tr>
+              <tr>
+                <td>2015</td>
+                <td>Liu và cộng sự</td>
+                <td>Neighborhood centrality theo n bước: hàng xóm càng xa thì ảnh hưởng càng nhỏ.</td>
+              </tr>
+              <tr>
+                <td>2017</td>
+                <td>Wang và cộng sự</td>
+                <td>Weighted neighborhood centrality, để bảng xếp hạng sát hơn.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Điểm bài muốn người đọc giữ: họ Freeman (1978) làm việc trên mạng nhị phân. Phần lớn công trình sau đó hoặc đẩy các độ đo ấy sang mạng có trọng số, hoặc đổi câu hỏi từ “đỉnh nào bậc cao” sang “đỉnh nào nằm ở lõi và kéo theo hàng xóm ở lõi”.</p>
+        <p>Bài có Table 1 liệt kê ký hiệu. Các ký hiệu dùng lại phía dưới: <var>N</var> tập đỉnh, <var>E</var> tập cạnh, <var>n</var> số đỉnh, <var>m</var> số cạnh, <var>d<sub>i</sub></var> bậc của đỉnh <var>i</var>, <var>d(i, j)</var> khoảng cách địa trắc, <var>σ<sub>st</sub></var> số đường đi ngắn nhất từ <var>s</var> tới <var>t</var>, <var>σ<sub>st</sub>(v)</var> số đường đó đi qua <var>v</var>. Các chữ <var>C</var> kèm chỉ số là từng độ đo: <var>C<sub>D</sub></var> Degree (bậc), <var>C<sub>C</sub></var> Closeness (gần), <var>C<sub>EC</sub></var> Eccentricity (lệch tâm), <var>C<sub>I</sub></var> Information (thông tin), <var>C<sub>S</sub></var> Stress (sức căng), <var>C<sub>B</sub></var> Betweenness (trung gian), <var>C<sub>K</sub></var> Katz (bước đi chiết khấu), <var>C<sub>SG</sub></var> Subgraph (đồ thị con), <var>C<sub>F</sub></var> Functional (hàm), <var>C<sub>L</sub></var> Leverage (đòn bẩy), <var>C<sub>NC</sub></var> Neighborhood coreness (lõi lân cận), <var>C<sub>N</sub></var> Neighborhood (lân cận).</p>
+      </section>
+
+      <section id="khai-niem">
+        <h2>3. Khái niệm nền</h2>
+        <p>Mọi mạng trong bài được viết thành đồ thị <var>G(N, E)</var>. <var>N</var> là tập đỉnh hữu hạn, đánh số <var>1, 2, …, n</var>. Quan hệ giữa <var>i</var> và <var>j</var> là <var>g<sub>ij</sub></var> bằng 1 nếu có liên kết, bằng 0 nếu không. Hàng xóm của <var>i</var> là <var>N<sub>i</sub>(G) = { j ∈ N : g<sub>ij</sub> = 1 }</var>. Bậc <var>d<sub>i</sub></var> là số phần tử của tập hàng xóm đó.</p>
+        <p>Một <strong>bước đi</strong> (walk) là dãy đỉnh trong đó hai đỉnh liên tiếp có cạnh; đỉnh và cạnh được phép lặp. Nếu mọi cạnh trong dãy đều khác nhau thì đó là một <strong>trail</strong>. Nếu mọi đỉnh đều khác nhau thì đó là một <strong>đường đi</strong> (path). Khoảng cách địa trắc <var>d(i, j)</var> là số cạnh trên đường đi ngắn nhất từ <var>i</var> tới <var>j</var>, khi đường đó tồn tại.</p>
+        <p>Mạng gọi là liên thông nếu mọi cặp đỉnh đều có đường đi. Mạng có hướng khi mỗi liên kết mang chiều. Mạng có trọng số khi cạnh mang một số đo sức mạnh. Mạng được gọi là mạng xã hội khi đỉnh là người, nhóm hoặc tổ chức, và cạnh là một quan hệ giữa họ.</p>
+        <p>Figure 2 của bài là một mạng minh họa 8 đỉnh, 9 cạnh. Hình chỉ để nhìn cấu trúc, bài không tính số trên hình đó. Khi đọc các công thức ở mục 4, dùng đúng các định nghĩa vừa nêu: bậc đếm hàng xóm trực tiếp, khoảng cách đếm cạnh trên đường ngắn nhất, <var>σ<sub>st</sub></var> đếm có bao nhiêu đường ngắn nhất.</p>
+      </section>
+
+      <section id="phan-loai">
+        <h2>4. Phân loại độ đo</h2>
+        <p>Độ đo trung tâm, theo cách bài viết, là công cụ toán để chỉ ra phần tử quan trọng. Trước khi đi vào từng công thức, bài xếp chúng theo Koschützki và cộng sự (2005), rồi thêm một nhóm k-shell.</p>
+        <div class="pair">
+          <article class="card">
+            <h3>Reachability (khả năng chạm)</h3>
+            <p>Hai tác nhân có nối với nhau, trực tiếp hoặc qua một lối nào đó, hay không. Nhóm này gồm Degree (bậc), Closeness (gần), Eccentricity (lệch tâm). Câu hỏi: từ đây có với tới phần còn lại của mạng dễ đến mức nào.</p>
+          </article>
+          <article class="card">
+            <h3>Shortest path (đường đi ngắn nhất)</h3>
+            <p>Giữa hai đỉnh có nhiều đường; nhóm này chỉ giữ đường ngắn nhất. Stress (sức căng) và Betweenness (trung gian) thuộc nhóm này. Câu hỏi: đỉnh nào đứng trên những đường ngắn đó.</p>
+          </article>
+          <article class="card">
+            <h3>Feedback (phản hồi)</h3>
+            <p>Một đỉnh quan trọng nếu hàng xóm của nó quan trọng. Điểm của một đỉnh phụ thuộc điểm của các đỉnh khác. Eigenvector (vector riêng), Subgraph centrality (đồ thị con), Functional centrality (hàm) nằm ở đây.</p>
+          </article>
+          <article class="card">
+            <h3>Current flow (dòng điện)</h3>
+            <p>Tin đôi khi chảy giống dòng điện, chia trên nhiều đường cùng lúc, không dồn hết vào một đường ngắn nhất. Current-flow betweenness (trung gian theo dòng) và current-flow closeness (gần theo dòng) thuộc nhóm này. Bài xếp nhóm nhưng không phát triển thành một mục công thức riêng.</p>
+          </article>
+          <article class="card">
+            <h3>Random process (quá trình ngẫu nhiên)</h3>
+            <p>Một bước đi ngẫu nhiên chọn cạnh bất kỳ để sang đỉnh kế. Có bản ngẫu nhiên của Degree (bậc), Closeness (gần), Betweenness (trung gian). Bài nhắc tên nhóm, không tính chi tiết.</p>
+          </article>
+          <article class="card">
+            <h3>Vitality (sức sống)</h3>
+            <p>Lấy một hàm trên cả đồ thị, so sánh giá trị khi còn đỉnh và khi bỏ đỉnh. Hiệu đó là vitality. Bài nêu closeness vitality (sức sống theo gần) và flow betweenness vitality (sức sống theo dòng trung gian) như ví dụ.</p>
+          </article>
+        </div>
+        <div class="note gold">
+          <p><strong>Nhóm k-shell,</strong> bài thêm ngoài danh sách Koschützki. Mạng được bóc thành nhiều vỏ để tìm đỉnh có ảnh hưởng nằm ở các vỏ trong. Coreness và neighborhood centrality đời sau nằm trong tinh thần này.</p>
+        </div>
+      </section>
+
+      <section id="muoi-bon">
+        <h2>4.1–4.14. Mười bốn độ đo</h2>
+
+        <article>
+          <h3>4.1. Degree centrality (độ trung tâm bậc)</h3>
+          <p>Shaw (1954) đưa degree như một chỉ số đỉnh quan trọng; Nieminen (1974) định nghĩa lại; Freeman (1978) xây mô hình toán dựa trên các liên kết chạm một đỉnh. Bonacich (1987) mở thành họ độ đo power và centrality dựa trên bậc. Barrat và cộng sự (2004), Newman (2004), Opsahl và Panzarasa (2009) thay “số cạnh” bằng “tổng trọng số”. Opsahl và cộng sự (2010) giữ cả số liên kết lẫn sức mạnh của đỉnh.</p>
+          <div class="formula">
+            <p><var>C<sub>D</sub></var>(<var>x</var>) = <var>d<sub>x</sub></var></p>
+            <p>Chuẩn hóa: <var>C'<sub>D</sub></var>(<var>x</var>) = <var>d<sub>x</sub></var> / (<var>n</var> − 1)</p>
+          </div>
+          <p>Trên mạng không trọng số, tính cho mọi đỉnh tốn <var>O(m)</var>. Hạn chế lớn: đây là thông tin cục bộ. Đỉnh chỉ được nhìn qua hàng xóm kề nó, cấu trúc toàn mạng không vào công thức. Đổi lại, độ đo rẻ và dùng được ở nhiều bài toán bố trí: chọn chỗ đặt cơ sở khẩn cấp như bệnh viện, đồn cảnh sát, doanh trại, hoặc cơ sở thường ngày như trường, trạm xăng, chợ, nhà hàng, khách sạn, theo tiêu chí minimax mà bài nhắc.</p>
+        </article>
+
+        <article>
+          <h3>4.2. Closeness centrality (độ trung tâm gần)</h3>
+          <p>Ý tưởng có từ Bavelas (1948), Sabidussi (1966) định nghĩa thành nghịch đảo của tổng khoảng cách địa trắc từ một đỉnh tới mọi đỉnh khác. Đây là mô hình toán thứ hai của Freeman (1979). Newman (2001) đưa sang mạng có trọng số bằng thuật toán Dijkstra (1959).</p>
+          <div class="formula">
+            <p><var>C<sub>C</sub></var>(<var>x</var>) = 1 / Σ<sub><var>y</var> ∈ <var>N</var></sub> <var>d</var>(<var>x</var>, <var>y</var>)</p>
+            <p>Chuẩn hóa: <var>C'<sub>C</sub></var>(<var>x</var>) = (<var>n</var> − 1) / Σ<sub><var>y</var></sub> <var>d</var>(<var>x</var>, <var>y</var>)</p>
+          </div>
+          <p>Brandes (2001) cho thuật toán <var>O(mn)</var> khi tính cho mọi đỉnh. So với degree, closeness nhìn cả liên kết gián tiếp. Nếu mạng không liên thông, khoảng cách giữa hai thành phần là vô hạn, công thức này không dùng trực tiếp được. Bài gắn closeness với bài toán chọn chỗ đặt dịch vụ, ví dụ một khu chợ, theo nghĩa vị trí ở “gần” phần còn lại của mạng.</p>
+        </article>
+
+        <article>
+          <h3>4.3. Eccentricity centrality (độ trung tâm lệch tâm)</h3>
+          <p>Gần với closeness. Hage và Harary (1995) bàn eccentricity trên mạng. Eccentricity của một đỉnh là khoảng cách địa trắc lớn nhất từ đỉnh đó tới một đỉnh bất kỳ. Độ trung tâm lấy nghịch đảo của số đó.</p>
+          <div class="formula">
+            <p><var>C<sub>EC</sub></var>(<var>x</var>) = 1 / max<sub><var>y</var> ∈ <var>N</var></sub> <var>d</var>(<var>x</var>, <var>y</var>)</p>
+          </div>
+          <p>Tính cho mọi đỉnh cũng cỡ <var>O(mn)</var> theo Brandes (2001, 2008). Đây là độ đo toàn cục: đỉnh nào có khoảng cách tới đỉnh xa nhất còn nhỏ thì tin từ đó lan ra “đủ xa” vẫn nhanh. Hạn chế bài nêu: chỉ một khoảng cách lớn nhất được giữ, mọi khoảng cách nhỏ hơn bị bỏ.</p>
+        </article>
+
+        <article>
+          <h3>4.4. Information centrality (độ trung tâm thông tin)</h3>
+          <p>Stephenson và Zelen (1989). Cùng họ với closeness, nhưng tin nằm trên mọi đường giữa hai đỉnh, không chỉ đường địa trắc. Gọi <var>A</var> là ma trận kề, <var>D</var> là ma trận đường chéo chứa bậc, <var>U</var> là ma trận toàn số 1. Đặt</p>
+          <div class="formula">
+            <p><var>B</var> = (<var>D</var> − <var>A</var> + <var>U</var>)<sup>−1</sup></p>
+            <p><var>T</var> = Σ<sub><var>j</var></sub> <var>b<sub>jj</sub></var>, &nbsp; <var>R</var> = Σ<sub><var>j</var></sub> <var>b<sub>ij</sub></var> với <var>i</var> cố định</p>
+            <p><var>C<sub>I</sub></var>(<var>k</var>) = 1 / (<var>b<sub>kk</sub></var> + (<var>T</var> − 2<var>R</var>) / <var>n</var>)</p>
+          </div>
+          <p>Độ phức tạp bài nêu là <var>O(n³)</var> vì có bước nghịch đảo ma trận. Độ đo này hợp các tình huống mà dòng tin được phép đi trên cả những đường dài.</p>
+        </article>
+
+        <article>
+          <h3>4.5. Stress centrality (độ trung tâm sức căng)</h3>
+          <p>Shimbel (1953), độ đo sớm dựa trên đường đi ngắn nhất. Với một đỉnh <var>v</var>, stress đếm số đường đi ngắn nhất giữa các cặp đỉnh khác mà có đi qua <var>v</var>. Cùng ý đó áp cho một cạnh <var>e</var>: đếm số đường đi ngắn nhất có chứa <var>e</var>.</p>
+          <div class="formula">
+            <p><var>C<sub>S</sub></var>(<var>v</var>) = Σ<sub><var>s</var></sub> Σ<sub><var>t</var></sub> <var>σ<sub>st</sub></var>(<var>v</var>)</p>
+            <p><var>C<sub>S</sub></var>(<var>e</var>) = Σ<sub><var>s</var></sub> Σ<sub><var>t</var></sub> <var>σ<sub>st</sub></var>(<var>e</var>)</p>
+          </div>
+          <p>Trong PDF, miền lấy tổng bị vỡ ký hiệu ở chỗ <var>s</var>, <var>t</var> thuộc hay không thuộc <var>N</var>. Ý toán học cần giữ khi đọc: <var>σ<sub>st</sub>(v)</var> là số đường đi ngắn nhất từ <var>s</var> tới <var>t</var> có chứa <var>v</var>. Khác betweenness ở chỗ stress <em>đếm</em> các đường đó, chưa chia cho tổng số đường ngắn nhất của cặp. Bài giải thích: giao thông và liên lạc trong mạng xã hội đi theo nhiều lối; stress đo lượng thông tin ấy dồn qua một đỉnh hoặc một cạnh. Bài gắn độ đo với việc xác định đường ngắn trong bài toán vận tải.</p>
+        </article>
+
+        <article>
+          <h3>4.6. Betweenness centrality (độ trung tâm trung gian)</h3>
+          <p>Khoảng cách từ một đỉnh tới các đỉnh khác chưa nói hết. Trong mạng truyền thông, điều quan trọng hơn là đỉnh nào nằm trên đường ngắn nhất giữa những cặp đỉnh khác. Shaw (1954) có một dạng sớm; Freeman (1977, 1978) đưa betweenness thành độ đo quyền kiểm soát thông tin giữa người với người.</p>
+          <div class="formula">
+            <p><var>C<sub>B</sub></var>(<var>x</var>) = Σ<sub><var>s</var> ≠ <var>t</var></sub> <var>σ<sub>st</sub></var>(<var>x</var>) / <var>σ<sub>st</sub></var></p>
+          </div>
+          <p>Tử là số đường đi ngắn nhất từ <var>s</var> tới <var>t</var> đi qua <var>x</var>. Mẫu là số đường đi ngắn nhất từ <var>s</var> tới <var>t</var>. Nếu một cặp có nhiều đường ngắn nhất, <var>x</var> chỉ nhận đúng phần đường nó đứng trên. Đây là độ đo toàn cục, nặng trên mạng lớn. Brandes (2001) đưa độ phức tạp xuống <var>O(mn)</var>. Ý nghĩa bài giữ: đỉnh betweenness cao là đỉnh kiểm soát tin giữa các đỉnh khác nhờ vị trí trên các đường nối.</p>
+          <p>Trong PDF, chỉ số của tổng viết lúc là <var>y ≠ z</var>, lúc giải thích bằng <var>s, t</var>. Khi tính, dùng cặp nguồn–đích <var>s, t</var> khác <var>x</var>. Trên đồ thị vô hướng, mỗi cặp không thứ tự chỉ tính một lần rồi chuẩn hóa bằng <var>(n−1)(n−2)/2</var>. Cách chuẩn hóa này được làm tường minh ở trang bài tập.</p>
+        </article>
+
+        <article>
+          <h3>4.7. Eigenvector centrality (độ trung tâm vector riêng)</h3>
+          <p>Bonacich (1972) lấy vector riêng ứng với trị riêng lớn nhất của ma trận kề. Bonacich và Lloyd (2001) đề xuất một biến thể để các kết quả so sánh được với nhau. Bonacich (2007) bàn thêm vài tính chất riêng của độ đo này.</p>
+          <div class="formula">
+            <p><var>A</var><var>x</var> = <var>λ</var><var>x</var></p>
+            <p><var>λ x<sub>i</sub></var> = Σ<sub><var>j</var> = 1</sub><sup><var>n</var></sup> <var>a<sub>ij</sub></var> <var>x<sub>j</sub></var></p>
+          </div>
+          <p><var>a<sub>ij</sub></var> bằng 1 khi <var>i</var> kề <var>j</var>, bằng 0 nếu không. Đọc phương trình theo từng đỉnh: điểm của <var>i</var> tỉ lệ với tổng điểm của các hàng xóm. Hàng xóm điểm cao kéo điểm của <var>i</var> lên. Bài nêu độ phức tạp <var>O(n²)</var> cho mọi đỉnh, và nói độ đo dùng được trong mạng nơ-ron (Fletcher và Wennekers, 2017). Ở bảng so sánh cuối bài, ứng dụng được ghi theo hướng chọn vị trí cho cơ sở khẩn cấp và hạn chế được tóm là “chỉ đếm các liên kết quan trọng”.</p>
+        </article>
+
+        <article>
+          <h3>4.8. Katz centrality (độ trung tâm bước đi chiết khấu)</h3>
+          <p>Katz (1953). Ảnh hưởng được đo bằng tổng các bước đi giữa các cặp đỉnh, bước đi dài bị nhân một hệ số nhỏ dần. Gọi <var>A</var> là ma trận kề.</p>
+          <div class="formula">
+            <p><var>C<sub>K</sub></var>(<var>i</var>) = Σ<sub><var>k</var> = 1</sub><sup>∞</sup> Σ<sub><var>j</var> = 1</sub><sup><var>n</var></sup> <var>α<sup>k</sup></var> (<var>A<sup>k</sup></var>)<sub><var>ji</var></sub></p>
+          </div>
+          <p><var>α</var> phải nhỏ hơn nghịch đảo của trị tuyệt đối của trị riêng lớn nhất của <var>A</var>. Lũy thừa <var>A<sup>k</sup></var> đếm các lối đi dài <var>k</var> bước qua các hàng xóm trung gian. Katz là dạng mở của eigenvector: điểm một đỉnh vẫn dựa trên điểm hàng xóm, nhưng mọi độ dài bước đi đều có mặt, với trọng số giảm. Bài nêu ứng dụng trên World Wide Web (Newman, 2010).</p>
+        </article>
+
+        <article>
+          <h3>4.9. Subgraph centrality (độ trung tâm đồ thị con)</h3>
+          <p>Estrada và Rodriguez-Velazquez (2005), đếm bước đi đóng. Số bước đi đóng dài <var>k</var>, xuất phát và kết thúc tại <var>i</var>, là moment phổ địa phương <var>μ<sub>k</sub>(i) = (A<sup>k</sup>)<sub>ii</sub></var>.</p>
+          <div class="formula">
+            <p><var>C<sub>SG</sub></var>(<var>i</var>) = Σ<sub><var>k</var> = 0</sub><sup>∞</sup> <var>μ<sub>k</sub></var>(<var>i</var>) / <var>k</var>!</p>
+          </div>
+          <p>Chia cho <var>k</var>! khiến bước đi dài gần như không còn đóng góp. Vòng ngắn, tức cấu trúc địa phương chặt, nặng hơn vòng dài. Độ phức tạp cùng họ với eigenvector. Bài gắn độ đo với cấu trúc phổ của liên kết phân tử trong hóa học.</p>
+        </article>
+
+        <article>
+          <h3>4.10. Functional centrality (độ trung tâm hàm)</h3>
+          <p>Rodriguez và cộng sự (2006). Mỗi độ dài bước đi đóng được nhân một hệ số <var>a<sub>j</sub></var> do người dùng chọn.</p>
+          <div class="formula">
+            <p><var>C<sub>F</sub></var>(<var>i</var>) = Σ<sub><var>j</var> = 0</sub><sup>∞</sup> <var>a<sub>j</sub></var> <var>μ<sub>j</sub></var>(<var>i</var>)</p>
+          </div>
+          <p>Subgraph centrality là trường hợp riêng khi <var>a<sub>j</sub> = 1/j!</var>. Bài nêu ứng dụng phát hiện protein trọng yếu trong mạng tương tác protein (Tew, Li và Tan, 2007): đỉnh functional centrality cao là ứng viên cho protein mà khi mất đi thì mạng sinh học bị tổn thương nặng.</p>
+        </article>
+
+        <article>
+          <h3>4.11. Leverage centrality (độ trung tâm đòn bẩy)</h3>
+          <p>Joyce và cộng sự (2010), minh họa trên mạng não. Với mỗi hàng xóm, so sánh bậc của chính đỉnh với bậc của hàng xóm.</p>
+          <div class="formula">
+            <p><var>C<sub>L</sub></var>(<var>i</var>) = (1 / <var>k<sub>i</sub></var>) Σ<sub><var>j</var> ∈ <var>N<sub>i</sub></var></sub> (<var>k<sub>i</sub></var> − <var>k<sub>j</sub></var>) / (<var>k<sub>i</sub></var> + <var>k<sub>j</sub></var>)</p>
+          </div>
+          <p><var>k<sub>i</sub></var> là bậc của <var>i</var>. Nếu <var>i</var> có bậc cao hơn phần lớn hàng xóm, tử dương, leverage dương: đỉnh này “lấn” hàng xóm. Nếu hàng xóm toàn đỉnh bậc rất cao, leverage âm: đỉnh này đứng cạnh những trung tâm lớn hơn nó. Độ đo vừa thấy bậc của mình vừa thấy bậc của hàng xóm, nên khác degree thuần.</p>
+        </article>
+
+        <article>
+          <h3>4.12. K-shell centrality (độ trung tâm vỏ k)</h3>
+          <p>Muốn chặn hoặc thúc một quá trình lan, cần tìm người lan tỏa mạnh. Kitsak và cộng sự (2010) chỉ ra người đó thường nằm ở lõi, và đề xuất phân rã k-shell. Zeng và Zhang (2013), Liu và cộng sự (2014) cải tiến cách xếp hạng. Garas, Schweitzer và Havlin (2012) đưa phân rã sang mạng có trọng số.</p>
+          <p>Cách bóc vỏ, đúng như bài mô tả:</p>
+          <ol class="steps">
+            <li>Xóa lặp mọi đỉnh đang có bậc 1. Gán cho chúng <var>k<sub>s</sub> = 1</var>. Xóa xong, một đỉnh khác có thể tụt xuống bậc 1 và cũng bị xóa trong cùng vỏ.</li>
+            <li>Trên phần còn lại, xóa lặp mọi đỉnh đang có bậc 2. Gán <var>k<sub>s</sub> = 2</var>.</li>
+            <li>Tiếp tục với bậc 3, 4, … cho đến khi mọi đỉnh đã nhận một chỉ số vỏ.</li>
+          </ol>
+          <p>Độ trung tâm k-shell của một đỉnh chính là chỉ số vỏ đó. Vỏ trong là lõi, được coi là quan trọng hơn vỏ ngoài. Figure 3 của bài mô tả một mạng đã bóc: đỉnh 1, 2, 3, 4 ở vỏ <var>k<sub>s</sub> = 3</var>; đỉnh 5, 6, 7 ở vỏ 2; đỉnh 8 đến 13 ở vỏ 1. Bài kết luận các đỉnh vỏ 3 là nhóm lan tỏa mạnh nhất, gọi là các đỉnh lõi.</p>
+          <p>Ưu điểm bài nêu: phân biệt được lõi với ngoài lõi, tính dễ, có nhìn cấu trúc toàn mạng, dùng để tìm siêu lan truyền. Hạn chế: trong cùng một vỏ, mọi đỉnh bị cho cùng một mức ưu tiên, không còn phân biệt ai hơn ai.</p>
+        </article>
+
+        <article>
+          <h3>4.13. Neighborhood coreness centrality (độ trung tâm lõi lân cận)</h3>
+          <p>Bae và Kim (2014). Trực giác: đỉnh có nhiều liên kết tới hàng xóm đang nằm ở lõi thì mạnh hơn đỉnh chỉ nối ra vỏ ngoài.</p>
+          <div class="formula">
+            <p><var>C<sub>NC</sub></var>(<var>v</var>) = Σ<sub><var>w</var> ∈ <var>N(v)</var></sub> <var>k<sub>s</sub></var>(<var>w</var>)</p>
+            <p><var>C<sub>NC</sub></var><sup>+</sup>(<var>v</var>) = Σ<sub><var>w</var> ∈ <var>N(v)</var></sub> <var>C<sub>NC</sub></var>(<var>w</var>)</p>
+          </div>
+          <p>Dòng thứ nhất cộng chỉ số vỏ của các hàng xóm kề. Dòng thứ hai cộng tiếp độ đo ấy của hàng xóm, tức nhìn thêm một tầng. Bài nói độ đo này gộp bậc và độ lõi, tính dễ, nhìn cục bộ, và có thể dùng cho bài toán lan nhiễm hoặc lan ô nhiễm. Chỗ PDF viết “degree and also coreness of node” ở đoạn dẫn, còn công thức in ra thì tổng trên hàng xóm. Khi đối chiếu, lấy công thức tổng <var>k<sub>s</sub>(w)</var> theo hàng xóm làm định nghĩa để tính.</p>
+        </article>
+
+        <article>
+          <h3>4.14. Neighborhood centrality (độ trung tâm lân cận)</h3>
+          <p>Liu và cộng sự (2015), để tìm người lan tỏa. Hàng xóm được tính theo nhiều bước; bước càng xa thì nhân hệ số càng nhỏ.</p>
+          <div class="formula">
+            <p><var>C<sub>N</sub></var>(<var>i</var>) = <var>d<sub>i</sub></var> + <var>p</var> Σ<sub><var>j</var> ∈ <var>N(i)</var></sub> <var>d<sub>j</sub></var> + <var>p</var><sup>2</sup> Σ <var>d<sub>k</sub></var> + <var>p</var><sup>3</sup> Σ <var>d<sub>l</sub></var> + … + <var>p<sup>n</sup></var> Σ <var>d<sub>s</sub></var></p>
+          </div>
+          <p><var>d<sub>i</sub></var> có thể là bậc hoặc chỉ số k-shell. <var>n</var> là số bước muốn nhìn. <var>p</var> nằm trong đoạn [0, 1]. Các tổng ở xa loại trừ những đỉnh đã đếm ở tầng gần hơn, đúng tinh thần các ký hiệu <var>N(j) \ i</var> trong bài. Bài đánh giá: khó tính hơn, có nhìn toàn mạng, và được dùng trong các nghiên cứu về lan của hút thuốc, uống rượu, hạnh phúc, tầm soát sức khỏe.</p>
+        </article>
+      </section>
+
+      <section id="bang-so-sanh">
+        <h2>Bảng so sánh</h2>
+        <p>Table 2 của bài gom độ phức tạp, hạn chế và vùng dùng của một số độ đo chuẩn. Bảng dưới đây là nội dung đó, viết lại bằng tiếng Việt. Một chỗ cần biết khi đối chiếu PDF: trong lời văn, closeness và betweenness được gắn với thuật toán Brandes cỡ <var>O(mn)</var>; Table 2 ghi closeness là <var>O(n³)</var> và betweenness là <var>O(n³)</var> hoặc <var>O(mn)</var>. <var>O(n³)</var> khớp cách tính khoảng cách bằng quy hoạch động trên đồ thị dày. Khi mạng thưa, cận Brandes chặt hơn.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Đối chiếu theo Table 2 của Das, Samanta và Pal (2018)</caption>
+            <thead>
+              <tr>
+                <th>Độ đo</th>
+                <th>Độ phức tạp trong Table 2</th>
+                <th>Hạn chế bài nêu</th>
+                <th>Vùng dùng bài nêu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Degree (bậc)</td>
+                <td><var>O(m)</var></td>
+                <td>Chỉ đếm liên kết trực tiếp, bỏ liên kết gián tiếp.</td>
+                <td>Tìm người ảnh hưởng trực tiếp lên người khác.</td>
+              </tr>
+              <tr>
+                <td>Closeness (gần)</td>
+                <td><var>O(n³)</var></td>
+                <td>Dùng khoảng cách từ một đỉnh tới các đỉnh khác, không phụ thuộc việc có bao nhiêu đường nối giữa chúng.</td>
+                <td>Chọn vị trí phát tin nhanh.</td>
+              </tr>
+              <tr>
+                <td>Eccentricity (lệch tâm)</td>
+                <td><var>O(mn)</var></td>
+                <td>Chỉ giữ khoảng cách lớn nhất.</td>
+                <td>Chọn vị trí phát tin nhanh.</td>
+              </tr>
+              <tr>
+                <td>Information (thông tin)</td>
+                <td><var>O(n³)</var></td>
+                <td>Không khóa vào đường ngắn nhất; tính mọi đường.</td>
+                <td>Những tình huống mà dòng tin dọc mạng là điều cần đo.</td>
+              </tr>
+              <tr>
+                <td>Stress (sức căng)</td>
+                <td><var>O(mn)</var></td>
+                <td>Lấy mọi đường ngắn nhất giữa hai đỉnh.</td>
+                <td>Đường ngắn trong bài toán vận tải.</td>
+              </tr>
+              <tr>
+                <td>Betweenness (trung gian)</td>
+                <td><var>O(n³)</var> hoặc <var>O(mn)</var></td>
+                <td>Đếm theo khoảng cách giữa các đỉnh, chưa phân biệt bản chất các đỉnh với nhau.</td>
+                <td>Tìm đỉnh kiểm soát tin giữa các đỉnh khác qua các đường nối.</td>
+              </tr>
+              <tr>
+                <td>Eigenvector (vector riêng)</td>
+                <td><var>O(n²)</var></td>
+                <td>Chỉ tính các liên kết quan trọng, theo nghĩa điểm đến từ hàng xóm có điểm cao.</td>
+                <td>Chọn vị trí cho cơ sở khẩn cấp.</td>
+              </tr>
+              <tr>
+                <td>K-shell (vỏ k)</td>
+                <td><var>O(m)</var></td>
+                <td>Tách được lõi và ngoài lõi, nhưng trong một vỏ thì các đỉnh ngang nhau.</td>
+                <td>Tìm đỉnh siêu lan truyền.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="ung-dung">
+        <h2>5. Ứng dụng</h2>
+        <p>Mục 5 đi qua xã hội học, tâm lý, kinh tế, nhân học, sinh học, tội phạm, giao thông, thần kinh, kinh doanh. Mỗi đoạn dưới đây là một lĩnh vực bài chọn để chứng minh độ đo không chỉ là công thức.</p>
+
+        <h3>Mạng sinh học</h3>
+        <p>Đỉnh là gene, protein hoặc chất chuyển hóa; cạnh là tương tác hoặc sự phối hợp. Jeong và cộng sự (2001) dùng degree để liên hệ bậc của một protein với mức nghiêm trọng khi protein đó bị loại. Wuchty và Stadler (2003) áp closeness lên nhiều mạng sinh học và chỉ ra sự tương ứng với bài toán chọn chỗ đặt dịch vụ. Koschützki và Schreiber (2004, 2008) lấy năm độ đo — degree, closeness, eccentricity, betweenness, eigenvector — trên mạng tương tác protein và mạng điều hòa gene, rồi thấy eigenvector và closeness tương quan mạnh.</p>
+
+        <h3>Đồng tác giả và tác động khoa học</h3>
+        <p>Đỉnh là nhà nghiên cứu, cạnh là quan hệ đồng tác giả. Liu và cộng sự (2005) so sánh ba độ đo trên cộng đồng nghiên cứu JCDL và thấy betweenness trội hơn trong phép so sánh của họ. Chen (2006) dùng betweenness trên văn liệu khoa học. Liu và cộng sự (2007) áp betweenness lên mạng đồng tác giả có trọng số. Yan và Ding (2009) dùng các độ đo trung tâm để phân tích tác động trong mạng đồng tác giả.</p>
+
+        <h3>An ninh và tội phạm</h3>
+        <p>Trên mạng trực tuyến hoặc ngoài đời, an ninh gắn với việc tìm người giữ vai trò đầu mối. Bài nhắc tội phạm dùng internet và điện thoại để chiếm đoạt tài sản. Trong tội phạm học, độ đo trung tâm được dùng để phát hiện người đứng đầu một mạng. Sparrow (1991) áp degree, closeness và betweenness vào tình báo hình sự. Coles (2001) phân tích nhóm tội phạm như một mạng xã hội. Borgatti và cộng sự (2009) đặt phân tích mạng vào cả an ninh quốc gia lẫn tội phạm có tổ chức.</p>
+
+        <h3>Đường bộ, ùn tắc và mạng vận tải</h3>
+        <p>Nút giao và đoạn đường tạo thành một mạng. Ùn tắc là bài toán hằng ngày (Holme, 2003). Người đi đường muốn lối ngắn và ít tốn kém. Degree, closeness, betweenness và eigenvector được Jayaweera, Perera và Munasinghe (2017) dùng để chỉ chỗ ùn trên mạng đường ở Sri Lanka. Với mạng vận tải đô thị, Wang và Xiufen (2017) dùng degree, closeness và betweenness. Guimerà và cộng sự (2005) dùng betweenness để nhìn cấu trúc toàn cục của mạng hàng không thế giới: độ trung tâm bất thường, cấu trúc cộng đồng, và vai trò toàn cầu của các thành phố.</p>
+
+        <h3>Lớp học</h3>
+        <p>Quan hệ giữa học sinh trong một lớp là một mạng. Phân tích mạng mô tả cách các mối quan hệ ấy vận hành, và qua đó nói về tính cách, tri thức, cách học sinh cải thiện lẫn nhau. Grunspan, Wiggins và Goodreau (2014) dùng degree và betweenness để phân tích quan hệ học sinh, đồng thời viết như một bài nhập môn SNA cho nghiên cứu giáo dục. Bruun và Brewe (2013) liên hệ vị trí của học sinh trong mạng trao đổi và mạng tương tác với kết quả học, cụ thể là dự đoán điểm từ các độ đo mạng và điểm tiền trắc nghiệm.</p>
+
+        <h3>Lạm dụng chất</h3>
+        <p>Bài xem lạm dụng chất là vấn đề tăng trong sinh viên, gắn với trầm cảm. Một mạng các triệu chứng — đỉnh là triệu chứng, cạnh là quan hệ giữa triệu chứng — cho thấy triệu chứng nào đứng ở trung tâm. Rhemtulla và cộng sự (2016) tính ba độ đo trung tâm triệu chứng cho cả mạng gộp nhiều chất lẫn mạng từng chất. Chỗ bài trích Boccaletti và cộng sự (2006) là công trình tổng quan về mạng phức, dùng như nền, không phải như một nghiên cứu riêng về chất gây nghiện.</p>
+      </section>
+
+      <section id="ket-luan">
+        <h2>6. Kết luận và hướng mở</h2>
+        <p>Các tác giả nhắc lại: độ đo trung tâm rất hữu ích cho phân tích mạng, nhưng còn phải biết chọn đúng độ đo cho đúng bài. Việc của bài là sắp thông tin ấy lại để người đọc chọn được vùng ứng dụng. Sở dĩ độ đo tiếp tục được sinh ra là vì mạng mới ngày càng lớn và bài toán mới không trùng bài toán cũ. Phần lớn nhóm tác giả muốn chứng minh độ đo của mình là khác và tốt hơn các độ đo đã có. Làm cho sự khác đó hiện ra rõ, rồi dùng đúng chỗ, vẫn là câu hỏi mở. Bài này là một lần các tác giả thử trình bày lại bức tranh đó.</p>
+        <p>Đoạn tiếp theo là lập trường riêng của họ. Trong một mạng xã hội, đỉnh là người hoặc tổ chức, cạnh là quan hệ. Không phải ai cũng cùng một tính cách, không phải quan hệ nào cũng cùng một sức mạnh. Có một sự mơ hồ nằm ngay trong đối tượng. Nếu coi tác nhân là đối tượng mờ và quan hệ là quan hệ mờ, ta được một mạng xã hội mờ. Logic mờ, theo họ, có thể cho kết quả sát hơn vì định nghĩa về đỉnh và cạnh sát thực tế hơn. Nghiên cứu thêm về phân tích mạng xã hội mờ là câu hỏi mở thứ hai.</p>
+        <p>Câu kết của bài: họ đã bàn khái niệm nền, duyệt các độ đo và so chúng trong một bảng. Mục đích là nghiên cứu các độ đo ấy. Việc định làm tiếp là cải tiến độ đo hiện có để được chấp nhận tốt hơn, và nghiên cứu độ đo trung tâm trên những mạng xã hội mờ chấp nhận được.</p>
+      </section>
+
+      <section id="lien-he">
+        <h2>Liên hệ với bài giảng</h2>
+        <div class="note">
+          <p>Bảng trên lớp chia độ đo mạng thành ba nhánh: Degree (bậc); nhánh dựa trên đường đi, gồm Betweenness (trung gian), Closeness (gần), Harmonic (điều hòa); nhánh phổ, gồm Eigenvector (vector riêng), Katz (bước đi chiết khấu), PageRank (hạng trang), HITS (hub và authority).</p>
+          <p>Bài báo phủ Degree (bậc), Closeness (gần), Betweenness (trung gian), Eigenvector (vector riêng) và Katz (bước đi chiết khấu) khá kỹ. Harmonic (điều hòa), PageRank (hạng trang) và HITS (hub và authority) không phải trọng tâm của survey này. Harmonic sửa chỗ Closeness bị vô hạn khi mạng không liên thông, bằng cách cộng nghịch đảo khoảng cách. PageRank và HITS là hai độ đo phổ kiểu phản hồi, rất gần Eigenvector và Katz: một đỉnh được điểm vì những đỉnh quan trọng trỏ tới nó. HITS tách hai vai, hub và authority. Trên đồ thị vô hướng, hai vai đó trùng nhau và cùng phương với vector riêng chính.</p>
+          <p>Phần tính số của buổi học nằm ở <a href="#bai-tap">phần bài tập</a> bên dưới: một đồ thị vô hướng 10 đỉnh, ma trận kề, và từng độ đo trên bảng được tính ra giấy.</p>
+        </div>
+      </section>
+
+      <header class="part-divider" id="bai-tap">
+        <h2>Phần B — Bài tập tính tay</h2>
+        <p>Đồ thị vô hướng 10 đỉnh: Degree, Betweenness, Closeness, Harmonic, Eigenvector, Katz, PageRank và HITS.</p>
+      </header>
+
+<section id="quy-uoc">
+        <h2>Quy ước khi tính</h2>
+        <div class="note">
+          <p>Đồ thị vô hướng, không trọng số, một thành phần liên thông. <var>n</var> = 10, nên mẫu số chuẩn hóa của Degree (bậc), Closeness (gần) và Harmonic (điều hòa) là <var>n</var> − 1 = 9. Betweenness (trung gian) lấy trên các cặp không thứ tự, mẫu số chuẩn hóa là (<var>n</var> − 1)(<var>n</var> − 2) / 2 = 36.</p>
+          <p>Đồ thị đối xứng qua trục dọc: đổi 2↔3, 4↔5, 6↔8 thì cạnh vẫn là cạnh đó. Đỉnh 1, 7, 9, 10 nằm trên trục. Vì vậy mỗi đại lượng của 3 bằng của 2, của 5 bằng của 4, của 8 bằng của 6. Phía dưới vẫn ghi đủ mười đỉnh để đối chiếu.</p>
+        </div>
+      </section>
+
+      <section id="do-thi">
+        <h2>Đồ thị</h2>
+        <p>Mười người. Cạnh là quan hệ bạn trực tiếp. Cụm trên là tam giác 1–2–3. Hai nhánh đi xuống: 2–4–6 và 3–5–8. Đỉnh 7 nối hai nhánh. Đỉnh 9 gom 6, 7, 8 rồi nối xuống 10.</p>
+        <figure>
+          <svg class="graph" viewBox="0 0 680 720" role="img">
+            <title>Đồ thị vô hướng 10 đỉnh, 13 cạnh</title>
+            <desc>Đỉnh 1 nối 2 và 3. Đỉnh 2 nối 4, đỉnh 3 nối 5. Đỉnh 4 nối 6 và 7, đỉnh 5 nối 7 và 8. Đỉnh 6, 7, 8 nối xuống 9. Đỉnh 9 nối 10.</desc>
+            <g class="edge">
+              <line x1="340" y1="52" x2="200" y2="150" />
+              <line x1="340" y1="52" x2="480" y2="150" />
+              <line x1="200" y1="150" x2="480" y2="150" />
+              <line x1="200" y1="150" x2="200" y2="280" />
+              <line x1="480" y1="150" x2="480" y2="280" />
+              <line x1="200" y1="280" x2="80" y2="420" />
+              <line x1="200" y1="280" x2="340" y2="430" />
+              <line x1="480" y1="280" x2="340" y2="430" />
+              <line x1="480" y1="280" x2="600" y2="420" />
+              <line x1="80" y1="420" x2="340" y2="555" />
+              <line x1="340" y1="430" x2="340" y2="555" />
+              <line x1="600" y1="420" x2="340" y2="555" />
+              <line x1="340" y1="555" x2="340" y2="670" />
+            </g>
+            <g>
+              <circle class="node" cx="340" cy="52" r="26" />
+              <circle class="node" cx="200" cy="150" r="26" />
+              <circle class="node" cx="480" cy="150" r="26" />
+              <circle class="node" cx="200" cy="280" r="26" />
+              <circle class="node" cx="480" cy="280" r="26" />
+              <circle class="node" cx="80" cy="420" r="26" />
+              <circle class="node" cx="340" cy="430" r="26" />
+              <circle class="node" cx="600" cy="420" r="26" />
+              <circle class="node" cx="340" cy="555" r="26" />
+              <circle class="node" cx="340" cy="670" r="26" />
+              <text class="label" x="340" y="52">1</text>
+              <text class="label" x="200" y="150">2</text>
+              <text class="label" x="480" y="150">3</text>
+              <text class="label" x="200" y="280">4</text>
+              <text class="label" x="480" y="280">5</text>
+              <text class="label" x="80" y="420">6</text>
+              <text class="label" x="340" y="430">7</text>
+              <text class="label" x="600" y="420">8</text>
+              <text class="label" x="340" y="555">9</text>
+              <text class="label" x="340" y="670">10</text>
+            </g>
+          </svg>
+          <figcaption>Mười đỉnh, 13 cạnh. Trục đối xứng đi qua 1, 7, 9, 10.</figcaption>
+        </figure>
+        <p>Danh sách cạnh: 1–2, 1–3, 2–3, 2–4, 3–5, 4–6, 4–7, 5–7, 5–8, 6–9, 7–9, 8–9, 9–10.</p>
+      </section>
+
+      <section id="ma-tran">
+        <h2>Ma trận kề</h2>
+        <p>Hàng <var>i</var>, cột <var>j</var> bằng 1 khi có cạnh, bằng 0 khi không. Đường chéo bằng 0 vì không có khuyên. Ma trận đối xứng vì đồ thị vô hướng. Đếm số 1 trên cả ma trận được 26, chia 2 ra đúng 13 cạnh.</p>
+        <div class="table-wrap">
+          <table class="matrix">
+            <caption>Ma trận kề A</caption>
+            <thead>
+              <tr>
+                <th scope="col">A</th>
+                <th scope="col">1</th>
+                <th scope="col">2</th>
+                <th scope="col">3</th>
+                <th scope="col">4</th>
+                <th scope="col">5</th>
+                <th scope="col">6</th>
+                <th scope="col">7</th>
+                <th scope="col">8</th>
+                <th scope="col">9</th>
+                <th scope="col">10</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+              <tr><th scope="row">2</th><td class="on">1</td><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+              <tr><th scope="row">3</th><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+              <tr><th scope="row">4</th><td class="zero">0</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+              <tr><th scope="row">5</th><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td></tr>
+              <tr><th scope="row">6</th><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td></tr>
+              <tr><th scope="row">7</th><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td></tr>
+              <tr><th scope="row">8</th><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td></tr>
+              <tr><th scope="row">9</th><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="on">1</td><td class="on">1</td><td class="zero">0</td><td class="on">1</td></tr>
+              <tr><th scope="row">10</th><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="on">1</td><td class="zero">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="bac">
+        <h2>Degree (bậc)</h2>
+        <div class="formula">
+          <p><var>C<sub>D</sub></var>(<var>i</var>) = deg(<var>i</var>)</p>
+          <p><var>C'<sub>D</sub></var>(<var>i</var>) = deg(<var>i</var>) / (<var>n</var> − 1) = deg(<var>i</var>) / 9</p>
+        </div>
+        <div class="note">
+          <p>Có hai số khác nhau. <var>C<sub>D</sub></var> là số bạn, đếm bằng tổng một hàng của ma trận kề. <var>C'<sub>D</sub></var> là số bạn ấy chia cho số người còn lại.</p>
+          <p>Đồ thị có 10 đỉnh, nên mỗi người chỉ có thể kết bạn với tối đa 9 người kia. Mẫu số 9 chính là mức trần đó, viết là <var>n</var> − 1. Ai kết bạn với cả 9 người thì điểm chuẩn hóa bằng 1. Đỉnh 9 có 4 bạn, nên</p>
+          <p>4 / 9 ≈ 0,4444</p>
+          <p>nghĩa là đỉnh 9 đạt 4 phần trong 9 mối có thể có. Đỉnh 10 có 1 bạn, nên 1/9 ≈ 0,1111.</p>
+          <p>Trong đúng đồ thị này, chia cho 9 không đổi ai hơn ai: 4 vẫn lớn hơn 3. Mẫu số dùng khi mang con số sang một mạng khác số đỉnh. Bậc 4 trong nhóm 10 người nặng hơn bậc 4 trong nhóm 1.000 người; sau khi chia cho <var>n</var> − 1 thì hai mạng so được với nhau.</p>
+        </div>
+        <p>Đếm tay: hàng 9 có bốn số 1, tại cột 6, 7, 8 và 10, nên deg(9) = 4. Hàng 10 chỉ có một số 1, tại cột 9.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Degree (bậc) và bản chuẩn hóa</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th scope="col">Hàng xóm</th>
+                <th class="num" scope="col">deg</th>
+                <th class="num" scope="col"><var>C'<sub>D</sub></var></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td>2, 3</td><td class="num">2</td><td class="num">2/9 ≈ 0,2222</td></tr>
+              <tr><th scope="row">2</th><td>1, 3, 4</td><td class="num">3</td><td class="num">1/3 ≈ 0,3333</td></tr>
+              <tr><th scope="row">3</th><td>1, 2, 5</td><td class="num">3</td><td class="num">1/3 ≈ 0,3333</td></tr>
+              <tr><th scope="row">4</th><td>2, 6, 7</td><td class="num">3</td><td class="num">1/3 ≈ 0,3333</td></tr>
+              <tr><th scope="row">5</th><td>3, 7, 8</td><td class="num">3</td><td class="num">1/3 ≈ 0,3333</td></tr>
+              <tr><th scope="row">6</th><td>4, 9</td><td class="num">2</td><td class="num">2/9 ≈ 0,2222</td></tr>
+              <tr><th scope="row">7</th><td>4, 5, 9</td><td class="num">3</td><td class="num">1/3 ≈ 0,3333</td></tr>
+              <tr><th scope="row">8</th><td>5, 9</td><td class="num">2</td><td class="num">2/9 ≈ 0,2222</td></tr>
+              <tr class="rank-high"><th scope="row">9</th><td>6, 7, 8, 10</td><td class="num">4</td><td class="num">4/9 ≈ 0,4444</td></tr>
+              <tr><th scope="row">10</th><td>9</td><td class="num">1</td><td class="num">1/9 ≈ 0,1111</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Tổng bậc = 2 + 3 + 3 + 3 + 3 + 2 + 3 + 2 + 4 + 1 = 26 = 2<var>m</var>, nên <var>m</var> = 13. Đỉnh 9 cao nhất. Đỉnh 10 thấp nhất.</p>
+      </section>
+
+      <section id="khoang-cach">
+        <h2>Khoảng cách</h2>
+        <p>Khoảng cách <var>d(i, j)</var> là số cạnh trên đường đi ngắn nhất. Tính bằng BFS. Dưới đây là một lượt xuất phát từ 7, vì 7 sẽ là đỉnh Closeness (gần) cao nhất, và một lượt xuất phát từ 1, vì số đường đi từ 1 được dùng lại ở Betweenness (trung gian).</p>
+        <h3>BFS từ 7</h3>
+        <ol class="steps">
+          <li>Tầng 0: {7}.</li>
+          <li>Tầng 1: hàng xóm của 7 là 4, 5, 9.</li>
+          <li>Tầng 2: từ 4 tới 2 và 6; từ 5 tới 3 và 8; từ 9 tới 10. Đỉnh 6 và 8 không mở thêm đỉnh mới ngoài các đỉnh đã có.</li>
+          <li>Tầng 3: từ 2 tới 1, từ 3 cũng tới 1. Không còn đỉnh nào ở tầng 4.</li>
+        </ol>
+        <p>Độ dài cộng dồn, tức farness của 7: ba đỉnh ở khoảng cách 1, năm đỉnh ở khoảng cách 2, một đỉnh ở khoảng cách 3.</p>
+        <div class="formula">
+          <p>3·1 + 5·2 + 1·3 = 3 + 10 + 3 = 16</p>
+        </div>
+        <h3>BFS từ 1, kèm số đường đi ngắn nhất</h3>
+        <p>Khi một đỉnh được chạm lần đầu, số đường đi ngắn nhất của nó bằng số đường của đỉnh cha. Nếu một cha khác chạm lại đúng cùng tầng, cộng thêm số đường của cha đó.</p>
+        <ol class="steps">
+          <li>Tầng 1: 2 và 3, mỗi đỉnh một đường. <var>σ</var>(2) = <var>σ</var>(3) = 1.</li>
+          <li>Tầng 2: 4 chỉ qua 2, 5 chỉ qua 3. <var>σ</var>(4) = <var>σ</var>(5) = 1.</li>
+          <li>Tầng 3: 6 qua 4, 8 qua 5, nên <var>σ</var> = 1. Đỉnh 7 được cả 4 lẫn 5 chạm, nên <var>σ</var>(7) = 1 + 1 = 2. Hai đường là 1–2–4–7 và 1–3–5–7.</li>
+          <li>Tầng 4: 9 nhận đường từ 6 (1 đường), từ 7 (2 đường) và từ 8 (1 đường). <var>σ</var>(9) = 1 + 2 + 1 = 4.</li>
+          <li>Tầng 5: 10 chỉ qua 9, nên <var>σ</var>(10) = 4.</li>
+        </ol>
+        <p>Farness của 1 = 1 + 1 + 2 + 2 + 3 + 3 + 3 + 4 + 5 = 24.</p>
+        <p>Các hàng còn lại làm cùng một cách. Nhờ đối xứng, hàng 3 là ảnh của hàng 2, hàng 5 là ảnh của hàng 4, hàng 8 là ảnh của hàng 6.</p>
+        <div class="table-wrap">
+          <table class="matrix">
+            <caption>Ma trận khoảng cách. Hàng là đỉnh xuất phát</caption>
+            <thead>
+              <tr>
+                <th scope="col"><var>d</var></th>
+                <th scope="col">1</th>
+                <th scope="col">2</th>
+                <th scope="col">3</th>
+                <th scope="col">4</th>
+                <th scope="col">5</th>
+                <th scope="col">6</th>
+                <th scope="col">7</th>
+                <th scope="col">8</th>
+                <th scope="col">9</th>
+                <th scope="col">10</th>
+                <th scope="col">Tổng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td><td>3</td><td>4</td><td>5</td><td>24</td></tr>
+              <tr><th scope="row">2</th><td>1</td><td>0</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>3</td><td>3</td><td>4</td><td>19</td></tr>
+              <tr><th scope="row">3</th><td>1</td><td>1</td><td>0</td><td>2</td><td>1</td><td>3</td><td>2</td><td>2</td><td>3</td><td>4</td><td>19</td></tr>
+              <tr><th scope="row">4</th><td>2</td><td>1</td><td>2</td><td>0</td><td>2</td><td>1</td><td>1</td><td>3</td><td>2</td><td>3</td><td>17</td></tr>
+              <tr><th scope="row">5</th><td>2</td><td>2</td><td>1</td><td>2</td><td>0</td><td>3</td><td>1</td><td>1</td><td>2</td><td>3</td><td>17</td></tr>
+              <tr><th scope="row">6</th><td>3</td><td>2</td><td>3</td><td>1</td><td>3</td><td>0</td><td>2</td><td>2</td><td>1</td><td>2</td><td>19</td></tr>
+              <tr><th scope="row">7</th><td>3</td><td>2</td><td>2</td><td>1</td><td>1</td><td>2</td><td>0</td><td>2</td><td>1</td><td>2</td><td>16</td></tr>
+              <tr><th scope="row">8</th><td>3</td><td>3</td><td>2</td><td>3</td><td>1</td><td>2</td><td>2</td><td>0</td><td>1</td><td>2</td><td>19</td></tr>
+              <tr><th scope="row">9</th><td>4</td><td>3</td><td>3</td><td>2</td><td>2</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>18</td></tr>
+              <tr><th scope="row">10</th><td>5</td><td>4</td><td>4</td><td>3</td><td>3</td><td>2</td><td>2</td><td>2</td><td>1</td><td>0</td><td>26</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Cột Tổng là farness, tổng khoảng cách tới chín đỉnh kia. Hàng 4: 2 + 1 + 2 + 2 + 1 + 1 + 3 + 2 + 3 = 17. Hàng 10: 5 + 4 + 4 + 3 + 3 + 2 + 2 + 2 + 1 = 26. Ma trận đối xứng, đúng với đồ thị vô hướng.</p>
+      </section>
+
+      <section id="closeness">
+        <h2>Closeness (gần)</h2>
+        <div class="formula">
+          <p><var>C'<sub>C</sub></var>(<var>i</var>) = (<var>n</var> − 1) / Σ<sub><var>j</var> ≠ <var>i</var></sub> <var>d</var>(<var>i</var>, <var>j</var>) = 9 / farness(<var>i</var>)</p>
+        </div>
+        <div class="note">
+          <p>Farness là tổng số bước tới 9 người kia, tức cột Tổng của ma trận khoảng cách. Khoảng cách trung bình tới một người khác là farness / 9. Closeness chuẩn hóa là nghịch đảo của khoảng cách trung bình đó:</p>
+          <p><var>C'<sub>C</sub></var>(<var>i</var>) = 1 / (farness / 9) = 9 / farness</p>
+          <p>Số 9 lại là số người còn lại. Nếu đứng cạnh cả 9 người, farness = 9·1 = 9 và điểm bằng 1. Đường càng dài, tổng càng lớn, điểm càng nhỏ.</p>
+          <p>Đỉnh 7 có farness 16. Khoảng cách trung bình là 16/9 ≈ 1,78 bước. Điểm closeness là 9/16 = 0,5625. Đỉnh 10 có farness 26, trung bình 26/9 ≈ 2,89 bước, điểm 9/26 ≈ 0,3462.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption>Closeness (gần), bản chuẩn hóa</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Farness</th>
+                <th class="num" scope="col"><var>C'<sub>C</sub></var></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">24</td><td class="num">9/24 = 3/8 = 0,3750</td></tr>
+              <tr><th scope="row">2</th><td class="num">19</td><td class="num">9/19 ≈ 0,4737</td></tr>
+              <tr><th scope="row">3</th><td class="num">19</td><td class="num">9/19 ≈ 0,4737</td></tr>
+              <tr><th scope="row">4</th><td class="num">17</td><td class="num">9/17 ≈ 0,5294</td></tr>
+              <tr><th scope="row">5</th><td class="num">17</td><td class="num">9/17 ≈ 0,5294</td></tr>
+              <tr><th scope="row">6</th><td class="num">19</td><td class="num">9/19 ≈ 0,4737</td></tr>
+              <tr class="rank-high"><th scope="row">7</th><td class="num">16</td><td class="num">9/16 = 0,5625</td></tr>
+              <tr><th scope="row">8</th><td class="num">19</td><td class="num">9/19 ≈ 0,4737</td></tr>
+              <tr><th scope="row">9</th><td class="num">18</td><td class="num">9/18 = 1/2 = 0,5000</td></tr>
+              <tr><th scope="row">10</th><td class="num">26</td><td class="num">9/26 ≈ 0,3462</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Đỉnh 7 đứng đầu, dù bậc của 7 chỉ là 3, thấp hơn bậc 4 của đỉnh 9. Closeness phạt nặng đường dài: từ 9 lên 1 phải đi 4 bước, từ 7 lên 1 chỉ 3 bước, và 7 đã ở giữa hai nhánh.</p>
+      </section>
+
+      <section id="harmonic">
+        <h2>Harmonic (điều hòa)</h2>
+        <div class="formula">
+          <p><var>H</var>(<var>i</var>) = Σ<sub><var>j</var> ≠ <var>i</var></sub> 1 / <var>d</var>(<var>i</var>, <var>j</var>)</p>
+          <p><var>H'</var>(<var>i</var>) = <var>H</var>(<var>i</var>) / (<var>n</var> − 1) = <var>H</var>(<var>i</var>) / 9</p>
+        </div>
+        <div class="note">
+          <p><var>H</var> cộng 1/khoảng cách tới từng người trong 9 người kia. Người ở sát bên góp 1. Người cách 2 bước góp 1/2. Người cách 4 bước chỉ góp 1/4.</p>
+          <p>Chia cho 9 để lấy trung bình của các số 1/khoảng cách ấy. Trần của <var>H</var> là 9, khi mọi người đều cách đúng 1 bước. Khi đó <var>H'</var> = 9/9 = 1. Đỉnh 9 có <var>H</var> = 71/12, nên <var>H'</var> = (71/12) / 9 = 71/108 ≈ 0,6574.</p>
+          <p>Closeness lấy nghịch đảo sau khi đã cộng khoảng cách, nên một đường rất dài kéo cả điểm xuống. Harmonic cộng nghịch đảo trước, nên đường dài chỉ thêm một số nhỏ vào tổng.</p>
+        </div>
+        <p>Đỉnh 7, các khoảng cách tới chín đỉnh kia là 3, 2, 2, 1, 1, 2, 2, 1, 2:</p>
+        <div class="formula">
+          <p>1/3 + 1/2 + 1/2 + 1 + 1 + 1/2 + 1/2 + 1 + 1/2 = 3 + 5/2 + 1/3 = 35/6 ≈ 5,8333</p>
+        </div>
+        <p>Đỉnh 9, các khoảng cách là 4, 3, 3, 2, 2, 1, 1, 1, 1:</p>
+        <div class="formula">
+          <p>1/4 + 1/3 + 1/3 + 1/2 + 1/2 + 1 + 1 + 1 + 1 = 5 + 2/3 + 1/4 = 71/12 ≈ 5,9167</p>
+        </div>
+        <p>Bốn hàng xóm ở khoảng cách 1 kéo harmonic của 9 lên trên 7. Các đỉnh còn lại:</p>
+        <ul>
+          <li>Đỉnh 1: 1 + 1 + 1/2 + 1/2 + 1/3 + 1/3 + 1/3 + 1/4 + 1/5 = 89/20 = 4,45</li>
+          <li>Đỉnh 2 và 3: 1 + 1 + 1 + 1/2 + 1/2 + 1/2 + 1/3 + 1/3 + 1/4 = 65/12 ≈ 5,4167</li>
+          <li>Đỉnh 4 và 5: 1/2 + 1 + 1/2 + 1/2 + 1 + 1 + 1/3 + 1/2 + 1/3 = 17/3 ≈ 5,6667</li>
+          <li>Đỉnh 6 và 8: 1/3 + 1/2 + 1/3 + 1 + 1/3 + 1/2 + 1/2 + 1 + 1/2 = 5</li>
+          <li>Đỉnh 10: 1/5 + 1/4 + 1/4 + 1/3 + 1/3 + 1/2 + 1/2 + 1/2 + 1 = 58/15 ≈ 3,8667</li>
+        </ul>
+        <div class="table-wrap">
+          <table>
+            <caption>Harmonic (điều hòa)</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col"><var>H</var></th>
+                <th class="num" scope="col"><var>H'</var> = <var>H</var>/9</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">89/20 = 4,4500</td><td class="num">89/180 ≈ 0,4944</td></tr>
+              <tr><th scope="row">2</th><td class="num">65/12 ≈ 5,4167</td><td class="num">65/108 ≈ 0,6019</td></tr>
+              <tr><th scope="row">3</th><td class="num">65/12 ≈ 5,4167</td><td class="num">65/108 ≈ 0,6019</td></tr>
+              <tr><th scope="row">4</th><td class="num">17/3 ≈ 5,6667</td><td class="num">17/27 ≈ 0,6296</td></tr>
+              <tr><th scope="row">5</th><td class="num">17/3 ≈ 5,6667</td><td class="num">17/27 ≈ 0,6296</td></tr>
+              <tr><th scope="row">6</th><td class="num">5</td><td class="num">5/9 ≈ 0,5556</td></tr>
+              <tr><th scope="row">7</th><td class="num">35/6 ≈ 5,8333</td><td class="num">35/54 ≈ 0,6481</td></tr>
+              <tr><th scope="row">8</th><td class="num">5</td><td class="num">5/9 ≈ 0,5556</td></tr>
+              <tr class="rank-high"><th scope="row">9</th><td class="num">71/12 ≈ 5,9167</td><td class="num">71/108 ≈ 0,6574</td></tr>
+              <tr><th scope="row">10</th><td class="num">58/15 ≈ 3,8667</td><td class="num">58/135 ≈ 0,4296</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="betweenness">
+        <h2>Betweenness (trung gian)</h2>
+        <div class="formula">
+          <p><var>C<sub>B</sub></var>(<var>v</var>) = Σ<sub><var>s</var> &lt; <var>t</var>, <var>s</var>,<var>t</var> ≠ <var>v</var></sub> <var>σ<sub>st</sub></var>(<var>v</var>) / <var>σ<sub>st</sub></var></p>
+          <p><var>C'<sub>B</sub></var>(<var>v</var>) = <var>C<sub>B</sub></var>(<var>v</var>) / 36, &nbsp; 36 = 9·8 / 2</p>
+        </div>
+        <div class="note">
+          <p>Với một cặp <var>s</var>, <var>t</var> không chứa <var>v</var>, mẫu <var>σ<sub>st</sub></var> là số đường đi ngắn nhất giữa hai đỉnh đó. Tử là số đường trong đó có đi qua <var>v</var>. Tỉ lệ này nằm từ 0 đến 1. Cộng mọi cặp thì ra <var>C<sub>B</sub></var>.</p>
+          <p>Bỏ <var>v</var> ra, còn 9 đỉnh. Số cặp không thứ tự trong 9 đỉnh là 9·8/2 = 36. Nếu mọi cặp đều gửi toàn bộ đường ngắn nhất qua <var>v</var>, điểm thô bằng 36 và điểm chuẩn hóa bằng 1. Chia cho 36 nên là tỉ lệ các cặp mà <var>v</var> đang đứng giữa.</p>
+          <p>Đỉnh 9 có <var>C<sub>B</sub></var> = 34/3 ≈ 11,33. Chuẩn hóa: (34/3) / 36 = 17/54 ≈ 0,3148, tức khoảng 31% các cặp đi qua 9. Cặp không đi qua <var>v</var> góp 0; bảng dưới chỉ ghi cặp góp số dương.</p>
+        </div>
+        <div class="note gold">
+          <p><strong>Một cặp làm mẫu: 4 và 8.</strong> Ba đường cùng dài 3 bước, không có đường ngắn hơn.</p>
+          <p>4–6–9–8 đi qua 6 và 9. 4–7–9–8 đi qua 7 và 9. 4–7–5–8 đi qua 7 và 5.</p>
+          <p>Vậy <var>σ</var>(9) = 2/3, <var>σ</var>(7) = 2/3, <var>σ</var>(6) = 1/3, <var>σ</var>(5) = 1/3. Các đỉnh 1, 2, 3, 10 không nằm trên đường nào của cặp này.</p>
+        </div>
+
+        <h3>Đỉnh 1 và đỉnh 10</h3>
+        <p><var>C<sub>B</sub></var>(1) = 0 và <var>C<sub>B</sub></var>(10) = 0. Đỉnh 10 là lá: mọi đường đi qua 10 đều phải quay lại 9, nên không bao giờ là đường ngắn nhất giữa hai đỉnh khác. Đỉnh 1 có hai hàng xóm là 2 và 3, mà 2–3 đã là một cạnh. Đường 2–1–3 dài hơn đường 2–3. Mọi lối vòng qua 1 đều bỏ được 1 mà vẫn ngắn hơn hoặc bằng. Không có cặp nào dùng 1 làm trạm trung chuyển.</p>
+
+        <h3>Đỉnh 2</h3>
+        <p>Bảy cặp. Tổng 1 + 1 + 1/2 + 1/2 + 1/2 + 1 + 1 = 11/2. Chuẩn hóa: (11/2) / 36 = 11/72 ≈ 0,1528.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 2</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–4</td><td class="paths">1–2–4</td><td class="num">1</td></tr>
+              <tr><td>1–6</td><td class="paths">1–2–4–6</td><td class="num">1</td></tr>
+              <tr><td>1–7</td><td class="paths">1–2–4–7; 1–3–5–7</td><td class="num">1/2</td></tr>
+              <tr><td>1–9</td><td class="paths">1–2–4–6–9; 1–2–4–7–9; 1–3–5–7–9; 1–3–5–8–9</td><td class="num">1/2</td></tr>
+              <tr><td>1–10</td><td class="paths">1–2–4–6–9–10; 1–2–4–7–9–10; 1–3–5–7–9–10; 1–3–5–8–9–10</td><td class="num">1/2</td></tr>
+              <tr><td>3–4</td><td class="paths">3–2–4</td><td class="num">1</td></tr>
+              <tr><td>3–6</td><td class="paths">3–2–4–6</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 3</h3>
+        <p>Ảnh gương của đỉnh 2. Cùng tổng 11/2, chuẩn hóa 11/72 ≈ 0,1528.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 3</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–5</td><td class="paths">1–3–5</td><td class="num">1</td></tr>
+              <tr><td>1–7</td><td class="paths">1–2–4–7; 1–3–5–7</td><td class="num">1/2</td></tr>
+              <tr><td>1–8</td><td class="paths">1–3–5–8</td><td class="num">1</td></tr>
+              <tr><td>1–9</td><td class="paths">1–2–4–6–9; 1–2–4–7–9; 1–3–5–7–9; 1–3–5–8–9</td><td class="num">1/2</td></tr>
+              <tr><td>1–10</td><td class="paths">bốn đường của cặp 1–9, mỗi đường thêm 10</td><td class="num">1/2</td></tr>
+              <tr><td>2–5</td><td class="paths">2–3–5</td><td class="num">1</td></tr>
+              <tr><td>2–8</td><td class="paths">2–3–5–8</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 4</h3>
+        <p>1 + 1/2 + 1/2 + 1/2 + 1 + 1 + 1 + 1 + 1 + 1/3 + 1/2 = 6 + 2 + 1/3 = 25/3 ≈ 8,3333. Chuẩn hóa 25/108 ≈ 0,2315.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 4</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–6</td><td class="paths">1–2–4–6</td><td class="num">1</td></tr>
+              <tr><td>1–7</td><td class="paths">1–2–4–7; 1–3–5–7</td><td class="num">1/2</td></tr>
+              <tr><td>1–9</td><td class="paths">hai trong bốn đường đi qua 4: 1–2–4–6–9 và 1–2–4–7–9</td><td class="num">1/2</td></tr>
+              <tr><td>1–10</td><td class="paths">cùng hai lối đó, nối tiếp 10</td><td class="num">1/2</td></tr>
+              <tr><td>2–6</td><td class="paths">2–4–6</td><td class="num">1</td></tr>
+              <tr><td>2–7</td><td class="paths">2–4–7</td><td class="num">1</td></tr>
+              <tr><td>2–9</td><td class="paths">2–4–6–9; 2–4–7–9</td><td class="num">1</td></tr>
+              <tr><td>2–10</td><td class="paths">2–4–6–9–10; 2–4–7–9–10</td><td class="num">1</td></tr>
+              <tr><td>3–6</td><td class="paths">3–2–4–6</td><td class="num">1</td></tr>
+              <tr><td>5–6</td><td class="paths">5–7–4–6; 5–7–9–6; 5–8–9–6</td><td class="num">1/3</td></tr>
+              <tr><td>6–7</td><td class="paths">6–4–7; 6–9–7</td><td class="num">1/2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 5</h3>
+        <p>Ảnh gương của đỉnh 4. Cùng 25/3, chuẩn hóa 25/108 ≈ 0,2315. Cặp đáng chú ý là 4–8, đã tính ở ví dụ đầu: đỉnh 5 chỉ đứng trên một trong ba đường, góp 1/3.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 5</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–7</td><td class="paths">1–2–4–7; 1–3–5–7</td><td class="num">1/2</td></tr>
+              <tr><td>1–8</td><td class="paths">1–3–5–8</td><td class="num">1</td></tr>
+              <tr><td>1–9</td><td class="paths">hai đường qua 5: 1–3–5–7–9 và 1–3–5–8–9</td><td class="num">1/2</td></tr>
+              <tr><td>1–10</td><td class="paths">cùng hai lối đó, nối tiếp 10</td><td class="num">1/2</td></tr>
+              <tr><td>2–8</td><td class="paths">2–3–5–8</td><td class="num">1</td></tr>
+              <tr><td>3–7</td><td class="paths">3–5–7</td><td class="num">1</td></tr>
+              <tr><td>3–8</td><td class="paths">3–5–8</td><td class="num">1</td></tr>
+              <tr><td>3–9</td><td class="paths">3–5–7–9; 3–5–8–9</td><td class="num">1</td></tr>
+              <tr><td>3–10</td><td class="paths">3–5–7–9–10; 3–5–8–9–10</td><td class="num">1</td></tr>
+              <tr><td>4–8</td><td class="paths">4–6–9–8; 4–7–9–8; 4–7–5–8</td><td class="num">1/3</td></tr>
+              <tr><td>7–8</td><td class="paths">7–5–8; 7–9–8</td><td class="num">1/2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 6</h3>
+        <p>1/4 + 1/4 + 1/2 + 1/2 + 1/3 + 1/2 + 1/2 = 1/2 + 2 + 1/3 = 17/6 ≈ 2,8333. Chuẩn hóa 17/216 ≈ 0,0787.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 6</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–9</td><td class="paths">chỉ 1–2–4–6–9 trong bốn đường</td><td class="num">1/4</td></tr>
+              <tr><td>1–10</td><td class="paths">chỉ lối đó, nối tiếp 10</td><td class="num">1/4</td></tr>
+              <tr><td>2–9</td><td class="paths">2–4–6–9; 2–4–7–9</td><td class="num">1/2</td></tr>
+              <tr><td>2–10</td><td class="paths">2–4–6–9–10; 2–4–7–9–10</td><td class="num">1/2</td></tr>
+              <tr><td>4–8</td><td class="paths">4–6–9–8; 4–7–9–8; 4–7–5–8</td><td class="num">1/3</td></tr>
+              <tr><td>4–9</td><td class="paths">4–6–9; 4–7–9</td><td class="num">1/2</td></tr>
+              <tr><td>4–10</td><td class="paths">4–6–9–10; 4–7–9–10</td><td class="num">1/2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 8</h3>
+        <p>Ảnh gương của đỉnh 6. Cùng 17/6, chuẩn hóa 17/216 ≈ 0,0787.</p>
+
+        <h3>Đỉnh 7</h3>
+        <p>Mười tỉ lệ 1/2, cộng một tỉ lệ 1, cộng hai tỉ lệ 2/3: 5 + 1 + 4/3 = 22/3 ≈ 7,3333. Chuẩn hóa (22/3) / 36 = 11/54 ≈ 0,2037.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 7</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–9</td><td class="paths">1–2–4–7–9 và 1–3–5–7–9, trong bốn đường</td><td class="num">1/2</td></tr>
+              <tr><td>1–10</td><td class="paths">cùng hai lối đó, nối tiếp 10</td><td class="num">1/2</td></tr>
+              <tr><td>2–9</td><td class="paths">2–4–6–9; 2–4–7–9</td><td class="num">1/2</td></tr>
+              <tr><td>2–10</td><td class="paths">2–4–6–9–10; 2–4–7–9–10</td><td class="num">1/2</td></tr>
+              <tr><td>3–9</td><td class="paths">3–5–7–9; 3–5–8–9</td><td class="num">1/2</td></tr>
+              <tr><td>3–10</td><td class="paths">3–5–7–9–10; 3–5–8–9–10</td><td class="num">1/2</td></tr>
+              <tr><td>4–5</td><td class="paths">4–7–5</td><td class="num">1</td></tr>
+              <tr><td>4–8</td><td class="paths">4–6–9–8; 4–7–9–8; 4–7–5–8</td><td class="num">2/3</td></tr>
+              <tr><td>4–9</td><td class="paths">4–6–9; 4–7–9</td><td class="num">1/2</td></tr>
+              <tr><td>4–10</td><td class="paths">4–6–9–10; 4–7–9–10</td><td class="num">1/2</td></tr>
+              <tr><td>5–6</td><td class="paths">5–7–4–6; 5–7–9–6; 5–8–9–6</td><td class="num">2/3</td></tr>
+              <tr><td>5–9</td><td class="paths">5–7–9; 5–8–9</td><td class="num">1/2</td></tr>
+              <tr><td>5–10</td><td class="paths">5–7–9–10; 5–8–9–10</td><td class="num">1/2</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Đỉnh 9</h3>
+        <p>Chín cặp đi hết qua 9, hai cặp góp 2/3, hai cặp góp 1/2: 9 + 4/3 + 1 = 34/3 ≈ 11,3333. Chuẩn hóa (34/3) / 36 = 17/54 ≈ 0,3148. Đây là betweenness cao nhất: mọi đường tới 10 đều phải qua 9, và 9 còn đứng trên nhiều cầu giữa nhánh trái và nhánh phải.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các cặp có đường ngắn nhất đi qua đỉnh 9</caption>
+            <thead>
+              <tr><th>Cặp</th><th>Các đường đi ngắn nhất</th><th class="num">Tỉ lệ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1–10</td><td class="paths">cả bốn đường đều qua 9</td><td class="num">1</td></tr>
+              <tr><td>2–10</td><td class="paths">2–4–6–9–10; 2–4–7–9–10</td><td class="num">1</td></tr>
+              <tr><td>3–10</td><td class="paths">3–5–7–9–10; 3–5–8–9–10</td><td class="num">1</td></tr>
+              <tr><td>4–8</td><td class="paths">4–6–9–8; 4–7–9–8; 4–7–5–8</td><td class="num">2/3</td></tr>
+              <tr><td>4–10</td><td class="paths">4–6–9–10; 4–7–9–10</td><td class="num">1</td></tr>
+              <tr><td>5–6</td><td class="paths">5–7–4–6; 5–7–9–6; 5–8–9–6</td><td class="num">2/3</td></tr>
+              <tr><td>5–10</td><td class="paths">5–7–9–10; 5–8–9–10</td><td class="num">1</td></tr>
+              <tr><td>6–7</td><td class="paths">6–4–7; 6–9–7</td><td class="num">1/2</td></tr>
+              <tr><td>6–8</td><td class="paths">6–9–8</td><td class="num">1</td></tr>
+              <tr><td>6–10</td><td class="paths">6–9–10</td><td class="num">1</td></tr>
+              <tr><td>7–8</td><td class="paths">7–5–8; 7–9–8</td><td class="num">1/2</td></tr>
+              <tr><td>7–10</td><td class="paths">7–9–10</td><td class="num">1</td></tr>
+              <tr><td>8–10</td><td class="paths">8–9–10</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Betweenness (trung gian), dạng thô và dạng chuẩn hóa</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col"><var>C<sub>B</sub></var></th>
+                <th class="num" scope="col"><var>C'<sub>B</sub></var></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0</td><td class="num">0</td></tr>
+              <tr><th scope="row">2</th><td class="num">11/2 = 5,5</td><td class="num">11/72 ≈ 0,1528</td></tr>
+              <tr><th scope="row">3</th><td class="num">11/2 = 5,5</td><td class="num">11/72 ≈ 0,1528</td></tr>
+              <tr><th scope="row">4</th><td class="num">25/3 ≈ 8,3333</td><td class="num">25/108 ≈ 0,2315</td></tr>
+              <tr><th scope="row">5</th><td class="num">25/3 ≈ 8,3333</td><td class="num">25/108 ≈ 0,2315</td></tr>
+              <tr><th scope="row">6</th><td class="num">17/6 ≈ 2,8333</td><td class="num">17/216 ≈ 0,0787</td></tr>
+              <tr><th scope="row">7</th><td class="num">22/3 ≈ 7,3333</td><td class="num">11/54 ≈ 0,2037</td></tr>
+              <tr><th scope="row">8</th><td class="num">17/6 ≈ 2,8333</td><td class="num">17/216 ≈ 0,0787</td></tr>
+              <tr class="rank-high"><th scope="row">9</th><td class="num">34/3 ≈ 11,3333</td><td class="num">17/54 ≈ 0,3148</td></tr>
+              <tr><th scope="row">10</th><td class="num">0</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="eigenvector">
+        <h2>Eigenvector (vector riêng)</h2>
+        <div class="formula">
+          <p><var>A</var><var>x</var> = <var>λ</var><var>x</var>, &nbsp; <var>λ</var> là trị riêng lớn nhất, &nbsp; ‖<var>x</var>‖<sub>2</sub> = 1, &nbsp; <var>x</var> &gt; 0</p>
+        </div>
+        <div class="note">
+          <p>Đọc một dòng của phương trình: điểm của <var>i</var> nhân với <var>λ</var> bằng tổng điểm các hàng xóm. Hàng xóm điểm cao kéo <var>i</var> lên. <var>λ</var> là hệ số co để hai vế bằng nhau; ở đồ thị này <var>λ</var><sub>1</sub> ≈ 2,7835.</p>
+          <p>Nếu nhân cả vectơ điểm với 2, phương trình vẫn đúng với cùng <var>λ</var>. Vì vậy phải chọn một cách chuẩn hóa. Cách ở đây là độ dài Euclid bằng 1: lấy mỗi thành phần chia cho √(tổng bình phương các thành phần). Phép chia này chỉ chọn một đại diện cho vectơ, không đổi thứ hạng.</p>
+          <p>Đa thức đặc trưng bậc 10 không khai triển tay cho gọn. Lặp lũy thừa: xuất phát từ vectơ toàn 1, nhân với <var>A</var>, rồi chia cho độ dài. Nhân với <var>A</var> chính là thay mỗi đỉnh bằng tổng điểm các hàng xóm.</p>
+        </div>
+        <p>Vòng 1, <var>A</var> nhân vectơ toàn 1 ra đúng vectơ bậc (2, 3, 3, 3, 3, 2, 3, 2, 4, 1): ba đỉnh bậc 2, năm đỉnh bậc 3, một đỉnh bậc 4 và một đỉnh bậc 1. Độ dài của vectơ bậc:</p>
+        <div class="formula">
+          <p>√(3·2² + 5·3² + 4² + 1²) = √(12 + 45 + 16 + 1) = √74 ≈ 8,6023</p>
+        </div>
+        <p>Vectơ sau vòng 1 là bậc chia cho √74: khoảng (0,2325; 0,3487; 0,3487; 0,3487; 0,3487; 0,2325; 0,3487; 0,2325; 0,4650; 0,1162). Ước lượng trị riêng ở vòng này là độ dài của <var>A</var> nhân vectơ vừa được, khoảng 2,78. Các vòng sau vẫn là phép cộng hàng xóm rồi chuẩn hóa. Dãy hội tụ về trị riêng</p>
+        <div class="formula">
+          <p><var>λ</var><sub>1</sub> ≈ 2,7835</p>
+        </div>
+        <p>Kiểm tra trên giấy với vectơ làm tròn 4 chữ số: nhân <var>λ</var> với điểm của đỉnh phải gần tổng điểm các hàng xóm. Đỉnh 1 chỉ kề 2 và 3:</p>
+        <div class="formula">
+          <p>2,7835 · 0,2412 ≈ 0,6714 &nbsp; và &nbsp; 0,3357 + 0,3357 = 0,6714</p>
+        </div>
+        <p>Đỉnh 10 chỉ kề 9, nên <var>λ x</var><sub>10</sub> phải bằng <var>x</var><sub>9</sub>: 2,7835 · 0,1371 ≈ 0,3816.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Eigenvector (vector riêng), chuẩn Euclid</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col"><var>x<sub>i</sub></var></th>
+                <th scope="col">Hàng xóm dùng để kiểm tra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0,2412</td><td>2 + 3</td></tr>
+              <tr><th scope="row">2</th><td class="num">0,3357</td><td>1 + 3 + 4</td></tr>
+              <tr><th scope="row">3</th><td class="num">0,3357</td><td>1 + 2 + 5</td></tr>
+              <tr><th scope="row">4</th><td class="num">0,3576</td><td>2 + 6 + 7</td></tr>
+              <tr><th scope="row">5</th><td class="num">0,3576</td><td>3 + 7 + 8</td></tr>
+              <tr><th scope="row">6</th><td class="num">0,2655</td><td>4 + 9</td></tr>
+              <tr class="rank-high"><th scope="row">7</th><td class="num">0,3940</td><td>4 + 5 + 9</td></tr>
+              <tr><th scope="row">8</th><td class="num">0,2655</td><td>5 + 9</td></tr>
+              <tr><th scope="row">9</th><td class="num">0,3816</td><td>6 + 7 + 8 + 10</td></tr>
+              <tr><th scope="row">10</th><td class="num">0,1371</td><td>9</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Đỉnh 7 nhỉnh hơn đỉnh 9. Hàng xóm của 7 là 4, 5 và 9, toàn đỉnh điểm cao. Hàng xóm của 9 có thêm đỉnh 10, đỉnh điểm thấp nhất, nên tổng hàng xóm của 9 bị kéo xuống.</p>
+      </section>
+
+      <section id="katz">
+        <h2>Katz (bước đi chiết khấu)</h2>
+        <div class="formula">
+          <p><var>c</var> = Σ<sub><var>k</var> = 0</sub><sup>∞</sup> (<var>α A</var>)<sup><var>k</var></sup> <strong>1</strong> = (<var>I</var> − <var>α A</var>)<sup>−1</sup> <strong>1</strong></p>
+          <p><var>α</var> = 0,1 &nbsp; vì &nbsp; 1/<var>λ</var><sub>1</sub> ≈ 0,3593 và 0,1 nhỏ hơn ngưỡng này</p>
+        </div>
+        <div class="note">
+          <p>Katz cộng mọi bước đi xuất phát từ một đỉnh. Bước dài <var>k</var> được nhân <var>α<sup>k</sup></var>. Với <var>α</var> = 0,1, một bước góp 0,1; hai bước góp 0,01; ba bước góp 0,001. Bước càng dài càng nhẹ.</p>
+          <p>Số bước đi dài <var>k</var> tăng xấp xỉ <var>λ</var><sub>1</sub><sup><var>k</var></sup>. Nếu <var>α</var> ≥ 1/<var>λ</var><sub>1</sub> ≈ 0,3593, tổng vô hạn không còn hội tụ. Chọn 0,1 để chuỗi tắt nhanh và vẫn tính tay được vài số hạng đầu. Số hạng <var>k</var> = 0 bằng 1 tại mọi đỉnh, là phần “có mặt của chính đỉnh”, để không đỉnh nào khởi đầu từ 0.</p>
+        </div>
+        <p>Thành phần thứ <var>i</var> của <var>A<sup>k</sup></var><strong>1</strong> là số bước đi dài <var>k</var> xuất phát từ <var>i</var>. Gọi số đó là <var>w<sub>k</sub></var>(<var>i</var>). Bước đi được phép quay lại đỉnh cũ. Công thức đệ quy để đếm tay: <var>w</var><sub>0</sub> = 1 tại mọi đỉnh, và <var>w<sub>k</sub></var>(<var>i</var>) bằng tổng <var>w<sub>k−1</sub></var> của các hàng xóm.</p>
+        <p><var>w</var><sub>1</sub> chính là bậc. <var>w</var><sub>2</sub>(<var>i</var>) là tổng bậc của hàng xóm. Ví dụ đỉnh 1: bậc của 2 cộng bậc của 3 bằng 3 + 3 = 6. Đỉnh 10: bậc của 9 bằng 4. Đỉnh 9: 2 + 3 + 2 + 1 = 8. Đỉnh 7: 3 + 3 + 4 = 10. Đỉnh 4: 3 + 2 + 3 = 8.</p>
+        <p><var>w</var><sub>3</sub> là tổng <var>w</var><sub>2</sub> của hàng xóm. Đỉnh 9: 7 + 10 + 7 + 4 = 28. Đỉnh 4: 8 + 7 + 10 = 25. Đỉnh 10: chỉ lấy <var>w</var><sub>2</sub>(9) = 8. <var>w</var><sub>4</sub> làm tiếp một tầng như vậy.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Số bước đi xuất phát từ mỗi đỉnh</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col"><var>w</var><sub>0</sub></th>
+                <th class="num" scope="col"><var>w</var><sub>1</sub></th>
+                <th class="num" scope="col"><var>w</var><sub>2</sub></th>
+                <th class="num" scope="col"><var>w</var><sub>3</sub></th>
+                <th class="num" scope="col"><var>w</var><sub>4</sub></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">1</td><td class="num">2</td><td class="num">6</td><td class="num">16</td><td class="num">44</td></tr>
+              <tr><th scope="row">2</th><td class="num">1</td><td class="num">3</td><td class="num">8</td><td class="num">22</td><td class="num">63</td></tr>
+              <tr><th scope="row">3</th><td class="num">1</td><td class="num">3</td><td class="num">8</td><td class="num">22</td><td class="num">63</td></tr>
+              <tr><th scope="row">4</th><td class="num">1</td><td class="num">3</td><td class="num">8</td><td class="num">25</td><td class="num">62</td></tr>
+              <tr><th scope="row">5</th><td class="num">1</td><td class="num">3</td><td class="num">8</td><td class="num">25</td><td class="num">62</td></tr>
+              <tr><th scope="row">6</th><td class="num">1</td><td class="num">2</td><td class="num">7</td><td class="num">16</td><td class="num">53</td></tr>
+              <tr><th scope="row">7</th><td class="num">1</td><td class="num">3</td><td class="num">10</td><td class="num">24</td><td class="num">78</td></tr>
+              <tr><th scope="row">8</th><td class="num">1</td><td class="num">2</td><td class="num">7</td><td class="num">16</td><td class="num">53</td></tr>
+              <tr><th scope="row">9</th><td class="num">1</td><td class="num">4</td><td class="num">8</td><td class="num">28</td><td class="num">64</td></tr>
+              <tr><th scope="row">10</th><td class="num">1</td><td class="num">1</td><td class="num">4</td><td class="num">8</td><td class="num">28</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Cắt chuỗi tại <var>k</var> = 4 đã ra gần giá trị hội tụ. Với đỉnh 9:</p>
+        <div class="formula">
+          <p>1 + 0,1·4 + 0,01·8 + 0,001·28 + 0,0001·64 = 1 + 0,4 + 0,08 + 0,028 + 0,0064 = 1,5144</p>
+        </div>
+        <p>Với đỉnh 10: 1 + 0,1·1 + 0,01·4 + 0,001·8 + 0,0001·28 = 1,1508. Phần đuôi <var>k</var> ≥ 5 còn khoảng 0,003 với đỉnh 9 và khoảng 0,001 với đỉnh 10. Chuỗi đầy đủ:</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Katz (bước đi chiết khấu), α = 0,1</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Tới <var>k</var> = 4</th>
+                <th class="num" scope="col">Chuỗi vô hạn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">1,2804</td><td class="num">1,2821</td></tr>
+              <tr><th scope="row">2</th><td class="num">1,4083</td><td class="num">1,4107</td></tr>
+              <tr><th scope="row">3</th><td class="num">1,4083</td><td class="num">1,4107</td></tr>
+              <tr><th scope="row">4</th><td class="num">1,4112</td><td class="num">1,4138</td></tr>
+              <tr><th scope="row">5</th><td class="num">1,4112</td><td class="num">1,4138</td></tr>
+              <tr><th scope="row">6</th><td class="num">1,2913</td><td class="num">1,2931</td></tr>
+              <tr><th scope="row">7</th><td class="num">1,4318</td><td class="num">1,4345</td></tr>
+              <tr><th scope="row">8</th><td class="num">1,2913</td><td class="num">1,2931</td></tr>
+              <tr class="rank-high"><th scope="row">9</th><td class="num">1,5144</td><td class="num">1,5172</td></tr>
+              <tr><th scope="row">10</th><td class="num">1,1508</td><td class="num">1,1517</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Thứ tự đã ổn định từ <var>k</var> = 4: đỉnh 9 cao nhất, rồi 7, rồi cặp 4 và 5. Katz đếm mọi bước đi có chiết khấu, nên bậc cao của 9 được cộng thêm rất nhiều lối đi ngắn quanh nó.</p>
+      </section>
+
+      <section id="pagerank">
+        <h2>PageRank (hạng trang)</h2>
+        <p>Đồ thị vô hướng được đọc thành đồ thị có hướng hai chiều: mỗi cạnh thành hai cung. Không có đỉnh bậc 0, nên không phải xử lý đỉnh treo. Hệ số damping <var>d</var> = 0,85. Mỗi bước, một người hoặc nhảy tới một đỉnh bất kỳ với xác suất 0,15, hoặc đi theo một cạnh với xác suất 0,85, chọn đều giữa các hàng xóm.</p>
+        <div class="formula">
+          <p><var>π<sub>i</sub></var> = (1 − <var>d</var>) / 10 + <var>d</var> · Σ<sub><var>j</var> kề <var>i</var></sub> <var>π<sub>j</sub></var> / deg(<var>j</var>)</p>
+          <p>(1 − <var>d</var>) / <var>n</var> = 0,15 / 10 = 0,015</p>
+        </div>
+        <div class="note">
+          <p>Hình dung một người đang đứng ở đỉnh <var>j</var>. Với xác suất 0,85 người đó đi tiếp theo một cạnh, và chọn đều giữa các hàng xóm, nên mỗi hàng xóm nhận <var>π<sub>j</sub></var> · 0,85 / deg(<var>j</var>). Chia cho bậc của <var>j</var>, tức người đang giữ điểm, vì chính người đó phải chia phần của mình. Đỉnh bậc 1 đổ gần trọn phần “đi theo cạnh” vào người hàng xóm duy nhất. Đỉnh bậc 4 chỉ gửi cho mỗi hàng xóm một phần tư.</p>
+          <p>Với xác suất 0,15 người đó nhảy tới một đỉnh bất kỳ trong 10 đỉnh, mỗi đỉnh nhận 0,15/10 = 0,015. Số 0,015 này cộng vào mọi đỉnh ở mọi vòng, kể cả đỉnh không có ai trỏ tới.</p>
+          <p>Vòng đầu, <var>π</var> = 0,1 ở mọi đỉnh, nên mỗi hàng xóm gửi 0,85 · 0,1 / deg(<var>j</var>) = 0,085 / deg(<var>j</var>).</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption>Vòng lặp PageRank thứ nhất, tính từ vectơ đều 0,1</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th scope="col">Phép tính</th>
+                <th class="num" scope="col"><var>π</var><sup>(1)</sup></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td>0,015 + 0,085/3 + 0,085/3</td><td class="num">0,0717</td></tr>
+              <tr><th scope="row">2</th><td>0,015 + 0,085/2 + 0,085/3 + 0,085/3</td><td class="num">0,1142</td></tr>
+              <tr><th scope="row">3</th><td>cùng phép với đỉnh 2</td><td class="num">0,1142</td></tr>
+              <tr><th scope="row">4</th><td>0,015 + 0,085/3 + 0,085/2 + 0,085/3</td><td class="num">0,1142</td></tr>
+              <tr><th scope="row">5</th><td>cùng phép với đỉnh 4</td><td class="num">0,1142</td></tr>
+              <tr><th scope="row">6</th><td>0,015 + 0,085/3 + 0,085/4</td><td class="num">0,0646</td></tr>
+              <tr><th scope="row">7</th><td>0,015 + 0,085/3 + 0,085/3 + 0,085/4</td><td class="num">0,0929</td></tr>
+              <tr><th scope="row">8</th><td>cùng phép với đỉnh 6</td><td class="num">0,0646</td></tr>
+              <tr><th scope="row">9</th><td>0,015 + 0,085/2 + 0,085/3 + 0,085/2 + 0,085/1</td><td class="num">0,2133</td></tr>
+              <tr><th scope="row">10</th><td>0,015 + 0,085/4</td><td class="num">0,0363</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Đỉnh 9 đã nhảy lên ngay vòng đầu vì đỉnh 10 có bậc 1: toàn bộ phần “đi theo cạnh” của 10 đổ vào 9. Các vòng sau dùng lại đúng công thức, chỉ thay <var>π</var> cũ bằng <var>π</var> vừa tính. Dãy làm tròn 4 chữ số:</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các vòng PageRank tiếp theo, đến khi ổn định</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Vòng 2</th>
+                <th class="num" scope="col">Vòng 3</th>
+                <th class="num" scope="col">Vòng 5</th>
+                <th class="num" scope="col">Hội tụ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0,0797</td><td class="num">0,0774</td><td class="num">0,0790</td><td class="num">0,0783</td></tr>
+              <tr><th scope="row">2</th><td class="num">0,1102</td><td class="num">0,1087</td><td class="num">0,1090</td><td class="num">0,1117</td></tr>
+              <tr><th scope="row">3</th><td class="num">0,1102</td><td class="num">0,1087</td><td class="num">0,1090</td><td class="num">0,1117</td></tr>
+              <tr><th scope="row">4</th><td class="num">0,1011</td><td class="num">0,1210</td><td class="num">0,1188</td><td class="num">0,1121</td></tr>
+              <tr><th scope="row">5</th><td class="num">0,1011</td><td class="num">0,1210</td><td class="num">0,1188</td><td class="num">0,1121</td></tr>
+              <tr><th scope="row">6</th><td class="num">0,0927</td><td class="num">0,0706</td><td class="num">0,0740</td><td class="num">0,0797</td></tr>
+              <tr><th scope="row">7</th><td class="num">0,1250</td><td class="num">0,0993</td><td class="num">0,1034</td><td class="num">0,1115</td></tr>
+              <tr><th scope="row">8</th><td class="num">0,0927</td><td class="num">0,0706</td><td class="num">0,0740</td><td class="num">0,0797</td></tr>
+              <tr class="rank-high"><th scope="row">9</th><td class="num">0,1270</td><td class="num">0,1805</td><td class="num">0,1694</td><td class="num">0,1551</td></tr>
+              <tr><th scope="row">10</th><td class="num">0,0603</td><td class="num">0,0420</td><td class="num">0,0445</td><td class="num">0,0480</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Kiểm tra đỉnh 10 ở vectơ hội tụ. Đỉnh 10 chỉ nhận tin từ 9, và deg(9) = 4:</p>
+        <div class="formula">
+          <p>0,015 + 0,85 · 0,1551 / 4 = 0,015 + 0,0330 = 0,0480</p>
+        </div>
+        <p>Khớp <var>π</var><sub>10</sub>. Tổng mười thành phần bằng 1. Đỉnh 9 giữ ngôi đầu. PageRank của 4 và 5 xấp xỉ 2 và 3, còn 7 không vượt lên như ở eigenvector, vì 7 phải chia khối lượng cho ba hàng xóm trong khi 10 dồn gần như trọn phần đi-theo-cạnh của nó vào 9.</p>
+      </section>
+
+      <section id="hits">
+        <h2>HITS (hub và authority)</h2>
+        <p>Mỗi đỉnh có điểm hub <var>h</var> và điểm authority <var>a</var>. Authority được cộng từ hub của đỉnh trỏ tới mình. Hub được cộng từ authority của đỉnh mình trỏ tới. Trên đồ thị vô hướng, hai vai trùng nhau vì <var>A</var> đối xứng: <var>A</var><sup>T</sup> = <var>A</var>.</p>
+        <div class="formula">
+          <p><var>a</var> ← <var>A</var><var>h</var>, &nbsp; chia để tổng bằng 1</p>
+          <p><var>h</var> ← <var>A</var><var>a</var>, &nbsp; chia để tổng bằng 1</p>
+        </div>
+        <div class="note">
+          <p>Authority của một đỉnh là tổng hub của những đỉnh nối với nó. Hub của một đỉnh là tổng authority của những đỉnh nó nối tới. Hai phép này nhân vectơ với <var>A</var>, nên các số phình lên sau mỗi vòng. Chia cho tổng các thành phần để mười số cộng lại bằng 1. Thứ hạng không đổi bởi phép chia; chỉ có thang điểm được giữ cố định để so vòng này với vòng sau.</p>
+          <p>Trên đồ thị vô hướng, cạnh không có chiều, nên “trỏ đi” và “được trỏ tới” là cùng một tập hàng xóm. Hai vectơ vì thế tiến về cùng một dãy số, chính là Eigenvector đã chuẩn hóa theo tổng bằng 1 thay vì theo độ dài Euclid.</p>
+        </div>
+        <p>Bắt đầu từ <var>h</var> toàn số 1. Vòng 1, <var>A h</var> ra vectơ bậc, tổng bậc bằng 26, nên authority tỉ lệ với bậc:</p>
+        <div class="formula">
+          <p><var>a</var><sup>(1)</sup> = (2, 3, 3, 3, 3, 2, 3, 2, 4, 1) / 26</p>
+        </div>
+        <p>Hub mới bằng <var>A a</var>, tức tổng authority của hàng xóm. Lấy các hệ số nguyên trước khi chia: đỉnh 1 nhận 3 + 3 = 6, đỉnh 2 nhận 2 + 3 + 3 = 8, đỉnh 6 nhận 3 + 4 = 7, đỉnh 7 nhận 3 + 3 + 4 = 10, đỉnh 9 nhận 2 + 3 + 2 + 1 = 8, đỉnh 10 nhận 4. Tổng các hệ số này là 74, đúng bằng tổng số bước đi dài 2 trên toàn mạng. Chia 74:</p>
+        <div class="formula">
+          <p><var>h</var><sup>(1)</sup> ≈ (0,0811; 0,1081; 0,1081; 0,1081; 0,1081; 0,0946; 0,1351; 0,0946; 0,1081; 0,0541)</p>
+        </div>
+        <p>Lặp tiếp cùng hai phép nhân và chuẩn hóa tổng. Trên đồ thị này hai vectơ tiến về nhau, và vectơ chung chính là vector riêng chính đã chuẩn hóa theo tổng bằng 1. Đó là điều cần thấy: với mạng vô hướng, HITS không tạo thêm một thứ hạng mới so với eigenvector. Nó chỉ đổi cách chuẩn hóa, từ độ dài Euclid sang tổng bằng 1.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>HITS sau khi hội tụ. Hub và authority bằng nhau</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Hub = authority</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0,0785</td></tr>
+              <tr><th scope="row">2</th><td class="num">0,1093</td></tr>
+              <tr><th scope="row">3</th><td class="num">0,1093</td></tr>
+              <tr><th scope="row">4</th><td class="num">0,1164</td></tr>
+              <tr><th scope="row">5</th><td class="num">0,1164</td></tr>
+              <tr><th scope="row">6</th><td class="num">0,0865</td></tr>
+              <tr class="rank-high"><th scope="row">7</th><td class="num">0,1283</td></tr>
+              <tr><th scope="row">8</th><td class="num">0,0865</td></tr>
+              <tr><th scope="row">9</th><td class="num">0,1242</td></tr>
+              <tr><th scope="row">10</th><td class="num">0,0446</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Tổng bằng 1. Đỉnh 7 vẫn đứng trên đỉnh 9, cùng thứ tự với cột eigenvector.</p>
+      </section>
+
+      <section id="so-sanh">
+        <h2>So sánh</h2>
+        <p>Cùng một mạng, mỗi độ đo trả lời một câu hỏi khác nhau. Bảng dưới lấy bản chuẩn hóa của các độ đo đường đi, và bản đã hội tụ của các độ đo phổ. Ô đậm là giá trị cao nhất của cột.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Các độ đo đường đi</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Degree (bậc)</th>
+                <th class="num" scope="col">Closeness (gần)</th>
+                <th class="num" scope="col">Harmonic (điều hòa)</th>
+                <th class="num" scope="col">Betweenness (trung gian)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0,2222</td><td class="num">0,3750</td><td class="num">0,4944</td><td class="num">0</td></tr>
+              <tr><th scope="row">2</th><td class="num">0,3333</td><td class="num">0,4737</td><td class="num">0,6019</td><td class="num">0,1528</td></tr>
+              <tr><th scope="row">3</th><td class="num">0,3333</td><td class="num">0,4737</td><td class="num">0,6019</td><td class="num">0,1528</td></tr>
+              <tr><th scope="row">4</th><td class="num">0,3333</td><td class="num">0,5294</td><td class="num">0,6296</td><td class="num">0,2315</td></tr>
+              <tr><th scope="row">5</th><td class="num">0,3333</td><td class="num">0,5294</td><td class="num">0,6296</td><td class="num">0,2315</td></tr>
+              <tr><th scope="row">6</th><td class="num">0,2222</td><td class="num">0,4737</td><td class="num">0,5556</td><td class="num">0,0787</td></tr>
+              <tr><th scope="row">7</th><td class="num">0,3333</td><td class="num rank-high">0,5625</td><td class="num">0,6481</td><td class="num">0,2037</td></tr>
+              <tr><th scope="row">8</th><td class="num">0,2222</td><td class="num">0,4737</td><td class="num">0,5556</td><td class="num">0,0787</td></tr>
+              <tr><th scope="row">9</th><td class="num rank-high">0,4444</td><td class="num">0,5000</td><td class="num rank-high">0,6574</td><td class="num rank-high">0,3148</td></tr>
+              <tr><th scope="row">10</th><td class="num">0,1111</td><td class="num">0,3462</td><td class="num">0,4296</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption>Các độ đo phổ</caption>
+            <thead>
+              <tr>
+                <th scope="col">Đỉnh</th>
+                <th class="num" scope="col">Eigenvector (vector riêng)</th>
+                <th class="num" scope="col">Katz (bước đi chiết khấu)</th>
+                <th class="num" scope="col">PageRank (hạng trang)</th>
+                <th class="num" scope="col">HITS (hub và authority)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">0,2412</td><td class="num">1,2821</td><td class="num">0,0783</td><td class="num">0,0785</td></tr>
+              <tr><th scope="row">2</th><td class="num">0,3357</td><td class="num">1,4107</td><td class="num">0,1117</td><td class="num">0,1093</td></tr>
+              <tr><th scope="row">3</th><td class="num">0,3357</td><td class="num">1,4107</td><td class="num">0,1117</td><td class="num">0,1093</td></tr>
+              <tr><th scope="row">4</th><td class="num">0,3576</td><td class="num">1,4138</td><td class="num">0,1121</td><td class="num">0,1164</td></tr>
+              <tr><th scope="row">5</th><td class="num">0,3576</td><td class="num">1,4138</td><td class="num">0,1121</td><td class="num">0,1164</td></tr>
+              <tr><th scope="row">6</th><td class="num">0,2655</td><td class="num">1,2931</td><td class="num">0,0797</td><td class="num">0,0865</td></tr>
+              <tr><th scope="row">7</th><td class="num rank-high">0,3940</td><td class="num">1,4345</td><td class="num">0,1115</td><td class="num rank-high">0,1283</td></tr>
+              <tr><th scope="row">8</th><td class="num">0,2655</td><td class="num">1,2931</td><td class="num">0,0797</td><td class="num">0,0865</td></tr>
+              <tr><th scope="row">9</th><td class="num">0,3816</td><td class="num rank-high">1,5172</td><td class="num rank-high">0,1551</td><td class="num">0,1242</td></tr>
+              <tr><th scope="row">10</th><td class="num">0,1371</td><td class="num">1,1517</td><td class="num">0,0480</td><td class="num">0,0446</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note">
+          <p>Đỉnh 9 là người có nhiều bạn nhất, đứng trên nhiều đường ngắn nhất, nhận Katz và PageRank cao nhất. Điểm PageRank được đẩy thêm vì đỉnh 10 chỉ có một cửa để đổ trọng số vào, và cửa đó là 9.</p>
+          <p>Đỉnh 7 là người ở giữa. Tổng khoảng cách của 7 nhỏ nhất nên closeness cao nhất. Hàng xóm của 7 lại toàn đỉnh quan trọng, nên eigenvector và HITS cũng đặt 7 lên đầu.</p>
+          <p>Đỉnh 1 và đỉnh 10 đều ở rìa theo betweenness. Khác nhau ở chỗ 1 còn nằm trong một tam giác với 2 và 3, nên các độ đo phổ của 1 cao hơn 10. Đỉnh 10 thấp nhất ở mọi cột trừ betweenness, nơi nó hòa với 1 ở mức 0.</p>
+          <p>Bài học của bảng: chọn độ đo theo câu hỏi. Hỏi ai có nhiều liên hệ trực tiếp, lấy Degree (bậc). Hỏi ai nằm gần cả nhóm, lấy Closeness (gần) hoặc Harmonic (điều hòa). Hỏi ai kiểm soát lối đi giữa những người khác, lấy Betweenness (trung gian). Hỏi ai được những người quan trọng kết nối tới, lấy Eigenvector (vector riêng), Katz (bước đi chiết khấu), PageRank (hạng trang) hoặc HITS (hub và authority).</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p>Buổi 2 · Phân tích mạng xã hội. Phần A diễn giải Das, Samanta và Pal (2018), <cite>Social Network Analysis and Mining</cite> 8:13. Phần B là bài tập tính tay trên đồ thị 10 đỉnh, 13 cạnh.</p>
+    </div>
+  </footer>
+</body>
+</html>

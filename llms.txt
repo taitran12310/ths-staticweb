@@ -9,7 +9,7 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 - [Giải thuật nâng cao](https://taitran12310.github.io/ths-staticweb/giai-thuat-nang-cao/): Bài tập, slide và đồ án môn học — Học kỳ 1 · Năm học 2026–2027 — 2 tài liệu
 - [Công nghệ phần mềm tiên tiến](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/): Đề án và bài tập môn học — Học kỳ 1 · Năm học 2026–2027 — 6 tài liệu
 - [Phương pháp nghiên cứu khoa học](https://taitran12310.github.io/ths-staticweb/phuong-phap-nghien-cuu-khoa-hoc/): Đề cương, đề án và ghi chú buổi học — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
-- [Phân tích mạng xã hội](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 4 tài liệu
+- [Phân tích mạng xã hội](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 5 tài liệu
 - [Thị giác máy tính và nhận dạng mẫu](https://taitran12310.github.io/ths-staticweb/thi-giac-may-tinh-va-nhan-dang-mau/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
 - [Triết học](https://taitran12310.github.io/ths-staticweb/triet-hoc/): Ghi chú buổi học và tài liệu tham khảo — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
 - [Toán cho tin học](https://taitran12310.github.io/ths-staticweb/toan-cho-tin-hoc/): Bài tập và tài liệu môn học — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
@@ -25,12 +25,13 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 - [ERD Studio — Buổi 9](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/BaiTapBuoi9_ERD-viewer.html): BaiTapBuoi9_ERD-viewer.html, cập nhật 31/10/2026, 180.3 KB
 - [Đề án — File ngữ cảnh cho coding agent](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DeAn_Plan.html): DeAn_Plan.html, cập nhật 30/10/2026, 60.5 KB
 - [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver1.html): TieuLuan_ver1.html, cập nhật 23/10/2026, 209.6 KB
-- [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver2.html): TieuLuan_ver2.html, cập nhật 23/10/2026, 208.8 KB
+- [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver2.html): TieuLuan_ver2.html, cập nhật 31/10/2026, 213.8 KB
 - [Đọc hiểu tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuanDocHieu.html): TieuLuanDocHieu.html, cập nhật 21/10/2026, 84.5 KB
 
 ## Phân tích mạng xã hội
 
 - [LLM × GNN trong Phân tích Mạng Xã hội — Đề xuất đồ án](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/NoiDung_BT_Buoi1_Bai1.html): NoiDung_BT_Buoi1_Bai1.html, cập nhật 11/10/2026, 38.2 KB
+- [Buổi 2 — Độ đo trung tâm: đọc hiểu và bài tập](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/NoiDung_BT_Buoi2.html): NoiDung_BT_Buoi2.html, cập nhật 31/10/2026, 119.7 KB
 - [LLM × GNN trong Phân tích Mạng Xã hội — Buổi 1](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Slide_BT_Buoi1_Bai1.html): Slide_BT_Buoi1_Bai1.html, cập nhật 11/10/2026, 94.2 KB
 - [Bài 2 — Thuật toán PageRank · SNA Buổi 1](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Slide_BT_Buoi1_Bai2_PageRank.html): Slide_BT_Buoi1_Bai2_PageRank.html, cập nhật 11/10/2026, 30.4 KB
 - [Bài 3 — Misinformation · Disinformation · Rumor · Fake News](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Slide_BT_Buoi1_Bai3.html): Slide_BT_Buoi1_Bai3.html, cập nhật 11/10/2026, 34.0 KB
