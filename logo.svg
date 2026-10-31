@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ThS HUIT">
+  <defs>
+    <linearGradient id="bg" x1="6" y1="58" x2="58" y2="6" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset=".4" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <g fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- mortarboard diamond -->
+    <path d="M12 29.5 32 18l20 11.5L32 41 12 29.5Z"/>
+    <!-- head band -->
+    <path d="M21 34.2v6.8c0 2.2 4.8 4.5 11 4.5s11-2.3 11-4.5v-6.8"/>
+    <!-- tassel -->
+    <path d="M52 29.5V42.5"/>
+  </g>
+</svg>

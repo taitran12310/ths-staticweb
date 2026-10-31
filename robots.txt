@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://taitran12310.github.io/ths-staticweb/sitemap.xml

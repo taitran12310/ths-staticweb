@@ -8,20 +8,33 @@ Site HTML tĩnh deploy lên **GitHub Pages**.
 
 ```
 ths-staticweb/
-├── index.html                          # Trang menu (load từ JSON)
-├── data/menu.json                      # Dữ liệu menu
-├── js/menu.js                          # Render menu từ JSON
-├── 404.html                            # Trang lỗi tùy chỉnh
-├── css/style.css
-├── scripts/generate_listings.py        # Sinh danh sách file HTML
-├── .github/workflows/deploy-pages.yml  # Auto deploy Pages
-├── giai-thuat-nang-cao/index.html
-├── cong-nghe-phan-mem-tien-tien/index.html
-├── phuong-phap-nghien-cuu-khoa-hoc/index.html
-└── phan-tich-mang-xa-hoi/index.html
+├── data/menu.json                      # Nguồn dữ liệu duy nhất (sửa file này)
+├── scripts/generate_listings.py        # Sinh toàn bộ trang index + file SEO bên dưới
+├── index.html                          # (sinh tự động) Trang chủ
+├── <môn>/index.html                    # (sinh tự động) Danh sách tài liệu từng môn
+├── sitemap.xml · robots.txt · llms.txt # (sinh tự động) SEO / GEO
+├── 404.html                            # Trang lỗi (viết tay)
+├── css/site.css                        # Giao diện clay pastel (light/dark)
+├── css/style.css                       # Style cũ, vẫn dùng cho DeAn_Plan.html
+├── js/site.js                          # Đổi theme + lọc tìm kiếm (không bắt buộc để xem nội dung)
+├── assets/                             # Ảnh WebP: hero, mascot, icon môn, og-cover.jpg
+├── favicon.svg / favicon.png / apple-touch-icon.png / logo.*
+└── .github/workflows/deploy-pages.yml  # Auto deploy Pages
 ```
 
-Menu ở `index.html` load từ `data/menu.json`. Link tới `folder/` — GitHub Pages mặc định mở `index.html`.
+Mọi trang index được render sẵn thành HTML tĩnh từ `data/menu.json`, nên mở được cả `file://` lẫn HTTP, và công cụ tìm kiếm / AI crawler đọc được nội dung mà không cần chạy JS. Link nội bộ trỏ thẳng tới `.../index.html`, còn `canonical` dùng URL dạng thư mục.
+
+### SEO / GEO
+
+- Mỗi trang có `title`, `description`, `canonical`, Open Graph (`assets/og-cover.jpg`) và JSON-LD (`WebSite`, `CollectionPage`, `Course`, `LearningResource`, `BreadcrumbList`).
+- `sitemap.xml` có `lastmod` lấy từ lịch sử commit. `llms.txt` tóm tắt site dạng Markdown cho AI search.
+- Đổi domain: sửa `siteUrl` trong `data/menu.json`.
+- Site dạng project page (`/ths-staticweb/`) nên `robots.txt` không nằm ở gốc domain — hãy khai báo `sitemap.xml` trong Google Search Console.
+
+### Hiệu năng
+
+- Ảnh WebP có sẵn `width`/`height` (không CLS); ảnh hero được preload với `fetchpriority="high"`, ảnh dưới màn hình `loading="lazy"`.
+- Một font biến thiên (Nunito) nạp không chặn render; JS duy nhất là `site.js` (`defer`, ~3 KB).
 
 ## Deploy GitHub Pages
 
@@ -46,7 +59,7 @@ Workflow: `.github/workflows/deploy-pages.yml`
 
 ## Xem local
 
-Không mở bằng `file://`. Chạy:
+Có thể mở trực tiếp `index.html` bằng trình duyệt (`file://`), hoặc chạy HTTP server:
 
 ```bash
 cd ths-staticweb
@@ -75,9 +88,15 @@ python3 scripts/generate_listings.py
   "id": "ten-muc",
   "title": "Tên mục",
   "description": "Mô tả ngắn",
-  "path": "ten-muc/"
+  "path": "ten-muc/",
+  "icon": "folder",
+  "term": "Học kỳ 1",
+  "schoolYear": "2026–2027"
 }
 ```
+
+`icon` nhận một trong: `algorithm`, `code`, `research`, `network`, `folder`.  
+`term` / `schoolYear` gắn theo từng môn — học kỳ sau thêm môn mới với giá trị khác, không sửa chung toàn site.
 
 4. Chạy `python3 scripts/generate_listings.py`.
 

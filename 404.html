@@ -1,207 +1,86 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Không tìm thấy trang — ThS HUIT.">
-  <meta name="robots" content="noindex">
-  <title>404 — Không tìm thấy | ThS HUIT</title>
-  <link id="favicon" rel="icon" href="favicon.svg" type="image/svg+xml">
-  <style>
-    :root {
-      --bg: #0f1419;
-      --bg-elevated: #1a222c;
-      --surface: #243040;
-      --text: #e8eef4;
-      --text-muted: #93a4b5;
-      --accent: #3d9bfd;
-      --accent-soft: rgba(61, 155, 253, 0.15);
-      --border: rgba(232, 238, 244, 0.1);
-      --radius: 12px;
-      --font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 — Không tìm thấy trang | ThS HUIT</title>
+<meta name="description" content="Không tìm thấy trang — ThS HUIT.">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("ths-theme"); } catch (e) {}
+    if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
+    // GitHub Pages trả trang này cho mọi đường dẫn sai → asset phải đi theo gốc site
+    var root = "/";
+    if (/\.github\.io$/i.test(location.hostname)) {
+      var parts = location.pathname.split("/").filter(Boolean);
+      if (parts.length) root = "/" + parts[0] + "/";
     }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font);
-      color: var(--text);
-      background:
-        radial-gradient(ellipse 80% 50% at 10% -10%, #1a3a5c 0%, transparent 55%),
-        radial-gradient(ellipse 60% 40% at 100% 80%, #1a2f45 0%, transparent 45%),
-        var(--bg);
-      line-height: 1.6;
-      display: grid;
-      place-items: center;
-      padding: 2rem 1rem;
-    }
-
-    .skip-link {
-      position: absolute;
-      left: -9999px;
-      top: 0;
-      background: var(--accent);
-      color: #fff;
-      padding: 0.5rem 1rem;
-      z-index: 100;
-    }
-
-    .skip-link:focus {
-      left: 1rem;
-      top: 1rem;
-    }
-
-    .error-card {
-      width: min(520px, 100%);
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2.25rem 1.75rem 1.75rem;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-    }
-
-    .brand {
-      display: inline-block;
-      font-size: 0.8rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 1.25rem;
-    }
-
-    .error-code {
-      margin: 0;
-      font-size: clamp(4rem, 18vw, 6rem);
-      font-weight: 700;
-      letter-spacing: -0.05em;
-      line-height: 0.9;
-      background: linear-gradient(135deg, #3d9bfd, #7eb8ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    h1 {
-      margin: 1rem 0 0.5rem;
-      font-size: clamp(1.4rem, 4vw, 1.75rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .lead {
-      margin: 0 auto 1.25rem;
-      color: var(--text-muted);
-      max-width: 28rem;
-    }
-
-    .error-path {
-      margin: 0 0 1.5rem;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.85rem;
-      word-break: break-all;
-      color: var(--text-muted);
-      text-align: left;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      justify-content: center;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      padding: 0.75rem 1.2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    }
-
-    .btn:hover {
-      text-decoration: none;
-      transform: translateY(-1px);
-    }
-
-    .btn--primary {
-      background: var(--accent);
-      color: #041018;
-      border: 1px solid transparent;
-    }
-
-    .btn--primary:hover {
-      background: #5aadff;
-    }
-
-    .btn--ghost {
-      background: var(--accent-soft);
-      color: var(--accent);
-      border: 1px solid rgba(61, 155, 253, 0.35);
-    }
-
-    .btn--ghost:hover {
-      background: rgba(61, 155, 253, 0.25);
-    }
-
-    .foot {
-      margin: 1.75rem 0 0;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-  </style>
+    window.__THS_ROOT__ = root;
+    document.write(
+      '<link rel="icon" href="' + root + 'favicon.svg" type="image/svg+xml">' +
+      '<link rel="apple-touch-icon" href="' + root + 'apple-touch-icon.png">' +
+      '<link rel="stylesheet" href="' + root + 'css/site.css">' +
+      '<script src="' + root + 'js/site.js" defer><\/script>'
+    );
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500..800&amp;display=swap" media="print" onload="this.media='all'">
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+</svg>
+<a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
 
-  <main id="main-content" class="error-card">
-    <span class="brand">ThS HUIT</span>
+<div class="error-top">
+  <button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-label="Đổi giao diện sáng/tối">
+    <svg class="icon i-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+    <svg class="icon i-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+  </button>
+</div>
+
+<main id="main-content" class="error-page">
+  <div class="error-card">
+    <img class="owl" data-root-src="assets/owl.webp" src="assets/owl.webp" width="120" height="120" alt="" decoding="async">
     <p class="error-code" aria-hidden="true">404</p>
     <h1>Không tìm thấy trang</h1>
-    <p class="lead">Đường dẫn bạn vừa mở không tồn tại hoặc đã bị xóa.</p>
+    <p>Đường dẫn bạn vừa mở không tồn tại hoặc đã bị xoá.</p>
     <p id="error-path" class="error-path" hidden></p>
-    <div class="actions">
-      <a id="home-link" class="btn btn--primary" href="./">← Về trang menu</a>
+    <div class="error-actions">
+      <a class="btn btn--coral" data-root-link href="./"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-home"/></svg>Về trang chủ</a>
+      <button type="button" class="btn btn--soft" id="go-back"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-back"/></svg>Quay lại</button>
     </div>
-    <p class="foot">ThS HUIT · Lỗi 404</p>
-  </main>
+  </div>
+</main>
 
-  <script>
-    (function () {
-      var root = "/";
-      if (/\.github\.io$/i.test(location.hostname)) {
-        var parts = location.pathname.split("/").filter(Boolean);
-        if (parts.length) root = "/" + parts[0] + "/";
-      }
+<script>
+  (function () {
+    var root = window.__THS_ROOT__ || "/";
+    document.querySelectorAll("[data-root-link]").forEach(function (a) { a.setAttribute("href", root); });
+    document.querySelectorAll("[data-root-src]").forEach(function (el) { el.setAttribute("src", root + el.getAttribute("data-root-src")); });
 
-      var home = document.getElementById("home-link");
-      if (home) home.setAttribute("href", root);
+    var back = document.getElementById("go-back");
+    if (back) {
+      if (history.length > 1) back.addEventListener("click", function () { history.back(); });
+      else back.hidden = true;
+    }
 
-      var favicon = document.getElementById("favicon");
-      if (favicon) favicon.setAttribute("href", root + "favicon.svg");
-
-      var pathEl = document.getElementById("error-path");
-      if (pathEl) {
-        pathEl.hidden = false;
-        pathEl.textContent = "Đường dẫn: " + location.pathname;
-      }
-    })();
-  </script>
+    var pathEl = document.getElementById("error-path");
+    if (pathEl) {
+      pathEl.hidden = false;
+      pathEl.textContent = "Đường dẫn: " + location.pathname;
+    }
+  })();
+</script>
 </body>
 </html>
