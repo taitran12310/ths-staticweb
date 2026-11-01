@@ -30,7 +30,7 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 
 ## Phân tích mạng xã hội
 
-- [Buổi 2 — Độ đo trung tâm: đọc hiểu và bài tập](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/NoiDung_BT_Buoi2.html): NoiDung_BT_Buoi2.html, cập nhật 31/10/2026, 119.7 KB
+- [Buổi 3 — Độ đo trung tâm: đọc hiểu và bài tập](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/NoiDung_BT_Buoi3.html): NoiDung_BT_Buoi3.html, cập nhật 01/11/2026, 137.7 KB
 - [LLM × GNN trong Phân tích Mạng Xã hội — Đề xuất đồ án](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/NoiDung_BT_Buoi1_Bai1.html): NoiDung_BT_Buoi1_Bai1.html, cập nhật 11/10/2026, 38.2 KB
 - [LLM × GNN trong Phân tích Mạng Xã hội — Buổi 1](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Slide_BT_Buoi1_Bai1.html): Slide_BT_Buoi1_Bai1.html, cập nhật 11/10/2026, 94.2 KB
 - [Bài 2 — Thuật toán PageRank · SNA Buổi 1](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Slide_BT_Buoi1_Bai2_PageRank.html): Slide_BT_Buoi1_Bai2_PageRank.html, cập nhật 11/10/2026, 30.4 KB
