@@ -611,6 +611,122 @@ cite {
   font-style: italic;
 }
 
+/* ---------- Power iteration demo ---------- */
+
+.demo {
+  margin: 1.2rem 0;
+  padding: 1rem 1.15rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.demo__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.demo__code,
+.demo__log {
+  margin: 0.8rem 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  overflow: auto;
+}
+
+.demo__code {
+  max-height: 26rem;
+  background: #1d1b16;
+  color: #f3eee4;
+}
+
+.demo__code code {
+  font: inherit;
+  white-space: pre;
+}
+
+.demo__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  background: var(--teal);
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.btn:hover {
+  background: #0a3a47;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--teal);
+}
+
+.btn--ghost:hover {
+  background: var(--teal-soft);
+}
+
+.demo__status {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.demo__log {
+  max-height: 30rem;
+  background: var(--paper);
+  white-space: pre-wrap;
+}
+
+.log-entry {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--line-strong);
+}
+
+.log-entry:last-child {
+  border-bottom: 0;
+}
+
+.log-entry__title {
+  margin: 0 0 0.2rem;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.log-entry--done .log-entry__title {
+  color: var(--clay);
+}
+
+.log-entry p {
+  margin: 0;
+}
+
+.log-entry p:empty {
+  height: 0.7em;
+}
+
 /* ---------- Tables ---------- */
 
 .table-wrap {
@@ -2072,15 +2188,68 @@ footer {
         <div class="formula">
           <p>√(3·2² + 5·3² + 4² + 1²) = √(12 + 45 + 16 + 1) = √74 ≈ 8,6023</p>
         </div>
-        <p>Vectơ sau vòng 1 là bậc chia cho √74: khoảng (0,2325; 0,3487; 0,3487; 0,3487; 0,3487; 0,2325; 0,3487; 0,2325; 0,4650; 0,1162). Ước lượng trị riêng ở vòng này là độ dài của <var>A</var> nhân vectơ vừa được, khoảng 2,78. Các vòng sau vẫn là phép cộng hàng xóm rồi chuẩn hóa. Dãy hội tụ về trị riêng</p>
+        <p>Vectơ sau vòng 1 là bậc chia cho √74: 2/8,6023 = 0,2325; 3/8,6023 = 0,3487; 4/8,6023 = 0,4650; 1/8,6023 = 0,1162. Ta được <var>x</var><sup>(1)</sup> ≈ (0,2325; 0,3487; 0,3487; 0,3487; 0,3487; 0,2325; 0,3487; 0,2325; 0,4650; 0,1162), độ dài bằng 1.</p>
+        <p>Cách đọc <var>λ</var> ở mỗi vòng: <var>x</var> có độ dài 1, nên độ dài của <var>A x</var> cho biết vectơ phình ra bao nhiêu lần sau một lần cộng hàng xóm. Khi <var>x</var> đã là vectơ riêng, số đó đúng bằng <var>λ</var>.</p>
+        <div class="formula">
+          <p><var>λ</var> ≈ ‖<var>A x</var><sup>(<var>k</var>)</sup>‖ = độ dài vectơ mới / độ dài vectơ cũ</p>
+        </div>
+        <p>Mẹo tính tay: phép chia cho độ dài chỉ đổi tỉ lệ, không đổi hình dạng vectơ. Vì vậy cứ cộng hàng xóm trên số nguyên, gọi kết quả là <var>w<sub>k</sub></var> = <var>A<sup>k</sup></var><strong>1</strong>, rồi mới chia. Đây cũng là các cột <var>w<sub>k</sub></var> trong bảng Katz bên dưới.</p>
+        <p>Vòng 2: mỗi đỉnh cộng bậc của hàng xóm. Đỉnh 1: 3 + 3 = 6. Đỉnh 2: 2 + 3 + 3 = 8; đỉnh 3, 4, 5, 9 cũng ra 8. Đỉnh 6: 3 + 4 = 7; đỉnh 8 cũng ra 7. Đỉnh 7: 3 + 3 + 4 = 10. Đỉnh 10: 4. Vậy <var>w</var><sub>2</sub> = (6, 8, 8, 8, 8, 7, 10, 7, 8, 4).</p>
+        <div class="formula">
+          <p>‖<var>w</var><sub>2</sub>‖ = √(6² + 5·8² + 2·7² + 10² + 4²) = √(36 + 320 + 98 + 100 + 16) = √570 ≈ 23,875</p>
+          <p><var>λ</var> ≈ √570 / √74 = 23,875 / 8,6023 ≈ 2,7754</p>
+        </div>
+        <p>Chia <var>w</var><sub>2</sub> cho 23,875 ra <var>x</var><sup>(2)</sup> ≈ (0,2513; 0,3351; 0,3351; 0,3351; 0,3351; 0,2932; 0,4189; 0,2932; 0,3351; 0,1675).</p>
+        <p>Vòng 3: cộng <var>w</var><sub>2</sub> của hàng xóm. Đỉnh 9: 7 + 10 + 7 + 4 = 28. Đỉnh 4: 8 + 7 + 10 = 25. Được <var>w</var><sub>3</sub> = (16, 22, 22, 25, 25, 16, 24, 16, 28, 8).</p>
+        <div class="formula">
+          <p>‖<var>w</var><sub>3</sub>‖ = √(3·16² + 2·22² + 2·25² + 24² + 28² + 8²) = √(768 + 968 + 1250 + 576 + 784 + 64) = √4410 ≈ 66,408</p>
+          <p><var>λ</var> ≈ 66,408 / 23,875 ≈ 2,7815</p>
+        </div>
+        <p>Vòng 4: <var>w</var><sub>4</sub> = (44, 63, 63, 62, 62, 53, 78, 53, 64, 28), ‖<var>w</var><sub>4</sub>‖ = √34144 ≈ 184,78, nên <var>λ</var> ≈ 184,78 / 66,408 ≈ 2,7825.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Ước lượng trị riêng qua các vòng lặp lũy thừa</caption>
+            <thead>
+              <tr>
+                <th scope="col">Vòng <var>k</var></th>
+                <th class="num" scope="col">‖<var>w<sub>k</sub></var>‖</th>
+                <th class="num" scope="col"><var>λ</var> ≈ ‖<var>w<sub>k</sub></var>‖ / ‖<var>w<sub>k−1</sub></var>‖</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">1</th><td class="num">√74 ≈ 8,6023</td><td class="num">—</td></tr>
+              <tr><th scope="row">2</th><td class="num">√570 ≈ 23,875</td><td class="num">2,7754</td></tr>
+              <tr><th scope="row">3</th><td class="num">√4410 ≈ 66,408</td><td class="num">2,7815</td></tr>
+              <tr><th scope="row">4</th><td class="num">√34144 ≈ 184,78</td><td class="num">2,7825</td></tr>
+              <tr><th scope="row">10</th><td class="num"></td><td class="num">2,7832</td></tr>
+              <tr><th scope="row">20</th><td class="num"></td><td class="num">2,7834</td></tr>
+              <tr><th scope="row">39</th><td class="num"></td><td class="num">2,7835</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Dãy hội tụ về trị riêng</p>
         <div class="formula">
           <p><var>λ</var><sub>1</sub> ≈ 2,7835</p>
+        </div>
+        <p>Vì sao cách này ra trị riêng <em>lớn nhất</em>: vectơ toàn 1 là tổng của nhiều vectơ riêng. Mỗi lần nhân <var>A</var>, phần ứng với trị riêng <var>λ<sub>i</sub></var> bị nhân thêm <var>λ<sub>i</sub></var>. Sau <var>k</var> vòng, phần ứng với <var>λ</var><sub>1</sub> lớn lên theo 2,7835<sup><var>k</var></sup>, nhanh hơn mọi phần khác, nên lấn át dần.</p>
+        <p><var>λ</var> ổn định nhanh, nhưng vectơ hội tụ chậm và dao động. Ở vòng 2 đỉnh 7 cao nhất (0,4189), sang vòng 3 đỉnh 9 lại cao nhất (0,4216). Đồ thị này còn trị riêng −2,6053, trị tuyệt đối gần 2,7835. Phần ứng với nó chỉ giảm theo tỉ lệ 2,6053 / 2,7835 ≈ 0,94 mỗi vòng và đổi dấu sau mỗi vòng. Cần khoảng 100 vòng thì bốn chữ số thập phân mới đứng yên như bảng dưới, nên trên giấy chỉ kiểm tra kết quả cuối.</p>
+        <div class="demo" id="power-demo">
+          <p class="demo__title">Chạy thử lặp lũy thừa bằng JavaScript</p>
+          <p>Đoạn mã dưới đây chính là đoạn mà các nút gọi tới. “Chạy 1 vòng” ghi đủ ba bước của một vòng: cộng hàng xóm, đo độ dài, chia cho độ dài. “Chạy đến hội tụ” lặp tới khi mọi thành phần của vectơ đổi ít hơn 0,0001, ghi mỗi vòng một dòng, rồi kiểm tra <var>λ x<sub>i</sub></var> với tổng hàng xóm ở từng đỉnh.</p>
+          <pre class="demo__code"><code></code></pre>
+          <div class="demo__controls">
+            <button type="button" class="btn" data-action="step">Chạy 1 vòng</button>
+            <button type="button" class="btn" data-action="converge">Chạy đến hội tụ</button>
+            <button type="button" class="btn btn--ghost" data-action="reset">Đặt lại</button>
+            <span class="demo__status" aria-live="polite"></span>
+          </div>
+          <div class="demo__log" role="log" aria-live="polite" tabindex="0"></div>
         </div>
         <p>Kiểm tra trên giấy với vectơ làm tròn 4 chữ số: nhân <var>λ</var> với điểm của đỉnh phải gần tổng điểm các hàng xóm. Đỉnh 1 chỉ kề 2 và 3:</p>
         <div class="formula">
           <p>2,7835 · 0,2412 ≈ 0,6714 &nbsp; và &nbsp; 0,3357 + 0,3357 = 0,6714</p>
         </div>
-        <p>Đỉnh 10 chỉ kề 9, nên <var>λ x</var><sub>10</sub> phải bằng <var>x</var><sub>9</sub>: 2,7835 · 0,1371 ≈ 0,3816.</p>
+        <p>Đỉnh 10 chỉ kề 9, nên <var>λ x</var><sub>10</sub> phải bằng <var>x</var><sub>9</sub>: 2,7835 · 0,1371 ≈ 0,3816. Đỉnh 7 kề 4, 5, 9: 0,3576 + 0,3576 + 0,3816 = 1,0968, và 2,7835 · 0,3940 ≈ 1,0967. Mọi dòng đều khớp thì <var>λ</var> đúng là trị riêng và <var>x</var> đúng là vectơ riêng.</p>
         <div class="table-wrap">
           <table>
             <caption>Eigenvector (vector riêng), chuẩn Euclid</caption>
@@ -2375,6 +2544,198 @@ footer {
   <button class="to-top" type="button" id="to-top" aria-label="Lên đầu trang">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>
   </button>
+
+  <script id="power-iteration-src">
+// Danh sách cạnh của đồ thị 10 đỉnh, 13 cạnh
+const EDGES = [
+  [1, 2], [1, 3], [2, 3], [2, 4], [3, 5], [4, 6], [4, 7],
+  [5, 7], [5, 8], [6, 9], [7, 9], [8, 9], [9, 10],
+];
+const N = 10;
+
+// neighbors[i] là danh sách hàng xóm của đỉnh i (đỉnh đánh số 1..10, bỏ ô 0)
+function buildNeighbors(edges, n) {
+  const neighbors = Array.from({ length: n + 1 }, () => []);
+  for (const [a, b] of edges) {
+    neighbors[a].push(b);
+    neighbors[b].push(a);
+  }
+  return neighbors;
+}
+
+// Nhân A với x: điểm mới của đỉnh i = tổng điểm cũ của các hàng xóm
+function multiplyA(neighbors, x) {
+  return x.map((_, i) => neighbors[i].reduce((sum, j) => sum + x[j], 0));
+}
+
+// Độ dài Euclid: căn bậc hai của tổng bình phương
+function norm(v) {
+  return Math.sqrt(v.reduce((sum, value) => sum + value * value, 0));
+}
+
+// Một vòng lặp lũy thừa: y = A x, rồi chia y cho độ dài của nó.
+// Khi x đã có độ dài 1, độ dài của y chính là ước lượng của λ.
+function powerStep(neighbors, x) {
+  const y = multiplyA(neighbors, x);
+  const length = norm(y);
+  const next = y.map((value) => value / length);
+  return { y, length, next };
+}
+
+// Vectơ xuất phát: toàn 1
+function startVector(n) {
+  return Array.from({ length: n + 1 }, (_, i) => (i === 0 ? 0 : 1));
+}
+  </script>
+
+  <script>
+    (() => {
+      const root = document.getElementById("power-demo");
+      if (!root) return;
+
+      const TOLERANCE = 1e-4;
+      const MAX_ROUNDS = 500;
+
+      root.querySelector(".demo__code code").textContent =
+        document.getElementById("power-iteration-src").textContent.trim();
+
+      const logEl = root.querySelector(".demo__log");
+      const statusEl = root.querySelector(".demo__status");
+      const neighbors = buildNeighbors(EDGES, N);
+      const vertices = Array.from({ length: N }, (_, i) => i + 1);
+
+      const fmt = (value, digits = 4) =>
+        value.toLocaleString("vi-VN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+      const fmtVec = (x) => `(${vertices.map((i) => fmt(x[i])).join("; ")})`;
+      const topVertex = (x) => vertices.reduce((best, i) => (x[i] > x[best] ? i : best), 1);
+
+      let state;
+
+      const addEntry = (title, lines, variant = "") => {
+        const entry = document.createElement("div");
+        entry.className = `log-entry${variant ? ` log-entry--${variant}` : ""}`;
+        const heading = document.createElement("p");
+        heading.className = "log-entry__title";
+        heading.textContent = title;
+        entry.append(heading);
+        for (const line of lines) {
+          const p = document.createElement("p");
+          p.textContent = line;
+          entry.append(p);
+        }
+        logEl.append(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+      };
+
+      const updateStatus = () => {
+        statusEl.textContent = state.k === 0
+          ? "Chưa chạy vòng nào"
+          : `Đã chạy ${state.k} vòng${state.k > 1 ? ` · λ ≈ ${fmt(state.lambda)}` : ""}`;
+      };
+
+      const advance = () => {
+        const prev = state.x;
+        const result = powerStep(neighbors, prev);
+        state.k += 1;
+        state.x = result.next;
+        const prevLambda = state.lambda;
+        state.lambda = result.length;
+        const change = Math.max(...vertices.map((i) => Math.abs(result.next[i] - prev[i])));
+        return { prev, ...result, prevLambda, change };
+      };
+
+      const stepDetailed = () => {
+        const { prev, y, length, next, prevLambda } = advance();
+        const k = state.k;
+        const sumSquares = vertices.reduce((sum, i) => sum + y[i] * y[i], 0);
+        const lines = ["Bước 1. Nhân A: mỗi đỉnh lấy tổng điểm của hàng xóm ở vectơ cũ."];
+        for (const i of vertices) {
+          const names = neighbors[i].map((j) => `x${j}`).join(" + ");
+          const values = neighbors[i].map((j) => fmt(prev[j])).join(" + ");
+          const expanded = neighbors[i].length > 1 ? `${values} = ` : "";
+          lines.push(`   Đỉnh ${String(i).padStart(2)}: ${names} = ${expanded}${fmt(y[i])}`);
+        }
+        lines.push("");
+        lines.push("Bước 2. Đo độ dài vectơ vừa được (căn của tổng bình phương):");
+        lines.push(`   ‖A x‖ = √${fmt(sumSquares)} ≈ ${fmt(length)}`);
+        if (k === 1) {
+          lines.push("   Vectơ xuất phát toàn 1 có độ dài √10, chưa phải 1, nên vòng này chưa đọc λ.");
+          lines.push("   √74 ≈ 8,6023 khớp với phép tính tay ở trên.");
+        } else {
+          lines.push(`   Vectơ cũ có độ dài 1, nên λ ≈ ${fmt(length)}.`);
+          if (k > 2) lines.push(`   So với vòng trước (${fmt(prevLambda)}), λ đổi ${fmt(Math.abs(length - prevLambda), 6)}.`);
+        }
+        lines.push("");
+        lines.push(`Bước 3. Chuẩn hóa: chia từng thành phần cho ${fmt(length)} để vectơ có độ dài 1.`);
+        lines.push(`   x(${k}) = ${fmtVec(next)}`);
+        const top = topVertex(next);
+        const prevTop = k > 1 ? topVertex(prev) : null;
+        let topNote = `   Đỉnh cao nhất lúc này: đỉnh ${top} (${fmt(next[top])}).`;
+        if (prevTop && prevTop !== top) topNote += ` Vòng trước là đỉnh ${prevTop}: vectơ còn đang dao động.`;
+        lines.push(topNote);
+        addEntry(`Vòng ${k}`, lines);
+        updateStatus();
+      };
+
+      const runToConvergence = () => {
+        const lines = [];
+        let change = Infinity;
+        const startK = state.k;
+        while (state.k < MAX_ROUNDS) {
+          const result = advance();
+          change = result.change;
+          const lambdaText = state.k > 1 ? `λ ≈ ${fmt(state.lambda)}` : "λ: chưa đọc";
+          lines.push(`Vòng ${String(state.k).padStart(3)}: ${lambdaText} · đổi tối đa ${fmt(change, 6)} · cao nhất: đỉnh ${topVertex(state.x)}`);
+          if (state.k > 1 && change < TOLERANCE) break;
+        }
+        addEntry(`Lặp từ vòng ${startK + 1} đến vòng ${state.k}`, [
+          "Mỗi dòng: λ ước lượng, mức đổi lớn nhất của một thành phần so với vòng trước, và đỉnh đang có điểm cao nhất.",
+          ...lines,
+        ]);
+
+        const x = state.x;
+        const lambda = state.lambda;
+        const ax = multiplyA(neighbors, x);
+        const checks = vertices.map((i) => {
+          const names = neighbors[i].map((j) => `x${j}`).join(" + ");
+          return `   Đỉnh ${String(i).padStart(2)}: λ·x${i} = ${fmt(lambda)} · ${fmt(x[i])} = ${fmt(lambda * x[i])}   |   ${names} = ${fmt(ax[i])}`;
+        });
+        const stopReason = change < TOLERANCE
+          ? `Dừng ở vòng ${state.k} vì không thành phần nào đổi quá ${fmt(TOLERANCE)}.`
+          : `Dừng ở vòng ${state.k} vì chạm giới hạn ${MAX_ROUNDS} vòng.`;
+        addEntry("Kết quả", [
+          stopReason,
+          `λ1 ≈ ${fmt(lambda)}`,
+          `x  ≈ ${fmtVec(x)}`,
+          `Đỉnh cao nhất: đỉnh ${topVertex(x)}.`,
+          "",
+          "Kiểm tra A x = λ x: hai cột phải gần bằng nhau ở mọi đỉnh.",
+          ...checks,
+          "",
+          "Vectơ hội tụ chậm vì đồ thị còn trị riêng −2,6053: phần ứng với nó chỉ giảm khoảng 6% mỗi vòng và đổi dấu sau mỗi vòng.",
+        ], "done");
+        updateStatus();
+      };
+
+      const reset = () => {
+        state = { k: 0, x: startVector(N), lambda: NaN };
+        logEl.replaceChildren();
+        addEntry("Bắt đầu", [
+          `x(0) = ${fmtVec(state.x)}`,
+          "Bấm “Chạy 1 vòng” để xem từng bước, hoặc “Chạy đến hội tụ” để chạy tới khi vectơ ổn định.",
+        ]);
+        updateStatus();
+      };
+
+      const actions = { step: stepDetailed, converge: runToConvergence, reset };
+      root.querySelector(".demo__controls").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-action]");
+        if (button) actions[button.dataset.action]();
+      });
+
+      reset();
+    })();
+  </script>
 
   <script>
     (() => {
