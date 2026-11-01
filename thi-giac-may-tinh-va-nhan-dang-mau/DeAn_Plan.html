@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Đề án môn học: phát hiện 29 điểm mốc giải phẫu trên phim X-quang sọ nghiêng (Aariz) bằng YOLO11-Pose, so sánh với U-Net heatmap và ResNet-50 regression; chạy được trên máy tính phổ thông.">
+  <meta name="color-scheme" content="light dark">
+  <title>Đề án — Điểm mốc sọ nghiêng với YOLO-Pose</title>
+  <script>(function(){var d=document.documentElement,t=null;d.classList.add("js");try{t=localStorage.getItem("ths-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t})();</script>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Crimson+Pro:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Tokens (Swiss Modernism · Research Lab palette) ---------- */
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --fg: #0f172a;
+      --fg-muted: #475569;
+      --border: #cbd5e1;
+      --border-soft: #e2e8f0;
+      --rule: #0f172a;
+      --primary: #1e3a5f;
+      --link: #1d4ed8;
+      --accent: #a16207;
+      --focus: #a16207;
+      --code-bg: #f1f5f9;
+      --code-fg: #1e293b;
+
+      --c-prep: #1d4ed8;
+      --c-train: #0f766e;
+      --c-eval: #a16207;
+      --c-write: #4338ca;
+      --c-risk: #b91c1c;
+      --t-prep: #dbeafe;
+      --t-train: #ccfbf1;
+      --t-eval: #fef3c7;
+      --t-write: #e0e7ff;
+      --t-risk: #fee2e2;
+
+      --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-head: "Crimson Pro", Georgia, "Times New Roman", serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+      --radius: 8px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --dur: 200ms;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --surface: #111827;
+      --surface-2: #1e293b;
+      --fg: #f8fafc;
+      --fg-muted: #cbd5e1;
+      --border: #334155;
+      --border-soft: #1e293b;
+      --rule: #94a3b8;
+      --primary: #bfdbfe;
+      --link: #93c5fd;
+      --accent: #fbbf24;
+      --focus: #fbbf24;
+      --code-bg: #0f172a;
+      --code-fg: #e2e8f0;
+
+      --c-prep: #60a5fa;
+      --c-train: #2dd4bf;
+      --c-eval: #fbbf24;
+      --c-write: #a5b4fc;
+      --c-risk: #f87171;
+      --t-prep: rgba(96, 165, 250, 0.14);
+      --t-train: rgba(45, 212, 191, 0.13);
+      --t-eval: rgba(251, 191, 36, 0.13);
+      --t-write: rgba(165, 180, 252, 0.14);
+      --t-risk: rgba(248, 113, 113, 0.14);
+    }
+
+    /* ---------- Base ---------- */
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 1.5rem;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--fg);
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      color: var(--link);
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      text-decoration-thickness: 2px;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    code {
+      padding: 0.08em 0.35em;
+      border-radius: 4px;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      overflow-wrap: anywhere;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 100;
+      padding: 0.75rem 1rem;
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+    }
+
+    .sprite {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .ico {
+      width: 1.15rem;
+      height: 1.15rem;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ---------- Top bar ---------- */
+
+    .wrap {
+      width: min(1200px, 100% - 2.5rem);
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-height: 44px;
+      color: var(--fg-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color var(--dur);
+    }
+
+    .back:hover {
+      color: var(--fg);
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--fg);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color var(--dur), background var(--dur);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--fg-muted);
+    }
+
+    [data-theme="dark"] .i-sun,
+    [data-theme="light"] .i-moon {
+      display: none;
+    }
+
+    /* ---------- Hero ---------- */
+
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 2rem;
+      align-items: center;
+      padding: 2.5rem 0 2.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero__text {
+      grid-column: span 7;
+    }
+
+    .hero__fig {
+      grid-column: span 5;
+      margin: 0;
+    }
+
+    .kicker {
+      margin-bottom: 0.9rem;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+      font-family: var(--font-head);
+      font-size: clamp(2.3rem, 5vw, 3.6rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+    }
+
+    .lede {
+      max-width: 60ch;
+      margin-bottom: 1.75rem;
+      color: var(--fg-muted);
+      font-size: 1.1rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      max-width: 560px;
+      margin: 0 0 1.75rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stats li {
+      padding-top: 0.6rem;
+      border-top: 2px solid var(--rule);
+    }
+
+    .stats strong {
+      display: block;
+      font-family: var(--font-head);
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+
+    .stats span {
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 44px;
+      padding: 0 1.15rem;
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--dur), color var(--dur), border-color var(--dur);
+    }
+
+    .btn--primary {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .btn--primary:hover {
+      background: var(--fg);
+      border-color: var(--fg);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--primary);
+    }
+
+    .btn--ghost:hover {
+      background: var(--surface-2);
+    }
+
+    /* Ceph figure: film stays dark in both themes, like a real radiograph */
+
+    .film {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      background: #0a0f17;
+      border: 1px solid var(--border);
+    }
+
+    .film .vault { fill: none; stroke: #cbd5e1; stroke-width: 2.2; }
+    .film .bone { fill: rgba(203, 213, 225, 0.08); stroke: #cbd5e1; stroke-width: 1.8; }
+    .film .bone-thin { fill: none; stroke: #94a3b8; stroke-width: 1.2; }
+    .film .tooth { fill: rgba(241, 245, 249, 0.22); stroke: #e2e8f0; stroke-width: 1.4; }
+    .film .soft { fill: none; stroke: #5eead4; stroke-width: 1.6; opacity: 0.75; }
+    .film .ref { fill: none; stroke-width: 1.1; stroke-dasharray: 5 5; }
+    .film .ref--sn { stroke: #93c5fd; }
+    .film .ref--fh { stroke: #fbbf24; }
+    .film .lm-bone { fill: #60a5fa; stroke: #0a0f17; stroke-width: 1.5; }
+    .film .lm-soft { fill: #34d399; stroke: #0a0f17; stroke-width: 1.5; }
+    .film text { font-family: var(--font-body); font-size: 10px; font-weight: 600; }
+    .film .t-bone { fill: #bfdbfe; }
+    .film .t-soft { fill: #a7f3d0; }
+    .film .t-ref { fill: #94a3b8; font-size: 9px; font-weight: 500; }
+
+    .film .lm {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .js .film .lm {
+      animation: pop 0.45s var(--ease) both;
+      animation-delay: calc(var(--i, 0) * 45ms + 200ms);
+    }
+
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .fig-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem 1.1rem;
+      margin: 0.7rem 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--fg-muted);
+      font-size: 0.84rem;
+    }
+
+    .fig-legend li {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .fig-legend svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .fig-caption {
+      margin-top: 0.4rem;
+      color: var(--fg-muted);
+      font-size: 0.8rem;
+    }
+
+    /* ---------- Layout with TOC ---------- */
+
+    .layout {
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      gap: 3rem;
+      padding: 2.5rem 0 4rem;
+    }
+
+    .toc {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+    }
+
+    .toc__title {
+      margin-bottom: 0.6rem;
+      color: var(--fg-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .toc ol {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .toc a {
+      display: flex;
+      gap: 0.6rem;
+      align-items: baseline;
+      min-height: 36px;
+      padding: 0.4rem 0 0.4rem 0.9rem;
+      margin-left: -1px;
+      border-left: 2px solid transparent;
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: color var(--dur), border-color var(--dur);
+    }
+
+    .toc a span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .toc a:hover {
+      color: var(--fg);
+    }
+
+    .toc a[aria-current="true"] {
+      border-left-color: var(--accent);
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* ---------- Sections ---------- */
+
+    .sec {
+      padding: 1.25rem 0 3rem;
+      border-top: 2px solid var(--rule);
+    }
+
+    .sec__head {
+      display: grid;
+      grid-template-columns: 3.25rem minmax(0, 1fr);
+      gap: 0 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .sec__num {
+      grid-row: span 2;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding-top: 0.45rem;
+    }
+
+    .sec h2 {
+      font-family: var(--font-head);
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+      font-weight: 700;
+    }
+
+    .sec__lead {
+      max-width: 68ch;
+      margin-top: 0.5rem;
+      color: var(--fg-muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      padding: 1.15rem 1.15rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .card h3 {
+      margin-bottom: 0.4rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      color: var(--fg-muted);
+      font-size: 0.93rem;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 0.6rem;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 0.8rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tags li {
+      padding: 0.15rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--fg-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .note {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-left: 3px solid var(--accent);
+      background: var(--surface-2);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.95rem;
+    }
+
+    .note .ico {
+      margin-top: 0.2rem;
+      color: var(--accent);
+    }
+
+    /* 03 — experiment */
+
+    .fixed {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0 0 1.25rem;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+    }
+
+    .fixed li {
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--fg-muted);
+    }
+
+    .fixed li:first-child {
+      padding-left: 0;
+      border: 0;
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    .io {
+      padding: 0.75rem 1rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .arrow {
+      display: flex;
+      justify-content: center;
+      padding: 0.4rem 0;
+      color: var(--fg-muted);
+    }
+
+    .model {
+      border-top: 4px solid var(--m);
+    }
+
+    .model--yolo { --m: var(--c-prep); }
+    .model--unet { --m: var(--c-train); }
+    .model--r50 { --m: var(--c-eval); }
+
+    .model .role {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--m);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .metric span {
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    /* 04 — data */
+
+    .split-bar {
+      display: flex;
+      height: 44px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .split-bar span {
+      display: grid;
+      place-items: center;
+      color: #fff;
+    }
+
+    .split-bar .s-train { flex: 70; background: #1e3a5f; }
+    .split-bar .s-val { flex: 15; background: #0f766e; }
+    .split-bar .s-test { flex: 15; background: #a16207; }
+
+    .facts {
+      display: grid;
+      gap: 0;
+      margin: 1rem 0 0;
+    }
+
+    .facts div {
+      display: grid;
+      grid-template-columns: 8rem minmax(0, 1fr);
+      gap: 1rem;
+      padding: 0.6rem 0;
+      border-top: 1px solid var(--border-soft);
+      font-size: 0.92rem;
+    }
+
+    .facts dt {
+      font-weight: 600;
+    }
+
+    .facts dd {
+      margin: 0;
+      color: var(--fg-muted);
+    }
+
+    .bignum {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .bignum strong {
+      font-family: var(--font-head);
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .warn {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 6px;
+      background: var(--t-eval);
+      color: var(--fg);
+      font-size: 0.86rem;
+    }
+
+    .warn .ico {
+      margin-top: 0.15rem;
+      color: var(--c-eval);
+    }
+
+    /* 05 — pipeline */
+
+    .steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: step;
+      border-top: 1px solid var(--border);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 2.5rem minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 0.5rem 1.25rem;
+      padding: 1.1rem 0;
+      border-bottom: 1px solid var(--border);
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: counter(step, decimal-leading-zero);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding-top: 0.1rem;
+    }
+
+    .step h3 {
+      margin-bottom: 0.3rem;
+      font-size: 1.02rem;
+      font-weight: 600;
+    }
+
+    .step h3 code {
+      margin-left: 0.35rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .step ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--fg-muted);
+      font-size: 0.92rem;
+    }
+
+    .step li + li {
+      margin-top: 0.25rem;
+    }
+
+    .out {
+      padding: 0.7rem 0.85rem;
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: var(--fg-muted);
+      font-size: 0.86rem;
+    }
+
+    .out b {
+      display: block;
+      margin-bottom: 0.2rem;
+      color: var(--fg);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* 06 — config */
+
+    .codebox,
+    .tree {
+      margin: 0;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      background: var(--code-bg);
+      color: var(--code-fg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    .codebox .c,
+    .tree .c { color: var(--fg-muted); }
+    .codebox .k,
+    .tree .d { color: var(--link); font-weight: 600; }
+    .codebox .s { color: var(--accent); }
+
+    .tips {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tips li {
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--c-prep);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    .tips strong {
+      display: block;
+      margin-bottom: 0.15rem;
+      color: var(--fg);
+    }
+
+    /* 07 — results */
+
+    .table-wrap {
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      background: var(--surface);
+      font-size: 0.9rem;
+    }
+
+    caption {
+      padding: 0.75rem 1rem;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+      text-align: left;
+      caption-side: bottom;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    th,
+    td {
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border-soft);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    thead th {
+      background: var(--surface-2);
+      color: var(--fg);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    td.tbd {
+      color: var(--fg-muted);
+    }
+
+    tr.ref-row td {
+      font-style: italic;
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 0.7rem;
+      height: 0.7rem;
+      margin-right: 0.45rem;
+      border-radius: 2px;
+      vertical-align: -0.05rem;
+      background: var(--s);
+    }
+
+    .chart {
+      margin: 0;
+    }
+
+    .chart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-bottom: 0.75rem;
+    }
+
+    .chart figcaption strong {
+      display: block;
+      margin-bottom: 0.15rem;
+      font-size: 0.95rem;
+    }
+
+    .chart figcaption span {
+      color: var(--fg-muted);
+      font-size: 0.86rem;
+    }
+
+    .chart .axis { stroke: var(--border); stroke-width: 1.5; fill: none; }
+    .chart .lbl { fill: var(--fg-muted); font-family: var(--font-body); font-size: 10px; }
+    .f-yolo { fill: var(--c-prep); }
+    .f-unet { fill: var(--c-train); }
+    .f-r50 { fill: var(--c-eval); }
+    .f-risk { fill: var(--c-risk); }
+    .s-yolo { stroke: var(--c-prep); }
+    .s-unet { stroke: var(--c-train); }
+    .s-r50 { stroke: var(--c-eval); }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem 1rem;
+      margin: 0 0 1rem;
+      padding: 0;
+      list-style: none;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+    }
+
+    .muted-note {
+      margin-top: 1rem;
+      color: var(--fg-muted);
+      font-size: 0.86rem;
+    }
+
+    /* 08 — repo */
+
+    .folders {
+      display: grid;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .folders li {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      padding: 0.85rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    .folders .ico {
+      margin-top: 0.15rem;
+      color: var(--c-prep);
+    }
+
+    .folders strong {
+      display: block;
+      color: var(--fg);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+    }
+
+    /* 09 — timeline */
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1.1rem;
+      margin: 0 0 1.25rem;
+      padding: 0;
+      list-style: none;
+      color: var(--fg-muted);
+      font-size: 0.86rem;
+    }
+
+    .week {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      margin: 0 0 0.6rem;
+      font-weight: 700;
+    }
+
+    .week span {
+      color: var(--fg-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.6rem;
+      margin: 0 0 1.5rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    .day {
+      --c: var(--c-prep);
+      --t: var(--t-prep);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.8rem 0.75rem 0.85rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 4px solid var(--c);
+      border-radius: var(--radius);
+    }
+
+    .day--train { --c: var(--c-train); --t: var(--t-train); }
+    .day--eval { --c: var(--c-eval); --t: var(--t-eval); }
+    .day--write { --c: var(--c-write); --t: var(--t-write); }
+
+    .day__no {
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .kind {
+      align-self: flex-start;
+      padding: 0.05rem 0.45rem;
+      border-radius: 4px;
+      background: var(--t);
+      color: var(--fg);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .day strong {
+      font-size: 0.95rem;
+      line-height: 1.3;
+    }
+
+    .day p {
+      color: var(--fg-muted);
+      font-size: 0.84rem;
+    }
+
+    .gate {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: auto;
+      padding-top: 0.4rem;
+      color: var(--c-risk);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .gate .ico {
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+
+    .day--gate {
+      box-shadow: inset 0 0 0 1px var(--c-risk);
+    }
+
+    /* 10 — risks */
+
+    .risk {
+      border-left: 4px solid var(--c-risk);
+    }
+
+    .risk h3 {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .risk h3 .ico {
+      margin-top: 0.15rem;
+      color: var(--c-risk);
+    }
+
+    .risk dl {
+      margin: 0.5rem 0 0;
+      font-size: 0.92rem;
+    }
+
+    .risk dt {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .risk dt.fix {
+      color: var(--c-train);
+    }
+
+    .risk dd {
+      margin: 0.1rem 0 0;
+      color: var(--fg-muted);
+    }
+
+    /* 11 — outline */
+
+    .outline {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: part;
+      border-top: 1px solid var(--border);
+    }
+
+    .outline > li {
+      display: grid;
+      grid-template-columns: 2.5rem 14rem minmax(0, 1fr);
+      gap: 0.5rem 1.25rem;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--border);
+      counter-increment: part;
+    }
+
+    .outline > li::before {
+      content: counter(part);
+      color: var(--accent);
+      font-family: var(--font-head);
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .outline h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .outline p,
+    .outline ul {
+      color: var(--fg-muted);
+      font-size: 0.92rem;
+    }
+
+    .outline ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .refs {
+      margin: 1.5rem 0 0;
+      padding-left: 1.2rem;
+      color: var(--fg-muted);
+      font-size: 0.9rem;
+    }
+
+    .refs li + li {
+      margin-top: 0.3rem;
+    }
+
+    footer {
+      padding: 1.5rem 0 2.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--fg-muted);
+      font-size: 0.88rem;
+    }
+
+
+    /* ---------- Extra style ---------- */
+
+    :root {
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 8px 24px -8px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.06);
+      --grid-line: rgba(30, 58, 95, 0.07);
+      --glow: rgba(29, 78, 216, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 10px 28px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(148, 163, 184, 0.08);
+      --grid-line: rgba(148, 163, 184, 0.07);
+      --glow: rgba(96, 165, 250, 0.16);
+    }
+
+    body {
+      overflow-x: clip;
+    }
+
+    .lede code {
+      white-space: nowrap;
+    }
+
+    ::selection {
+      background: var(--t-eval);
+      color: var(--fg);
+    }
+
+    /* Reading progress + back to top */
+
+    .progress {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 50;
+      height: 3px;
+      pointer-events: none;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--c-prep), var(--c-train) 50%, var(--c-eval));
+      transform: scaleX(var(--p, 0));
+      transform-origin: left;
+    }
+
+    .to-top {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 1.25rem;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--fg);
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity var(--dur), transform var(--dur) var(--ease), border-color var(--dur);
+    }
+
+    .to-top.is-visible {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .to-top:hover {
+      border-color: var(--accent);
+    }
+
+    /* Hero: Swiss grid backdrop + glow behind the film */
+
+    .hero {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0 -50vw;
+      z-index: -1;
+      background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 32px 32px;
+      -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent);
+      mask-image: linear-gradient(180deg, #000 30%, transparent);
+    }
+
+    .hero__fig {
+      position: relative;
+    }
+
+    .hero__fig::before {
+      content: "";
+      position: absolute;
+      inset: -8% -6% 10%;
+      z-index: -1;
+      background: radial-gradient(closest-side, var(--glow), transparent);
+    }
+
+    .film {
+      box-shadow: var(--shadow-md);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kicker::before {
+      content: "";
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--t-eval);
+    }
+
+    .stats li:nth-child(1) { border-top-color: var(--c-prep); }
+    .stats li:nth-child(2) { border-top-color: var(--c-train); }
+    .stats li:nth-child(3) { border-top-color: var(--c-eval); }
+    .stats li:nth-child(4) { border-top-color: var(--c-write); }
+
+    .btn--primary {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn {
+      transition: background var(--dur), color var(--dur), border-color var(--dur), transform var(--dur) var(--ease);
+    }
+
+    /* Section number as a badge */
+
+    .sec__num {
+      display: grid;
+      place-items: center;
+      align-self: start;
+      width: 2.6rem;
+      height: 2.6rem;
+      margin-top: 0.1rem;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Cards: depth + hover */
+
+    .card {
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur), border-color var(--dur);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--fg-muted);
+    }
+
+    .tile {
+      display: inline-grid;
+      place-items: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: 0.75rem;
+      border-radius: 10px;
+      background: var(--t);
+      color: var(--c);
+    }
+
+    .tile .ico {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .tone-prep { --c: var(--c-prep); --t: var(--t-prep); }
+    .tone-train { --c: var(--c-train); --t: var(--t-train); }
+    .tone-eval { --c: var(--c-eval); --t: var(--t-eval); }
+    .tone-write { --c: var(--c-write); --t: var(--t-write); }
+
+    .card.tone-prep,
+    .card.tone-train,
+    .card.tone-eval,
+    .card.tone-write {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.tone-prep::after,
+    .card.tone-train::after,
+    .card.tone-eval::after,
+    .card.tone-write::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 3px;
+      background: var(--c);
+    }
+
+    .card.tone-prep .label,
+    .card.tone-train .label,
+    .card.tone-eval .label,
+    .card.tone-write .label {
+      color: var(--c);
+    }
+
+    .io {
+      border-style: solid;
+      background:
+        repeating-linear-gradient(135deg, transparent 0 10px, var(--grid-line) 10px 11px),
+        var(--surface-2);
+    }
+
+    .note {
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Pipeline as a vertical timeline */
+
+    .steps {
+      position: relative;
+      border-top: 0;
+    }
+
+    .steps::before {
+      content: "";
+      position: absolute;
+      top: 1.6rem;
+      bottom: 1.6rem;
+      left: 1.05rem;
+      width: 2px;
+      background: linear-gradient(180deg, var(--c-prep), var(--c-train), var(--c-eval));
+      opacity: 0.5;
+    }
+
+    .step {
+      border-bottom: 0;
+      padding: 0.6rem 0;
+    }
+
+    .step::before {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      padding: 0;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      background: var(--bg);
+    }
+
+    .step > div:first-child {
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .out {
+      align-self: stretch;
+      border: 1px dashed var(--border);
+    }
+
+    /* Code and tree as editor windows */
+
+    .window {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--code-bg);
+      box-shadow: var(--shadow-md);
+    }
+
+    .window__bar {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    .window__bar i {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .window__bar i:nth-child(1) { background: #f87171; }
+    .window__bar i:nth-child(2) { background: #fbbf24; }
+    .window__bar i:nth-child(3) { background: #34d399; }
+
+    .window__bar b {
+      margin-left: 0.5rem;
+      color: var(--fg-muted);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .window .codebox,
+    .window .tree {
+      border: 0;
+      border-radius: 0;
+    }
+
+    .tips li {
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease);
+    }
+
+    .tips li:hover {
+      transform: translateX(3px);
+    }
+
+    /* Table */
+
+    .table-wrap {
+      box-shadow: var(--shadow-sm);
+    }
+
+    tbody tr:nth-child(even) td {
+      background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+    }
+
+    tbody tr {
+      transition: background var(--dur);
+    }
+
+    tbody tr:hover td {
+      background: var(--t-prep);
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      letter-spacing: 0.02em;
+    }
+
+    /* Timeline */
+
+    .week {
+      padding: 0.4rem 0.8rem;
+      border-left: 3px solid var(--accent);
+      background: var(--surface-2);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .day {
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur);
+    }
+
+    .day:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .day--gate {
+      background:
+        linear-gradient(180deg, var(--t-risk), transparent 60%),
+        var(--surface);
+    }
+
+    .folders li {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .outline > li {
+      transition: background var(--dur);
+    }
+
+    .outline > li:hover {
+      background: var(--surface-2);
+    }
+
+    /* Footer */
+
+    footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    footer a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      color: var(--fg-muted);
+    }
+
+    footer a:hover {
+      color: var(--fg);
+    }
+
+    @media (max-width: 720px) {
+      .steps::before { left: 1rem; }
+      .to-top { right: 1rem; bottom: 1rem; }
+    }
+
+    /* ---------- Reveal ---------- */
+
+    .js .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+    }
+
+    .js .reveal.is-in {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* ---------- Responsive ---------- */
+
+    @media (max-width: 1100px) {
+      .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .timeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .outline > li { grid-template-columns: 2.5rem minmax(0, 1fr); }
+      .outline > li > :last-child { grid-column: 2; }
+    }
+
+    @media (max-width: 960px) {
+      .hero__text,
+      .hero__fig {
+        grid-column: 1 / -1;
+      }
+
+      .hero__fig {
+        max-width: 520px;
+      }
+
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.5rem;
+        padding-top: 0;
+      }
+
+      .toc {
+        top: 0;
+        z-index: 10;
+        margin: 0 -1.25rem;
+        padding: 0.5rem 1.25rem;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .toc__title {
+        display: none;
+      }
+
+      .toc ol {
+        display: flex;
+        gap: 0.25rem;
+        overflow-x: auto;
+        border-left: 0;
+        scrollbar-width: none;
+      }
+
+      .toc a {
+        min-height: 40px;
+        margin-left: 0;
+        padding: 0.4rem 0.75rem;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+
+      .toc a[aria-current="true"] {
+        border-bottom-color: var(--accent);
+      }
+
+      html {
+        scroll-padding-top: 4.5rem;
+      }
+
+      .g3 { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .wrap { width: min(1200px, 100% - 2rem); }
+      .toc { margin: 0 -1rem; padding: 0.5rem 1rem; }
+      .g2,
+      .g4 { grid-template-columns: minmax(0, 1fr); }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sec__head { grid-template-columns: minmax(0, 1fr); }
+      .sec__num { grid-row: auto; padding-top: 0; }
+      .step { grid-template-columns: 2.25rem minmax(0, 1fr); }
+      .step .out { grid-column: 2; }
+      .facts div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+      .theme-btn .txt { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .js .reveal {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Bỏ qua đến nội dung chính</a>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2M11.5 9.5l2-2M8.5 6.5l2-2M17.5 15.5l2-2"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2"/><circle cx="17" cy="5" r="2"/><circle cx="19" cy="17" r="2"/><circle cx="8" cy="18" r="2"/><path d="M7 6.5 15 5.5M18 7l1 8M17 17.5 10 18M7 16l-1.5-8"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></symbol>
+  </svg>
+
+  <div class="wrap">
+    <header class="topbar">
+      <a class="back" href="index.html"><svg class="ico" aria-hidden="true"><use href="#i-arrow-left"/></svg>Thị giác máy tính và nhận dạng mẫu</a>
+      <button class="theme-btn" type="button" data-theme-toggle aria-label="Đổi giao diện sáng hoặc tối">
+        <svg class="ico i-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        <svg class="ico i-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+        <span class="txt">Giao diện</span>
+      </button>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero__text">
+        <p class="kicker">ThS HUIT · Đề án môn học</p>
+        <h1 id="page-title">29 điểm mốc sọ nghiêng với một mô hình nhẹ</h1>
+        <p class="lede">Phát hiện tự động điểm mốc giải phẫu trên phim X-quang sọ nghiêng bằng <code>YOLO11-Pose</code>, đo sai số bằng milimét, so với U-Net heatmap và ResNet-50, rồi chạy suy luận ngay trên máy tính phổ thông.</p>
+        <ul class="stats">
+          <li><strong>1.000</strong><span>ảnh Aariz</span></li>
+          <li><strong>29</strong><span>điểm mốc</span></li>
+          <li><strong>3</strong><span>mô hình so sánh</span></li>
+          <li><strong>14</strong><span>ngày thực hiện</span></li>
+        </ul>
+        <div class="actions">
+          <a class="btn btn--primary" href="#thi-nghiem">Xem thiết kế thí nghiệm</a>
+          <a class="btn btn--ghost" href="#lich">Lịch 2 tuần</a>
+        </div>
+      </div>
+
+      <figure class="hero__fig">
+        <svg class="film" viewBox="0 0 420 460" role="img" aria-labelledby="ceph-title ceph-desc">
+          <title id="ceph-title">Tracing phim X-quang sọ nghiêng, mặt hướng sang phải</title>
+          <desc id="ceph-desc">Hình vẽ hộp sọ, hố yên, ổ mắt, xương hàm trên, xương hàm dưới, răng cửa, răng hàm, đốt sống cổ và đường viền mô mềm. Các điểm mốc xương gồm S, N, Or, Po, ANS, PNS, A, B, Pog, Me, Go, Ar và đỉnh răng cửa. Các điểm mô mềm gồm N', Prn, Sn, Ls, Li và Pog'. Đường SN nối S với N; đường Frankfort nối Po với Or.</desc>
+
+          <!-- Cranial vault: outer table closes onto the occipital base at basion -->
+          <path class="vault" d="M306 152 C312 140 318 128 320 112 C324 80 300 40 250 26 C190 10 110 24 66 62 C30 94 22 150 38 192 C46 214 62 232 86 246 C96 252 106 254 112 250"/>
+          <path class="bone-thin" d="M300 150 C306 128 308 110 306 98 C300 66 276 46 246 38 C190 26 118 38 78 70 C48 96 40 146 52 184 C58 202 70 218 88 230"/>
+          <path class="bone-thin" d="M300 138 C302 124 310 120 314 128 C316 136 312 144 306 146 Z"/>
+
+          <!-- Anterior cranial base, sella turcica, clivus -->
+          <path class="bone-thin" d="M302 152 C272 156 204 160 166 165"/>
+          <path class="bone" d="M166 165 C163 172 161 184 152 187 C143 188 137 181 139 171 C140 166 137 161 132 158"/>
+          <path class="bone-thin" d="M135 162 C129 190 121 220 112 250"/>
+
+          <!-- Orbit, nasal bone, pterygomaxillary fissure -->
+          <path class="bone-thin" d="M262 168 C274 160 292 164 296 178 C298 192 288 206 274 207 C262 207 256 197 258 184 C259 176 260 171 262 168 Z"/>
+          <path class="bone" d="M306 152 C314 166 322 182 331 197"/>
+          <path class="bone-thin" d="M318 204 C322 228 330 248 341 258"/>
+          <path class="bone-thin" d="M222 214 C230 228 228 248 217 262 C212 248 212 228 222 214 Z"/>
+
+          <!-- Ear rod (porion) -->
+          <circle cx="118" cy="214" r="10" fill="none" stroke="#64748b" stroke-width="1.4" stroke-dasharray="3 3"/>
+
+          <!-- Maxilla: thin palate from PNS to ANS, alveolar process around the incisor root, A-point concavity -->
+          <path class="bone" d="M341 258 C300 258 250 260 216 262 C222 268 240 270 262 272 C286 274 306 282 316 296 C322 304 326 310 328 314 L341 311 C334 300 327 292 329 282 C331 272 335 264 341 258 Z"/>
+
+          <!-- Mandible: condyle, sigmoid notch, coronoid, alveolar crest, symphysis, lower border, gonial angle -->
+          <path class="bone" d="M146 244 C142 232 154 222 164 230 C170 236 168 248 172 256 C180 262 194 260 200 240 C204 262 206 286 212 306 C216 324 224 338 240 342 C270 346 310 346 336 346 C334 354 330 360 331 366 C334 378 344 388 344 399 C344 410 336 420 320 423 C276 424 220 404 184 388 C170 382 160 376 157 366 C151 336 146 290 146 244 Z"/>
+          <path class="bone-thin" d="M300 352 C294 370 296 396 312 414"/>
+
+          <!-- Upper teeth: second molar, first molar, premolars (crowns + roots), central incisor -->
+          <path class="bone-thin" d="M235 298 L237 280 M249 298 L247 280 M260 298 L262 280 M274 298 L272 280 M292 300 L292 282 M306 300 L306 282"/>
+          <path class="tooth" d="M231 300 C231 296 253 296 253 300 L253 311 C249 317 235 317 231 311 Z"/>
+          <path class="tooth" d="M256 300 C256 296 279 296 279 300 L279 312 C275 318 260 318 256 312 Z"/>
+          <path class="tooth" d="M286 301 C286 298 298 298 298 301 L298 314 C295 319 289 319 286 314 Z"/>
+          <path class="tooth" d="M300 302 C300 299 312 299 312 302 L312 316 C309 321 303 321 300 316 Z"/>
+          <path class="tooth" d="M318 270 C324 272 330 286 336 302 C342 316 348 330 347 339 C343 340 338 330 333 318 C328 304 318 286 316 276 Z"/>
+
+          <!-- Lower teeth: molars, premolars (crowns + roots), central incisor -->
+          <path class="bone-thin" d="M236 335 L234 356 M248 335 L250 356 M258 336 L256 358 M272 336 L274 358 M291 337 L291 360 M305 338 L305 362"/>
+          <path class="tooth" d="M230 322 C234 318 248 318 252 322 L252 333 C248 337 234 337 230 333 Z"/>
+          <path class="tooth" d="M254 322 C258 318 274 318 278 322 L278 334 C274 338 258 338 254 334 Z"/>
+          <path class="tooth" d="M285 324 C288 321 294 321 297 324 L297 336 C294 339 288 339 285 336 Z"/>
+          <path class="tooth" d="M299 325 C302 322 308 322 311 325 L311 337 C308 340 302 340 299 337 Z"/>
+          <path class="tooth" d="M340 329 C343 334 342 346 338 358 C334 372 326 386 320 392 C316 390 316 380 318 370 C322 356 330 340 334 332 C336 330 338 328 340 329 Z"/>
+
+          <!-- Cervical vertebrae: atlas arch, C2 with dens, C3, C4 -->
+          <ellipse class="bone-thin" cx="122" cy="248" rx="9" ry="6"/>
+          <path class="bone-thin" d="M92 258 C96 250 108 250 112 258 L122 266 C126 290 126 310 122 326 L88 326 C84 306 84 280 92 258 Z"/>
+          <rect class="bone-thin" x="86" y="336" width="38" height="32" rx="6"/>
+          <rect class="bone-thin" x="86" y="378" width="38" height="32" rx="6"/>
+
+          <!-- Soft-tissue profile: forehead, nose, lips, chin, neck -->
+          <path class="soft" d="M336 40 C346 70 348 110 338 140 C334 150 328 156 326 160 C336 180 356 205 378 228 C382 236 376 246 366 250 C358 254 352 258 348 262 C352 276 358 290 361 304 C359 314 354 320 349 325 C356 330 362 340 361 348 C358 362 350 370 348 376 C356 390 362 402 360 412 C354 428 334 438 312 442 C286 446 256 444 232 448"/>
+
+          <!-- Reference planes -->
+          <path class="ref ref--sn" d="M128 180 L330 148"/>
+          <path class="ref ref--fh" d="M96 205 L300 207"/>
+          <text class="t-ref" x="334" y="146">SN</text>
+          <text class="t-ref" x="304" y="216">FH</text>
+
+          <!-- Bone landmarks (circles) -->
+          <g>
+            <circle class="lm lm-bone" style="--i:0" cx="151" cy="176" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:1" cx="306" cy="152" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:2" cx="274" cy="207" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:3" cx="118" cy="204" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:4" cx="341" cy="258" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:5" cx="216" cy="262" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:6" cx="329" cy="282" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:7" cx="347" cy="339" r="3.5"/>
+            <circle class="lm lm-bone" style="--i:8" cx="340" cy="329" r="3.5"/>
+            <circle class="lm lm-bone" style="--i:9" cx="331" cy="366" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:10" cx="344" cy="399" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:11" cx="320" cy="423" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:12" cx="158" cy="368" r="4.5"/>
+            <circle class="lm lm-bone" style="--i:13" cx="147" cy="254" r="4.5"/>
+          </g>
+          <g>
+            <text class="t-bone" x="156" y="200">S</text>
+            <text class="t-bone" x="292" y="146">N</text>
+            <text class="t-bone" x="262" y="224">Or</text>
+            <text class="t-bone" x="98" y="198">Po</text>
+            <text class="t-bone" x="322" y="250">ANS</text>
+            <text class="t-bone" x="192" y="258">PNS</text>
+            <text class="t-bone" x="314" y="286">A</text>
+            <text class="t-bone" x="302" y="368">B</text>
+            <text class="t-bone" x="318" y="404">Pog</text>
+            <text class="t-bone" x="294" y="438">Me</text>
+            <text class="t-bone" x="134" y="386">Go</text>
+            <text class="t-bone" x="126" y="270">Ar</text>
+          </g>
+
+          <!-- Soft-tissue landmarks (diamonds) -->
+          <g>
+            <rect class="lm lm-soft" style="--i:14" x="322" y="156" width="8" height="8" transform="rotate(45 326 160)"/>
+            <rect class="lm lm-soft" style="--i:15" x="375" y="225" width="8" height="8" transform="rotate(45 379 229)"/>
+            <rect class="lm lm-soft" style="--i:16" x="344" y="258" width="8" height="8" transform="rotate(45 348 262)"/>
+            <rect class="lm lm-soft" style="--i:17" x="357" y="300" width="8" height="8" transform="rotate(45 361 304)"/>
+            <rect class="lm lm-soft" style="--i:18" x="357" y="344" width="8" height="8" transform="rotate(45 361 348)"/>
+            <rect class="lm lm-soft" style="--i:19" x="357" y="400" width="8" height="8" transform="rotate(45 361 404)"/>
+          </g>
+          <g>
+            <text class="t-soft" x="334" y="172">N'</text>
+            <text class="t-soft" x="386" y="232">Prn</text>
+            <text class="t-soft" x="368" y="268">Sn</text>
+            <text class="t-soft" x="368" y="308">Ls</text>
+            <text class="t-soft" x="368" y="352">Li</text>
+            <text class="t-soft" x="368" y="408">Pog'</text>
+          </g>
+        </svg>
+        <ul class="fig-legend">
+          <li><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="#60a5fa"/></svg>Điểm mốc xương</li>
+          <li><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="3" width="8" height="8" fill="#34d399" transform="rotate(45 7 7)"/></svg>Điểm mốc mô mềm</li>
+          <li><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1 7h12" stroke="#93c5fd" stroke-width="1.6" stroke-dasharray="3 2"/></svg>Đường SN</li>
+          <li><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1 7h12" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="3 2"/></svg>Đường Frankfort</li>
+        </ul>
+        <figcaption class="fig-caption">Sơ đồ minh hoạ 20 trong 29 điểm mốc, vẽ theo quy ước tracing phim sọ nghiêng (mặt hướng sang phải).</figcaption>
+      </figure>
+    </section>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Mục lục">
+        <p class="toc__title">Mục lục</p>
+        <ol>
+          <li><a href="#muc-tieu"><span>01</span>Mục tiêu</a></li>
+          <li><a href="#cau-hoi"><span>02</span>Câu hỏi</a></li>
+          <li><a href="#thi-nghiem"><span>03</span>Thí nghiệm</a></li>
+          <li><a href="#du-lieu"><span>04</span>Dữ liệu</a></li>
+          <li><a href="#pipeline"><span>05</span>Pipeline</a></li>
+          <li><a href="#cau-hinh"><span>06</span>Cấu hình YOLO</a></li>
+          <li><a href="#ket-qua"><span>07</span>Kết quả</a></li>
+          <li><a href="#repo"><span>08</span>Cấu trúc repo</a></li>
+          <li><a href="#lich"><span>09</span>Lịch 14 ngày</a></li>
+          <li><a href="#rui-ro"><span>10</span>Rủi ro</a></li>
+          <li><a href="#bao-cao"><span>11</span>Báo cáo</a></li>
+        </ol>
+      </nav>
+
+      <main id="main-content">
+
+        <section class="sec reveal" id="muc-tieu" aria-labelledby="h-goal">
+          <div class="sec__head">
+            <p class="sec__num">01</p>
+            <h2 id="h-goal">Đủ chính xác cho lâm sàng, đủ nhẹ cho phòng khám</h2>
+            <p class="sec__lead">Bác sĩ chỉnh nha đang chấm tay vài chục điểm trên mỗi phim sọ nghiêng để đo góc và khoảng cách. Đề án tự động hoá bước đó bằng mô hình keypoint gọn nhẹ chạy được trên máy tính phổ thông.</p>
+          </div>
+          <div class="grid g2">
+            <article class="card tone-prep">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-target"/></svg></span>
+              <p class="label">Mục tiêu chính</p>
+              <h3>Phát hiện 29 điểm mốc bằng YOLO-Pose</h3>
+              <p>Huấn luyện trên Aariz, dự đoán cả điểm xương và mô mềm. Đích đến là MRE dưới 2&nbsp;mm, ngưỡng thường được coi là chấp nhận được về lâm sàng.</p>
+            </article>
+            <article class="card tone-train">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-cpu"/></svg></span>
+              <p class="label">Mục tiêu ứng dụng</p>
+              <h3>Chạy được trên máy tính phổ thông</h3>
+              <p>Chứng minh mô hình vài triệu tham số cho sai số tiệm cận mô hình nặng, trong khi suy luận mỗi ảnh chỉ mất vài chục ms, không cần GPU rời.</p>
+            </article>
+          </div>
+          <p class="note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Các nghiên cứu điểm mốc sọ thường dùng heatmap hoặc backbone lớn trên GPU. Đề án hỏi: phải đánh đổi bao nhiêu milimét để có một mô hình chạy end-to-end trên máy tính phổ thông.</span></p>
+        </section>
+
+        <section class="sec reveal" id="cau-hoi" aria-labelledby="h-rq">
+          <div class="sec__head">
+            <p class="sec__num">02</p>
+            <h2 id="h-rq">Bốn câu hỏi, mỗi câu một con số</h2>
+          </div>
+          <div class="grid g4">
+            <article class="card tone-prep">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-ruler"/></svg></span>
+              <p class="label">RQ1 · Độ chính xác</p>
+              <p>YOLO-Pose đạt MRE và SDR bao nhiêu so với U-Net heatmap và ResNet-50?</p>
+              <ul class="tags"><li>MRE (mm)</li><li>SDR 2–4 mm</li></ul>
+            </article>
+            <article class="card tone-train">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-bolt"/></svg></span>
+              <p class="label">RQ2 · Tài nguyên</p>
+              <p>Mỗi mô hình tốn bao nhiêu thời gian và dung lượng khi chạy trên máy tính phổ thông?</p>
+              <ul class="tags"><li>ms/ảnh</li><li>MB</li><li>Params</li><li>GFLOPs</li></ul>
+            </article>
+            <article class="card tone-eval">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-dots"/></svg></span>
+              <p class="label">RQ3 · Điểm khó</p>
+              <p>Điểm mốc nào sai nhiều nhất? Mô mềm khác mô xương ra sao?</p>
+              <ul class="tags"><li>MRE từng điểm</li><li>Xương / mô mềm</li></ul>
+            </article>
+            <article class="card tone-write">
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-scan"/></svg></span>
+              <p class="label">RQ4 · Máy chụp</p>
+              <p>Sai số có lệch giữa 7 máy X-quang khác nhau không?</p>
+              <ul class="tags"><li>MRE theo máy</li><li>Độ phân giải</li></ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="thi-nghiem" aria-labelledby="h-exp">
+          <div class="sec__head">
+            <p class="sec__num">03</p>
+            <h2 id="h-exp">Một bộ test, ba cách dự đoán</h2>
+            <p class="sec__lead">Cùng tập test Aariz, cùng công thức đổi pixel sang milimét, cùng script chấm điểm. Chỉ khác cách mô hình sinh ra toạ độ.</p>
+          </div>
+          <ul class="fixed">
+            <li>Giữ cố định:</li>
+            <li>Split Train/Val/Test chính thức</li>
+            <li>Pixel spacing theo từng ảnh</li>
+            <li><code>evaluate.py</code> chung</li>
+            <li>Cùng một máy khi đo tốc độ</li>
+          </ul>
+          <div class="io">Phim sọ nghiêng trong tập test Aariz</div>
+          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
+          <div class="grid g3">
+            <article class="card model model--yolo">
+              <span class="role">Đề xuất</span>
+              <h3>YOLO11-Pose</h3>
+              <p>Hồi quy trực tiếp 29 keypoint trong một lần chạy. Thử bản <code>n</code> và <code>s</code>, đối chiếu thêm YOLOv8n-Pose.</p>
+              <ul class="tags"><li>~3–10M params</li><li>Ultralytics</li><li>Nhẹ</li></ul>
+            </article>
+            <article class="card model model--unet">
+              <span class="role">Đối chứng 1 · tự huấn luyện</span>
+              <h3>U-Net heatmap</h3>
+              <p>Encoder ResNet-18, xuất 29 heatmap Gaussian, lấy toạ độ bằng argmax hoặc soft-argmax. Gộp hai lựa chọn trong yêu cầu thành một mô hình.</p>
+              <ul class="tags"><li>~14M params</li><li>segmentation-models-pytorch</li></ul>
+            </article>
+            <article class="card model model--r50">
+              <span class="role">Đối chứng 2 · trích dẫn</span>
+              <h3>ResNet-50 Regression</h3>
+              <p>Lấy kết quả công bố của bài MDPI 2025: MRE ~1.25&nbsp;mm, SDR@2mm ~81.5%. Không huấn luyện lại, chỉ đối chiếu.</p>
+              <ul class="tags"><li>~25M params</li><li>Số liệu bài báo</li></ul>
+            </article>
+          </div>
+          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
+          <div class="io">Toạ độ dự đoán, đổi sang mm, so với ground-truth</div>
+          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
+          <div class="grid g3">
+            <div class="card metric"><strong>MRE ± SD</strong><span>Khoảng cách Euclid trung bình (mm), cả tổng và từng điểm.</span></div>
+            <div class="card metric"><strong>SDR</strong><span>Tỉ lệ điểm có sai số ≤ 2; 2.5; 3; 4&nbsp;mm.</span></div>
+            <div class="card metric"><strong>Tốc độ và kích thước</strong><span>ms/ảnh (median 100 lần), MB, số tham số, GFLOPs.</span></div>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="du-lieu" aria-labelledby="h-data">
+          <div class="sec__head">
+            <p class="sec__num">04</p>
+            <h2 id="h-data">Aariz: 1.000 phim, 7 máy chụp</h2>
+            <p class="sec__lead">Bộ dữ liệu công bố trên <em>Nature Scientific Data</em> (2025), có sẵn split và toạ độ ground-truth do chuyên gia chấm. Mỗi ảnh kèm thông tin máy chụp và kích thước pixel, đủ để đổi sai số sang milimét.</p>
+          </div>
+          <div class="grid g2">
+            <div class="card">
+              <h3>Chia tập theo split của tác giả</h3>
+              <div class="split-bar" role="img" aria-label="Train 700 ảnh, Val 150 ảnh, Test 150 ảnh">
+                <span class="s-train">Train 700</span>
+                <span class="s-val">Val 150</span>
+                <span class="s-test">Test 150</span>
+              </div>
+              <dl class="facts">
+                <div><dt>Train / Val</dt><dd>Huấn luyện; chọn epoch và siêu tham số theo MRE trên val.</dd></div>
+                <div><dt>Test</dt><dd>Chỉ chạy một lần cuối, sau khi đã chốt mô hình.</dd></div>
+                <div><dt>Điểm mốc</dt><dd>29 điểm, gồm cả mô xương và mô mềm.</dd></div>
+                <div><dt>Nguồn ảnh</dt><dd>7 máy X-quang, độ phân giải không đồng nhất.</dd></div>
+                <div><dt>Đổi đơn vị</dt><dd><code>mm = pixel × pixel_size</code> theo từng ảnh, không dùng một hằng số chung.</dd></div>
+              </dl>
+            </div>
+            <div class="card bignum">
+              <p class="label">Mỗi mô hình được chấm</p>
+              <strong>4.350</strong>
+              <p>cặp điểm (dự đoán, ground-truth): 150 ảnh test × 29 điểm. Có bốn mô hình tự huấn luyện: YOLO11n, YOLO11s, YOLOv8n và U-Net.</p>
+              <p class="warn"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg><span>Khi tải dữ liệu, đối chiếu lại số ảnh mỗi tập và cột pixel size trong file CSV của Aariz trước khi viết script chuyển đổi.</span></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="pipeline" aria-labelledby="h-pipe">
+          <div class="sec__head">
+            <p class="sec__num">05</p>
+            <h2 id="h-pipe">Sáu bước, mỗi bước một file</h2>
+            <p class="sec__lead">Bên trái là việc cần làm, bên phải là thứ bước đó sinh ra cho bước sau.</p>
+          </div>
+          <ol class="steps">
+            <li class="step">
+              <div>
+                <h3>Chuyển định dạng <code>prepare_aariz.py</code></h3>
+                <ul>
+                  <li>Đọc nhãn Aariz, ghi mỗi ảnh một file <code>.txt</code> theo chuẩn YOLO Pose: một đối tượng "sọ", bbox bao toàn bộ điểm mốc (nới 5%), 29 bộ <code>x y v</code> đã chuẩn hoá.</li>
+                  <li>Vẽ ngẫu nhiên 20 ảnh có chồng điểm để kiểm tra bằng mắt trước khi train.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>data/yolo/{train,val,test}/</code><br><code>configs/aariz-pose.yaml</code><br><code>data/meta.csv</code></div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Huấn luyện YOLO <code>train_yolo.py</code></h3>
+                <ul>
+                  <li>Fine-tune từ <code>yolo11n-pose.pt</code> và <code>yolo11s-pose.pt</code>, <code>imgsz=1024</code>.</li>
+                  <li>Ablation nhỏ: <code>imgsz</code> 640 so với 1024 trên bản <code>n</code>.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>runs/pose/{exp}/weights/best.pt</code><br>Log loss và mAP-pose theo epoch</div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Huấn luyện U-Net <code>train_unet.py</code></h3>
+                <ul>
+                  <li>Resize 512×512 (hoặc 768 nếu đủ RAM), heatmap Gaussian σ≈2–3 px, loss MSE hoặc adaptive wing.</li>
+                  <li>Cùng split, cùng augmentation hình học nhẹ như YOLO.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>checkpoints/unet_r18.pt</code></div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Chấm điểm <code>evaluate.py</code></h3>
+                <ul>
+                  <li>Dự đoán trên test, đưa toạ độ về kích thước ảnh gốc, nhân pixel size của từng ảnh.</li>
+                  <li>Tính MRE ± SD, SDR 2/2.5/3/4&nbsp;mm; tách theo từng điểm, nhóm xương/mô mềm và máy chụp.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>results/predictions_{model}.csv</code><br><code>results/metrics_summary.csv</code></div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Đo tốc độ <code>benchmark_speed.py</code></h3>
+                <ul>
+                  <li>Trên cùng một máy: warm-up 10 lần rồi lấy median của 100 lần, batch 1, cho CPU và GPU (nếu có).</li>
+                  <li>Thêm một cột YOLO xuất ONNX (<code>model.export(format="onnx")</code>) nếu còn thời gian.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>results/speed.csv</code>: ms/ảnh, MB, params, GFLOPs</div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Hình và bảng <code>plots.py</code></h3>
+                <ul>
+                  <li>Vẽ bằng <code>matplotlib</code>; chồng dự đoán lên ảnh để minh hoạ ca tốt và ca xấu.</li>
+                  <li>Xuất bảng so sánh dạng Markdown/LaTeX cho báo cáo.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>results/figures/*.png</code><br><code>results/table_main.tex</code></div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="sec reveal" id="cau-hinh" aria-labelledby="h-cfg">
+          <div class="sec__head">
+            <p class="sec__num">06</p>
+            <h2 id="h-cfg">Mấy chỗ dễ sai khi dùng YOLO-Pose cho ảnh y tế</h2>
+            <p class="sec__lead">Mặc định của Ultralytics được chỉnh cho ảnh người và đồ vật. Với phim sọ chỉ có một đối tượng, cần tắt vài augmentation và tăng độ phân giải.</p>
+          </div>
+          <div class="grid g2">
+            <figure class="window"><div class="window__bar" aria-hidden="true"><i></i><i></i><i></i><b>aariz-pose.yaml · train_yolo.py</b></div><pre class="codebox"><span class="c"># configs/aariz-pose.yaml</span>
+<span class="k">path</span>: data/yolo
+<span class="k">train</span>: train/images
+<span class="k">val</span>: val/images
+<span class="k">test</span>: test/images
+<span class="k">kpt_shape</span>: [29, 3]
+<span class="k">flip_idx</span>: [0, 1, 2, ..., 28]  <span class="c"># không lật</span>
+<span class="k">names</span>: {0: <span class="s">skull</span>}
+
+<span class="c"># train_yolo.py</span>
+model = YOLO(<span class="s">"yolo11n-pose.pt"</span>)
+model.train(
+    data=<span class="s">"configs/aariz-pose.yaml"</span>,
+    imgsz=1024, epochs=150, batch=4,
+    patience=30,
+    fliplr=0.0, mosaic=0.0,
+    degrees=5, scale=0.15, translate=0.05,
+    hsv_h=0.0, hsv_s=0.0,
+)</pre></figure>
+            <ul class="tips">
+              <li><strong><code>imgsz</code> lớn</strong>Phim gốc khoảng 2000 px. Ở 640 px, mỗi pixel đầu vào đã ứng với hơn 1&nbsp;mm, nên sai số khó xuống dưới 2&nbsp;mm. Bắt đầu từ 1024.</li>
+              <li><strong>Tắt <code>fliplr</code> và <code>mosaic</code></strong>Phim sọ nghiêng luôn quay cùng một hướng. Mosaic ghép bốn ảnh làm sọ nhỏ lại và cắt mất điểm mốc.</li>
+              <li><strong>Ảnh xám</strong>Màu không mang thông tin, nên tắt augmentation sắc độ và độ bão hoà.</li>
+              <li><strong>Batch nhỏ</strong>Ảnh 1024 px tốn nhiều bộ nhớ. Nếu tràn bộ nhớ, giảm batch hoặc train trên Colab/Kaggle GPU.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="ket-qua" aria-labelledby="h-out">
+          <div class="sec__head">
+            <p class="sec__num">07</p>
+            <h2 id="h-out">Một bảng chính và bốn hình</h2>
+            <p class="sec__lead">Bảng đặt mọi mô hình cạnh nhau. Mỗi hình bên dưới trả lời một câu hỏi ở mục 02.</p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <caption>Khung bảng kết quả trên tập test. Ô "—" sẽ điền sau Ngày 9; dòng in nghiêng là số trích dẫn, không chạy lại.</caption>
+              <thead>
+                <tr><th scope="col">Mô hình</th><th scope="col">MRE (mm)</th><th scope="col">SDR 2mm</th><th scope="col">SDR 2.5mm</th><th scope="col">SDR 3mm</th><th scope="col">SDR 4mm</th><th scope="col">ms/ảnh</th><th scope="col">Params</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLO11n-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLO11s-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLOv8n-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-train)"></span>U-Net (ResNet-18)</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr class="ref-row"><td><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50 (MDPI 2025)</td><td>~1.25</td><td>~81.5%</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">không đo</td><td class="tbd">~25M</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="chart-legend" aria-label="Chú thích màu mô hình">
+            <li><span class="swatch" style="--s: var(--c-prep)"></span>YOLO-Pose</li>
+            <li><span class="swatch" style="--s: var(--c-train)"></span>U-Net heatmap</li>
+            <li><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50</li>
+          </ul>
+
+          <div class="grid g4">
+            <figure class="card chart">
+              <svg viewBox="0 0 200 120" aria-hidden="true">
+                <path class="axis" d="M20 100 H190"/>
+                <rect class="f-yolo" x="30" y="52" width="12" height="48" rx="1"/>
+                <rect class="f-unet" x="44" y="44" width="12" height="56" rx="1"/>
+                <rect class="f-r50" x="58" y="40" width="12" height="60" rx="1"/>
+                <rect class="f-yolo" x="82" y="40" width="12" height="60" rx="1"/>
+                <rect class="f-unet" x="96" y="32" width="12" height="68" rx="1"/>
+                <rect class="f-r50" x="110" y="30" width="12" height="70" rx="1"/>
+                <rect class="f-yolo" x="134" y="28" width="12" height="72" rx="1"/>
+                <rect class="f-unet" x="148" y="22" width="12" height="78" rx="1"/>
+                <rect class="f-r50" x="162" y="20" width="12" height="80" rx="1"/>
+                <text class="lbl" x="38" y="114">2mm</text>
+                <text class="lbl" x="88" y="114">2.5mm</text>
+                <text class="lbl" x="142" y="114">3mm</text>
+              </svg>
+              <figcaption><strong>Cột nhóm · SDR</strong><span>RQ1: tỉ lệ đạt ở từng ngưỡng, mỗi màu một mô hình.</span></figcaption>
+            </figure>
+            <figure class="card chart">
+              <svg viewBox="0 0 200 120" aria-hidden="true">
+                <path class="axis" d="M30 100 H190 M30 100 V20"/>
+                <circle class="f-yolo" cx="52" cy="66" r="6" opacity="0.75"/>
+                <circle class="f-yolo" cx="72" cy="56" r="9" opacity="0.75"/>
+                <circle class="f-unet" cx="132" cy="50" r="12" opacity="0.75"/>
+                <circle class="f-r50" cx="170" cy="44" r="16" opacity="0.6"/>
+                <text class="lbl" x="122" y="114">ms/ảnh →</text>
+                <text class="lbl" x="2" y="16">↑ MRE</text>
+              </svg>
+              <figcaption><strong>Chấm · Tốc độ và sai số</strong><span>RQ2: kích thước chấm là số tham số; càng gần góc trái dưới càng tốt.</span></figcaption>
+            </figure>
+            <figure class="card chart">
+              <svg viewBox="0 0 200 120" aria-hidden="true">
+                <path class="axis" d="M42 8 V104"/>
+                <rect class="f-yolo" x="42" y="12" width="132" height="10" rx="1"/>
+                <rect class="f-unet" x="42" y="27" width="110" height="10" rx="1"/>
+                <rect class="f-yolo" x="42" y="42" width="92" height="10" rx="1"/>
+                <rect class="f-unet" x="42" y="57" width="70" height="10" rx="1"/>
+                <rect class="f-yolo" x="42" y="72" width="56" height="10" rx="1"/>
+                <rect class="f-yolo" x="42" y="87" width="40" height="10" rx="1"/>
+                <text class="lbl" x="6" y="21">Go</text>
+                <text class="lbl" x="6" y="36">Pog'</text>
+                <text class="lbl" x="6" y="51">Or</text>
+                <text class="lbl" x="6" y="66">Li</text>
+                <text class="lbl" x="6" y="81">N</text>
+                <text class="lbl" x="6" y="96">S</text>
+              </svg>
+              <figcaption><strong>Thanh ngang · MRE từng điểm</strong><span>RQ3: 29 điểm xếp theo sai số; xanh dương là xương, xanh ngọc là mô mềm.</span></figcaption>
+            </figure>
+            <figure class="card chart">
+              <svg viewBox="0 0 200 120" aria-hidden="true">
+                <rect x="20" y="8" width="160" height="104" rx="6" fill="#0a0f17"/>
+                <path d="M78 30 C96 14 136 16 150 34 C160 48 154 66 150 78 C146 92 140 100 120 102 C100 104 86 96 80 84 C70 66 68 44 78 30 Z" fill="none" stroke="#94a3b8" stroke-width="1.4"/>
+                <circle cx="132" cy="34" r="3" fill="#34d399"/><circle cx="135" cy="37" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+                <circle cx="148" cy="62" r="3" fill="#34d399"/><circle cx="154" cy="67" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+                <circle cx="120" cy="98" r="3" fill="#34d399"/><circle cx="122" cy="95" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+                <circle cx="88" cy="74" r="3" fill="#34d399"/><circle cx="94" cy="78" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+              </svg>
+              <figcaption><strong>Ảnh minh hoạ</strong><span>Chấm đặc là ground-truth, vòng rỗng là dự đoán. Chọn ca tốt, ca xấu và một ca mỗi máy chụp (RQ4).</span></figcaption>
+            </figure>
+          </div>
+          <p class="muted-note">Các hình trên là bản phác bố cục, chưa phải số liệu thật.</p>
+        </section>
+
+        <section class="sec reveal" id="repo" aria-labelledby="h-repo">
+          <div class="sec__head">
+            <p class="sec__num">08</p>
+            <h2 id="h-repo">Bốn thư mục chính</h2>
+          </div>
+          <div class="grid g2">
+            <figure class="window"><div class="window__bar" aria-hidden="true"><i></i><i></i><i></i><b>ceph-landmark-yolo</b></div><pre class="tree"><span class="d">ceph-landmark-yolo/</span>
+├── <span class="d">data/</span>
+│   ├── raw/              <span class="c"># Aariz tải về, không sửa</span>
+│   ├── yolo/             <span class="c"># ảnh + nhãn YOLO Pose</span>
+│   └── meta.csv          <span class="c"># pixel size, máy chụp</span>
+├── <span class="d">src/</span>
+│   ├── prepare_aariz.py
+│   ├── train_yolo.py
+│   ├── train_unet.py
+│   ├── evaluate.py
+│   ├── benchmark_speed.py
+│   ├── plots.py
+│   └── demo.py           <span class="c"># chọn ảnh, vẽ 29 điểm</span>
+├── <span class="d">results/</span>
+│   ├── predictions_*.csv
+│   ├── metrics_summary.csv
+│   ├── speed.csv
+│   └── figures/
+├── <span class="d">configs/</span>
+│   └── aariz-pose.yaml
+├── requirements.txt
+└── README.md</pre></figure>
+            <ul class="folders">
+              <li><svg class="ico" aria-hidden="true"><use href="#i-folder"/></svg><span><strong>data/</strong>Dữ liệu gốc giữ nguyên; bản chuyển đổi và bảng metadata để đổi mm.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg><span><strong>src/</strong>Sáu bước ở mục 05 và một script demo cho buổi bảo vệ.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg><span><strong>results/</strong>Dự đoán thô, bảng metric, số đo tốc độ và hình.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg><span><strong>configs/</strong>Khai báo dataset cho Ultralytics: <code>kpt_shape</code>, <code>flip_idx</code>.</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="lich" aria-labelledby="h-plan">
+          <div class="sec__head">
+            <p class="sec__num">09</p>
+            <h2 id="h-plan">Hai tuần, 14 ngày</h2>
+            <p class="sec__lead">Tuần 1 lo dữ liệu và huấn luyện, tuần 2 lo đánh giá và viết. Ngày có nhãn "Mốc kiểm tra": nếu chưa đạt thì dùng phương án dự phòng ở mục 10 thay vì kéo dài lịch.</p>
+          </div>
+
+          <p class="week">Tuần 1 <span>Dữ liệu và mô hình</span></p>
+          <ol class="timeline">
+            <li class="day"><span class="day__no">Ngày 1</span><span class="kind">Chuẩn bị</span><strong>Đọc và cài đặt</strong><p>Đọc bài Aariz và bài MDPI. Tải dữ liệu, cài <code>torch</code>, <code>ultralytics</code>.</p></li>
+            <li class="day"><span class="day__no">Ngày 2</span><span class="kind">Chuẩn bị</span><strong>Chuyển định dạng</strong><p>Viết <code>prepare_aariz</code>, vẽ điểm lên ảnh để kiểm tra nhãn và pixel size.</p></li>
+            <li class="day day--eval day--gate"><span class="day__no">Ngày 3</span><span class="kind">Đánh giá</span><strong>Chạy thử và chấm điểm</strong><p>YOLO11n, 640 px, 10 epoch. Viết <code>evaluate</code> ngay để có MRE đầu tiên.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
+            <li class="day day--train"><span class="day__no">Ngày 4</span><span class="kind">Huấn luyện</span><strong>YOLO11n đầy đủ</strong><p>1024 px, khoảng 150 epoch, chạy qua đêm.</p></li>
+            <li class="day day--train"><span class="day__no">Ngày 5</span><span class="kind">Huấn luyện</span><strong>YOLO11s và v8n</strong><p>Train hai biến thể còn lại; chạy ablation 640 so với 1024.</p></li>
+            <li class="day day--train"><span class="day__no">Ngày 6</span><span class="kind">Huấn luyện</span><strong>U-Net heatmap</strong><p>Viết <code>train_unet</code>, kiểm tra decode heatmap trên val, bắt đầu train.</p></li>
+            <li class="day day--train day--gate"><span class="day__no">Ngày 7</span><span class="kind">Huấn luyện</span><strong>Chốt mô hình</strong><p>U-Net xong. Chọn checkpoint tốt nhất mỗi mô hình theo MRE trên val.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
+          </ol>
+
+          <p class="week">Tuần 2 <span>Đánh giá và báo cáo</span></p>
+          <ol class="timeline">
+            <li class="day day--eval"><span class="day__no">Ngày 8</span><span class="kind">Đánh giá</span><strong>Chấm trên test</strong><p>Chạy test một lần: MRE, SDR, từng điểm, theo máy chụp.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 9</span><span class="kind">Đánh giá</span><strong>Đo tốc độ</strong><p>CPU, GPU, ONNX. Đếm params, GFLOPs, MB.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 10</span><span class="kind">Đánh giá</span><strong>Phân tích lỗi</strong><p>Xem các điểm sai nhiều nhất; tuỳ chọn thử TTA hoặc tinh chỉnh vùng crop.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 11</span><span class="kind">Đánh giá</span><strong>Hình và bảng</strong><p>Chạy <code>plots</code>, chọn ảnh minh hoạ, viết <code>demo.py</code>.</p></li>
+            <li class="day day--write"><span class="day__no">Ngày 12</span><span class="kind">Viết</span><strong>Viết phần đầu</strong><p>Giới thiệu, tổng quan, dữ liệu và phương pháp.</p></li>
+            <li class="day day--write"><span class="day__no">Ngày 13</span><span class="kind">Viết</span><strong>Kết quả và slide</strong><p>Viết RQ1–RQ4, thảo luận. Làm slide bảo vệ.</p></li>
+            <li class="day day--write"><span class="day__no">Ngày 14</span><span class="kind">Viết</span><strong>Hoàn thiện</strong><p>Đối chiếu số trong bài với CSV, tập demo, đóng gói repo và nộp.</p></li>
+          </ol>
+        </section>
+
+        <section class="sec reveal" id="rui-ro" aria-labelledby="h-risk">
+          <div class="sec__head">
+            <p class="sec__num">10</p>
+            <h2 id="h-risk">Bốn chỗ có thể vỡ lịch</h2>
+          </div>
+          <div class="grid g2">
+            <article class="card risk">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>YOLO không xuống dưới 2&nbsp;mm</h3>
+              <dl>
+                <dt>Vì sao</dt>
+                <dd>Hồi quy keypoint ở độ phân giải thấp thường kém heatmap về độ chính xác dưới milimét.</dd>
+                <dt class="fix">Dự phòng</dt>
+                <dd>Tăng <code>imgsz</code> lên 1280, hoặc thêm bước hai crop quanh từng điểm để tinh chỉnh. Nếu vẫn không đạt, báo cáo trung thực đánh đổi tốc độ và độ chính xác; đó vẫn là kết quả.</dd>
+              </dl>
+            </article>
+            <article class="card risk">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Thiếu GPU hoặc train quá chậm</h3>
+              <dl>
+                <dt>Vì sao</dt>
+                <dd>Train ở 1024 px tốn nhiều bộ nhớ và thời gian nếu chỉ có CPU hoặc GPU nhỏ.</dd>
+                <dt class="fix">Dự phòng</dt>
+                <dd>Giảm batch, hoặc train trên Colab/Kaggle GPU. Tốc độ suy luận vẫn đo trên máy tính phổ thông vì đó là mục tiêu ứng dụng.</dd>
+              </dl>
+            </article>
+            <article class="card risk">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Đổi sang mm sai</h3>
+              <dl>
+                <dt>Vì sao</dt>
+                <dd>Bảy máy chụp có kích thước pixel khác nhau. Dùng một hằng số chung sẽ làm MRE sai lệch.</dd>
+                <dt class="fix">Dự phòng</dt>
+                <dd>Kiểm tra từ Ngày 2 bằng cách đo lại vài khoảng cách đã biết; đưa pixel size vào <code>meta.csv</code> và chỉ đọc từ đó.</dd>
+              </dl>
+            </article>
+            <article class="card risk">
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>So với bài MDPI không cùng điều kiện</h3>
+              <dl>
+                <dt>Vì sao</dt>
+                <dd>Số liệu trích dẫn có thể đo trên tập test, số điểm mốc hoặc độ phân giải khác.</dd>
+                <dt class="fix">Dự phòng</dt>
+                <dd>Kiểm lại bài báo ở Ngày 1 và ghi rõ khác biệt trong bảng. Phép so sánh công bằng chính là với U-Net tự huấn luyện trên cùng split.</dd>
+              </dl>
+            </article>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="bao-cao" aria-labelledby="h-paper">
+          <div class="sec__head">
+            <p class="sec__num">11</p>
+            <h2 id="h-paper">Dàn ý báo cáo sáu phần</h2>
+          </div>
+          <ol class="outline">
+            <li><h3>Giới thiệu</h3><p>Vai trò phân tích sọ nghiêng trong chỉnh nha; chi phí chấm tay; nhu cầu chạy tại phòng khám.</p></li>
+            <li><h3>Tổng quan</h3><p>Heatmap (U-Net, HRNet), hồi quy trực tiếp (ResNet), YOLO-Pose; các bộ dữ liệu ISBI 2015 và Aariz.</p></li>
+            <li><h3>Dữ liệu và phương pháp</h3><p>Aariz, chuyển định dạng, cấu hình YOLO, U-Net, cách tính MRE/SDR và đo tốc độ.</p></li>
+            <li>
+              <h3>Kết quả thực nghiệm</h3>
+              <ul>
+                <li>4.1 · RQ1: MRE và SDR của ba mô hình.</li>
+                <li>4.2 · RQ2: tốc độ và dung lượng mô hình.</li>
+                <li>4.3 · RQ3: điểm mốc khó, xương so với mô mềm.</li>
+                <li>4.4 · RQ4: sai số theo từng máy chụp.</li>
+              </ul>
+            </li>
+            <li><h3>Thảo luận</h3><p>Khi nào YOLO-Pose đủ dùng, khi nào cần heatmap; gợi ý triển khai ở phòng khám.</p></li>
+            <li><h3>Hạn chế và kết luận</h3><p>Một bộ dữ liệu, một lần chạy, chưa thẩm định lâm sàng; hướng mở rộng.</p></li>
+          </ol>
+          <ol class="refs">
+            <li>Aariz: bộ dữ liệu benchmark điểm mốc sọ nghiêng, <em>Nature Scientific Data</em>, 2025.</li>
+            <li>Bài báo MDPI 2025, ResNet-50 Regression (cần ghi đầy đủ tác giả, tạp chí, DOI khi trích dẫn).</li>
+            <li>Ultralytics, <a href="https://docs.ultralytics.com/tasks/pose/">tài liệu Pose Estimation</a>.</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+
+    <footer>
+      <p>ThS HUIT · Thị giác máy tính và nhận dạng mẫu · Đề án môn học</p>
+      <a href="index.html">Về trang môn học</a>
+    </footer>
+  </div>
+
+  <a class="to-top" href="#page-title" aria-label="Lên đầu trang"><svg class="ico" aria-hidden="true"><use href="#i-arrow-up"/></svg></a>
+
+  <script>
+    const root = document.documentElement;
+    const themeBtn = document.querySelector("[data-theme-toggle]");
+
+    function syncThemeButton() {
+      themeBtn.setAttribute("aria-pressed", String(root.dataset.theme === "dark"));
+    }
+
+    themeBtn.addEventListener("click", () => {
+      root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+      try { localStorage.setItem("ths-theme", root.dataset.theme); } catch (e) {}
+      syncThemeButton();
+    });
+    syncThemeButton();
+
+    const tocLinks = [...document.querySelectorAll(".toc a")];
+    const sections = tocLinks.map((a) => document.querySelector(a.getAttribute("href")));
+    const reveals = document.querySelectorAll(".reveal");
+
+    const tocList = document.querySelector(".toc ol");
+
+    function setCurrent(id) {
+      for (const link of tocLinks) {
+        const on = link.getAttribute("href") === "#" + id;
+        if (on) {
+          link.setAttribute("aria-current", "true");
+          if (tocList.scrollWidth > tocList.clientWidth) {
+            tocList.scrollLeft = link.offsetLeft - tocList.clientWidth / 2 + link.offsetWidth / 2;
+          }
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      }
+    }
+
+    const progress = document.querySelector(".progress span");
+    const toTop = document.querySelector(".to-top");
+    let ticking = false;
+
+    function onScroll() {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      progress.style.setProperty("--p", max > 0 ? Math.min(scrollY / max, 1) : 0);
+      toTop.classList.toggle("is-visible", scrollY > innerHeight);
+      ticking = false;
+    }
+
+    addEventListener("scroll", () => {
+      if (!ticking) {
+        requestAnimationFrame(onScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+    onScroll();
+
+    if ("IntersectionObserver" in window) {
+      const revealObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-in");
+          revealObserver.unobserve(entry.target);
+        }
+      }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
+      reveals.forEach((el) => revealObserver.observe(el));
+
+      const spy = new IntersectionObserver((entries) => {
+        const visible = entries.filter((e) => e.isIntersecting);
+        if (visible.length) setCurrent(visible[0].target.id);
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      sections.forEach((s) => s && spy.observe(s));
+    } else {
+      reveals.forEach((el) => el.classList.add("is-in"));
+    }
+  </script>
+</body>
+</html>
