@@ -133,26 +133,41 @@ def html_title(path: Path) -> str | None:
     return title or None
 
 
+def append_html_entry(entries: list[dict], path: Path, href: str, git_mtimes: dict[str, float]) -> None:
+    ts = file_timestamp(path, git_mtimes)
+    entries.append(
+        {
+            "name": href,
+            "title": html_title(path) or path.stem.replace("_", " "),
+            "size": format_size(path.stat().st_size),
+            "mtime": format_mtime(ts),
+            "ts": ts,
+            "href": href,
+        }
+    )
+
+
 def collect_entries(folder: Path, git_mtimes: dict[str, float]) -> list[dict]:
     entries: list[dict] = []
     if not folder.is_dir():
         return entries
     for path in folder.iterdir():
-        if not path.is_file() or path.name in SKIP_NAMES or path.name.startswith("."):
+        if path.name.startswith(".") or path.name in SKIP_DIRS:
             continue
-        if path.suffix.lower() != ".html":
+        if path.is_file():
+            if path.name in SKIP_NAMES or path.suffix.lower() != ".html":
+                continue
+            append_html_entry(entries, path, path.name, git_mtimes)
             continue
-        ts = file_timestamp(path, git_mtimes)
-        entries.append(
-            {
-                "name": path.name,
-                "title": html_title(path) or path.stem.replace("_", " "),
-                "size": format_size(path.stat().st_size),
-                "mtime": format_mtime(ts),
-                "ts": ts,
-                "href": path.name,
-            }
-        )
+        if not path.is_dir():
+            continue
+        # Một cấp thư mục con: giữ index.html vì đó có thể là trang vào của bài.
+        for child in path.iterdir():
+            if not child.is_file() or child.name.startswith(".") or child.name == "files.json":
+                continue
+            if child.suffix.lower() != ".html":
+                continue
+            append_html_entry(entries, child, f"{path.name}/{child.name}", git_mtimes)
     # Mới chỉnh sửa trước; cùng ngày thì theo tên để ổn định.
     entries.sort(key=lambda x: (-x["ts"], x["name"].lower()))
     return entries

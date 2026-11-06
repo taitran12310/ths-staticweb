@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích cách thu thập dữ liệu TMDB, dựng mạng đồng diễn, tính độ đo SNA và lấy thêm ảnh, tên phim, poster." />
+  <title>Giải thích dữ liệu và độ đo SNA</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("sna-doc-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --paper: #fafaf9;
+      --card: #ffffff;
+      --accent: #9a3412;
+      --accent-soft: #fff7ed;
+      --code: #44403c;
+      --code-bg: #f5f5f4;
+      --pre-bg: #1c1917;
+      --pre-ink: #fafaf9;
+      --alt: #0f766e;
+      --on-accent: #ffffff;
+      --zebra: #f5f5f4;
+      --shadow: 0 1px 2px rgba(28, 25, 23, .06), 0 4px 14px rgba(28, 25, 23, .06);
+      --ease: cubic-bezier(.2, .7, .2, 1);
+      --f-body: "Noto Serif", "Iowan Old Style", Georgia, serif;
+      --f-ui: "Be Vietnam Pro", "Avenir Next", "Segoe UI", sans-serif;
+      --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --ink: #ece7e2;
+        --muted: #a8a29e;
+        --line: #3a342e;
+        --paper: #1a1714;
+        --card: #24201c;
+        --accent: #fb923c;
+        --accent-soft: rgba(251, 146, 60, .12);
+        --code: #d6d3d1;
+        --code-bg: #2e2924;
+        --pre-bg: #110f0d;
+        --pre-ink: #ece7e2;
+        --alt: #2dd4bf;
+        --on-accent: #1a1714;
+        --zebra: rgba(255, 255, 255, .03);
+        --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #ece7e2;
+      --muted: #a8a29e;
+      --line: #3a342e;
+      --paper: #1a1714;
+      --card: #24201c;
+      --accent: #fb923c;
+      --accent-soft: rgba(251, 146, 60, .12);
+      --code: #d6d3d1;
+      --code-bg: #2e2924;
+      --pre-bg: #110f0d;
+      --pre-ink: #ece7e2;
+      --alt: #2dd4bf;
+      --on-accent: #1a1714;
+      --zebra: rgba(255, 255, 255, .03);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--f-body);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background-color .25s ease, color .25s ease;
+    }
+
+    a { color: var(--accent); }
+    a:hover { text-decoration: none; }
+
+    .skip {
+      position: absolute;
+      left: 0.75rem;
+      top: 0.75rem;
+      transform: translateY(-150%);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      z-index: 30;
+      font-family: var(--f-ui);
+    }
+
+    .skip:focus { transform: none; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ---------- Thanh tiến độ, nút nổi ---------- */
+    .progress {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 3px;
+      background: var(--accent);
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      z-index: 25;
+    }
+
+    .fab {
+      position: fixed;
+      z-index: 20;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      font: 600 1.1rem/1 var(--f-ui);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform .2s var(--ease), opacity .3s var(--ease), border-color .2s;
+    }
+
+    .fab:hover { border-color: var(--accent); color: var(--accent); }
+    .theme-toggle { top: 0.9rem; right: 1rem; }
+    .to-top { bottom: 1.2rem; right: 1rem; opacity: 0; pointer-events: none; transform: translateY(8px); }
+    .to-top.show { opacity: 1; pointer-events: auto; transform: none; }
+
+    /* ---------- Bố cục ---------- */
+    .page > header, .page > main, .page > footer, .page > .toc {
+      width: min(52rem, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    header {
+      padding: 1.4rem 0 0.5rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0 0 1rem;
+      padding: 0.35rem 0.8rem 0.35rem 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      font: 600 0.9rem/1 var(--f-ui);
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+
+    .back-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    header p {
+      color: var(--muted);
+      margin: 0.6rem 0 0;
+    }
+
+    .hero {
+      margin: 0 0 1.4rem;
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 16 / 7;
+      background: var(--pre-bg);
+      box-shadow: var(--shadow);
+    }
+
+    .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .eyebrow {
+      font: 600 0.78rem/1 var(--f-ui);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 .6rem;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--f-ui);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0; font-weight: 700; }
+    h2 { font-size: 1.5rem; margin: 2.6rem 0 0.7rem; font-weight: 700; scroll-margin-top: 1.5rem; }
+    h3 { font-size: 1.12rem; margin: 1.6rem 0 0.4rem; font-weight: 600; }
+    h2::before {
+      content: "";
+      display: block;
+      width: 2.2rem;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-bottom: .7rem;
+    }
+
+    .toc nav {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-family: var(--f-ui);
+      font-size: 0.95rem;
+    }
+
+    .toc ol { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    .toc li { margin: .15rem 0; }
+    .toc a { text-decoration: none; color: var(--muted); transition: color .2s; }
+    .toc a:hover { text-decoration: underline; color: var(--accent); }
+    .toc a[aria-current="true"] { color: var(--accent); font-weight: 600; }
+
+    @media (min-width: 1100px) {
+      .page {
+        display: grid;
+        grid-template-columns: 13rem minmax(0, 52rem);
+        column-gap: 3rem;
+        justify-content: center;
+      }
+      .page > header, .page > main, .page > footer, .page > .toc { width: auto; margin-inline: 0; }
+      .page > header { grid-column: 2; grid-row: 1; }
+      .page > .toc { grid-column: 1; grid-row: 1 / span 3; }
+      .page > main { grid-column: 2; grid-row: 2; }
+      .page > footer { grid-column: 2; grid-row: 3; }
+      .toc nav {
+        position: sticky;
+        top: 2rem;
+        margin-top: 2.5rem;
+        background: transparent;
+        border: 0;
+        border-left: 1px solid var(--line);
+        border-radius: 0;
+        padding: 0 0 0 1rem;
+        font-size: 0.9rem;
+      }
+      .toc ol { list-style: none; padding-left: 0; }
+      .toc li { position: relative; }
+      .toc li:has(a[aria-current="true"])::before {
+        content: "";
+        position: absolute;
+        left: -1.06rem;
+        top: .25em;
+        bottom: .25em;
+        width: 2px;
+        background: var(--accent);
+      }
+    }
+
+    section {
+      padding-bottom: 0.4rem;
+    }
+
+    .reveal { opacity: 0; transform: translateY(10px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    p, li { overflow-wrap: anywhere; }
+
+    /* ---------- Bảng ---------- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.8rem 0 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      font-size: 0.95rem;
+    }
+
+    caption {
+      text-align: left;
+      padding: 0.6rem 0.7rem 0.4rem;
+      font: 500 0.85rem/1.4 var(--f-ui);
+      color: var(--muted);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) { background: var(--zebra); }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    th { font-family: var(--f-ui); font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* ---------- Mã ---------- */
+    code, .formula {
+      font-family: var(--f-mono);
+      font-size: 0.84em;
+    }
+
+    code {
+      background: var(--code-bg);
+      color: var(--code);
+      padding: 0.05rem 0.28rem;
+      border-radius: 4px;
+    }
+
+    .formula {
+      display: block;
+      margin: 0.8rem 0 1rem;
+      padding: 0.85rem 1rem;
+      background: var(--accent-soft);
+      color: var(--ink);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    .note {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      color: var(--code);
+    }
+
+    pre {
+      margin: 0.7rem 0 1rem;
+      padding: 0.85rem 1rem;
+      overflow-x: auto;
+      border-radius: 10px;
+      background: var(--pre-bg);
+      color: var(--pre-ink);
+      border: 1px solid var(--line);
+      font-family: var(--f-mono);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* ---------- Hình ---------- */
+    .fig {
+      margin: 1.2rem 0 1.6rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .fig svg { display: block; width: 100%; height: auto; }
+    .fig img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--pre-bg); }
+
+    .fig figcaption {
+      margin-top: .7rem;
+      font: 400 0.86rem/1.5 var(--f-ui);
+      color: var(--muted);
+    }
+
+    .fig figcaption strong { color: var(--ink); font-weight: 600; }
+
+    .fig-pair {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    @media (min-width: 640px) {
+      .fig-pair { grid-template-columns: 1fr 1fr; }
+    }
+
+    .fig svg text { font-family: var(--f-ui); font-size: 14px; fill: var(--ink); }
+    .fig svg text.mono { font-family: var(--f-mono); font-size: 13px; }
+    .fig svg text.sm { font-size: 12.5px; }
+    .fig svg text.b { font-weight: 600; }
+    .fig svg text.lg { font-size: 16px; font-weight: 700; }
+
+    .f-accent { fill: var(--accent); }
+    .f-soft { fill: var(--accent-soft); }
+    .f-card { fill: var(--card); }
+    .f-paper { fill: var(--paper); }
+    .f-ink { fill: var(--ink); }
+    .f-muted { fill: var(--muted); }
+    .f-line { fill: var(--line); }
+    .f-alt { fill: var(--alt); }
+    .f-none { fill: none; }
+    .s-line { stroke: var(--line); }
+    .s-ink { stroke: var(--ink); }
+    .s-muted { stroke: var(--muted); }
+    .s-accent { stroke: var(--accent); }
+    .s-alt { stroke: var(--alt); }
+    .dash { stroke-dasharray: 5 5; }
+    .fig svg text.t-ink { fill: var(--ink); }
+    .fig svg text.t-muted { fill: var(--muted); }
+    .fig svg text.t-accent { fill: var(--accent); }
+    .fig svg text.t-on { fill: var(--on-accent); }
+    .fig svg text.t-alt { fill: var(--alt); }
+    .op-6 { opacity: .6; }
+    .op-8 { opacity: .85; }
+
+    /* ---------- Ô số liệu ---------- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: .75rem;
+      margin: 1.2rem 0 1.2rem;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+
+    .stat-num {
+      display: block;
+      font: 700 1.7rem/1.1 var(--f-ui);
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em;
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: .35rem;
+      font: 500 .82rem/1.35 var(--f-ui);
+      color: var(--muted);
+    }
+
+    /* ---------- Đồ thị tương tác ---------- */
+    .toy-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      margin-bottom: .8rem;
+    }
+
+    .toy-tabs button {
+      font: 500 .88rem/1 var(--f-ui);
+      padding: .55rem .85rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      transition: background-color .2s, color .2s, border-color .2s;
+    }
+
+    .toy-tabs button:hover { border-color: var(--accent); }
+    .toy-tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+    .toy-explain {
+      margin: .6rem 0 0;
+      min-height: 3em;
+      font: 400 .92rem/1.5 var(--f-ui);
+      color: var(--ink);
+    }
+
+    .toy .node circle { transition: r .4s var(--ease), stroke-width .3s; stroke: var(--card); stroke-width: 2; }
+    .toy .node.hot circle { stroke: var(--ink); stroke-width: 3.5; }
+    .toy .node text.name { font-size: 12.5px; font-weight: 700; fill: var(--on-accent); }
+    .toy .node text.val { font-size: 12.5px; fill: var(--muted); font-family: var(--f-mono); transition: transform .4s var(--ease); }
+    .toy .node.hot text.val { fill: var(--accent); font-weight: 600; }
+
+    footer {
+      margin-top: 2rem;
+      padding: 1.2rem 0 2.5rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 1rem; }
+      .fig { padding: .7rem; }
+      .stat-num { font-size: 1.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <figure class="hero">
+      <img src="slide-art/sna-cover.jpg" width="1280" height="720" alt="Minh họa mạng lưới các nút sáng nối với nhau, vài đường màu cam nổi bật như các cầu nối" loading="eager" fetchpriority="high" />
+    </figure>
+    <p class="eyebrow">Phân tích mạng xã hội · TMDB</p>
+    <h1>Cách lấy dữ liệu, xử lý và tính độ đo</h1>
+    <p>Mạng đồng diễn diễn viên từ TMDB, dùng cho trang <a href="BaiCaNhan_WEB/explore.html">Kho phim</a> và trang <a href="BaiCaNhan_WEB/index.html">Đồ thị SNA</a>. Các con số dưới đây lấy từ file dữ liệu đang có trong dự án, không lấy từ bảng cũ trong README. Bản trình chiếu nằm ở <a href="BaiCaNhan_Slide.html">BaiCaNhan_Slide.html</a>.</p>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#dinh-nghia">Đồ thị được định nghĩa thế nào</a></li>
+        <li><a href="#lay-du-lieu">Cách lấy dữ liệu từ TMDB</a></li>
+        <li><a href="#xu-ly">Cách xử lý sau khi lấy</a></li>
+        <li><a href="#do-do">Cách tính các độ đo</a></li>
+        <li><a href="#xuat-web">Cách xuất ra trang web</a></li>
+        <li><a href="#thong-tin-them">Ảnh, tên phim, poster và bộ nhớ đệm</a></li>
+        <li><a href="#gioi-han">Giới hạn cần nhớ khi đọc kết quả</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="dinh-nghia">
+      <h2>Đồ thị được định nghĩa thế nào</h2>
+      <p>Mỗi <strong>đỉnh</strong> là một diễn viên, nhận diện bằng <code>person_id</code> của TMDB. Hai diễn viên có <strong>một cạnh vô hướng</strong> khi cùng nằm trong top 10 tên trên bill của ít nhất một phim. <strong>Trọng số</strong> của cạnh là số phim chung.</p>
+      <p>Ví dụ A, B và C cùng đóng một phim thì sinh ba cạnh A–B, A–C, B–C, mỗi cạnh cộng thêm 1. Nếu A và B còn đóng chung một phim nữa, trọng số A–B thành 2. Phim chỉ còn một diễn viên sau khi lọc thì không tạo cạnh.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 290" role="img" aria-label="Bên trái: Phim 1 nối với A, B, C; Phim 2 nối với A, B, D. Mũi tên chiếu sang bên phải: đồ thị đồng diễn với cạnh A–B trọng số 2, các cạnh A–C, B–C, A–D, B–D trọng số 1.">
+          <defs>
+            <marker id="ar-proj" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-accent" /></marker>
+          </defs>
+          <text x="85" y="22" text-anchor="middle" class="sm t-muted b">Phim</text>
+          <text x="260" y="22" text-anchor="middle" class="sm t-muted b">Diễn viên</text>
+          <text x="565" y="22" text-anchor="middle" class="sm t-muted b">Đồ thị đồng diễn</text>
+          <g class="s-muted" stroke-width="1.6">
+            <line x1="140" y1="82" x2="242" y2="60" /><line x1="140" y1="82" x2="242" y2="125" /><line x1="140" y1="82" x2="242" y2="190" />
+            <line x1="140" y1="212" x2="242" y2="60" /><line x1="140" y1="212" x2="242" y2="125" /><line x1="140" y1="212" x2="242" y2="255" />
+          </g>
+          <rect x="30" y="60" width="110" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="85" y="87" text-anchor="middle" class="b">Phim 1</text>
+          <rect x="30" y="190" width="110" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="85" y="217" text-anchor="middle" class="b">Phim 2</text>
+          <g class="f-alt"><circle cx="260" cy="60" r="18" /><circle cx="260" cy="125" r="18" /><circle cx="260" cy="190" r="18" /><circle cx="260" cy="255" r="18" /></g>
+          <g text-anchor="middle"><text x="260" y="65" class="b t-on">A</text><text x="260" y="130" class="b t-on">B</text><text x="260" y="195" class="b t-on">C</text><text x="260" y="260" class="b t-on">D</text></g>
+
+          <line x1="312" y1="157" x2="404" y2="157" class="s-accent" stroke-width="2.5" marker-end="url(#ar-proj)" />
+          <text x="356" y="145" text-anchor="middle" class="b t-accent">chiếu</text>
+          <text x="356" y="180" text-anchor="middle" class="sm t-muted">cùng phim → nối</text>
+
+          <g class="s-muted" stroke-width="2">
+            <line x1="480" y1="80" x2="480" y2="240" /><line x1="650" y1="80" x2="650" y2="240" />
+            <line x1="480" y1="80" x2="650" y2="240" /><line x1="650" y1="80" x2="480" y2="240" />
+          </g>
+          <line x1="480" y1="80" x2="650" y2="80" class="s-accent" stroke-width="6" stroke-linecap="round" />
+          <text x="565" y="68" text-anchor="middle" class="b t-accent">2</text>
+          <text x="466" y="164" text-anchor="end" class="sm t-muted">1</text>
+          <text x="664" y="164" class="sm t-muted">1</text>
+          <text x="520" y="138" class="sm t-muted">1</text>
+          <text x="610" y="138" text-anchor="end" class="sm t-muted">1</text>
+          <g class="f-alt"><circle cx="480" cy="80" r="18" /><circle cx="650" cy="80" r="18" /><circle cx="480" cy="240" r="18" /><circle cx="650" cy="240" r="18" /></g>
+          <g text-anchor="middle"><text x="480" y="85" class="b t-on">A</text><text x="650" y="85" class="b t-on">B</text><text x="480" y="245" class="b t-on">C</text><text x="650" y="245" class="b t-on">D</text></g>
+          <text x="565" y="278" text-anchor="middle" class="sm t-muted">C và D không chung phim nào → không có cạnh</text>
+        </svg>
+        <figcaption><strong>Từ đồ thị phim–diễn viên sang đồ thị đồng diễn.</strong> A và B cùng có mặt ở Phim 1 và Phim 2 nên cạnh A–B có trọng số 2; mỗi cặp còn lại chỉ chung một phim nên trọng số 1.</figcaption>
+      </figure>
+
+      <p>Degree, clustering, betweenness, closeness, đường đi và diameter dùng đồ thị <em>không trọng số</em>: một bước là một lần có đóng chung, dù hai người đóng chung một phim hay mười phim. Louvain và modularity dùng trọng số. HITS chạy trên cùng đồ thị vô hướng, mỗi cạnh được xem như đi được cả hai chiều.</p>
+    </section>
+
+    <section id="lay-du-lieu">
+      <h2>Cách lấy dữ liệu từ TMDB</h2>
+      <p>Script <code>src/01_crawler.py</code> dùng API phiên bản 3. Gốc mọi URL là <code>https://api.themoviedb.org/3</code>. Có hai lệnh gọi cho mỗi phim: một lệnh tìm danh sách, một lệnh lấy chi tiết. Ngôn ngữ yêu cầu là <code>en-US</code>, nên <code>title</code> trả về là tên tiếng Anh nếu TMDB có bản đó.</p>
+
+      <figure class="fig">
+        <img src="slide-art/sna-pipeline.jpg" width="1280" height="720" loading="lazy" decoding="async" alt="Năm khung nối tiếp: cuộn phim, cơ sở dữ liệu, dòng dữ liệu, đồ thị nhỏ và đồ thị lớn" />
+        <figcaption><strong>Cả quy trình.</strong> Phim trên TMDB → file CSV → làm sạch → đồ thị đồng diễn → độ đo và trang web.</figcaption>
+      </figure>
+
+      <h3>Khóa API đặt ở đâu</h3>
+      <p>Khóa không ghi trong mã nguồn và không gửi kèm file nộp. Script đọc biến <code>TMDB_API_KEY</code>. Nếu biến chưa có trong môi trường, nó mở file <code>tmdb_sna_project/.env</code>, tìm dòng <code>TMDB_API_KEY=...</code>, rồi gán vào môi trường. File mẫu <code>.env.example</code> chỉ có chỗ trống:</p>
+      <pre><code>TMDB_API_KEY=your_tmdb_api_key_here</code></pre>
+      <p>Khóa miễn phí tạo tại trang API của TMDB. Mọi request trong crawler gửi khóa bằng query string <code>api_key</code>, không gửi bằng header. Thiếu khóa, hoặc khóa vẫn là dòng mẫu, script dừng ngay và không ghi file.</p>
+      <p>Tốc độ bị giới hạn khoảng 35 request trong mỗi 10 giây. HTTP 429 thì chờ số giây trong header <code>Retry-After</code>. HTTP 5xx thì chờ rồi thử lại, tối đa 5 lần. HTTP 404 ở lệnh chi tiết thì bỏ phim đó.</p>
+
+      <h3>API 1: tìm danh sách phim</h3>
+      <p>Endpoint <code>GET /discover/movie</code>. Script gọi lần lượt bốn nước, xen kẽ từng trang, sắp theo độ phổ biến giảm dần. Tham số của một lần gọi cho Việt Nam, trang 1:</p>
+      <div class="table-wrap">
+      <table>
+        <caption>Query string của <code>/discover/movie</code></caption>
+        <thead>
+          <tr><th>Tham số</th><th>Giá trị script gửi</th><th>Việc của tham số</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>api_key</code></td><td>khóa trong <code>.env</code></td><td>Xác thực</td></tr>
+          <tr><td><code>language</code></td><td><code>en-US</code></td><td>Tên và tóm tắt tiếng Anh</td></tr>
+          <tr><td><code>sort_by</code></td><td><code>popularity.desc</code></td><td>Phim phổ biến trước</td></tr>
+          <tr><td><code>include_adult</code></td><td><code>false</code></td><td>Bỏ phim TMDB đánh dấu adult ở bước discover</td></tr>
+          <tr><td><code>with_origin_country</code></td><td><code>VN</code>, rồi <code>KR</code>, <code>GB</code>, <code>US</code></td><td>Nước sản xuất</td></tr>
+          <tr><td><code>page</code></td><td><code>1</code>, <code>2</code>, …</td><td>Trang kết quả, tối đa 500</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>URL đầy đủ, khóa được viết tắt:</p>
+      <pre><code>GET /3/discover/movie?api_key=YOUR_KEY&amp;language=en-US&amp;sort_by=popularity.desc&amp;include_adult=false&amp;with_origin_country=VN&amp;page=1</code></pre>
+      <p>Response là một trang danh sách. Script chỉ đọc <code>total_pages</code> và <code>results[].id</code>. Các field còn lại bị bỏ, vì thông tin thật lấy ở API chi tiết. Dạng rút gọn, với phim sau này được ghi vào dữ liệu:</p>
+      <pre><code>{
+  "page": 1,
+  "results": [
+    {
+      "id": 637536,
+      "title": "Sister Sister",
+      "release_date": "2019-12-18",
+      "adult": false
+    }
+  ],
+  "total_pages": 80,
+  "total_results": 1600
+}</code></pre>
+      <p><code>total_pages</code> trong khối trên chỉ minh họa hình dạng. Số trang thật phụ thuộc thời điểm TMDB trả lời, và script không đi quá 500 trang. <code>id</code> 637536 là phim thật trong file cast.</p>
+      <p>Một phim đồng sản xuất chỉ nhận nhãn của nước gặp trước trong thứ tự VN, KR, GB, US. Nếu id đã có khi duyệt Việt Nam, lần nó xuất hiện ở trang Mỹ sẽ bị bỏ. Cột <code>origin_lang</code> lưu <code>vn</code>, <code>kr</code>, <code>gb</code> hoặc <code>us</code>. Đây là nhãn nguồn lúc cào, không phải quốc tịch diễn viên.</p>
+      <p>Cào dừng khi đủ hai mốc: ít nhất 50.000 dòng cast và ít nhất 50.000 cạnh ước lượng, và mỗi nước đã đi quá 20 trang hoặc đã hết trang. Kết quả ghi vào file tạm <code>.next.csv</code>. Chỉ khi đủ mốc, file tạm mới thay file chính. <code>--resume</code> nối tiếp file tạm.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 500" role="img" aria-label="Lưu đồ crawler: gọi discover theo nước VN, KR, GB, US; gọi chi tiết phim kèm credits và keywords; lọc phim người lớn; ghi hai file CSV; kiểm tra mốc 50.000 dòng và 50.000 cạnh, chưa đủ thì quay lại trang tiếp. Nhánh phụ: RateLimiter 35 request mỗi 10 giây, xử lý lỗi 429, 5xx, 404.">
+          <defs>
+            <marker id="ar-crawl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted" /></marker>
+            <marker id="ar-crawl-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-accent" /></marker>
+          </defs>
+          <g class="f-card s-line" stroke-width="1.5">
+            <rect x="70" y="16" width="360" height="64" rx="10" />
+            <rect x="70" y="116" width="360" height="64" rx="10" />
+            <rect x="70" y="216" width="360" height="64" rx="10" />
+            <rect x="70" y="316" width="360" height="64" rx="10" />
+          </g>
+          <rect x="70" y="416" width="360" height="72" rx="10" class="f-soft s-accent" stroke-width="1.5" />
+          <g text-anchor="middle">
+            <text x="250" y="43" class="mono b">GET /discover/movie</text>
+            <text x="250" y="66" class="sm t-muted">VN → KR → GB → US, xen kẽ từng trang</text>
+            <text x="250" y="143" class="mono b">GET /movie/{id}</text>
+            <text x="250" y="166" class="mono sm t-muted">?append_to_response=credits,keywords</text>
+            <text x="250" y="243" class="b">Lọc phim người lớn</text>
+            <text x="250" y="266" class="sm t-muted">adult = true hoặc keyword người lớn</text>
+            <text x="250" y="343" class="b">Ghi CSV</text>
+            <text x="250" y="366" class="mono sm t-muted">raw_movies_cast.csv · movies_meta.csv</text>
+            <text x="250" y="445" class="b">≥ 50.000 dòng cast và ≥ 50.000 cạnh,</text>
+            <text x="250" y="469" class="sm">mỗi nước &gt; 20 trang hoặc hết trang?</text>
+          </g>
+          <g class="s-muted" stroke-width="1.6" fill="none">
+            <line x1="250" y1="80" x2="250" y2="112" marker-end="url(#ar-crawl)" />
+            <line x1="250" y1="180" x2="250" y2="212" marker-end="url(#ar-crawl)" />
+            <line x1="250" y1="280" x2="250" y2="312" marker-end="url(#ar-crawl)" />
+            <line x1="250" y1="380" x2="250" y2="412" marker-end="url(#ar-crawl)" />
+            <path d="M70 452 H34 V48 H66" marker-end="url(#ar-crawl)" />
+            <line x1="430" y1="248" x2="466" y2="248" marker-end="url(#ar-crawl)" />
+          </g>
+          <text x="24" y="250" text-anchor="middle" class="sm t-muted" transform="rotate(-90 24 250)">chưa đủ → trang tiếp</text>
+          <line x1="430" y1="452" x2="466" y2="452" class="s-accent" stroke-width="1.8" marker-end="url(#ar-crawl-a)" />
+
+          <g class="f-paper s-line dash" stroke-width="1.4">
+            <rect x="470" y="16" width="230" height="64" rx="10" />
+            <rect x="470" y="100" width="230" height="100" rx="10" />
+            <rect x="470" y="222" width="230" height="52" rx="10" />
+          </g>
+          <rect x="470" y="420" width="230" height="64" rx="10" class="f-soft s-accent" stroke-width="1.5" />
+          <g class="s-muted dash" stroke-width="1.2"><line x1="430" y1="48" x2="470" y2="48" /><line x1="430" y1="148" x2="470" y2="148" /></g>
+          <g text-anchor="middle">
+            <text x="585" y="43" class="b">RateLimiter</text>
+            <text x="585" y="66" class="sm t-muted">35 request / 10 giây</text>
+            <text x="585" y="124" class="b">Lỗi HTTP</text>
+            <text x="585" y="146" class="sm t-muted">429 → chờ Retry-After</text>
+            <text x="585" y="166" class="sm t-muted">5xx → chờ, thử lại ≤ 5 lần</text>
+            <text x="585" y="186" class="sm t-muted">404 → bỏ phim</text>
+            <text x="585" y="253" class="sm t-muted">khớp → bỏ, không ghi dòng nào</text>
+            <text x="585" y="447" class="b t-accent">Đủ mốc</text>
+            <text x="585" y="469" class="sm"><tspan class="mono">.next.csv</tspan> thay file chính</text>
+          </g>
+        </svg>
+        <figcaption><strong>Vòng lặp của <code>01_crawler.py</code>.</strong> Cột giữa là đường chính cho mỗi phim; các khung nét đứt bên phải là phần chạy kèm mọi request (giới hạn tốc độ, thử lại) và nhánh loại phim.</figcaption>
+      </figure>
+
+      <h3>API 2: chi tiết phim, diễn viên và keyword</h3>
+      <p>Với mỗi <code>id</code> chưa gặp, script gọi <code>GET /movie/{id}</code>. Tham số <code>append_to_response=credits,keywords</code> nhét cast và keyword vào cùng một JSON, khỏi gọi thêm hai endpoint.</p>
+      <div class="table-wrap">
+      <table>
+        <caption>Query string của <code>/movie/{id}</code></caption>
+        <thead>
+          <tr><th>Tham số</th><th>Giá trị</th><th>Việc của tham số</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>api_key</code></td><td>khóa trong <code>.env</code></td><td>Xác thực</td></tr>
+          <tr><td><code>language</code></td><td><code>en-US</code></td><td>Tên, tóm tắt, tên thể loại</td></tr>
+          <tr><td><code>append_to_response</code></td><td><code>credits,keywords</code></td><td>Gắn <code>credits</code> và <code>keywords</code> vào response</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <pre><code>GET /3/movie/637536?api_key=YOUR_KEY&amp;language=en-US&amp;append_to_response=credits,keywords</code></pre>
+      <p>Response thật còn rất nhiều field (<code>budget</code>, <code>production_companies</code>, <code>crew</code>, ảnh, …). Script không lưu những field đó. Khối dưới chỉ giữ phần được đọc, với đúng id, tên và keyword đang có trong dữ liệu của phim Chị Chị Em Em:</p>
+      <pre><code>{
+  "adult": false,
+  "id": 637536,
+  "title": "Sister Sister",
+  "overview": "This is a psychological film exploring the love story...",
+  "release_date": "2019-12-18",
+  "runtime": 104,
+  "popularity": 7.0572,
+  "vote_average": 5.5,
+  "vote_count": 11,
+  "genres": [
+    { "id": 53, "name": "Thriller" },
+    { "id": 18, "name": "Drama" },
+    { "id": 10749, "name": "Romance" }
+  ],
+  "credits": {
+    "cast": [
+      { "id": 83482, "name": "Thanh Hằng", "character": "Thiên Kim", "order": 0 },
+      { "id": 1598161, "name": "Chi Pu", "character": "Bảo Nhi", "order": 1 },
+      { "id": 2389301, "name": "Lãnh Thanh", "character": "Thiên Kim's husband", "order": 2 }
+    ]
+  },
+  "keywords": {
+    "keywords": [
+      { "name": "vietnam" },
+      { "name": "lgbt" },
+      { "name": "psychological" }
+    ]
+  }
+}</code></pre>
+      <p>Trong <code>credits.cast</code>, chỉ người có <code>order</code> từ 0 đến 9, có cả <code>id</code> và <code>name</code>, mới được ghi. <code>order</code> 0 là tên đầu bill. Cắt ở 10 người vì một phim vài chục diễn viên sẽ tạo hàng trăm cạnh giữa những vai thoáng qua.</p>
+      <p>Nếu không có <code>title</code>, script lấy <code>original_title</code>. <code>overview</code> cắt còn 500 ký tự. <code>genres</code> được lưu nguyên chuỗi Python của mảng object, không chuyển thành JSON.</p>
+
+      <h3>File crawler ghi ra</h3>
+      <p>Một phim thành nhiều dòng trong <code>data/raw_movies_cast.csv</code>, mỗi dòng một diễn viên. Ba dòng đầu thật của phim 637536:</p>
+      <pre><code>movie_id,movie_title,release_date,person_id,person_name,character,cast_order,origin_lang
+637536,Sister Sister,2019-12-18,83482,Thanh Hằng,Thiên Kim,0,vn
+637536,Sister Sister,2019-12-18,1598161,Chi Pu,Bảo Nhi,1,vn
+637536,Sister Sister,2019-12-18,2389301,Lãnh Thanh,Thiên Kim's husband,2,vn</code></pre>
+      <p>Cùng lúc, một dòng metadata vào <code>data/movies_meta.csv</code>. Cột <code>genres</code> là chuỗi, không phải cột JSON:</p>
+      <pre><code>genres,id,overview,popularity,release_date,runtime,title,vote_average,vote_count
+"[{'id': 53, 'name': 'Thriller'}, {'id': 18, 'name': 'Drama'}, {'id': 10749, 'name': 'Romance'}]",637536,"This is a psychological film...",7.0572,2019-12-18,104,Sister Sister,5.5,11</code></pre>
+      <p>Lúc cào, script còn đếm số cặp diễn viên để biết đã đủ 50.000 cạnh chưa. Những cặp đó không ghi ra file. Cạnh chính thức được dựng lại ở bước xử lý.</p>
+
+      <h3>Loại phim người lớn</h3>
+      <p><code>include_adult=false</code> không loại hết phim khiêu dâm, vì nhiều phim TMDB vẫn để <code>adult: false</code>. Sau response chi tiết, phim bị bỏ nếu <code>adult</code> là true, hoặc một keyword trùng softcore, porno, pornography, pornographic, porn, erotic movie. Từ “eroticism” cố ý không dùng, vì nó bắt nhầm phim điện ảnh. Phim bị bỏ không có dòng cast và không có dòng meta.</p>
+      <p>Mười bốn phim điện ảnh bị keyword gắn nhầm vẫn được giữ: 9 Songs, Taxi Driver, Samaritan Girl, Boogie Nights, The Isle, Lies, Shame, Invasion of Alien Bikini, Forbidden Quest, Plum Blossom, The Duke of Burgundy, Porno, X và Pearl. Cùng quy tắc nằm trong crawler và trong lệnh <code>drop-adult</code>.</p>
+      <p>Sau khi loại và giữ 14 phim đó, kho hiện có <strong>5.656 phim</strong> và <strong>22.548 diễn viên</strong> trong <code>catalog.json</code>. Nhãn nước của các phim: Mỹ 1.585, Anh 1.650, Việt Nam 1.227, Hàn Quốc 1.194.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 176" role="img" aria-label="Số phim theo nhãn nước: Anh 1.650, Mỹ 1.585, Việt Nam 1.227, Hàn Quốc 1.194, tổng 5.656 phim.">
+          <g class="f-line"><rect x="140" y="12" width="480" height="24" rx="4" opacity=".5" /><rect x="140" y="50" width="480" height="24" rx="4" opacity=".5" /><rect x="140" y="88" width="480" height="24" rx="4" opacity=".5" /><rect x="140" y="126" width="480" height="24" rx="4" opacity=".5" /></g>
+          <rect x="140" y="12" width="480" height="24" rx="4" class="f-accent" />
+          <rect x="140" y="50" width="461.1" height="24" rx="4" class="f-accent op-8" />
+          <rect x="140" y="88" width="356.9" height="24" rx="4" class="f-accent op-6" />
+          <rect x="140" y="126" width="347.3" height="24" rx="4" class="f-accent op-6" />
+          <g text-anchor="end">
+            <text x="128" y="29">Anh (GB)</text>
+            <text x="128" y="67">Mỹ (US)</text>
+            <text x="128" y="105">Việt Nam (VN)</text>
+            <text x="128" y="143">Hàn Quốc (KR)</text>
+          </g>
+          <g class="mono b">
+            <text x="630" y="29" class="mono b">1.650</text>
+            <text x="611" y="67" class="mono b">1.585</text>
+            <text x="507" y="105" class="mono b">1.227</text>
+            <text x="497" y="143" class="mono b">1.194</text>
+          </g>
+          <text x="140" y="172" class="sm t-muted">Tổng 5.656 phim trong catalog.json · mỗi phim một nhãn, theo thứ tự gặp VN → KR → GB → US</text>
+        </svg>
+        <figcaption><strong>Số phim theo nhãn nước nguồn.</strong> Bốn nguồn khá cân bằng; Anh và Mỹ nhiều hơn Việt Nam và Hàn Quốc khoảng 400 phim mỗi bên.</figcaption>
+      </figure>
+    </section>
+
+    <section id="xu-ly">
+      <h2>Cách xử lý sau khi lấy</h2>
+      <p>Script <code>src/02_process_graph.py</code> không gọi API. Input duy nhất là <code>raw_movies_cast.csv</code>. File meta không tham gia bước dựng cạnh. Vì các phim người lớn đã bị xóa sau lần cào, số dòng còn 48.133, thấp hơn mốc 50.000 của crawler. Bước này chấp nhận từ 40.000 dòng, nhưng vẫn đòi ít nhất 50.000 cạnh.</p>
+
+      <h3>Input</h3>
+      <p>Mỗi dòng là một lần một diễn viên xuất hiện trên bill của một phim. Tám cột, đúng header đang có trong file:</p>
+      <pre><code>movie_id,movie_title,release_date,person_id,person_name,character,cast_order,origin_lang</code></pre>
+      <p><code>movie_title</code>, <code>release_date</code>, <code>character</code> và <code>origin_lang</code> không dùng để tính cạnh. Chúng còn lại cho bước xuất kho phim.</p>
+
+      <h3>Các bước trên bảng cast</h3>
+      <div class="table-wrap">
+      <table>
+        <caption>Số dòng qua từng bước làm sạch, theo <code>clean_counts.csv</code></caption>
+        <thead>
+          <tr><th>Bước</th><th class="num">Số dòng hoặc số cạnh</th><th>Quy tắc</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cast thô</td><td class="num">48.133</td><td>Đọc nguyên file</td></tr>
+          <tr><td>Bỏ dòng thiếu id hoặc tên</td><td class="num">48.133</td><td><code>person_id</code> và <code>person_name</code> phải có</td></tr>
+          <tr><td>Gộp trùng một người trong một phim</td><td class="num">48.126</td><td>Khóa <code>(movie_id, person_id)</code>, giữ <code>cast_order</code> nhỏ hơn</td></tr>
+          <tr><td>Giữ bill 0–9</td><td class="num">48.126</td><td>Crawler đã lọc, bước này lọc lại</td></tr>
+          <tr><td>Bỏ phim dưới 2 diễn viên</td><td class="num">47.988</td><td>Một người thì không có cặp</td></tr>
+          <tr><td>Cạnh duy nhất</td><td class="num">189.586</td><td>Mỗi cặp một dòng, trọng số là số phim chung</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 300" role="img" aria-label="Phễu làm sạch: 48.133 dòng cast thô, gộp trùng còn 48.126 dòng (bớt 7), bỏ phim dưới 2 diễn viên còn 47.988 dòng (bớt 138), rồi dựng thành 189.586 cạnh duy nhất.">
+          <defs>
+            <marker id="ar-funnel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-accent" /></marker>
+          </defs>
+          <g text-anchor="end">
+            <text x="188" y="37">Cast thô</text>
+            <text x="188" y="87">Gộp trùng</text>
+            <text x="188" y="137">Phim ≥ 2 người</text>
+          </g>
+          <rect x="200" y="18" width="440" height="28" rx="5" class="f-muted op-6" />
+          <rect x="200" y="68" width="439.9" height="28" rx="5" class="f-muted op-8" />
+          <rect x="200" y="118" width="438.7" height="28" rx="5" class="f-ink" />
+          <g class="mono b" text-anchor="end">
+            <text x="630" y="37" class="mono b t-on">48.133 dòng</text>
+            <text x="630" y="87" class="mono b t-on">48.126 dòng</text>
+            <text x="630" y="137" class="mono b" style="fill: var(--paper)">47.988 dòng</text>
+          </g>
+          <g class="sm t-accent">
+            <text x="210" y="63" class="sm t-accent">−7 dòng trùng (movie_id, person_id)</text>
+            <text x="210" y="113" class="sm t-accent">−138 dòng của phim chỉ còn 1 diễn viên</text>
+          </g>
+          <line x1="420" y1="152" x2="420" y2="196" class="s-accent" stroke-width="2.5" marker-end="url(#ar-funnel)" />
+          <text x="432" y="180" class="sm t-muted">lập mọi cặp trong từng phim, gộp cặp trùng</text>
+          <rect x="200" y="202" width="440" height="72" rx="10" class="f-soft s-accent" stroke-width="2" />
+          <text x="420" y="236" text-anchor="middle" class="lg t-accent">189.586 cạnh duy nhất</text>
+          <text x="420" y="260" text-anchor="middle" class="sm t-muted">trên 22.485 đỉnh · trọng số = số phim chung</text>
+        </svg>
+        <figcaption><strong>Làm sạch gần như không mất dữ liệu.</strong> Chỉ 145 dòng bị bỏ (0,3%), nhưng bước lập cặp biến 47.988 lần xuất hiện thành gần bốn lần số cạnh.</figcaption>
+      </figure>
+
+      <h3>Từ một phim ra các cạnh</h3>
+      <p>Trong một phim, script lấy danh sách <code>person_id</code> không trùng, sắp tăng dần, rồi lập mọi cặp. Ba người 83482, 1598161 và 2389301 cho ba cạnh, mỗi cạnh trọng số 1 nếu họ chỉ gặp nhau ở phim này:</p>
+      <pre><code>source,target,weight
+83482,1598161,1
+83482,2389301,1
+1598161,2389301,1</code></pre>
+      <p>Nếu cùng cặp xuất hiện ở phim thứ hai, dòng không được thêm mới. <code>weight</code> tăng lên 2. <code>source</code> luôn là id nhỏ hơn <code>target</code>, nên A–B và B–A không thành hai cạnh.</p>
+
+      <figure class="fig">
+        <div class="fig-pair">
+          <img src="slide-art/sna-cast-triangle.jpg" width="1024" height="1024" loading="lazy" decoding="async" alt="Ba hình người nối với nhau thành tam giác, bảng clapper phim ở giữa" />
+          <svg viewBox="0 0 360 320" role="img" aria-label="Phim Sister Sister: Thanh Hằng, Chi Pu, Lãnh Thanh tạo tam giác 3 cạnh, mỗi cạnh trọng số 1. Công thức n nhân n trừ 1 chia 2: 3 người ra 3 cạnh, 10 người ra 45 cạnh.">
+            <g class="s-accent" stroke-width="2.5">
+              <line x1="180" y1="60" x2="70" y2="200" /><line x1="180" y1="60" x2="290" y2="200" /><line x1="70" y1="200" x2="290" y2="200" />
+            </g>
+            <g class="sm t-muted b" text-anchor="middle">
+              <text x="112" y="124" class="sm t-muted b">1</text><text x="248" y="124" class="sm t-muted b">1</text><text x="180" y="194" class="sm t-muted b">1</text>
+            </g>
+            <g class="f-alt"><circle cx="180" cy="60" r="20" /><circle cx="70" cy="200" r="20" /><circle cx="290" cy="200" r="20" /></g>
+            <g text-anchor="middle">
+              <text x="180" y="28" class="b">Thanh Hằng</text>
+              <text x="70" y="240" class="b">Chi Pu</text>
+              <text x="290" y="240" class="b">Lãnh Thanh</text>
+            </g>
+            <text x="180" y="278" text-anchor="middle" class="mono lg t-accent">n(n − 1) / 2</text>
+            <text x="180" y="306" text-anchor="middle" class="sm t-muted">3 người → 3 cạnh · 10 người → 45 cạnh</text>
+          </svg>
+        </div>
+        <figcaption><strong>Một phim là một cụm đủ cạnh.</strong> Bill tối đa 10 tên nên một phim sinh tối đa 45 cạnh; đó là lý do clustering của mạng rất cao.</figcaption>
+      </figure>
+
+      <h3>Output của bước dựng đồ thị</h3>
+      <p><code>data/actors.csv</code> có một dòng cho mỗi diễn viên còn lại. Tên là tên gặp đầu tiên. <code>n_movies</code> là số phim khác nhau. Dòng thật của Mark Hamill:</p>
+      <pre><code>person_id,name,n_movies
+2,Mark Hamill,10</code></pre>
+      <p><code>data/edges.csv</code> có đúng ba cột. Dòng thật <code>2,3,4</code> nghĩa là diễn viên 2 và diễn viên 3 đóng chung 4 phim:</p>
+      <pre><code>source,target,weight
+2,3,4</code></pre>
+      <p><code>data/clean_counts.csv</code> chỉ là nhật ký số dòng ở bảng trên, hai cột <code>step</code> và <code>n_rows</code>. Đồ thị sau bước này có <strong>22.485 đỉnh</strong> và <strong>189.586 cạnh</strong>. Kho phim nhiều hơn 63 diễn viên vì catalog giữ cả người không có đồng diễn nào sau khi lọc. Những người đó không có đỉnh trên đồ thị.</p>
+
+      <h3>Output của bước tính độ đo</h3>
+      <p><code>src/03_calculate_sna.py</code> nhận <code>edges.csv</code> và <code>actors.csv</code>. Không nhận lại CSV cast. Mỗi cạnh thành một cạnh NetworkX, <code>weight</code> đi cùng cạnh.</p>
+      <p>Output từng đỉnh là <code>data/metrics_nodes.csv</code>. Một dòng thật, Samuel L. Jackson, đúng thứ tự cột trong file:</p>
+      <pre><code>id,name,n_movies,community,degree,clustering,hub,authority,betweenness,closeness,eigenvector
+2231,Samuel L. Jackson,42,1,323,0.0405,0.0000878,0.0000878,0.01470,0.3223,0.00320</code></pre>
+      <p>Các số thập phân ở dòng ví dụ được làm tròn cho dễ đọc. File gốc giữ đủ số chữ số của phép tính. Ô trống nghĩa là độ đo không được tính cho đỉnh đó, thường gặp ở closeness và ở đỉnh ngoài thành phần lớn.</p>
+      <p>Output toàn mạng là <code>data/metrics_global.json</code>. Phần đầu của file đang có dạng:</p>
+      <pre><code>{
+  "n_nodes": 22485,
+  "n_edges": 189586,
+  "giant_component_size": 20255,
+  "density": 0.0007500147264556414,
+  "avg_clustering": 0.7948801081746785,
+  "modularity": 0.6843748928117995,
+  "n_communities": 489,
+  "avg_path_length": 4.518465241433791,
+  "diameter": 14,
+  "path_metrics_approximate": true,
+  "closeness_approximate": true,
+  "closeness_computed_nodes": 2506,
+  "betweenness_k": 300,
+  "betweenness_approximate": true
+}</code></pre>
+    </section>
+
+    <section id="do-do">
+      <h2>Cách tính các độ đo</h2>
+      <p>Script <code>src/03_calculate_sna.py</code> dựng <code>networkx.Graph</code> từ toàn bộ cạnh, rồi ghi <code>metrics_nodes.csv</code> và <code>metrics_global.json</code>. Thành phần liên thông lớn nhất có 20.255 đỉnh, lớn hơn ngưỡng 8.000, nên betweenness, closeness, đường đi trung bình và diameter được tính xấp xỉ. Seed cố định là 42 để chạy lại ra cùng mẫu.</p>
+
+      <div class="stats" aria-label="Năm độ đo toàn mạng chính">
+        <div class="stat"><span class="stat-num" data-to="0.6844" data-dec="4">0,6844</span><span class="stat-label">Modularity Q (Louvain)</span></div>
+        <div class="stat"><span class="stat-num" data-to="0.7949" data-dec="4">0,7949</span><span class="stat-label">Clustering trung bình</span></div>
+        <div class="stat"><span class="stat-num" data-to="4.518" data-dec="3">4,518</span><span class="stat-label">Đường đi trung bình ≈</span></div>
+        <div class="stat"><span class="stat-num" data-to="14" data-dec="0">14</span><span class="stat-label">Diameter mẫu ≈</span></div>
+        <div class="stat"><span class="stat-num" data-to="489" data-dec="0">489</span><span class="stat-label">Cộng đồng Louvain</span></div>
+      </div>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 110" role="img" aria-label="Thành phần liên thông lớn nhất có 20.255 trên 22.485 đỉnh, khoảng 90,1 phần trăm; 2.230 đỉnh còn lại nằm ở các mảnh nhỏ.">
+          <rect x="20" y="40" width="680" height="32" rx="6" class="f-line" />
+          <rect x="20" y="40" width="612.6" height="32" rx="6" class="f-accent" />
+          <text x="34" y="62" class="b t-on">20.255 đỉnh · 90,1%</text>
+          <text x="20" y="26" class="sm t-muted">Thành phần liên thông lớn nhất</text>
+          <text x="700" y="26" text-anchor="end" class="sm t-muted">Mảnh nhỏ</text>
+          <text x="700" y="96" text-anchor="end" class="mono sm t-muted">2.230 đỉnh</text>
+          <text x="20" y="96" class="mono sm t-muted">tổng 22.485 đỉnh</text>
+        </svg>
+        <figcaption><strong>Gần như cả mạng nối thành một khối.</strong> Betweenness, closeness, eigenvector và đường đi chỉ tính trên 20.255 đỉnh này.</figcaption>
+      </figure>
+
+      <figure class="fig toy" id="toy-graph">
+        <div class="toy-tabs" role="group" aria-label="Chọn độ đo để tô đồ thị mẫu">
+          <button type="button" data-m="deg" aria-pressed="true">Degree</button>
+          <button type="button" data-m="btw" aria-pressed="false">Betweenness</button>
+          <button type="button" data-m="clo" aria-pressed="false">Closeness</button>
+          <button type="button" data-m="eig" aria-pressed="false">Eigenvector</button>
+          <button type="button" data-m="clu" aria-pressed="false">Clustering</button>
+        </div>
+        <svg viewBox="0 0 720 320" role="img" aria-label="Đồ thị mẫu 10 đỉnh: cụm A gồm A1 đến A5, cụm B gồm B1 đến B4, nối với nhau qua đỉnh cầu X nằm giữa A1 và B1. Kích thước đỉnh đổi theo độ đo đang chọn.">
+          <g class="s-muted" stroke-width="1.8" opacity=".7">
+            <line x1="290" y1="160" x2="200" y2="70" /><line x1="290" y1="160" x2="110" y2="150" /><line x1="290" y1="160" x2="190" y2="245" />
+            <line x1="200" y1="70" x2="110" y2="150" /><line x1="200" y1="70" x2="190" y2="245" /><line x1="110" y1="150" x2="190" y2="245" />
+            <line x1="110" y1="150" x2="60" y2="265" /><line x1="190" y1="245" x2="60" y2="265" />
+            <line x1="470" y1="160" x2="560" y2="70" /><line x1="470" y1="160" x2="650" y2="160" /><line x1="470" y1="160" x2="560" y2="250" />
+            <line x1="560" y1="70" x2="650" y2="160" /><line x1="560" y1="70" x2="560" y2="250" /><line x1="650" y1="160" x2="560" y2="250" />
+          </g>
+          <g class="s-accent" stroke-width="3"><line x1="290" y1="160" x2="380" y2="160" /><line x1="380" y1="160" x2="470" y2="160" /></g>
+          <g id="toy-nodes"></g>
+        </svg>
+        <p class="toy-explain" aria-live="polite"></p>
+        <figcaption><strong>Thử năm độ đo trên một đồ thị nhỏ.</strong> Giá trị tính bằng NetworkX trên đồ thị 10 đỉnh này; đỉnh viền đậm là đỉnh cao nhất theo độ đo đang chọn. X ít bạn diễn nhất nhưng là cầu nối duy nhất giữa hai cụm.</figcaption>
+      </figure>
+
+      <h3>Degree</h3>
+      <p>Degree của một diễn viên là số người khác có ít nhất một phim chung với họ. Đây là số hàng xóm, không phải tổng trọng số. Trên trang đồ thị, nút to hơn khi degree cao, theo thang log để hub không nuốt hết các nút nhỏ.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 300" role="img" aria-label="Phân bố degree trên 22.485 đỉnh: 1 đến 8: 3.400; đúng 9: 12.293; 10 đến 17: 1.052; đúng 18: 1.846; 19 đến 26: 587; đúng 27: 632; 28 đến 44: 1.015; 45 đến 99: 1.282; từ 100 trở lên: 378.">
+          <g class="s-line" stroke-width="1">
+            <line x1="70" y1="240" x2="700" y2="240" /><line x1="70" y1="174.9" x2="700" y2="174.9" class="dash" /><line x1="70" y1="109.8" x2="700" y2="109.8" class="dash" /><line x1="70" y1="44.8" x2="700" y2="44.8" class="dash" />
+          </g>
+          <g text-anchor="end" class="mono sm t-muted">
+            <text x="62" y="244" class="mono sm t-muted">0</text><text x="62" y="179" class="mono sm t-muted">4.000</text><text x="62" y="114" class="mono sm t-muted">8.000</text><text x="62" y="49" class="mono sm t-muted">12.000</text>
+          </g>
+          <g class="f-muted op-6">
+            <rect x="80" y="184.7" width="50" height="55.3" rx="3" />
+            <rect x="220" y="222.9" width="50" height="17.1" rx="3" />
+            <rect x="360" y="230.5" width="50" height="9.5" rx="3" />
+            <rect x="500" y="223.5" width="50" height="16.5" rx="3" />
+            <rect x="570" y="219.1" width="50" height="20.9" rx="3" />
+            <rect x="640" y="233.9" width="50" height="6.1" rx="3" />
+          </g>
+          <g class="f-accent">
+            <rect x="150" y="40" width="50" height="200" rx="3" />
+            <rect x="290" y="210" width="50" height="30" rx="3" />
+            <rect x="430" y="229.7" width="50" height="10.3" rx="3" />
+          </g>
+          <g text-anchor="middle" class="mono sm">
+            <text x="105" y="178" class="mono sm">3.400</text>
+            <text x="175" y="34" class="mono sm t-accent b">12.293</text>
+            <text x="245" y="216" class="mono sm">1.052</text>
+            <text x="315" y="203" class="mono sm t-accent b">1.846</text>
+            <text x="385" y="224" class="mono sm">587</text>
+            <text x="455" y="223" class="mono sm t-accent b">632</text>
+            <text x="525" y="217" class="mono sm">1.015</text>
+            <text x="595" y="212" class="mono sm">1.282</text>
+            <text x="665" y="227" class="mono sm">378</text>
+          </g>
+          <g text-anchor="middle" class="sm">
+            <text x="105" y="262" class="sm">1–8</text><text x="175" y="262" class="sm b t-accent">9</text><text x="245" y="262" class="sm">10–17</text><text x="315" y="262" class="sm b t-accent">18</text><text x="385" y="262" class="sm">19–26</text><text x="455" y="262" class="sm b t-accent">27</text><text x="525" y="262" class="sm">28–44</text><text x="595" y="262" class="sm">45–99</text><text x="665" y="262" class="sm">100+</text>
+          </g>
+          <text x="385" y="290" text-anchor="middle" class="sm t-muted">degree (số người đóng chung) · số diễn viên</text>
+          <text x="230" y="80" class="sm t-accent">← 12.293 người (55%) có đúng 9 bạn diễn:</text>
+          <text x="230" y="100" class="sm t-muted">đóng đúng một phim đủ 10 tên đầu bill</text>
+        </svg>
+        <figcaption><strong>Phân bố degree, tính từ <code>metrics_nodes.csv</code>.</strong> Đỉnh nhọn ở 9, 18, 27 (tô màu) là dấu vết của bill 10 người: một, hai, ba phim không trùng bạn diễn. Đuôi dài: 378 diễn viên có từ 100 bạn diễn, cao nhất là Samuel L. Jackson với 323.</figcaption>
+      </figure>
+
+      <h3>Density</h3>
+      <p class="formula">density = 2E / (N × (N − 1))</p>
+      <p>Với 22.485 đỉnh và 189.586 cạnh, mật độ là 0,000750. Mạng thưa: hầu hết cặp diễn viên không đóng chung.</p>
+
+      <h3>Clustering</h3>
+      <p>Hệ số cụm cục bộ của một đỉnh là tỷ lệ hàng xóm của họ cũng nối với nhau. Trung bình cộng trên mọi đỉnh là 0,7949. Cao là đúng với mạng đồng diễn: cùng một phim, các diễn viên top bill gần như tạo thành một cụm đủ cạnh.</p>
+
+      <h3>HITS</h3>
+      <p>HITS lặp hub và authority, chuẩn hóa, tối đa 300 vòng, sai số 1e-6. Trên đồ thị vô hướng, hai điểm này trùng hoặc rất sát nhau. Tương quan hạng Spearman giữa hub và degree là 0,583: người đóng chung với nhiều người thường cũng là hub, nhưng hai độ đo không thay thế nhau. Cả hub và authority vẫn được lưu cho từng đỉnh.</p>
+
+      <h3>Louvain và modularity</h3>
+      <p>Cộng đồng do thư viện <code>python-louvain</code>, hàm <code>best_partition</code>, có trọng số và <code>random_state=42</code>. Hai người đóng chung nhiều phim bị kéo vào cùng cụm mạnh hơn một lần đóng chung.</p>
+      <p class="formula">Q = (1 / 2W) × Σ [Aij − (ki × kj) / 2W] × δ(ci, cj)</p>
+      <p>W là nửa tổng trọng số, Aij là trọng số cạnh, ki là tổng trọng số bậc, δ bằng 1 khi hai đỉnh cùng cộng đồng. Kết quả: <strong>Q = 0,6844</strong>, <strong>489 cộng đồng</strong>. Q dương và khá cao nghĩa là các cụm dày bên trong hơn so với cách nối ngẫu nhiên cùng bậc.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 320" role="img" aria-label="Tám cộng đồng Louvain lớn nhất và diễn viên degree cao nhất mỗi cộng đồng: Samuel L. Jackson 4.947; Don Lee 3.066; Như Quỳnh 2.188; Sean Connery 1.768; Robert De Niro 972; Steve Buscemi 669; Patrick Wilson 618; Drew Barrymore 476.">
+          <g text-anchor="end">
+            <text x="220" y="31">Samuel L. Jackson</text>
+            <text x="220" y="69">Don Lee</text>
+            <text x="220" y="107">Như Quỳnh</text>
+            <text x="220" y="145">Sean Connery</text>
+            <text x="220" y="183">Robert De Niro</text>
+            <text x="220" y="221">Steve Buscemi</text>
+            <text x="220" y="259">Patrick Wilson</text>
+            <text x="220" y="297">Drew Barrymore</text>
+          </g>
+          <g class="f-accent">
+            <rect x="232" y="14" width="400" height="24" rx="4" />
+          </g>
+          <g class="f-accent op-8">
+            <rect x="232" y="52" width="247.9" height="24" rx="4" />
+            <rect x="232" y="90" width="176.9" height="24" rx="4" />
+            <rect x="232" y="128" width="143" height="24" rx="4" />
+          </g>
+          <g class="f-accent op-6">
+            <rect x="232" y="166" width="78.6" height="24" rx="4" />
+            <rect x="232" y="204" width="54.1" height="24" rx="4" />
+            <rect x="232" y="242" width="50" height="24" rx="4" />
+            <rect x="232" y="280" width="38.5" height="24" rx="4" />
+          </g>
+          <g class="mono b">
+            <text x="642" y="31" class="mono b">4.947</text>
+            <text x="490" y="69" class="mono b">3.066</text>
+            <text x="419" y="107" class="mono b">2.188</text>
+            <text x="385" y="145" class="mono b">1.768</text>
+            <text x="321" y="183" class="mono b">972</text>
+            <text x="296" y="221" class="mono b">669</text>
+            <text x="292" y="259" class="mono b">618</text>
+            <text x="281" y="297" class="mono b">476</text>
+          </g>
+          <g class="sm t-muted">
+            <text x="540" y="69" class="sm t-muted">cụm Hàn Quốc</text>
+            <text x="470" y="107" class="sm t-muted">cụm Việt Nam</text>
+          </g>
+        </svg>
+        <figcaption><strong>Tám cộng đồng Louvain lớn nhất</strong>, đặt tên theo diễn viên có degree cao nhất trong cụm (tính từ cột <code>community</code> của <code>metrics_nodes.csv</code>). Tám cụm này chứa 14.704 diễn viên, khoảng 65% số đỉnh; 481 cụm còn lại nhỏ hơn 476 người.</figcaption>
+      </figure>
+
+      <h3>Betweenness</h3>
+      <p>Betweenness đo một đỉnh nằm trên bao nhiêu đường đi ngắn nhất giữa các cặp khác. Chỉ tính trong thành phần lớn nhất. Thay vì mọi đỉnh nguồn, thuật toán lấy mẫu <strong>k = 300</strong> nguồn, chuẩn hóa, seed 42. Đỉnh ngoài thành phần lớn để trống.</p>
+      <p>Điểm cao nghĩa là người đó là cầu nối giữa các cụm phim, không chỉ là người có nhiều đồng diễn. Trang đồ thị xếp “Cầu nối” theo cột này.</p>
+
+      <h3>Closeness</h3>
+      <p>Vì thành phần lớn hơn 8.000 đỉnh, closeness không tính cho mọi người. Script lấy 2.500 đỉnh degree cao nhất trong thành phần lớn, cộng 50 đỉnh betweenness cao nhất, rồi bỏ trùng. Thực tế có <strong>2.506 đỉnh</strong> được tính. Các đỉnh còn lại để trống trên bảng và trên thẻ thông tin.</p>
+      <p>Với mỗi nguồn, một lần BFS cho khoảng cách tới mọi đỉnh tới được. Công thức Wasserman–Faust, đúng kiểu <code>wf_improved</code> của NetworkX:</p>
+      <p class="formula">C(s) = ((r − 1) / (N − 1)) × ((r − 1) / farness)</p>
+      <p>r là số đỉnh tới được trong thành phần lớn, kể cả chính nó. N là số đỉnh của thành phần lớn, vì BFS chạy trên thành phần đó chứ không trên cả đồ thị. farness là tổng khoảng cách từ s. Thừa số đầu giảm điểm nếu từ s không với tới hết thành phần lớn.</p>
+
+      <h3>Eigenvector</h3>
+      <p>Eigenvector centrality tính trên thành phần lớn, lặp tối đa 500 vòng, sai số 1e-6. Nếu không hội tụ thì dùng bản numpy. Một diễn viên điểm cao khi đồng diễn với những người cũng ở gần trung tâm, không chỉ khi có nhiều đồng diễn.</p>
+
+      <h3>Đường đi trung bình và diameter</h3>
+      <p>Cả hai đều xấp xỉ từ 400 đỉnh nguồn ngẫu nhiên trong thành phần lớn. Từ mỗi nguồn, BFS lấy khoảng cách tới các đỉnh tới được. Đường đi trung bình là trung bình mọi khoảng cách dương thu được: <strong>4,518</strong>. Diameter báo cáo là khoảng cách lớn nhất nhìn thấy trong các lần BFS đó: <strong>14</strong>. Đây là cận dưới của diameter thật, vì một cặp chưa được mẫu có thể còn xa hơn. Cờ <code>path_metrics_approximate</code> trên web là true, nên giao diện gắn dấu xấp xỉ.</p>
+
+      <div class="table-wrap">
+      <table>
+        <caption>Độ đo toàn mạng trong <code>metrics_global.json</code></caption>
+        <thead>
+          <tr><th>Chỉ số</th><th class="num">Giá trị</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Đỉnh</td><td class="num">22.485</td></tr>
+          <tr><td>Cạnh</td><td class="num">189.586</td></tr>
+          <tr><td>Thành phần liên thông lớn nhất</td><td class="num">20.255</td></tr>
+          <tr><td>Density</td><td class="num">0,000750</td></tr>
+          <tr><td>Clustering trung bình</td><td class="num">0,7949</td></tr>
+          <tr><td>Modularity Q</td><td class="num">0,6844</td></tr>
+          <tr><td>Số cộng đồng Louvain</td><td class="num">489</td></tr>
+          <tr><td>Đường đi trung bình, xấp xỉ</td><td class="num">4,518</td></tr>
+          <tr><td>Diameter mẫu, xấp xỉ</td><td class="num">14</td></tr>
+          <tr><td>Spearman hub và degree</td><td class="num">0,583</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section id="xuat-web">
+      <h2>Cách xuất ra trang web</h2>
+      <p><code>src/04_export_web.py</code> tạo hai file. <code>catalog.json</code> phục vụ Kho phim. <code>network_data.json</code> phục vụ đồ thị 3D. Cả hai được copy sang <code>BaiCaNhan_WEB</code>. Kho phim mở tại <a href="BaiCaNhan_WEB/explore.html">BaiCaNhan_WEB/explore.html</a>, đồ thị 3D mở tại <a href="BaiCaNhan_WEB/index.html">BaiCaNhan_WEB/index.html</a>.</p>
+
+      <h3>Kho phim</h3>
+      <p>Mỗi phim gom cast đã lọc, thể loại, điểm, thời lượng, nhãn nước và tóm tắt cắt còn khoảng 280 ký tự. Mỗi diễn viên có danh sách phim, sắp theo điểm vote rồi ngày chiếu, kèm các độ đo nếu người đó có trong bảng metrics. Trang Kho phim đọc thêm tên tiếng Việt, tiếng Anh, tiếng Hàn từ <code>titles.json</code> khi có.</p>
+
+      <h3>Đồ thị 3D</h3>
+      <p>Mọi đỉnh của đồ thị đều được xuất, kèm tọa độ cố định. Tọa độ không do lực đẩy lúc mở trang. Script đặt tâm mỗi cộng đồng Louvain lên một mặt cầu, cộng đồng lớn nằm vòng ngoài hơn. Trong một cộng đồng, người degree cao gần tâm, người còn lại đi theo vòng xoắn góc vàng. Có một ít nhiễu nhỏ, seed 42, để các nút không nằm đúng trên một đường. Tọa độ ghi vào cả <code>x, y, z</code> và <code>fx, fy, fz</code> nên layout không chạy lại.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 370" role="img" aria-label="Bên trái: mặt cầu với tâm các cộng đồng, cộng đồng lớn trên vòng ngoài, cộng đồng nhỏ ở vòng trong. Bên phải: phóng to một cộng đồng, đỉnh degree cao ở tâm, các đỉnh khác xếp theo vòng xoắn góc vàng khoảng 137,5 độ.">
+          <defs>
+            <marker id="ar-sphere" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted" /></marker>
+          </defs>
+          <g class="f-none s-line" stroke-width="1.5">
+            <circle cx="180" cy="175" r="140" />
+            <ellipse cx="180" cy="175" rx="140" ry="40" class="dash" />
+            <ellipse cx="180" cy="175" rx="40" ry="140" class="dash" />
+          </g>
+          <circle cx="180" cy="175" r="80" class="f-none s-muted dash" stroke-width="1.2" />
+          <g class="f-accent op-8">
+            <circle cx="311.6" cy="127.1" r="26" />
+            <circle cx="132.1" cy="43.4" r="20" />
+            <circle cx="48.4" cy="222.9" r="17" />
+            <circle cx="227.9" cy="306.6" r="14" />
+          </g>
+          <g class="f-alt op-8">
+            <circle cx="220" cy="105.7" r="8" />
+            <circle cx="101.2" cy="161.1" r="7" />
+            <circle cx="152.6" cy="250.2" r="6" />
+            <circle cx="249.3" cy="215" r="6" />
+          </g>
+          <circle cx="180" cy="175" r="3" class="f-muted" />
+          <line x1="340" y1="133" x2="470" y2="165" class="s-muted dash" stroke-width="1.4" marker-end="url(#ar-sphere)" />
+          <circle cx="560" cy="175" r="82" class="f-paper s-line" stroke-width="1.5" />
+          <g class="f-accent op-8"><circle cx="553.0" cy="181.4" r="5.9"/><circle cx="561.2" cy="161.6" r="5.8"/><circle cx="570.0" cy="188.1" r="5.6"/><circle cx="541.3" cy="171.7" r="5.5"/><circle cx="577.9" cy="163.6" r="5.4"/><circle cx="554.0" cy="197.5" r="5.3"/><circle cx="548.4" cy="152.7" r="5.2"/><circle cx="585.2" cy="184.2" r="5.0"/><circle cx="533.7" cy="185.9" r="4.9"/><circle cx="572.7" cy="147.8" r="4.8"/><circle cx="569.4" cy="205.1" r="4.7"/><circle cx="531.5" cy="158.5" r="4.6"/><circle cx="593.5" cy="167.6" r="4.4"/><circle cx="539.6" cy="204.1" r="4.3"/><circle cx="555.3" cy="138.5" r="4.2"/><circle cx="589.1" cy="199.5" r="4.1"/><circle cx="520.9" cy="176.6" r="4.0"/><circle cx="588.6" cy="146.6" r="3.8"/><circle cx="558.1" cy="216.4" r="3.7"/><circle cx="532.8" cy="142.4" r="3.6"/><circle cx="603.1" cy="180.8" r="3.5"/><circle cx="523.4" cy="200.5" r="3.4"/><circle cx="570.0" cy="130.5" r="3.2"/><circle cx="583.1" cy="215.4" r="3.1"/><circle cx="514.7" cy="160.6" r="3.0"/><circle cx="604.0" cy="154.7" r="2.9"/><circle cx="540.9" cy="220.5" r="2.8"/><circle cx="543.0" cy="127.7" r="2.6"/><circle cx="605.3" cy="198.8" r="2.5"/><circle cx="509.7" cy="188.3" r="2.4"/><circle cx="588.6" cy="130.5" r="2.3"/><circle cx="569.1" cy="228.0" r="2.2"/><circle cx="516.8" cy="141.6" r="2.2"/></g>
+          <circle cx="560" cy="175" r="9" class="f-ink" />
+          <text x="560" y="30" text-anchor="middle" class="b">Trong một cộng đồng</text>
+          <text x="560" y="284" text-anchor="middle" class="sm">degree cao ở tâm,</text>
+          <text x="560" y="303" text-anchor="middle" class="sm t-muted">còn lại theo vòng xoắn góc vàng ≈ 137,5°</text>
+          <text x="180" y="352" text-anchor="middle" class="sm"><tspan class="t-accent b">●</tspan> cộng đồng lớn: vòng ngoài   <tspan class="t-alt b">●</tspan> nhỏ: vòng trong</text>
+        </svg>
+        <figcaption><strong>Layout cố định của <code>network_data.json</code>.</strong> Tâm cộng đồng đặt trên mặt cầu theo kích thước, rồi từng cộng đồng tự xếp thành đĩa xoắn ốc quanh tâm của nó; không có mô phỏng lực khi mở trang.</figcaption>
+      </figure>
+
+      <p>Vẽ đủ 189.586 cạnh sẽ thành một khối khó nhìn. File web chỉ giữ <strong>25.000 cạnh trọng số cao nhất</strong>. Degree và các độ đo vẫn là của đồ thị đầy đủ. Vì vậy một người có degree 244 trên thẻ thông tin có thể thấy ít cạnh hơn trên hình, nếu những cạnh còn lại không lọt top 25.000.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 140" role="img" aria-label="So sánh số cạnh: đồ thị đầy đủ 189.586 cạnh, bản vẽ web chỉ giữ 25.000 cạnh nặng nhất, khoảng 13,2 phần trăm.">
+          <text x="20" y="24" class="sm t-muted">Toàn bộ đồ thị, dùng để tính degree và độ đo</text>
+          <rect x="20" y="32" width="680" height="28" rx="5" class="f-muted op-6" />
+          <text x="34" y="51" class="mono b t-on">189.586 cạnh</text>
+          <text x="20" y="90" class="sm t-muted">Bản vẽ 3D trên web</text>
+          <rect x="20" y="98" width="680" height="28" rx="5" class="f-line" />
+          <rect x="20" y="98" width="89.7" height="28" rx="5" class="f-accent" />
+          <text x="120" y="117" class="mono b t-accent">25.000 cạnh nặng nhất · 13,2%</text>
+        </svg>
+        <figcaption><strong>Chỉ khoảng 1 trên 8 cạnh được vẽ.</strong> Các cạnh bị bỏ là cạnh trọng số thấp, thường chỉ chung một phim.</figcaption>
+      </figure>
+
+      <p>Với 2.500 đỉnh degree cao và 50 cầu nối betweenness, file còn lưu tối đa 8 đồng diễn nặng nhất. Danh sách “Đồng diễn nhiều phim chung” trên sidebar lấy từ đây, duyệt trên mọi cạnh chứ không chỉ 25.000 cạnh đang vẽ.</p>
+      <p>Mỗi đỉnh có cờ <code>us</code>, <code>gb</code>, <code>vn</code>, <code>kr</code> nếu người đó từng đóng phim mang nhãn nước tương ứng. Một người có thể có nhiều cờ. Số diễn viên theo cờ, có giao nhau: Mỹ 8.109, Anh 9.331, Việt Nam 2.865, Hàn Quốc 4.231.</p>
+
+      <h3>Khi xem quanh một diễn viên</h3>
+      <p>Chế độ trực tiếp giữ diễn viên đã chọn và những người có cạnh trong đồ thị mà trang đang dùng, gồm 25.000 cạnh nặng và các đồng diễn đã lưu. Chế độ gián tiếp đi thêm 1 đến 12 bước trên cùng đồ thị đó. Bậc 1 là đồng diễn của đồng diễn. Đi hết thành phần liên thông của bản vẽ sẽ gần như cả khối 7.000 đỉnh có cạnh trong 25.000 cạnh nặng, nên thanh kéo dừng ở 12 bậc. Màu xám là các bậc gián tiếp. Nút <em>Hiện toàn đồ thị</em> bỏ giới hạn này và trở lại layout cộng đồng.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 340" role="img" aria-label="Ba vòng đồng tâm quanh diễn viên đã chọn: vòng 1 là đồng diễn trực tiếp, vòng 2 là gián tiếp bậc 1 (đồng diễn của đồng diễn), vòng 3 là gián tiếp bậc 2. Các vòng gián tiếp tô xám.">
+          <g class="f-none s-line dash" stroke-width="1.2"><circle cx="200" cy="170" r="55" /><circle cx="200" cy="170" r="105" /><circle cx="200" cy="170" r="155" /></g>
+          <g class="s-muted" stroke-width="1.1" opacity=".55"><line x1="200" y1="115" x2="232" y2="70"/><line x1="248" y1="142" x2="285" y2="108"/><line x1="248" y1="142" x2="305" y2="170"/><line x1="248" y1="198" x2="285" y2="232"/><line x1="200" y1="225" x2="232" y2="270"/><line x1="200" y1="225" x2="168" y2="270"/><line x1="152" y1="198" x2="115" y2="232"/><line x1="152" y1="198" x2="95" y2="170"/><line x1="152" y1="142" x2="115" y2="108"/><line x1="200" y1="115" x2="168" y2="70"/><line x1="232" y1="70" x2="227" y2="17"/><line x1="232" y1="70" x2="290" y2="44"/><line x1="285" y1="108" x2="336" y2="96"/><line x1="305" y1="170" x2="355" y2="162"/><line x1="285" y1="232" x2="343" y2="230"/><line x1="285" y1="232" x2="303" y2="286"/><line x1="232" y1="270" x2="242" y2="319"/><line x1="168" y1="270" x2="173" y2="323"/><line x1="168" y1="270" x2="110" y2="296"/><line x1="115" y1="232" x2="64" y2="244"/><line x1="95" y1="170" x2="45" y2="178"/><line x1="115" y1="108" x2="57" y2="110"/><line x1="115" y1="108" x2="97" y2="54"/><line x1="168" y1="70" x2="158" y2="21"/></g>
+          <g class="s-accent" stroke-width="2"><line x1="200" y1="170" x2="200" y2="115"/><line x1="200" y1="170" x2="248" y2="142"/><line x1="200" y1="170" x2="248" y2="198"/><line x1="200" y1="170" x2="200" y2="225"/><line x1="200" y1="170" x2="152" y2="198"/><line x1="200" y1="170" x2="152" y2="142"/></g>
+          <g class="f-muted op-6"><circle cx="227" cy="17" r="5"/><circle cx="290" cy="44" r="5"/><circle cx="336" cy="96" r="5"/><circle cx="355" cy="162" r="5"/><circle cx="343" cy="230" r="5"/><circle cx="303" cy="286" r="5"/><circle cx="242" cy="319" r="5"/><circle cx="173" cy="323" r="5"/><circle cx="110" cy="296" r="5"/><circle cx="64" cy="244" r="5"/><circle cx="45" cy="178" r="5"/><circle cx="57" cy="110" r="5"/><circle cx="97" cy="54" r="5"/><circle cx="158" cy="21" r="5"/></g>
+          <g class="f-muted"><circle cx="232" cy="70" r="6"/><circle cx="285" cy="108" r="6"/><circle cx="305" cy="170" r="6"/><circle cx="285" cy="232" r="6"/><circle cx="232" cy="270" r="6"/><circle cx="168" cy="270" r="6"/><circle cx="115" cy="232" r="6"/><circle cx="95" cy="170" r="6"/><circle cx="115" cy="108" r="6"/><circle cx="168" cy="70" r="6"/></g>
+          <g class="f-accent"><circle cx="200" cy="115" r="8"/><circle cx="248" cy="142" r="8"/><circle cx="248" cy="198" r="8"/><circle cx="200" cy="225" r="8"/><circle cx="152" cy="198" r="8"/><circle cx="152" cy="142" r="8"/></g>
+          <circle cx="200" cy="170" r="14" class="f-ink" />
+
+          <circle cx="410" cy="70" r="9" class="f-ink" />
+          <text x="430" y="75" class="b">Diễn viên đã chọn</text>
+          <circle cx="410" cy="125" r="8" class="f-accent" />
+          <text x="430" y="122" class="b">Trực tiếp · 1 bước</text>
+          <text x="430" y="141" class="sm t-muted">có cạnh với người đã chọn</text>
+          <circle cx="410" cy="185" r="6" class="f-muted" />
+          <text x="430" y="182" class="b">Gián tiếp bậc 1 · 2 bước</text>
+          <text x="430" y="201" class="sm t-muted">đồng diễn của đồng diễn</text>
+          <circle cx="410" cy="245" r="5" class="f-muted op-6" />
+          <text x="430" y="242" class="b">Gián tiếp bậc 2 · 3 bước</text>
+          <text x="430" y="261" class="sm t-muted">… thanh kéo đi tới bậc 12</text>
+          <text x="410" y="310" class="sm t-muted">Đi trên 25.000 cạnh nặng + đồng diễn đã lưu</text>
+        </svg>
+        <figcaption><strong>Chế độ trực tiếp và gián tiếp.</strong> Mỗi vòng thêm một bước trên đồ thị của bản vẽ; các vòng gián tiếp hiện màu xám như trên trang.</figcaption>
+      </figure>
+    </section>
+
+    <section id="thong-tin-them">
+      <h2>Ảnh, tên phim, poster và bộ nhớ đệm</h2>
+      <p><code>src/05_fetch_media.py</code> chạy riêng sau khi đã có catalog và cast. Mỗi lệnh ghi tiếp file JSON, bỏ qua mục đã có. Ảnh tải qua <code>https://image.tmdb.org</code> bằng đường dẫn tương đối TMDB trả về. Script không bịa ảnh khi TMDB không có.</p>
+
+      <h3>Ảnh diễn viên</h3>
+      <p>Lệnh <code>photos</code> gọi <code>GET /person/{id}?api_key=YOUR_KEY</code> và chỉ lấy <code>profile_path</code>. Nếu field đó trống, gọi tiếp <code>GET /person/{id}/images</code> và chọn phần tử trong <code>profiles</code> có <code>vote_count</code> cao nhất. Response rút gọn của Thanh Hằng, id 83482:</p>
+      <pre><code>{
+  "id": 83482,
+  "name": "Thanh Hằng",
+  "profile_path": "/sa32gCX4i8b4cmArLtvOUC1k507.jpg"
+}</code></pre>
+      <p>File <code>actor_photos.json</code> là một object, khóa là id diễn viên, giá trị là đường dẫn hoặc <code>null</code>:</p>
+      <pre><code>{ "83482": "/sa32gCX4i8b4cmArLtvOUC1k507.jpg" }</code></pre>
+      <p><code>null</code> nghĩa là TMDB không có ảnh cho đúng id đó. Trong 22.548 diễn viên của catalog, <strong>4.523 người không có ảnh</strong>. Ảnh không được gán từ một người trùng tên. Trang web ghép đường dẫn vào <code>https://image.tmdb.org/t/p/w185</code> cho thẻ đồ thị, và <code>h632</code> cho trang diễn viên.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 230" role="img" aria-label="Luồng lấy ảnh diễn viên: gọi person lấy profile_path; nếu trống gọi person images và chọn ảnh vote_count cao nhất; nếu vẫn không có thì ghi null và trang web hiện ảnh giữ chỗ. Có ảnh thì lưu đường dẫn và ghép vào image.tmdb.org.">
+          <defs>
+            <marker id="ar-photo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted" /></marker>
+            <marker id="ar-photo-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-accent" /></marker>
+          </defs>
+          <g class="f-card s-line" stroke-width="1.5">
+            <rect x="10" y="20" width="170" height="70" rx="10" />
+            <rect x="222" y="20" width="200" height="70" rx="10" />
+            <rect x="464" y="20" width="110" height="70" rx="10" />
+          </g>
+          <rect x="608" y="20" width="102" height="70" rx="10" class="f-paper s-muted dash" stroke-width="1.4" />
+          <g text-anchor="middle">
+            <text x="95" y="49" class="mono sm b">/person/{id}</text>
+            <text x="95" y="72" class="mono sm t-muted">profile_path</text>
+            <text x="322" y="49" class="mono sm b">/person/{id}/images</text>
+            <text x="322" y="72" class="sm t-muted">vote_count cao nhất</text>
+            <text x="519" y="49" class="mono b">null</text>
+            <text x="519" y="72" class="sm t-muted">4.523 người</text>
+            <text x="659" y="49" class="sm b">Ảnh giữ chỗ</text>
+            <text x="659" y="72" class="sm t-muted">trên web</text>
+          </g>
+          <g class="s-muted" stroke-width="1.6">
+            <line x1="180" y1="55" x2="218" y2="55" marker-end="url(#ar-photo)" />
+            <line x1="422" y1="55" x2="460" y2="55" marker-end="url(#ar-photo)" />
+            <line x1="574" y1="55" x2="604" y2="55" marker-end="url(#ar-photo)" />
+          </g>
+          <g class="sm t-muted" text-anchor="middle"><text x="200" y="45" class="sm t-muted">trống</text><text x="442" y="45" class="sm t-muted">rỗng</text></g>
+          <g class="s-accent" stroke-width="1.8">
+            <line x1="95" y1="90" x2="95" y2="146" marker-end="url(#ar-photo-a)" />
+            <line x1="322" y1="90" x2="322" y2="146" marker-end="url(#ar-photo-a)" />
+          </g>
+          <g class="sm t-accent"><text x="104" y="124" class="sm t-accent b">có</text><text x="331" y="124" class="sm t-accent b">có</text></g>
+          <rect x="10" y="150" width="412" height="64" rx="10" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="216" y="177" text-anchor="middle" class="b">Lưu đường dẫn vào actor_photos.json</text>
+          <text x="216" y="200" text-anchor="middle" class="mono sm t-muted">image.tmdb.org/t/p/w185 · h632</text>
+        </svg>
+        <figcaption><strong>Thứ tự dự phòng khi tìm ảnh.</strong> Chỉ dùng ảnh của đúng id; không có ảnh thì để <code>null</code> và trang web hiện khung giữ chỗ, không mượn ảnh người trùng tên.</figcaption>
+      </figure>
+
+      <h3>Tên phim nhiều ngôn ngữ</h3>
+      <p>Lệnh <code>titles</code> gọi <code>GET /movie/{id}/translations?api_key=YOUR_KEY</code>. Mỗi phần tử có <code>iso_639_1</code>, <code>iso_3166_1</code> và <code>data.title</code>. Script chỉ giữ tiếng Việt, tiếng Anh và tiếng Hàn. Với mỗi ngôn ngữ, ưu tiên bản đúng vùng: VN, US, rồi KR. Dạng response rút gọn:</p>
+      <pre><code>{
+  "translations": [
+    { "iso_639_1": "vi", "iso_3166_1": "VN", "data": { "title": "Chị Chị Em Em" } },
+    { "iso_639_1": "en", "iso_3166_1": "US", "data": { "title": "Sister Sister" } },
+    { "iso_639_1": "ko", "iso_3166_1": "KR", "data": { "title": "은밀한" } }
+  ]
+}</code></pre>
+      <p>Output <code>titles.json</code> bỏ vùng và chỉ giữ tên đã chọn. Phim 637536 trong file:</p>
+      <pre><code>{ "637536": { "en": "Sister Sister", "vi": "Chị Chị Em Em", "ko": "은밀한" } }</code></pre>
+      <p>Hiện 1.446 phim trong catalog có tên tiếng Việt. Kho phim cho đổi ngôn ngữ tiêu đề theo object này.</p>
+
+      <h3>Poster</h3>
+      <p>Lệnh <code>posters</code> gọi lại <code>GET /movie/{id}</code>, lần này không cần credits, và lấy <code>poster_path</code>. Phim 637536 trả về <code>/x6waJfEzwDqEDG47nsSar1JIlMc.jpg</code>. Nếu field trống, script gọi <code>GET /movie/{id}/images</code>, đọc mảng <code>posters</code>, xếp ảnh không chữ hoặc chữ tiếng Anh trước, rồi tiếng Việt, tiếng Hàn, sau đó theo <code>vote_count</code>. Output:</p>
+      <pre><code>{ "637536": "/x6waJfEzwDqEDG47nsSar1JIlMc.jpg" }</code></pre>
+      <p>Trong catalog, 195 phim không có poster. Ô poster trên web dùng <code>object-fit: contain</code> trong khung 2:3 để không cắt ảnh. Ảnh nền dùng cỡ <code>w1280</code>, danh sách dùng <code>w500</code>.</p>
+
+      <h3>Keyword và bộ nhớ trên trình duyệt</h3>
+      <p>Lệnh <code>drop-adult</code> gọi <code>GET /movie/{id}/keywords?api_key=YOUR_KEY</code>. Response có mảng <code>keywords</code>, mỗi phần tử có <code>name</code>. Output <code>movie_keywords.json</code> chỉ giữ tên. Phim 637536:</p>
+      <pre><code>{
+  "637536": ["vietnam", "lgbt", "chị chị em em", "psychological", "girls' love (gl)"]
+}</code></pre>
+      <p>Script đối chiếu các tên này với danh sách từ khóa người lớn, rồi xóa phim khớp khỏi cast và metadata, trừ 14 phim được giữ. Sau lệnh này phải chạy lại bước dựng cạnh, tính độ đo và xuất web thì đồ thị mới khớp.</p>
+      <p>Trang web không vẽ dữ liệu cũ trước. Lần mở đầu hiện “Đang kiểm tra dữ liệu…”. File JSON lớn được giữ trong IndexedDB tên <code>cineinfo</code>. Request gửi <code>If-Modified-Since</code>. Máy chủ trả 304 thì dùng bản đã lưu. Trả 200 thì ghi đè. Đổi giao diện sáng tối nhớ trong <code>localStorage</code> với khóa <code>tmdb-sna-theme</code>. Ngôn ngữ tiêu đề nhớ riêng ở khóa <code>cineinfo-lang</code>.</p>
+
+      <figure class="fig">
+        <svg viewBox="0 0 720 260" role="img" aria-label="Luồng bộ nhớ đệm: trình duyệt gửi request kèm If-Modified-Since tới máy chủ. Máy chủ trả 304 thì dùng bản trong IndexedDB cineinfo; trả 200 thì ghi đè IndexedDB bằng file mới.">
+          <defs>
+            <marker id="ar-cache" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-muted" /></marker>
+            <marker id="ar-cache-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="f-accent" /></marker>
+          </defs>
+          <g class="f-card s-line" stroke-width="1.5">
+            <rect x="10" y="90" width="160" height="80" rx="10" />
+            <rect x="340" y="90" width="120" height="80" rx="10" />
+          </g>
+          <rect x="520" y="20" width="190" height="84" rx="10" class="f-soft s-accent" stroke-width="1.5" />
+          <rect x="520" y="156" width="190" height="84" rx="10" class="f-card s-muted" stroke-width="1.5" />
+          <g text-anchor="middle">
+            <text x="90" y="124" class="b">Trình duyệt</text>
+            <text x="90" y="147" class="sm t-muted">IndexedDB <tspan class="mono">cineinfo</tspan></text>
+            <text x="400" y="135" class="b">Máy chủ</text>
+            <text x="615" y="52" class="b t-accent">304 Not Modified</text>
+            <text x="615" y="76" class="sm t-muted">dùng bản đã lưu</text>
+            <text x="615" y="188" class="b">200 OK</text>
+            <text x="615" y="212" class="sm t-muted">ghi đè IndexedDB</text>
+            <text x="255" y="98" class="mono sm">GET +</text>
+            <text x="255" y="118" class="mono sm">If-Modified-Since</text>
+            <text x="255" y="160" class="sm t-muted">“Đang kiểm tra dữ liệu…”</text>
+          </g>
+          <line x1="170" y1="130" x2="336" y2="130" class="s-muted" stroke-width="1.6" marker-end="url(#ar-cache)" />
+          <path d="M460 115 C490 115 490 62 516 62" class="f-none s-accent" stroke-width="1.8" marker-end="url(#ar-cache-a)" />
+          <path d="M460 145 C490 145 490 198 516 198" class="f-none s-muted" stroke-width="1.6" marker-end="url(#ar-cache)" />
+          <text x="90" y="210" text-anchor="middle" class="sm t-muted">không vẽ bản cũ trước</text>
+          <text x="90" y="228" text-anchor="middle" class="sm t-muted">khi kiểm tra xong</text>
+        </svg>
+        <figcaption><strong>Bộ nhớ đệm của file JSON lớn.</strong> Mỗi lần mở trang đều hỏi lại máy chủ; chỉ khi file đổi mới tải lại toàn bộ.</figcaption>
+      </figure>
+    </section>
+
+    <section id="gioi-han">
+      <h2>Giới hạn cần nhớ khi đọc kết quả</h2>
+      <ul>
+        <li>Mạng chỉ gồm bốn nguồn Mỹ, Anh, Việt Nam, Hàn Quốc, theo độ phổ biến TMDB, và chỉ 10 tên đầu bill.</li>
+        <li>Nhãn nước là nước sản xuất của phim lúc discover, không phải quốc tịch diễn viên. Người đóng cả phim Hàn và phim Mỹ có hai cờ.</li>
+        <li>Cạnh trên hình 3D là 25.000 cạnh nặng nhất. Degree trên thẻ là của đồ thị đầy đủ 189.586 cạnh.</li>
+        <li>Betweenness là mẫu 300 nguồn. Closeness chỉ có ở 2.506 đỉnh tiêu biểu. Diameter 14 là khoảng cách xa nhất trong mẫu 400 nguồn.</li>
+        <li>Ảnh thiếu là thiếu thật trên TMDB. Cùng tên không được dùng ảnh của nhau.</li>
+        <li>Dữ liệu thuộc TMDB và không được TMDB xác nhận hay chứng nhận.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nguồn xử lý: <code>src/01_crawler.py</code>, <code>src/02_process_graph.py</code>, <code>src/03_calculate_sna.py</code>, <code>src/04_export_web.py</code>, <code>src/05_fetch_media.py</code>. Số liệu đọc từ <code>clean_counts.csv</code>, <code>metrics_global.json</code>, <code>catalog.json</code> và <code>network_data.json</code> hiện có.</p>
+  </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var root = document.documentElement;
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var hasIO = "IntersectionObserver" in window;
+
+      /* ---------- Giao diện sáng / tối ---------- */
+      var toggle = document.querySelector(".theme-toggle");
+      function currentTheme() {
+        var t = root.getAttribute("data-theme");
+        if (t === "light" || t === "dark") return t;
+        return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function paintToggle() {
+        var dark = currentTheme() === "dark";
+        toggle.firstElementChild.textContent = dark ? "☀" : "☾";
+        toggle.setAttribute("aria-label", dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối");
+      }
+      toggle.addEventListener("click", function () {
+        var next = currentTheme() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("sna-doc-theme", next); } catch (e) {}
+        paintToggle();
+      });
+      if (window.matchMedia) {
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        if (mq.addEventListener) mq.addEventListener("change", paintToggle);
+      }
+      paintToggle();
+
+      /* ---------- Thanh tiến độ và nút lên đầu ---------- */
+      var bar = document.querySelector(".progress");
+      var topBtn = document.querySelector(".to-top");
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+          var max = document.documentElement.scrollHeight - window.innerHeight;
+          var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+          bar.style.transform = "scaleX(" + p + ")";
+          topBtn.classList.toggle("show", window.scrollY > 600);
+          ticking = false;
+        });
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      onScroll();
+      topBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+        var skip = document.querySelector(".skip");
+        if (skip) skip.focus({ preventScroll: true });
+      });
+
+      var sections = Array.prototype.slice.call(document.querySelectorAll("main section[id]"));
+
+      /* ---------- Mục lục: đánh dấu mục đang đọc ---------- */
+      var links = {};
+      Array.prototype.forEach.call(document.querySelectorAll(".toc a[href^='#']"), function (a) {
+        links[a.getAttribute("href").slice(1)] = a;
+      });
+      function setActive(id) {
+        Object.keys(links).forEach(function (k) {
+          if (k === id) links[k].setAttribute("aria-current", "true");
+          else links[k].removeAttribute("aria-current");
+        });
+      }
+      if (hasIO) {
+        var visible = {};
+        var tocIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+          for (var i = 0; i < sections.length; i++) {
+            if (visible[sections[i].id]) { setActive(sections[i].id); break; }
+          }
+        }, { rootMargin: "-20% 0px -70% 0px" });
+        sections.forEach(function (s) { tocIO.observe(s); });
+      }
+
+      /* ---------- Hiện dần từng mục ---------- */
+      if (hasIO && !reduce) {
+        var revealIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.02 });
+        sections.forEach(function (s) {
+          var r = s.getBoundingClientRect();
+          if (r.top < window.innerHeight) return;
+          s.classList.add("reveal");
+          revealIO.observe(s);
+        });
+      }
+
+      /* ---------- Đếm số ---------- */
+      function fmt(v, dec) {
+        var s = v.toFixed(dec).split(".");
+        s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return s.join(",");
+      }
+      var nums = Array.prototype.slice.call(document.querySelectorAll(".stat-num[data-to]"));
+      function countUp(el) {
+        var to = parseFloat(el.getAttribute("data-to"));
+        var dec = parseInt(el.getAttribute("data-dec"), 10) || 0;
+        var start = null, dur = 1100;
+        function step(ts) {
+          if (start === null) start = ts;
+          var k = Math.min(1, (ts - start) / dur);
+          var e = 1 - Math.pow(1 - k, 3);
+          el.textContent = fmt(to * e, dec);
+          if (k < 1) window.requestAnimationFrame(step);
+          else el.textContent = fmt(to, dec);
+        }
+        window.requestAnimationFrame(step);
+      }
+      if (hasIO && !reduce) {
+        var numIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { countUp(e.target); numIO.unobserve(e.target); }
+          });
+        }, { threshold: 0.6 });
+        nums.forEach(function (n) { numIO.observe(n); });
+      }
+
+      /* ---------- Đồ thị mẫu tương tác ---------- */
+      var fig = document.getElementById("toy-graph");
+      if (fig) {
+        var SVGNS = "http://www.w3.org/2000/svg";
+        var nodes = [
+          { id: "A1", x: 290, y: 160, c: "f-accent" },
+          { id: "A2", x: 200, y: 70, c: "f-accent" },
+          { id: "A3", x: 110, y: 150, c: "f-accent" },
+          { id: "A4", x: 190, y: 245, c: "f-accent" },
+          { id: "A5", x: 60, y: 265, c: "f-accent" },
+          { id: "X", x: 380, y: 160, c: "f-ink" },
+          { id: "B1", x: 470, y: 160, c: "f-alt" },
+          { id: "B2", x: 560, y: 70, c: "f-alt" },
+          { id: "B3", x: 650, y: 160, c: "f-alt" },
+          { id: "B4", x: 560, y: 250, c: "f-alt" }
+        ];
+        var M = {
+          deg: { dec: 0, v: { A1: 4, A2: 3, A3: 4, A4: 4, A5: 2, X: 2, B1: 4, B2: 3, B3: 3, B4: 3 },
+            t: "Degree: đếm số hàng xóm. A1, A3, A4 và B1 có 4 người đóng chung; X chỉ có 2 dù nằm ngay giữa hai cụm." },
+          btw: { dec: 2, v: { A1: 0.556, A2: 0, A3: 0.097, A4: 0.097, A5: 0, X: 0.556, B1: 0.5, B2: 0, B3: 0, B4: 0 },
+            t: "Betweenness: X và A1 (0,56) nằm trên mọi đường ngắn nhất từ cụm A sang cụm B. Các đỉnh chỉ ở trong cụm gần như bằng 0." },
+          clo: { dec: 2, v: { A1: 0.529, A2: 0.409, A3: 0.429, A4: 0.429, A5: 0.321, X: 0.529, B1: 0.474, B2: 0.36, B3: 0.36, B4: 0.36 },
+            t: "Closeness: X và A1 (0,53) đi tới mọi người với ít bước nhất. A5 ở rìa cụm A nên xa nhất (0,32)." },
+          eig: { dec: 2, v: { A1: 0.456, A2: 0.416, A3: 0.48, A4: 0.48, A5: 0.282, X: 0.174, B1: 0.138, B2: 0.098, B3: 0.098, B4: 0.098 },
+            t: "Eigenvector: A3, A4 cao nhất (0,48) vì nối với những người cũng nhiều kết nối. Cụm B nhỏ và chỉ chạm cụm A qua X nên thấp." },
+          clu: { dec: 2, v: { A1: 0.5, A2: 1, A3: 0.667, A4: 0.667, A5: 1, X: 0, B1: 0.5, B2: 1, B3: 1, B4: 1 },
+            t: "Clustering: X = 0 vì hai hàng xóm A1 và B1 không nối nhau. A2, A5, B2–B4 = 1 vì mọi hàng xóm của họ đều nối kín." }
+        };
+        var layer = fig.querySelector("#toy-nodes");
+        var explain = fig.querySelector(".toy-explain");
+        var els = {};
+        nodes.forEach(function (n) {
+          var g = document.createElementNS(SVGNS, "g");
+          g.setAttribute("class", "node");
+          var c = document.createElementNS(SVGNS, "circle");
+          c.setAttribute("cx", n.x); c.setAttribute("cy", n.y); c.setAttribute("r", 16);
+          c.setAttribute("class", n.c);
+          var t = document.createElementNS(SVGNS, "text");
+          t.setAttribute("x", n.x); t.setAttribute("y", n.y + 4.5);
+          t.setAttribute("text-anchor", "middle"); t.setAttribute("class", "name");
+          t.textContent = n.id;
+          var v = document.createElementNS(SVGNS, "text");
+          v.setAttribute("x", n.x); v.setAttribute("y", n.y + 36);
+          v.setAttribute("text-anchor", "middle"); v.setAttribute("class", "val");
+          g.appendChild(c); g.appendChild(t); g.appendChild(v);
+          layer.appendChild(g);
+          els[n.id] = { g: g, c: c, v: v, n: n };
+        });
+        function show(key) {
+          var m = M[key];
+          var max = 0;
+          Object.keys(m.v).forEach(function (k) { if (m.v[k] > max) max = m.v[k]; });
+          Object.keys(els).forEach(function (k) {
+            var val = m.v[k];
+            var r = 13 + 15 * (max > 0 ? val / max : 0);
+            var e = els[k];
+            e.c.setAttribute("r", r.toFixed(1));
+            e.c.style.r = r.toFixed(1) + "px";
+            e.v.setAttribute("y", (e.n.y + r + 16).toFixed(1));
+            e.v.textContent = fmt(val, m.dec);
+            e.g.classList.toggle("hot", val === max);
+          });
+          explain.textContent = m.t;
+          Array.prototype.forEach.call(fig.querySelectorAll(".toy-tabs button"), function (b) {
+            b.setAttribute("aria-pressed", b.getAttribute("data-m") === key ? "true" : "false");
+          });
+        }
+        Array.prototype.forEach.call(fig.querySelectorAll(".toy-tabs button"), function (b) {
+          b.addEventListener("click", function () { show(b.getAttribute("data-m")); });
+        });
+        show("deg");
+      }
+    })();
+  </script>
+</body>
+</html>

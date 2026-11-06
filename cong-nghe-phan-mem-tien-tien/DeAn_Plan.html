@@ -303,6 +303,12 @@
       color: var(--text-muted);
     }
 
+    .block > h3 {
+      margin: 1.35rem 0 0.45rem;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
     .eyebrow {
       margin: 0;
       color: var(--accent);
@@ -692,7 +698,7 @@
 
     .repo-bars li {
       display: grid;
-      grid-template-columns: 12.5rem 1fr 2rem;
+      grid-template-columns: 13.5rem 1fr 4.4rem;
       gap: 0.7rem;
       align-items: center;
       font-size: 0.9rem;
@@ -735,6 +741,12 @@
     .repo-bars b {
       text-align: right;
       font-weight: 800;
+    }
+
+    .repo-bars b span {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
     }
 
     .runs {
@@ -932,6 +944,116 @@
       font-size: 0.84rem;
     }
 
+    /* dataset + runtime */
+
+    .spec {
+      display: grid;
+      gap: 0.55rem;
+      margin: 0 0 1rem;
+    }
+
+    .spec div {
+      display: grid;
+      grid-template-columns: 8.5rem minmax(0, 1fr);
+      gap: 0.35rem 0.85rem;
+      align-items: baseline;
+      padding: 0.75rem 0.9rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .spec dt {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .spec dd {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .spec a {
+      color: #8ec5ff;
+    }
+
+    .cmp-wrap {
+      overflow-x: auto;
+      margin: 0 0 0.9rem;
+    }
+
+    .cmp {
+      width: 100%;
+      min-width: 36rem;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    .cmp caption {
+      margin: 0 0 0.55rem;
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+    }
+
+    .cmp th,
+    .cmp td {
+      padding: 0.7rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .cmp thead th {
+      color: var(--text);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .cmp tbody th {
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .cmp td {
+      color: var(--text-muted);
+    }
+
+    .cmd {
+      margin: 0.75rem 0 0;
+      padding: 0.85rem 0.95rem;
+      overflow-x: auto;
+      background: #0d141b;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #d5e4f2;
+      font-size: 0.78rem;
+      line-height: 1.55;
+    }
+
+    .block .cmd code {
+      padding: 0;
+      background: none;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    .run-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin-top: 0.85rem;
+    }
+
     /* 07 — repo tree */
 
     .tree-grid {
@@ -1066,7 +1188,119 @@
     .legend .l-ana { --c: var(--amber); }
     .legend .l-write { --c: var(--violet); }
 
-    /* 09 — paper outline */
+    /* 09 — execution plan */
+
+    .plan-infra {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 0 0 1.25rem;
+    }
+
+    .plan-infra .card header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .plan-infra .card h3 {
+      margin: 0;
+    }
+
+    .cost-pill {
+      flex-shrink: 0;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .cost-pill--free {
+      background: var(--green-soft);
+      color: #6ee7b7;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+
+    .cost-pill--paid {
+      background: var(--amber-soft);
+      color: #fcd34d;
+      border: 1px solid rgba(251, 191, 36, 0.32);
+    }
+
+    .plan-infra .card ul {
+      margin: 0.55rem 0 0;
+      padding-left: 1.05rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .plan-infra .card li + li {
+      margin-top: 0.35rem;
+    }
+
+    .plan-steps .step {
+      grid-template-columns: 2.6rem minmax(0, 1fr);
+    }
+
+    .plan-steps .step__body {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .plan-steps .step__body > p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .plan-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.15rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .plan-meta li {
+      padding: 0.28rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(61, 155, 253, 0.1);
+      color: #b9dbff;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .plan-meta strong {
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .gate {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+      margin: 0.35rem 0 0;
+    }
+
+    .gate .outcome {
+      padding: 0.8rem 0.85rem;
+    }
+
+    .gate .outcome h4 {
+      margin: 0 0 0.25rem;
+      font-size: 0.92rem;
+    }
+
+    .gate .outcome p {
+      font-size: 0.86rem;
+    }
+
+    /* 10 — paper outline */
 
     .outline {
       display: grid;
@@ -1243,7 +1477,11 @@
       .rq-grid,
       .charts,
       .outline,
-      .sub-rq {
+      .sub-rq,
+      .run-grid,
+      .plan-infra,
+      .gate,
+      .spec div {
         grid-template-columns: 1fr;
       }
 
@@ -1271,7 +1509,7 @@
         padding-top: 0;
       }
 
-      .repo-bars li { grid-template-columns: 1fr 1.6rem; }
+      .repo-bars li { grid-template-columns: 1fr 4.4rem; }
       .repo-bars code { grid-column: 1 / -1; }
       .tablist { position: static; }
       .block { padding: 1.2rem 1rem 1.25rem; }
@@ -1360,7 +1598,7 @@
             <rect x="428" y="180" width="82" height="38" rx="10" fill="rgba(251,191,36,0.12)" stroke="#fbbf24"/>
             <text x="446" y="204" fill="#fcd34d" font-size="13" font-family="Be Vietnam Pro, sans-serif" font-weight="700">Token</text>
           </g>
-          <text x="316" y="272" fill="#93a4b5" font-size="13" font-family="Be Vietnam Pro, sans-serif">SWE-bench · Docker · cùng một agent</text>
+          <text x="316" y="272" fill="#93a4b5" font-size="13" font-family="Be Vietnam Pro, sans-serif">SWE-bench Lite · local · Sonnet 4.5</text>
         </svg>
       </figure>
     </header>
@@ -1444,10 +1682,10 @@
           <p>Mọi thứ giữ nguyên, chỉ đổi file ngữ cảnh đưa vào container. Khác biệt ở kết quả vì thế đến từ file đó.</p>
           <ul class="fixed">
             <li>Giữ cố định:</li>
-            <li>SWE-bench Lite / Verified</li>
-            <li>OpenHands · Aider · SWE-agent</li>
-            <li>Claude 3.5 Sonnet · GPT-4o</li>
-            <li>Docker</li>
+            <li>SWE-bench Lite · split test</li>
+            <li>mini-SWE-agent</li>
+            <li><code>claude-sonnet-4-5-20250929</code></li>
+            <li>local · Docker</li>
           </ul>
           <figure class="flow">
             <div class="node">Issue trên SWE-bench</div>
@@ -1466,7 +1704,7 @@
                   <span class="badge">V1</span>
                   <h3>Người viết</h3>
                 </header>
-                <p><code>AGENTS.md</code> / <code>CLAUDE.md</code> lấy từ repo thật hoặc bộ dữ liệu Agent READMEs.</p>
+                <p>Một <code>AGENTS.md</code> mỗi repo: ưu tiên file chính thức trên GitHub của đúng repo; nếu thiếu thì rút từ CONTRIBUTING/docs uy tín. Khuôn theo bài Agent READMEs + corpus <code>hao-li/AgentREADMEs</code>.</p>
                 <div class="file-preview" aria-hidden="true"><b>AGENTS.md</b><span></span><span></span><span></span></div>
               </article>
               <article class="lane lane--v2">
@@ -1474,12 +1712,12 @@
                   <span class="badge">V2</span>
                   <h3>LLM sinh</h3>
                 </header>
-                <p>LLM đọc codebase, viết <code>AGENTS.md</code> dưới 500 từ: lệnh build/test, kiến trúc chính.</p>
+                <p>Cùng model <code>claude-sonnet-4-5-20250929</code> đọc codebase tại <code>base_commit</code>, viết <code>AGENTS.md</code> dưới 500 từ.</p>
                 <div class="file-preview" aria-hidden="true"><b>AGENTS.md · auto</b><span></span><span></span><span></span></div>
               </article>
             </div>
             <div class="stem" aria-hidden="true"></div>
-            <div class="node">Cùng agent chạy trong Docker</div>
+            <div class="node">mini-SWE-agent trong Docker, trên máy local</div>
             <div class="stem" aria-hidden="true"></div>
             <ul class="metrics">
               <li><strong>Resolved</strong><span>Patch pass 100% unit test của task</span></li>
@@ -1491,15 +1729,48 @@
 
         <section class="block reveal" aria-labelledby="h-data">
           <p class="eyebrow">04 — Dữ liệu</p>
-          <h2 id="h-data">50 task, chia đều năm repo</h2>
-          <p>Lấy từ <code>princeton-nlp/SWE-bench_Lite</code>, mỗi repo mười task để không repo nào át kết quả. Có thể mở rộng lên 100 task hoặc dùng SWE-bench Verified.</p>
+          <h2 id="h-data">50 task, lấy từ SWE-bench Lite</h2>
+          <p>Mỗi repo mười task, chọn những repo có ít nhất mười issue trong split <code>test</code>. <code>psf/requests</code> trong Lite chỉ có 6 task, nên repo thứ năm là <code>sphinx-doc/sphinx</code> (16 task).</p>
+          <dl class="spec">
+            <div>
+              <dt>Task</dt>
+              <dd>Hugging Face <a href="https://huggingface.co/datasets/SWE-bench/SWE-bench_Lite"><code>SWE-bench/SWE-bench_Lite</code></a>, split <code>test</code>, 300 issue–PR. Bản ghi cũ cùng nội dung: <code>princeton-nlp/SWE-bench_Lite</code>. Bài gốc: Jimenez và cộng sự, <a href="https://arxiv.org/abs/2310.06770">SWE-bench, ICLR 2024, arXiv:2310.06770</a>. File dataset khoảng 2,9&nbsp;MB.</dd>
+            </div>
+            <div>
+              <dt>Cách lấy</dt>
+              <dd><code>load_dataset("SWE-bench/SWE-bench_Lite", split="test")</code>. Trong mỗi repo, sắp <code>instance_id</code> theo thứ tự từ điển và lấy 10 id đầu. Task đầu của django là <code>django__django-10914</code>. Ghi ra <code>data/swe_bench_sample.json</code>.</dd>
+            </div>
+            <div>
+              <dt>Trường dùng</dt>
+              <dd><code>instance_id</code>, <code>repo</code>, <code>base_commit</code>, <code>problem_statement</code> đưa cho agent. <code>patch</code> và <code>FAIL_TO_PASS</code> chỉ để chấm, không đưa vào prompt hay file ngữ cảnh.</dd>
+            </div>
+            <div>
+              <dt>Image test</dt>
+              <dd>Docker Hub <code>swebench/sweb.eval.x86_64.&lt;instance&gt;:latest</code>. Ảnh chính thức là <code>linux/amd64</code>. Harness: <a href="https://github.com/SWE-bench/SWE-bench">github.com/SWE-bench/SWE-bench</a>.</dd>
+            </div>
+            <div>
+              <dt>File V1</dt>
+              <dd>Không có sẵn trong SWE-bench. Thu thập vào <code>data/human_contexts/</code> theo quy trình dưới (script <code>src/fetch_human_contexts.py</code>, mô tả <code>data/human_contexts/SOURCES.md</code>).</dd>
+            </div>
+            <div>
+              <dt>Cách lấy V1</dt>
+              <dd>
+                <ol style="margin:0;padding-left:1.2rem">
+                  <li>Tải corpus baseline <a href="https://huggingface.co/datasets/hao-li/AgentREADMEs"><code>hao-li/AgentREADMEs</code></a> (bài <a href="https://arxiv.org/abs/2511.12884">arXiv:2511.12884</a>) → <code>data/agent_readmes/</code> làm khuôn 16 loại chỉ dẫn và mẫu phong cách. Corpus này <strong>không trùng</strong> 5 repo SWE-bench Lite của thí nghiệm.</li>
+                  <li>Ưu tiên file ngữ cảnh chính thức trên GitHub của đúng repo: <code>sympy/sympy</code> và <code>scikit-learn/scikit-learn</code> đã có <code>AGENTS.md</code> → dùng trực tiếp (kèm lệnh test ngắn từ docs).</li>
+                  <li>Repo chưa có <code>AGENTS.md</code> hữu ích (<code>django/django</code>, <code>pytest-dev/pytest</code>, <code>sphinx-doc/sphinx</code>): rút setup/test từ CONTRIBUTING / docs nội bộ chính thức trên GitHub, viết lại thành <code>AGENTS.md</code> theo taxonomy Agent READMEs (ưu tiên test + build). Không gán AGENTS.md của repo khác (AutoGPT, LangChain, …) vào testbed.</li>
+                  <li>Mỗi file ghi provenance (HTML comment + <code>provenance.json</code>).</li>
+                </ol>
+              </dd>
+            </div>
+          </dl>
           <div class="data-grid">
             <ul class="repo-bars">
-              <li><code>django/django</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10</b></li>
-              <li><code>sympy/sympy</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10</b></li>
-              <li><code>pytest-dev/pytest</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10</b></li>
-              <li><code>psf/requests</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10</b></li>
-              <li><code>scikit-learn/scikit-learn</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10</b></li>
+              <li><code>django/django</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10<span>/114</span></b></li>
+              <li><code>sympy/sympy</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10<span>/77</span></b></li>
+              <li><code>scikit-learn/scikit-learn</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10<span>/23</span></b></li>
+              <li><code>pytest-dev/pytest</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10<span>/17</span></b></li>
+              <li><code>sphinx-doc/sphinx</code><span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>10<span>/16</span></b></li>
             </ul>
             <div class="runs">
               <span class="eq">50 task × 3 biến thể</span>
@@ -1507,10 +1778,98 @@
               <p>lượt chạy agent, mỗi lượt một log JSON</p>
             </div>
           </div>
+          <p class="sketch-note">Số dạng 10/114 là số task lấy ra trên tổng task của repo đó trong split test.</p>
+        </section>
+
+        <section class="block reveal" id="may-chay" aria-labelledby="h-run">
+          <p class="eyebrow">05 — Máy chạy và model</p>
+          <h2 id="h-run">Chạy local, một model</h2>
+          <p>Model là API Anthropic. Máy local chỉ chạy Docker để agent sửa code và để chấm test. GPU không tham gia, nên Colab không làm vòng này nhanh hơn.</p>
+          <div class="cmp-wrap">
+            <table class="cmp">
+              <caption>Tốc độ ước lượng cho 1 task. Phần agent là thời gian chờ API. Phần chấm test trên máy local dùng Docker giả lập <code>linux/amd64</code> (QEMU nếu CPU không phải x86); số đo tham chiếu từ Grey Newell.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Việc</th>
+                  <th scope="col">Google Colab</th>
+                  <th scope="col">Máy local (sẽ chạy)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Tải dataset</th>
+                  <td>File Hugging Face khoảng 2,9&nbsp;MB, xong trong vài giây.</td>
+                  <td>Cùng file, vài giây.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Agent sửa issue</th>
+                  <td>Gọi được API, khoảng 5–20 phút/task vì chờ token. GPU T4 hay A100 không rút ngắn phần này. Không có Docker daemon nên không dựng được image testbed.</td>
+                  <td>Docker Desktop, <code>--workers 1</code>. Cùng 5–20 phút/task. Mốc giữa khoảng 10 phút: 50 task một biến thể khoảng 8 giờ, 150 lượt khoảng 25 giờ, chạy qua đêm.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Chấm test</th>
+                  <td>Không chạy. Image <code>swebench/sweb.eval.x86_64.*</code> cần Docker.</td>
+                  <td>QEMU x86: sympy 8&nbsp;s, scikit-learn 18&nbsp;s, django 19&nbsp;s, pytest 28&nbsp;s. Sphinx cùng nhóm repo Python thuần, dưới 1 phút. 150 lượt chấm khoảng 1–2 giờ.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Kéo image lần đầu</th>
+                  <td>Không pull được.</td>
+                  <td>Timeout mặc định 120&nbsp;giây của mini-SWE-agent thường thiếu. Để khoảng 10 phút/image. Đĩa Docker khoảng 60–100&nbsp;GB cho 50 image.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="sketch-note">Số giây chấm test: <a href="https://greynewell.com/blog/swe-bench-arm64-native-containers-6x-faster/">Grey Newell, SWE-bench trên ARM64</a>. Chi phí API đã công bố với đúng model và scaffold này trên SWE-bench Verified: khoảng 0,56–0,66&nbsp;USD/task (Live-SWE-agent, arXiv:2511.13646). 150 lượt khoảng 90&nbsp;USD. Trần <code>cost_limit</code> 3&nbsp;USD/task chặn mức tối đa khoảng 450&nbsp;USD.</p>
+
+          <h3>Model và cách chạy</h3>
+          <dl class="spec">
+            <div>
+              <dt>Tên API</dt>
+              <dd><code>anthropic/claude-sonnet-4-5-20250929</code>. Đây là Claude Sonnet 4.5, snapshot ngày 29/09/2025, đi qua LiteLLM. Cùng id cho agent và cho lần sinh file V2.</dd>
+            </div>
+            <div>
+              <dt>Scaffold</dt>
+              <dd><a href="https://mini-swe-agent.com/latest/usage/swebench/">mini-SWE-agent</a>, gói <code>mini-swe-agent</code>. Cấu hình trong <code>swebench.yaml</code>: <code>temperature</code> 0, <code>step_limit</code> 250, <code>cost_limit</code> 3, thư mục làm việc <code>/testbed</code>, <code>environment_class: docker</code>.</dd>
+            </div>
+            <div>
+              <dt>Cài</dt>
+              <dd>Docker Desktop trên máy local. Trong terminal: <code>pip install mini-swe-agent swebench datasets</code> rồi <code>export ANTHROPIC_API_KEY=sk-ant-...</code>.</dd>
+            </div>
+          </dl>
+          <p>CLI mặc định lấy split <code>dev</code> (23 task). Mẻ thí nghiệm phải truyền <code>--split test</code> và <code>--filter</code> đúng 50 id trong file JSON. Khi có cờ <code>-c</code>, phải kèm <code>swebench.yaml</code> vì file cấu hình mặc định không còn được nạp tự động. Lệnh dưới là mẻ V0. Với V1 và V2, <code>runner.py</code> chạy cùng lệnh sau khi <code>docker cp</code> file ngữ cảnh vào <code>/testbed/AGENTS.md</code>.</p>
+          <pre class="cmd"><code>FILTER=$(python3 -c 'import json; ids=[r["instance_id"] for r in json.load(open("data/swe_bench_sample.json"))]; print("^(" + "|".join(ids) + ")$")')
+
+mini-extra swebench \
+  --subset lite \
+  --split test \
+  --filter "$FILTER" \
+  --model anthropic/claude-sonnet-4-5-20250929 \
+  --workers 1 \
+  --environment-class docker \
+  --output results/raw_trajectories/v0 \
+  -c swebench.yaml \
+  -c model.model_kwargs.temperature=0 \
+  -c agent.step_limit=250 \
+  -c agent.cost_limit=3</code></pre>
+          <p>Chấm file <code>preds.json</code> do mini-SWE-agent ghi ra. Vẫn một worker vì container chạy giả lập x86.</p>
+          <pre class="cmd"><code>python -m swebench.harness.run_evaluation \
+  --dataset_name SWE-bench/SWE-bench_Lite \
+  --predictions_path results/raw_trajectories/v0/preds.json \
+  --max_workers 1 \
+  --run_id v0</code></pre>
+          <p>Thử một issue trước cả mẻ. <code>django__django-10914</code> là task đầu của mẫu django.</p>
+          <pre class="cmd"><code>mini-extra swebench-single \
+  --subset lite \
+  --split test \
+  --model anthropic/claude-sonnet-4-5-20250929 \
+  --environment-class docker \
+  --exit-immediately \
+  -c swebench.yaml \
+  -i django__django-10914</code></pre>
         </section>
 
         <section class="block reveal" aria-labelledby="h-pipe">
-          <p class="eyebrow">05 — Pipeline</p>
+          <p class="eyebrow">06 — Pipeline</p>
           <h2 id="h-pipe">Năm bước, mỗi bước một file</h2>
           <p>Bên trái là việc cần làm, bên phải là thứ bước đó sinh ra cho bước sau.</p>
           <ol class="steps">
@@ -1518,8 +1877,8 @@
               <div>
                 <h3>Chuẩn bị dữ liệu <code>dataset_loader.py</code></h3>
                 <ul>
-                  <li>Cài <code>swebench</code>, <code>docker</code>, <code>datasets</code>, <code>pandas</code>.</li>
-                  <li>Lấy 50 task, mười task mỗi repo.</li>
+                  <li><code>load_dataset("SWE-bench/SWE-bench_Lite", split="test")</code>.</li>
+                  <li>Mỗi repo: sắp <code>instance_id</code>, lấy 10 id đầu, ghi JSON.</li>
                 </ul>
               </div>
               <div class="step__out"><strong>Ra</strong><code>data/swe_bench_sample.json</code></div>
@@ -1538,8 +1897,8 @@
               <div>
                 <h3>Chạy agent <code>runner.py</code></h3>
                 <ul>
-                  <li>Mỗi cặp (task, biến thể): bật container, tiêm file, đưa mô tả issue cho agent.</li>
-                  <li>Ghi token, thời gian, số lần gọi công cụ, và git patch cuối.</li>
+                  <li>Gọi <code>mini-extra swebench</code> với <code>anthropic/claude-sonnet-4-5-20250929</code>, <code>--workers 1</code>.</li>
+                  <li>V1 và V2: <code>docker cp</code> file vào <code>/testbed/AGENTS.md</code> trước vòng lặp. Lệnh đầy đủ ở mục 05.</li>
                 </ul>
               </div>
               <div class="step__out"><strong>Ra</strong><code>results/raw_trajectories/<wbr>{task}_{variant}.json</code></div>
@@ -1562,13 +1921,13 @@
                   <li>Xuất bảng LaTeX để chèn thẳng vào bài.</li>
                 </ul>
               </div>
-              <div class="step__out"><strong>Ra</strong>Ba biểu đồ và bảng tóm tắt (xem mục 06)</div>
+              <div class="step__out"><strong>Ra</strong>Ba biểu đồ và bảng tóm tắt (xem mục 07)</div>
             </li>
           </ol>
         </section>
 
         <section class="block reveal" aria-labelledby="h-out">
-          <p class="eyebrow">06 — Kết quả sẽ trình bày</p>
+          <p class="eyebrow">07 — Kết quả sẽ trình bày</p>
           <h2 id="h-out">Ba hình và một bảng</h2>
           <p>Mỗi hình gắn với một câu hỏi nghiên cứu ở mục 02.</p>
           <div class="charts">
@@ -1630,14 +1989,19 @@
         </section>
 
         <section class="block reveal" aria-labelledby="h-repo">
-          <p class="eyebrow">07 — Cấu trúc repo</p>
+          <p class="eyebrow">08 — Cấu trúc repo</p>
           <h2 id="h-repo">Bốn thư mục chính</h2>
           <div class="tree-grid">
             <pre class="tree"><span class="d">agent-context-eval/</span>
 ├── <span class="d">data/</span>
-│   ├── swe_bench_sample.json   <span class="c"># 50–100 task đã lọc</span>
-│   ├── human_contexts/         <span class="c"># file người viết</span>
-│   └── synthetic_contexts/     <span class="c"># file LLM sinh</span>
+│   ├── swe_bench_sample.json   <span class="c"># 50 task, split test</span>
+│   ├── human_contexts/         <span class="c"># V1 — GitHub / paper khuôn</span>
+│   ├── agent_readmes/          <span class="c"># corpus baseline Agent READMEs</span>
+│   └── synthetic_contexts/     <span class="c"># V2 — LLM sinh</span>
+├── results/
+│   ├── sanity/                 <span class="c"># Step 1 — trajectory, CSV, figures</span>
+│   ├── pilot/                  <span class="c"># Step 2 — tách riêng, không trộn sanity</span>
+│   └── full/                   <span class="c"># Step 3</span>
 ├── <span class="d">src/</span>
 │   ├── __init__.py
 │   ├── dataset_loader.py
@@ -1649,45 +2013,115 @@
 │   ├── raw_trajectories/       <span class="c"># log JSON từng lượt</span>
 │   └── metrics_summary.csv     <span class="c"># bảng metric gộp</span>
 ├── <span class="d">configs/</span>
-│   └── config.yaml             <span class="c"># model, API key, timeout</span>
+│   └── config.yaml             <span class="c"># claude-sonnet-4-5-20250929</span>
 ├── requirements.txt
 └── README.md</pre>
             <ul class="folders">
               <li><span class="icon f-data" aria-hidden="true"><svg><use href="#i-folder"/></svg></span><span><strong>data/</strong>Đầu vào: task và ba loại file ngữ cảnh.</span></li>
-              <li><span class="icon f-src" aria-hidden="true"><svg><use href="#i-code"/></svg></span><span><strong>src/</strong>Năm module của pipeline ở mục 05.</span></li>
+              <li><span class="icon f-src" aria-hidden="true"><svg><use href="#i-code"/></svg></span><span><strong>src/</strong>Năm module của pipeline ở mục 06.</span></li>
               <li><span class="icon f-res" aria-hidden="true"><svg><use href="#i-chart"/></svg></span><span><strong>results/</strong>Log thô và bảng metric để vẽ hình.</span></li>
-              <li><span class="icon f-cfg" aria-hidden="true"><svg><use href="#i-gear"/></svg></span><span><strong>configs/</strong>Chọn model, API key, thời gian chờ.</span></li>
+              <li><span class="icon f-cfg" aria-hidden="true"><svg><use href="#i-gear"/></svg></span><span><strong>configs/</strong>Khóa API, <code>step_limit</code> 250, trần 3&nbsp;USD/task.</span></li>
             </ul>
           </div>
         </section>
 
-        <section class="block reveal" aria-labelledby="h-plan">
-          <p class="eyebrow">08 — Lịch</p>
-          <h2 id="h-plan">Sprint bảy ngày</h2>
-          <ul class="legend">
-            <li class="l-prep">Chuẩn bị</li>
-            <li class="l-run">Chạy thí nghiệm</li>
-            <li class="l-ana">Phân tích</li>
-            <li class="l-write">Viết bài</li>
-          </ul>
-          <ol class="timeline">
-            <li class="day"><em>NGÀY 1</em><strong>Dựng môi trường</strong><p>Docker, SWE-bench, viết <code>dataset_loader</code>.</p></li>
-            <li class="day"><em>NGÀY 2</em><strong>Chuẩn bị ngữ cảnh</strong><p>Gom file người viết, viết <code>context_injector</code> cho V0–V2.</p></li>
-            <li class="day day--run"><em>NGÀY 3</em><strong>Chạy V0</strong><p>50 task không ngữ cảnh. Kiểm tra log và <code>evaluator</code>.</p></li>
-            <li class="day day--run"><em>NGÀY 4</em><strong>Chạy V1, V2</strong><p>Hai mẻ còn lại trên cùng 50 task.</p></li>
-            <li class="day day--ana"><em>NGÀY 5</em><strong>Số liệu và hình</strong><p>Chấm điểm, gộp CSV, vẽ hình bằng <code>plotter</code>.</p></li>
-            <li class="day day--write"><em>NGÀY 6</em><strong>Viết bản thảo</strong><p>Abstract, mở đầu, thiết lập, kết quả RQ1–RQ4.</p></li>
-            <li class="day day--write"><em>NGÀY 7</em><strong>Hoàn thiện</strong><p>Rà bản thảo, đối chiếu số liệu, xuất PDF nộp.</p></li>
+        <section class="block reveal" id="plan" aria-labelledby="h-plan">
+          <p class="eyebrow">09 — Kế hoạch thực hiện</p>
+          <h2 id="h-plan">Hạ tầng và lộ trình 3 bước</h2>
+          <p>Sanity check miễn phí trên Groq, rồi chuyển sang <code>qwen/qwen-2.5-coder-32b</code> trên OpenRouter / OrcaRouter cho pilot và full experiment — tổng chi phí thực nghiệm khoảng <strong>$1.5–$2.5 USD</strong>.</p>
+
+          <h3>Chiến lược hạ tầng &amp; quản lý tài nguyên</h3>
+          <div class="plan-infra">
+            <article class="card">
+              <header>
+                <h3>Sanity Check</h3>
+                <span class="cost-pill cost-pill--free">$0 USD</span>
+              </header>
+              <p>Mô hình chính: <strong><code>qwen/qwen3.8-27b</code></strong> trên <strong>Groq Cloud API Free Tier</strong>.</p>
+              <ul>
+                <li>Tự động xoay <strong>5 API Keys</strong> trong <code>runner.py</code> (<code>GroqKeyRotator</code>) để tối ưu hạn mức <strong>200K TPD</strong>/ngày/account.</li>
+                <li>Áp dụng <strong>Exponential Backoff</strong> khi gặp lỗi <code>429 Too Many Requests</code> (trần <strong>8K TPM</strong>).</li>
+              </ul>
+            </article>
+            <article class="card">
+              <header>
+                <h3>Thực nghiệm</h3>
+                <span class="cost-pill cost-pill--paid">~$0.12–$0.15 / 1M tokens</span>
+              </header>
+              <p>Mô hình chính: <strong><code>qwen/qwen-2.5-coder-32b</code></strong> trên <strong>OpenRouter / OrcaRouter</strong>.</p>
+              <ul>
+                <li>Đảm bảo tool calling, độ bền trajectory trên SWE-bench và ổn định cho bài báo.</li>
+                <li>Không phụ thuộc rate limit ngày như free tier; chi phí tối ưu cho pilot + full run.</li>
+              </ul>
+            </article>
+          </div>
+
+          <h3>Lộ trình thực nghiệm 3 bước</h3>
+          <ol class="steps plan-steps">
+            <li class="step">
+              <div class="step__body">
+                <h3>Step 1: Sanity Check Pipeline</h3>
+                <ul class="plan-meta">
+                  <li>Model: <strong><code>qwen/qwen3.8-27b</code></strong> · Groq · xoay 5 keys</li>
+                  <li>Chi phí: <strong>$0 USD</strong></li>
+                  <li>Token: <strong>~50.000 – 100.000</strong></li>
+                  <li>Quy mô: <strong>1 task × 3 biến thể (V0, V1, V2)</strong></li>
+                </ul>
+                <p>Kiểm tra toàn bộ đường ống kỹ thuật — lấy dữ liệu, tiêm <code>AGENTS.md</code> vào Docker, chạy agent, ghi log thô và xuất CSV — đảm bảo không lỗi hệ thống.</p>
+                <ul>
+                  <li>Cấu hình <code>configs/config.yaml</code> tích hợp Groq API với <code>GroqKeyRotator</code>.</li>
+                  <li>Nghiệm thu log thô <code>results/raw_trajectories/</code> và bảng <code>results/metrics_summary.csv</code>.</li>
+                </ul>
+              </div>
+            </li>
+            <li class="step">
+              <div class="step__body">
+                <h3>Step 2: Pilot Run &amp; đánh giá tính khả thi</h3>
+                <ul class="plan-meta">
+                  <li>Model: <strong><code>qwen/qwen-2.5-coder-32b</code></strong> · OpenRouter / OrcaRouter</li>
+                  <li>Chi phí: <strong>~$0.2 – $0.3 USD</strong></li>
+                  <li>Token: <strong>~1.000.000</strong></li>
+                  <li>Quy mô: <strong>3–5 task × 3 biến thể = 9–15 lượt</strong></li>
+                </ul>
+                <p>Đo tín hiệu ban đầu (Resolved Rate, số bước <code>grep</code>/<code>file_search</code>, tổng token) trước khi chạy full scale.</p>
+                <div class="gate" role="group" aria-label="Decision Gate sau Pilot Run">
+                  <article class="outcome outcome--yes">
+                    <h4>Trường hợp A — Khả thi</h4>
+                    <p>V1/V2 cải thiện rõ so với V0 (giảm số bước hoặc tăng tỉ lệ pass test) → chuyển sang <strong>Step 3</strong>.</p>
+                  </article>
+                  <article class="outcome outcome--cost">
+                    <h4>Trường hợp B — Cần tinh chỉnh</h4>
+                    <p>Agent bỏ qua ngữ cảnh → rút gọn <code>AGENTS.md</code> xuống dưới <strong>300 từ</strong> (chỉ giữ lệnh build/test ngắn) và chạy lại Pilot Run.</p>
+                  </article>
+                </div>
+              </div>
+            </li>
+            <li class="step">
+              <div class="step__body">
+                <h3>Step 3: Full Experiment &amp; trích xuất kết quả</h3>
+                <ul class="plan-meta">
+                  <li>Model: <strong><code>qwen/qwen-2.5-coder-32b</code></strong> · OpenRouter / OrcaRouter</li>
+                  <li>Chi phí: <strong>~$1.5 – $2.2 USD</strong></li>
+                  <li>Token: <strong>~5.000.000 – 10.000.000</strong></li>
+                  <li>Quy mô: <strong>15–30 task × 3 biến thể = 45–90 lượt</strong></li>
+                </ul>
+                <p>Thu thập đủ dữ liệu cho RQ1–RQ4, xuất 3 biểu đồ chính và bảng LaTeX chuẩn khoa học.</p>
+                <ul>
+                  <li>Chạy hết các lượt thực nghiệm còn lại.</li>
+                  <li>Chạy <code>evaluator.py</code> và <code>plotter.py</code> để tổng hợp Resolved Rate, Token Distribution, Search Steps cùng bảng kết quả LaTeX.</li>
+                </ul>
+              </div>
+            </li>
           </ol>
         </section>
 
         <section class="block reveal" aria-labelledby="h-paper">
-          <p class="eyebrow">09 — Bài báo nộp</p>
+          <p class="eyebrow">10 — Bài báo nộp</p>
           <h2 id="h-paper">Dàn ý sáu phần</h2>
           <ol class="outline">
             <li class="card"><h3>Introduction</h3><p>File ngữ cảnh đang phổ biến nhưng thiếu kiểm chứng thực nghiệm.</p></li>
             <li class="card"><h3>Related Work</h3><p>Benchmark agentic coding (SWE-bench), RAG cấp repo, nghiên cứu MSR.</p></li>
-            <li class="card"><h3>Methodology</h3><p>Chọn task, ba biến thể, cấu hình agent, metric.</p></li>
+            <li class="card"><h3>Methodology</h3><p>50 task Lite, ba biến thể, mini-SWE-agent với <code>claude-sonnet-4-5-20250929</code> trên máy local.</p></li>
             <li class="card wide">
               <h3>Empirical Results</h3>
               <ul class="sub-rq">
@@ -1715,7 +2149,7 @@
               <li><strong>1.925</strong> repository</li>
               <li><strong>16</strong> loại chỉ dẫn</li>
             </ul>
-            <p>Bài này phân tích cấu trúc, cách bảo trì và nội dung của file ngữ cảnh; là nguồn file người viết cho nhánh V1.</p>
+            <p>Bài này phân tích cấu trúc và nội dung của file ngữ cảnh. Đề án tải corpus kèm theo (<code>hao-li/AgentREADMEs</code> → <code>data/agent_readmes/</code>) làm khuôn, rồi lấy / dựng <code>AGENTS.md</code> V1 từ GitHub của đúng repo SWE-bench (hoặc CONTRIBUTING chính thức). Task thì lấy từ SWE-bench Lite.</p>
             <p>
               <a href="assets/2511.12884v2.pdf">Mở hoặc tải PDF</a>
               ·

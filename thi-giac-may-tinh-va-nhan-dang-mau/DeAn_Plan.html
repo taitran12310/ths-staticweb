@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Đề án môn học: phát hiện 29 điểm mốc giải phẫu trên phim X-quang sọ nghiêng (Aariz) bằng YOLO11-Pose, so sánh với U-Net heatmap và ResNet-50 regression; chạy được trên máy tính phổ thông.">
+  <meta name="description" content="Đề án môn học: nhận diện tự động 29 điểm mốc sọ nghiêng (Aariz) bằng YOLOv11-Pose kết hợp ràng buộc hình học giải phẫu, so sánh với YOLOv11-Pose thuần và ResNet-50 regression (MDPI).">
   <meta name="color-scheme" content="light dark">
-  <title>Đề án — Điểm mốc sọ nghiêng với YOLO-Pose</title>
+  <title>Đề án — Điểm mốc sọ nghiêng: YOLOv11-Pose và ràng buộc giải phẫu</title>
   <script>(function(){var d=document.documentElement,t=null;d.classList.add("js");try{t=localStorage.getItem("ths-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t})();</script>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
@@ -1788,7 +1788,7 @@
           <li><strong>14</strong><span>ngày thực hiện</span></li>
         </ul>
         <div class="actions">
-          <a class="btn btn--primary" href="#thi-nghiem">Xem thiết kế thí nghiệm</a>
+          <a class="btn btn--primary" href="#cai-tien">Xem phương pháp cải tiến</a>
           <a class="btn btn--ghost" href="#lich">Lịch 2 tuần</a>
         </div>
       </div>
@@ -1921,15 +1921,17 @@
         <ol>
           <li><a href="#muc-tieu"><span>01</span>Mục tiêu</a></li>
           <li><a href="#cau-hoi"><span>02</span>Câu hỏi</a></li>
-          <li><a href="#thi-nghiem"><span>03</span>Thí nghiệm</a></li>
-          <li><a href="#du-lieu"><span>04</span>Dữ liệu</a></li>
-          <li><a href="#pipeline"><span>05</span>Pipeline</a></li>
-          <li><a href="#cau-hinh"><span>06</span>Cấu hình YOLO</a></li>
-          <li><a href="#ket-qua"><span>07</span>Kết quả</a></li>
-          <li><a href="#repo"><span>08</span>Cấu trúc repo</a></li>
-          <li><a href="#lich"><span>09</span>Lịch 14 ngày</a></li>
-          <li><a href="#rui-ro"><span>10</span>Rủi ro</a></li>
-          <li><a href="#bao-cao"><span>11</span>Báo cáo</a></li>
+          <li><a href="#du-lieu"><span>03</span>Dữ liệu</a></li>
+          <li><a href="#cai-tien"><span>04</span>Phương pháp cải tiến</a></li>
+          <li><a href="#thi-nghiem"><span>05</span>Thí nghiệm</a></li>
+          <li><a href="#danh-gia"><span>06</span>Đánh giá</a></li>
+          <li><a href="#pipeline"><span>07</span>Pipeline</a></li>
+          <li><a href="#cau-hinh"><span>08</span>Cấu hình YOLO</a></li>
+          <li><a href="#ket-qua"><span>09</span>Kết quả</a></li>
+          <li><a href="#repo"><span>10</span>Cấu trúc repo</a></li>
+          <li><a href="#lich"><span>11</span>Lịch 14 ngày</a></li>
+          <li><a href="#rui-ro"><span>12</span>Rủi ro</a></li>
+          <li><a href="#bao-cao"><span>13</span>Báo cáo</a></li>
         </ol>
       </nav>
 
@@ -1938,24 +1940,24 @@
         <section class="sec reveal" id="muc-tieu" aria-labelledby="h-goal">
           <div class="sec__head">
             <p class="sec__num">01</p>
-            <h2 id="h-goal">Đủ chính xác cho lâm sàng, đủ nhẹ cho phòng khám</h2>
-            <p class="sec__lead">Bác sĩ chỉnh nha đang chấm tay vài chục điểm trên mỗi phim sọ nghiêng để đo góc và khoảng cách. Đề án tự động hoá bước đó bằng mô hình keypoint gọn nhẹ chạy được trên máy tính phổ thông.</p>
+            <h2 id="h-goal">Mô hình thị giác cộng tri thức giải phẫu</h2>
+            <p class="sec__lead">YOLO-Pose dự đoán từng điểm mốc gần như độc lập, nên đôi khi đặt một điểm vào chỗ không thể có trên hộp sọ thật, ví dụ Menton nằm trên Pogonion hay Gonion trôi ra sau đốt sống cổ. Đề án dùng quan hệ hình học giữa các điểm mốc để phát hiện và sửa những dự đoán như vậy.</p>
           </div>
           <div class="grid g2">
             <article class="card tone-prep">
               <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-target"/></svg></span>
               <p class="label">Mục tiêu chính</p>
-              <h3>Phát hiện 29 điểm mốc bằng YOLO-Pose</h3>
-              <p>Huấn luyện trên Aariz, dự đoán cả điểm xương và mô mềm. Đích đến là MRE dưới 2&nbsp;mm, ngưỡng thường được coi là chấp nhận được về lâm sàng.</p>
+              <h3>Nhận diện điểm mốc có ràng buộc hình học</h3>
+              <p>Xây dựng hệ thống tự động nhận diện điểm mốc sọ nghiêng (Cephalometric Landmark Detection) tích hợp ràng buộc hình học giải phẫu (Geometric Constraints), nhằm khắc phục hiện tượng dự đoán sai lệch vô lý ở các điểm mốc khó.</p>
             </article>
             <article class="card tone-train">
-              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-cpu"/></svg></span>
-              <p class="label">Mục tiêu ứng dụng</p>
-              <h3>Chạy được trên máy tính phổ thông</h3>
-              <p>Chứng minh mô hình vài triệu tham số cho sai số tiệm cận mô hình nặng, trong khi suy luận mỗi ảnh chỉ mất vài chục ms, không cần GPU rời.</p>
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-ruler"/></svg></span>
+              <p class="label">Mục tiêu khoa học</p>
+              <h3>Đo được phần cải thiện nhờ tri thức y khoa</h3>
+              <p>Đánh giá mức cải thiện độ chính xác (MRE, SDR) khi kết hợp mô hình thị giác máy tính hiện đại với tri thức chuyên ngành (Anatomical Priors), so sánh trực tiếp với YOLO-Pose thuần (Baseline).</p>
             </article>
           </div>
-          <p class="note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Các nghiên cứu điểm mốc sọ thường dùng heatmap hoặc backbone lớn trên GPU. Đề án hỏi: phải đánh đổi bao nhiêu milimét để có một mô hình chạy end-to-end trên máy tính phổ thông.</span></p>
+          <p class="note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Vì bản cải tiến dùng lại đúng trọng số của Baseline và chỉ thêm ràng buộc, mọi chênh lệch về MRE, SDR hay số outlier đều quy được về tri thức giải phẫu chứ không phải do kiến trúc hay cách train khác.</span></p>
         </section>
 
         <section class="sec reveal" id="cau-hoi" aria-labelledby="h-rq">
@@ -1967,80 +1969,35 @@
             <article class="card tone-prep">
               <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-ruler"/></svg></span>
               <p class="label">RQ1 · Độ chính xác</p>
-              <p>YOLO-Pose đạt MRE và SDR bao nhiêu so với U-Net heatmap và ResNet-50?</p>
-              <ul class="tags"><li>MRE (mm)</li><li>SDR 2–4 mm</li></ul>
+              <p>Thêm ràng buộc hình học giảm MRE và tăng SDR bao nhiêu so với YOLOv11-Pose thuần?</p>
+              <ul class="tags"><li>MRE (mm)</li><li>SDR 2–3 mm</li></ul>
             </article>
             <article class="card tone-train">
-              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-bolt"/></svg></span>
-              <p class="label">RQ2 · Tài nguyên</p>
-              <p>Mỗi mô hình tốn bao nhiêu thời gian và dung lượng khi chạy trên máy tính phổ thông?</p>
-              <ul class="tags"><li>ms/ảnh</li><li>MB</li><li>Params</li><li>GFLOPs</li></ul>
+              <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-alert"/></svg></span>
+              <p class="label">RQ2 · Outlier</p>
+              <p>Số điểm mốc sai lệch nghiêm trọng (&gt;&nbsp;5&nbsp;mm) giảm được bao nhiêu phần trăm?</p>
+              <ul class="tags"><li>Outlier Reduction Rate</li></ul>
             </article>
             <article class="card tone-eval">
               <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-dots"/></svg></span>
               <p class="label">RQ3 · Điểm khó</p>
-              <p>Điểm mốc nào sai nhiều nhất? Mô mềm khác mô xương ra sao?</p>
-              <ul class="tags"><li>MRE từng điểm</li><li>Xương / mô mềm</li></ul>
+              <p>Điểm mốc nào hưởng lợi nhiều nhất? Có điểm vốn đúng bị ràng buộc kéo sai không?</p>
+              <ul class="tags"><li>MRE từng điểm</li><li>Trước / sau</li></ul>
             </article>
             <article class="card tone-write">
               <span class="tile" aria-hidden="true"><svg class="ico"><use href="#i-scan"/></svg></span>
-              <p class="label">RQ4 · Máy chụp</p>
-              <p>Sai số có lệch giữa 7 máy X-quang khác nhau không?</p>
-              <ul class="tags"><li>MRE theo máy</li><li>Độ phân giải</li></ul>
+              <p class="label">RQ4 · Tham chiếu SOTA</p>
+              <p>Sau cải tiến, hệ thống cách kết quả ResNet-50 đã công bố (MRE ~1.25&nbsp;mm) bao xa?</p>
+              <ul class="tags"><li>So với MDPI</li></ul>
             </article>
-          </div>
-        </section>
-
-        <section class="sec reveal" id="thi-nghiem" aria-labelledby="h-exp">
-          <div class="sec__head">
-            <p class="sec__num">03</p>
-            <h2 id="h-exp">Một bộ test, ba cách dự đoán</h2>
-            <p class="sec__lead">Cùng tập test Aariz, cùng công thức đổi pixel sang milimét, cùng script chấm điểm. Chỉ khác cách mô hình sinh ra toạ độ.</p>
-          </div>
-          <ul class="fixed">
-            <li>Giữ cố định:</li>
-            <li>Split Train/Val/Test chính thức</li>
-            <li>Pixel spacing theo từng ảnh</li>
-            <li><code>evaluate.py</code> chung</li>
-            <li>Cùng một máy khi đo tốc độ</li>
-          </ul>
-          <div class="io">Phim sọ nghiêng trong tập test Aariz</div>
-          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
-          <div class="grid g3">
-            <article class="card model model--yolo">
-              <span class="role">Đề xuất</span>
-              <h3>YOLO11-Pose</h3>
-              <p>Hồi quy trực tiếp 29 keypoint trong một lần chạy. Thử bản <code>n</code> và <code>s</code>, đối chiếu thêm YOLOv8n-Pose.</p>
-              <ul class="tags"><li>~3–10M params</li><li>Ultralytics</li><li>Nhẹ</li></ul>
-            </article>
-            <article class="card model model--unet">
-              <span class="role">Đối chứng 1 · tự huấn luyện</span>
-              <h3>U-Net heatmap</h3>
-              <p>Encoder ResNet-18, xuất 29 heatmap Gaussian, lấy toạ độ bằng argmax hoặc soft-argmax. Gộp hai lựa chọn trong yêu cầu thành một mô hình.</p>
-              <ul class="tags"><li>~14M params</li><li>segmentation-models-pytorch</li></ul>
-            </article>
-            <article class="card model model--r50">
-              <span class="role">Đối chứng 2 · trích dẫn</span>
-              <h3>ResNet-50 Regression</h3>
-              <p>Lấy kết quả công bố của bài MDPI 2025: MRE ~1.25&nbsp;mm, SDR@2mm ~81.5%. Không huấn luyện lại, chỉ đối chiếu.</p>
-              <ul class="tags"><li>~25M params</li><li>Số liệu bài báo</li></ul>
-            </article>
-          </div>
-          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
-          <div class="io">Toạ độ dự đoán, đổi sang mm, so với ground-truth</div>
-          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
-          <div class="grid g3">
-            <div class="card metric"><strong>MRE ± SD</strong><span>Khoảng cách Euclid trung bình (mm), cả tổng và từng điểm.</span></div>
-            <div class="card metric"><strong>SDR</strong><span>Tỉ lệ điểm có sai số ≤ 2; 2.5; 3; 4&nbsp;mm.</span></div>
-            <div class="card metric"><strong>Tốc độ và kích thước</strong><span>ms/ảnh (median 100 lần), MB, số tham số, GFLOPs.</span></div>
           </div>
         </section>
 
         <section class="sec reveal" id="du-lieu" aria-labelledby="h-data">
           <div class="sec__head">
-            <p class="sec__num">04</p>
-            <h2 id="h-data">Aariz: 1.000 phim, 7 máy chụp</h2>
-            <p class="sec__lead">Bộ dữ liệu công bố trên <em>Nature Scientific Data</em> (2025), có sẵn split và toạ độ ground-truth do chuyên gia chấm. Mỗi ảnh kèm thông tin máy chụp và kích thước pixel, đủ để đổi sai số sang milimét.</p>
+            <p class="sec__num">03</p>
+            <h2 id="h-data">Aariz: 1.000 phim đã được benchmark</h2>
+            <p class="sec__lead">Bộ dữ liệu <a href="https://github.com/manwaarkhd/aariz/tree/main">Aariz</a> công bố trên <em>Nature Scientific Data</em> (2025): 1.000 ảnh X-quang sọ nghiêng (Lateral Cephalograms), mỗi ảnh được chuyên gia gán nhãn chuẩn hoá 29 điểm mốc giải phẫu, chia sẵn Train/Validation/Test.</p>
           </div>
           <div class="grid g2">
             <div class="card">
@@ -2051,26 +2008,124 @@
                 <span class="s-test">Test 150</span>
               </div>
               <dl class="facts">
-                <div><dt>Train / Val</dt><dd>Huấn luyện; chọn epoch và siêu tham số theo MRE trên val.</dd></div>
-                <div><dt>Test</dt><dd>Chỉ chạy một lần cuối, sau khi đã chốt mô hình.</dd></div>
+                <div><dt>Train</dt><dd>Huấn luyện YOLO và học thống kê giải phẫu (vị trí tương đối giữa các điểm mốc).</dd></div>
+                <div><dt>Val</dt><dd>Chọn epoch và tinh chỉnh ngưỡng của bộ lọc hình học.</dd></div>
+                <div><dt>Test</dt><dd>Chỉ chạy một lần cuối, sau khi đã chốt mô hình và ngưỡng.</dd></div>
                 <div><dt>Điểm mốc</dt><dd>29 điểm, gồm cả mô xương và mô mềm.</dd></div>
-                <div><dt>Nguồn ảnh</dt><dd>7 máy X-quang, độ phân giải không đồng nhất.</dd></div>
-                <div><dt>Đổi đơn vị</dt><dd><code>mm = pixel × pixel_size</code> theo từng ảnh, không dùng một hằng số chung.</dd></div>
+                <div><dt>Đổi đơn vị</dt><dd><code>mm = pixel × pixel_size</code> theo từng ảnh; ảnh đến từ 7 máy chụp với độ phân giải khác nhau.</dd></div>
               </dl>
             </div>
             <div class="card bignum">
-              <p class="label">Mỗi mô hình được chấm</p>
+              <p class="label">Mỗi cấu hình được chấm</p>
               <strong>4.350</strong>
-              <p>cặp điểm (dự đoán, ground-truth): 150 ảnh test × 29 điểm. Có bốn mô hình tự huấn luyện: YOLO11n, YOLO11s, YOLOv8n và U-Net.</p>
-              <p class="warn"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg><span>Khi tải dữ liệu, đối chiếu lại số ảnh mỗi tập và cột pixel size trong file CSV của Aariz trước khi viết script chuyển đổi.</span></p>
+              <p>cặp điểm (dự đoán, ground-truth): 150 ảnh test × 29 điểm. Có ba cấu hình tự chạy: YOLO thuần, YOLO + bộ lọc hình học (1B) và YOLO + loss hình học (1A, nếu kịp).</p>
+              <p class="warn"><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg><span>Khi tải dữ liệu, đối chiếu lại số ảnh mỗi tập và cột pixel size trong file nhãn của Aariz trước khi viết script chuyển đổi.</span></p>
             </div>
+          </div>
+        </section>
+
+        <section class="sec reveal" id="cai-tien" aria-labelledby="h-method">
+          <div class="sec__head">
+            <p class="sec__num">04</p>
+            <h2 id="h-method">YOLOv11-Pose và hai cách đưa ràng buộc vào</h2>
+            <p class="sec__lead">Mô hình cốt lõi là <code>YOLOv11-Pose</code>, phiên bản keypoint/pose estimation mới nhất của Ultralytics. Ràng buộc hình học có thể đặt ở lúc train (1A) hoặc ngay sau khi suy luận (1B).</p>
+          </div>
+          <div class="grid g2">
+            <article class="card model model--unet">
+              <span class="role">Phương án 1A · Custom Loss</span>
+              <h3>Phạt sai lệch hình học khi train</h3>
+              <p>Bổ sung số hạng phạt sai lệch hình học (Geometric Penalty Loss) vào hàm mất mát: <code>L = L<sub>YOLO</sub> + λ · L<sub>geo</sub></code>. <code>L<sub>geo</sub></code> phạt khi khoảng cách hoặc góc giữa các cặp điểm mốc (đã chuẩn hoá theo độ dài S–N) vượt khỏi khoảng thống kê từ tập train.</p>
+              <ul class="tags"><li>Sửa <code>v8PoseLoss</code></li><li>Phải train lại</li><li>Tuỳ chọn</li></ul>
+            </article>
+            <article class="card model model--yolo">
+              <span class="role">Phương án 1B · Post-processing · Khuyên dùng</span>
+              <h3>Hiệu chỉnh toạ độ sau khi YOLO dự đoán</h3>
+              <p>Lấy toạ độ thô từ YOLO, đưa về hệ quy chiếu Sella–Nasion (Sella-Nasion alignment), kiểm tra từng điểm có nằm trong vùng không gian hợp lệ (Spatial Bounds) học từ tập train hay không, rồi kéo các điểm vi phạm về vị trí hợp lý.</p>
+              <ul class="tags"><li>Không train lại</li><li>Vài chục dòng NumPy</li><li>Làm trước</li></ul>
+            </article>
+          </div>
+          <div class="grid g2">
+            <figure class="window"><div class="window__bar" aria-hidden="true"><i></i><i></i><i></i><b>geo_refine.py · phương án 1B</b></div><pre class="codebox"><span class="c"># 1. Hệ quy chiếu S–N: gốc tại S, trục x theo S→N, đơn vị |SN|</span>
+R, s = align_to_sn(kpts[S], kpts[N])
+local = to_sn_frame(kpts, R, s)        <span class="c"># 29 × 2</span>
+
+<span class="c"># 2. Vùng hợp lệ học từ train: mean ± k·std</span>
+low, high = priors.mean - k * priors.std, \
+            priors.mean + k * priors.std
+bad = ((local &lt; low) | (local &gt; high)).any(1) \
+      | (conf &lt; conf_thr)
+
+<span class="c"># 3. Kéo điểm vi phạm về vùng hợp lệ</span>
+local[bad] = np.clip(local[bad], low[bad], high[bad])
+
+<span class="c"># 4. Trả về toạ độ ảnh gốc</span>
+refined = from_sn_frame(local, R, s)</pre></figure>
+            <ul class="tips">
+              <li><strong>Vì sao chọn S và N</strong>Sella và Nasion là hai điểm ổn định, dễ dự đoán, và đường S–N là mặt phẳng tham chiếu chuẩn trong phân tích sọ nghiêng. Chuẩn hoá theo S–N loại bỏ khác biệt về vị trí, góc đặt đầu và kích thước sọ.</li>
+              <li><strong>Học vùng hợp lệ</strong>Tính trên ground-truth của tập train, trong hệ S–N: trung bình, độ lệch chuẩn hoặc percentile 1–99 cho từng điểm. Có thể thêm ràng buộc thứ tự, ví dụ Me phải thấp hơn Pog.</li>
+              <li><strong>Chỉnh <code>k</code> trên val</strong><code>k</code> quá nhỏ thì kéo sai cả điểm đúng, quá lớn thì không bắt được outlier. Quét <code>k</code> từ 1.5 đến 4 và chọn theo MRE trên val.</li>
+              <li><strong>Bảo vệ hệ quy chiếu</strong>Nếu chính S hoặc N có confidence thấp, hoặc độ dài S–N (mm) nằm ngoài khoảng thường gặp, bỏ qua bước hiệu chỉnh cho ảnh đó thay vì làm hỏng cả 29 điểm.</li>
+            </ul>
+          </div>
+          <p class="note"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span>Nếu gấp thời gian, làm 1B trước: không phải train lại và cho kết quả so sánh sạch với Baseline. 1A chỉ làm khi 1B đã xong, và có thể đưa vào phần hướng mở rộng nếu không kịp.</span></p>
+        </section>
+
+        <section class="sec reveal" id="thi-nghiem" aria-labelledby="h-exp">
+          <div class="sec__head">
+            <p class="sec__num">05</p>
+            <h2 id="h-exp">Một bộ test, ba dòng kết quả</h2>
+            <p class="sec__lead">Cùng tập test Aariz, cùng công thức đổi pixel sang milimét, cùng script chấm điểm. Bản đề xuất và Baseline 1 dùng chung trọng số YOLO, chỉ khác có hay không có ràng buộc hình học.</p>
+          </div>
+          <ul class="fixed">
+            <li>Giữ cố định:</li>
+            <li>Split Train/Val/Test chính thức</li>
+            <li>Trọng số YOLOv11-Pose</li>
+            <li>Pixel spacing theo từng ảnh</li>
+            <li><code>evaluate.py</code> chung</li>
+          </ul>
+          <div class="io">Phim sọ nghiêng trong tập test Aariz</div>
+          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
+          <div class="grid g3">
+            <article class="card model model--yolo">
+              <span class="role">Đề xuất</span>
+              <h3>YOLOv11-Pose + ràng buộc</h3>
+              <p>Toạ độ YOLO đi qua bộ lọc hình học 1B. Nếu kịp, thêm một dòng cho bản train với Geometric Penalty Loss (1A).</p>
+              <ul class="tags"><li>Anatomical Priors</li><li>Ultralytics</li></ul>
+            </article>
+            <article class="card model model--unet">
+              <span class="role">Baseline 1 · tự huấn luyện</span>
+              <h3>YOLOv11-Pose nguyên bản</h3>
+              <p>Chạy cùng trọng số nhưng không có ràng buộc hình học. Đây là phép so sánh chính của đề án.</p>
+              <ul class="tags"><li>Không ràng buộc</li><li>Cùng split</li></ul>
+            </article>
+            <article class="card model model--r50">
+              <span class="role">Baseline 2 · trích dẫn</span>
+              <h3>ResNet-50 Regression</h3>
+              <p>Single-stage regression từ <a href="https://www.mdpi.com/2077-0383/15/13/5149">bài báo MDPI</a>: MRE ~1.25&nbsp;mm, SDR@2mm ~81.5%. Không huấn luyện lại, chỉ đối chiếu.</p>
+              <ul class="tags"><li>Số liệu bài báo</li></ul>
+            </article>
+          </div>
+          <div class="arrow" aria-hidden="true"><svg class="ico"><use href="#i-arrow-down"/></svg></div>
+          <div class="io">Toạ độ dự đoán, đổi sang mm, so với ground-truth</div>
+        </section>
+
+        <section class="sec reveal" id="danh-gia" aria-labelledby="h-metric">
+          <div class="sec__head">
+            <p class="sec__num">06</p>
+            <h2 id="h-metric">Ba chỉ số đánh giá</h2>
+            <p class="sec__lead">Hai chỉ số chuẩn của bài toán điểm mốc sọ, cộng một chỉ số đo đúng thứ mà ràng buộc hình học nhắm tới: các dự đoán sai lệch nghiêm trọng.</p>
+          </div>
+          <div class="grid g3">
+            <div class="card metric"><strong>MRE ± SD</strong><span>Mean Radial Error: khoảng cách Euclid trung bình (mm) giữa điểm mốc dự đoán và ground-truth, tính cho cả 29 điểm và từng điểm.</span></div>
+            <div class="card metric"><strong>SDR</strong><span>Success Detection Rate: tỉ lệ điểm có sai số trong ngưỡng lâm sàng SDR@2.0mm, SDR@2.5mm và SDR@3.0mm.</span></div>
+            <div class="card metric"><strong>Outlier Reduction Rate</strong><span>Tỉ lệ giảm số điểm sai lệch nghiêm trọng (&gt;&nbsp;5.0&nbsp;mm): <code>(N<sub>base</sub> − N<sub>geo</sub>) / N<sub>base</sub> × 100%</code>.</span></div>
           </div>
         </section>
 
         <section class="sec reveal" id="pipeline" aria-labelledby="h-pipe">
           <div class="sec__head">
-            <p class="sec__num">05</p>
-            <h2 id="h-pipe">Sáu bước, mỗi bước một file</h2>
+            <p class="sec__num">07</p>
+            <h2 id="h-pipe">Bảy bước, mỗi bước một file</h2>
             <p class="sec__lead">Bên trái là việc cần làm, bên phải là thứ bước đó sinh ra cho bước sau.</p>
           </div>
           <ol class="steps">
@@ -2086,49 +2141,59 @@
             </li>
             <li class="step">
               <div>
-                <h3>Huấn luyện YOLO <code>train_yolo.py</code></h3>
+                <h3>Huấn luyện Baseline <code>train_yolo.py</code></h3>
                 <ul>
-                  <li>Fine-tune từ <code>yolo11n-pose.pt</code> và <code>yolo11s-pose.pt</code>, <code>imgsz=1024</code>.</li>
-                  <li>Ablation nhỏ: <code>imgsz</code> 640 so với 1024 trên bản <code>n</code>.</li>
+                  <li>Fine-tune từ <code>yolo11s-pose.pt</code>, <code>imgsz=1024</code>; dùng bản <code>n</code> ở 640 px để chạy thử nhanh.</li>
+                  <li>Chọn checkpoint theo MRE trên val, không theo mAP-pose.</li>
                 </ul>
               </div>
-              <div class="out"><b>Đầu ra</b><code>runs/pose/{exp}/weights/best.pt</code><br>Log loss và mAP-pose theo epoch</div>
+              <div class="out"><b>Đầu ra</b><code>runs/pose/baseline/weights/best.pt</code></div>
             </li>
             <li class="step">
               <div>
-                <h3>Huấn luyện U-Net <code>train_unet.py</code></h3>
+                <h3>Học tri thức giải phẫu <code>fit_priors.py</code></h3>
                 <ul>
-                  <li>Resize 512×512 (hoặc 768 nếu đủ RAM), heatmap Gaussian σ≈2–3 px, loss MSE hoặc adaptive wing.</li>
-                  <li>Cùng split, cùng augmentation hình học nhẹ như YOLO.</li>
+                  <li>Từ ground-truth tập train: đưa 29 điểm về hệ S–N, tính trung bình, độ lệch chuẩn và percentile của từng điểm.</li>
+                  <li>Thống kê thêm khoảng hợp lệ của độ dài S–N (mm) và các quan hệ thứ tự trên/dưới, trước/sau.</li>
                 </ul>
               </div>
-              <div class="out"><b>Đầu ra</b><code>checkpoints/unet_r18.pt</code></div>
+              <div class="out"><b>Đầu ra</b><code>results/priors.json</code></div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Bộ lọc hình học 1B <code>geo_refine.py</code></h3>
+                <ul>
+                  <li>Nhận toạ độ thô và confidence từ YOLO, hiệu chỉnh các điểm vi phạm như mục 04.</li>
+                  <li>Quét <code>k</code> và ngưỡng confidence trên val; ghi lại điểm nào bị sửa ở mỗi ảnh.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>results/predictions_geo1b.csv</code><br><code>results/refine_log.csv</code></div>
+            </li>
+            <li class="step">
+              <div>
+                <h3>Loss hình học 1A <code>train_yolo_geo.py</code> · tuỳ chọn</h3>
+                <ul>
+                  <li>Kế thừa <code>v8PoseLoss</code> của Ultralytics, cộng <code>λ · L<sub>geo</sub></code> dựa trên <code>priors.json</code>.</li>
+                  <li>Fine-tune tiếp từ checkpoint Baseline để tiết kiệm thời gian; thử vài giá trị <code>λ</code>.</li>
+                </ul>
+              </div>
+              <div class="out"><b>Đầu ra</b><code>runs/pose/geo1a/weights/best.pt</code></div>
             </li>
             <li class="step">
               <div>
                 <h3>Chấm điểm <code>evaluate.py</code></h3>
                 <ul>
-                  <li>Dự đoán trên test, đưa toạ độ về kích thước ảnh gốc, nhân pixel size của từng ảnh.</li>
-                  <li>Tính MRE ± SD, SDR 2/2.5/3/4&nbsp;mm; tách theo từng điểm, nhóm xương/mô mềm và máy chụp.</li>
+                  <li>Đưa toạ độ về kích thước ảnh gốc, nhân pixel size của từng ảnh.</li>
+                  <li>Tính MRE ± SD, SDR 2/2.5/3&nbsp;mm, số outlier &gt;&nbsp;5&nbsp;mm và Outlier Reduction Rate; tách theo từng điểm.</li>
                 </ul>
               </div>
-              <div class="out"><b>Đầu ra</b><code>results/predictions_{model}.csv</code><br><code>results/metrics_summary.csv</code></div>
-            </li>
-            <li class="step">
-              <div>
-                <h3>Đo tốc độ <code>benchmark_speed.py</code></h3>
-                <ul>
-                  <li>Trên cùng một máy: warm-up 10 lần rồi lấy median của 100 lần, batch 1, cho CPU và GPU (nếu có).</li>
-                  <li>Thêm một cột YOLO xuất ONNX (<code>model.export(format="onnx")</code>) nếu còn thời gian.</li>
-                </ul>
-              </div>
-              <div class="out"><b>Đầu ra</b><code>results/speed.csv</code>: ms/ảnh, MB, params, GFLOPs</div>
+              <div class="out"><b>Đầu ra</b><code>results/predictions_{config}.csv</code><br><code>results/metrics_summary.csv</code></div>
             </li>
             <li class="step">
               <div>
                 <h3>Hình và bảng <code>plots.py</code></h3>
                 <ul>
-                  <li>Vẽ bằng <code>matplotlib</code>; chồng dự đoán lên ảnh để minh hoạ ca tốt và ca xấu.</li>
+                  <li>Vẽ bằng <code>matplotlib</code>; chồng dự đoán trước và sau hiệu chỉnh lên ảnh để minh hoạ.</li>
                   <li>Xuất bảng so sánh dạng Markdown/LaTeX cho báo cáo.</li>
                 </ul>
               </div>
@@ -2139,7 +2204,7 @@
 
         <section class="sec reveal" id="cau-hinh" aria-labelledby="h-cfg">
           <div class="sec__head">
-            <p class="sec__num">06</p>
+            <p class="sec__num">08</p>
             <h2 id="h-cfg">Mấy chỗ dễ sai khi dùng YOLO-Pose cho ảnh y tế</h2>
             <p class="sec__lead">Mặc định của Ultralytics được chỉnh cho ảnh người và đồ vật. Với phim sọ chỉ có một đối tượng, cần tắt vài augmentation và tăng độ phân giải.</p>
           </div>
@@ -2154,7 +2219,7 @@
 <span class="k">names</span>: {0: <span class="s">skull</span>}
 
 <span class="c"># train_yolo.py</span>
-model = YOLO(<span class="s">"yolo11n-pose.pt"</span>)
+model = YOLO(<span class="s">"yolo11s-pose.pt"</span>)
 model.train(
     data=<span class="s">"configs/aariz-pose.yaml"</span>,
     imgsz=1024, epochs=150, batch=4,
@@ -2165,7 +2230,7 @@ model.train(
 )</pre></figure>
             <ul class="tips">
               <li><strong><code>imgsz</code> lớn</strong>Phim gốc khoảng 2000 px. Ở 640 px, mỗi pixel đầu vào đã ứng với hơn 1&nbsp;mm, nên sai số khó xuống dưới 2&nbsp;mm. Bắt đầu từ 1024.</li>
-              <li><strong>Tắt <code>fliplr</code> và <code>mosaic</code></strong>Phim sọ nghiêng luôn quay cùng một hướng. Mosaic ghép bốn ảnh làm sọ nhỏ lại và cắt mất điểm mốc.</li>
+              <li><strong>Tắt <code>fliplr</code> và <code>mosaic</code></strong>Phim sọ nghiêng luôn quay cùng một hướng. Mosaic ghép bốn ảnh làm sọ nhỏ lại và cắt mất điểm mốc; lật ngang cũng phá vỡ chính các ràng buộc hình học cần học.</li>
               <li><strong>Ảnh xám</strong>Màu không mang thông tin, nên tắt augmentation sắc độ và độ bão hoà.</li>
               <li><strong>Batch nhỏ</strong>Ảnh 1024 px tốn nhiều bộ nhớ. Nếu tràn bộ nhớ, giảm batch hoặc train trên Colab/Kaggle GPU.</li>
             </ul>
@@ -2174,92 +2239,97 @@ model.train(
 
         <section class="sec reveal" id="ket-qua" aria-labelledby="h-out">
           <div class="sec__head">
-            <p class="sec__num">07</p>
+            <p class="sec__num">09</p>
             <h2 id="h-out">Một bảng chính và bốn hình</h2>
-            <p class="sec__lead">Bảng đặt mọi mô hình cạnh nhau. Mỗi hình bên dưới trả lời một câu hỏi ở mục 02.</p>
+            <p class="sec__lead">Bảng đặt mọi cấu hình cạnh nhau. Mỗi hình bên dưới trả lời một câu hỏi ở mục 02.</p>
           </div>
 
           <div class="table-wrap">
             <table>
               <caption>Khung bảng kết quả trên tập test. Ô "—" sẽ điền sau Ngày 9; dòng in nghiêng là số trích dẫn, không chạy lại.</caption>
               <thead>
-                <tr><th scope="col">Mô hình</th><th scope="col">MRE (mm)</th><th scope="col">SDR 2mm</th><th scope="col">SDR 2.5mm</th><th scope="col">SDR 3mm</th><th scope="col">SDR 4mm</th><th scope="col">ms/ảnh</th><th scope="col">Params</th></tr>
+                <tr><th scope="col">Mô hình</th><th scope="col">MRE ± SD (mm)</th><th scope="col">SDR 2mm</th><th scope="col">SDR 2.5mm</th><th scope="col">SDR 3mm</th><th scope="col">Outlier &gt;5mm</th><th scope="col">Giảm outlier</th></tr>
               </thead>
               <tbody>
-                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLO11n-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
-                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLO11s-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
-                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>YOLOv8n-Pose</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
-                <tr><td><span class="swatch" style="--s: var(--c-train)"></span>U-Net (ResNet-18)</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
-                <tr class="ref-row"><td><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50 (MDPI 2025)</td><td>~1.25</td><td>~81.5%</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">không đo</td><td class="tbd">~25M</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-train)"></span>YOLOv11-Pose (Baseline 1)</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">mốc 0%</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>+ Bộ lọc hình học (1B)</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr><td><span class="swatch" style="--s: var(--c-prep)"></span>+ Geometric Loss (1A, nếu kịp)</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td></tr>
+                <tr class="ref-row"><td><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50 (Baseline 2, MDPI)</td><td>~1.25</td><td>~81.5%</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">—</td><td class="tbd">không áp dụng</td></tr>
               </tbody>
             </table>
           </div>
 
           <ul class="chart-legend" aria-label="Chú thích màu mô hình">
-            <li><span class="swatch" style="--s: var(--c-prep)"></span>YOLO-Pose</li>
-            <li><span class="swatch" style="--s: var(--c-train)"></span>U-Net heatmap</li>
-            <li><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50</li>
+            <li><span class="swatch" style="--s: var(--c-prep)"></span>YOLO + ràng buộc (đề xuất)</li>
+            <li><span class="swatch" style="--s: var(--c-train)"></span>YOLO thuần (Baseline 1)</li>
+            <li><span class="swatch" style="--s: var(--c-eval)"></span>ResNet-50 (Baseline 2)</li>
           </ul>
 
           <div class="grid g4">
             <figure class="card chart">
               <svg viewBox="0 0 200 120" aria-hidden="true">
                 <path class="axis" d="M20 100 H190"/>
-                <rect class="f-yolo" x="30" y="52" width="12" height="48" rx="1"/>
-                <rect class="f-unet" x="44" y="44" width="12" height="56" rx="1"/>
+                <rect class="f-unet" x="30" y="56" width="12" height="44" rx="1"/>
+                <rect class="f-yolo" x="44" y="46" width="12" height="54" rx="1"/>
                 <rect class="f-r50" x="58" y="40" width="12" height="60" rx="1"/>
-                <rect class="f-yolo" x="82" y="40" width="12" height="60" rx="1"/>
-                <rect class="f-unet" x="96" y="32" width="12" height="68" rx="1"/>
+                <rect class="f-unet" x="82" y="42" width="12" height="58" rx="1"/>
+                <rect class="f-yolo" x="96" y="34" width="12" height="66" rx="1"/>
                 <rect class="f-r50" x="110" y="30" width="12" height="70" rx="1"/>
-                <rect class="f-yolo" x="134" y="28" width="12" height="72" rx="1"/>
-                <rect class="f-unet" x="148" y="22" width="12" height="78" rx="1"/>
+                <rect class="f-unet" x="134" y="32" width="12" height="68" rx="1"/>
+                <rect class="f-yolo" x="148" y="24" width="12" height="76" rx="1"/>
                 <rect class="f-r50" x="162" y="20" width="12" height="80" rx="1"/>
                 <text class="lbl" x="38" y="114">2mm</text>
                 <text class="lbl" x="88" y="114">2.5mm</text>
                 <text class="lbl" x="142" y="114">3mm</text>
               </svg>
-              <figcaption><strong>Cột nhóm · SDR</strong><span>RQ1: tỉ lệ đạt ở từng ngưỡng, mỗi màu một mô hình.</span></figcaption>
+              <figcaption><strong>Cột nhóm · SDR</strong><span>RQ1 và RQ4: tỉ lệ đạt ở từng ngưỡng, mỗi màu một cấu hình.</span></figcaption>
             </figure>
             <figure class="card chart">
               <svg viewBox="0 0 200 120" aria-hidden="true">
-                <path class="axis" d="M30 100 H190 M30 100 V20"/>
-                <circle class="f-yolo" cx="52" cy="66" r="6" opacity="0.75"/>
-                <circle class="f-yolo" cx="72" cy="56" r="9" opacity="0.75"/>
-                <circle class="f-unet" cx="132" cy="50" r="12" opacity="0.75"/>
-                <circle class="f-r50" cx="170" cy="44" r="16" opacity="0.6"/>
-                <text class="lbl" x="122" y="114">ms/ảnh →</text>
-                <text class="lbl" x="2" y="16">↑ MRE</text>
+                <path class="axis" d="M30 100 H180 M30 100 V14"/>
+                <rect class="f-unet" x="62" y="24" width="30" height="76" rx="1"/>
+                <rect class="f-yolo" x="118" y="70" width="30" height="30" rx="1"/>
+                <path d="M92 30 C110 30 124 46 130 64" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+                <text class="lbl" x="58" y="114">Baseline</text>
+                <text class="lbl" x="116" y="114">+ ràng buộc</text>
+                <text class="lbl" x="2" y="12">↑ số điểm &gt;5mm</text>
               </svg>
-              <figcaption><strong>Chấm · Tốc độ và sai số</strong><span>RQ2: kích thước chấm là số tham số; càng gần góc trái dưới càng tốt.</span></figcaption>
+              <figcaption><strong>Cột · Outlier &gt; 5&nbsp;mm</strong><span>RQ2: số điểm sai nghiêm trọng trước và sau, ghi kèm Outlier Reduction Rate.</span></figcaption>
             </figure>
             <figure class="card chart">
               <svg viewBox="0 0 200 120" aria-hidden="true">
                 <path class="axis" d="M42 8 V104"/>
-                <rect class="f-yolo" x="42" y="12" width="132" height="10" rx="1"/>
-                <rect class="f-unet" x="42" y="27" width="110" height="10" rx="1"/>
-                <rect class="f-yolo" x="42" y="42" width="92" height="10" rx="1"/>
-                <rect class="f-unet" x="42" y="57" width="70" height="10" rx="1"/>
-                <rect class="f-yolo" x="42" y="72" width="56" height="10" rx="1"/>
-                <rect class="f-yolo" x="42" y="87" width="40" height="10" rx="1"/>
-                <text class="lbl" x="6" y="21">Go</text>
-                <text class="lbl" x="6" y="36">Pog'</text>
-                <text class="lbl" x="6" y="51">Or</text>
-                <text class="lbl" x="6" y="66">Li</text>
-                <text class="lbl" x="6" y="81">N</text>
-                <text class="lbl" x="6" y="96">S</text>
+                <rect class="f-unet" x="42" y="12" width="140" height="6" rx="1"/>
+                <rect class="f-yolo" x="42" y="19" width="84" height="6" rx="1"/>
+                <rect class="f-unet" x="42" y="32" width="118" height="6" rx="1"/>
+                <rect class="f-yolo" x="42" y="39" width="76" height="6" rx="1"/>
+                <rect class="f-unet" x="42" y="52" width="92" height="6" rx="1"/>
+                <rect class="f-yolo" x="42" y="59" width="70" height="6" rx="1"/>
+                <rect class="f-unet" x="42" y="72" width="56" height="6" rx="1"/>
+                <rect class="f-yolo" x="42" y="79" width="54" height="6" rx="1"/>
+                <rect class="f-unet" x="42" y="92" width="40" height="6" rx="1"/>
+                <rect class="f-yolo" x="42" y="99" width="40" height="6" rx="1"/>
+                <text class="lbl" x="6" y="22">Go</text>
+                <text class="lbl" x="6" y="42">Pog'</text>
+                <text class="lbl" x="6" y="62">Or</text>
+                <text class="lbl" x="6" y="82">N</text>
+                <text class="lbl" x="6" y="102">S</text>
               </svg>
-              <figcaption><strong>Thanh ngang · MRE từng điểm</strong><span>RQ3: 29 điểm xếp theo sai số; xanh dương là xương, xanh ngọc là mô mềm.</span></figcaption>
+              <figcaption><strong>Thanh đôi · MRE từng điểm</strong><span>RQ3: 29 điểm xếp theo sai số Baseline; thanh dưới là sau hiệu chỉnh.</span></figcaption>
             </figure>
             <figure class="card chart">
               <svg viewBox="0 0 200 120" aria-hidden="true">
                 <rect x="20" y="8" width="160" height="104" rx="6" fill="#0a0f17"/>
                 <path d="M78 30 C96 14 136 16 150 34 C160 48 154 66 150 78 C146 92 140 100 120 102 C100 104 86 96 80 84 C70 66 68 44 78 30 Z" fill="none" stroke="#94a3b8" stroke-width="1.4"/>
-                <circle cx="132" cy="34" r="3" fill="#34d399"/><circle cx="135" cy="37" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
-                <circle cx="148" cy="62" r="3" fill="#34d399"/><circle cx="154" cy="67" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
-                <circle cx="120" cy="98" r="3" fill="#34d399"/><circle cx="122" cy="95" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
-                <circle cx="88" cy="74" r="3" fill="#34d399"/><circle cx="94" cy="78" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+                <path d="M88 32 L140 26" stroke="#93c5fd" stroke-width="1" stroke-dasharray="3 2"/>
+                <circle cx="132" cy="34" r="3" fill="#34d399"/><circle cx="134" cy="36" r="3.5" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+                <circle cx="120" cy="98" r="3" fill="#34d399"/>
+                <circle cx="66" cy="104" r="3.5" fill="none" stroke="#f87171" stroke-width="1.5"/>
+                <path d="M71 103 L112 99" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="2 2"/>
+                <circle cx="117" cy="98" r="3.5" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
+                <circle cx="88" cy="74" r="3" fill="#34d399"/><circle cx="91" cy="76" r="3.5" fill="none" stroke="#60a5fa" stroke-width="1.5"/>
               </svg>
-              <figcaption><strong>Ảnh minh hoạ</strong><span>Chấm đặc là ground-truth, vòng rỗng là dự đoán. Chọn ca tốt, ca xấu và một ca mỗi máy chụp (RQ4).</span></figcaption>
+              <figcaption><strong>Ảnh minh hoạ</strong><span>Chấm đặc là ground-truth, vòng đỏ là dự đoán vô lý của Baseline, vòng xanh là vị trí sau hiệu chỉnh.</span></figcaption>
             </figure>
           </div>
           <p class="muted-note">Các hình trên là bản phác bố cục, chưa phải số liệu thật.</p>
@@ -2267,11 +2337,11 @@ model.train(
 
         <section class="sec reveal" id="repo" aria-labelledby="h-repo">
           <div class="sec__head">
-            <p class="sec__num">08</p>
+            <p class="sec__num">10</p>
             <h2 id="h-repo">Bốn thư mục chính</h2>
           </div>
           <div class="grid g2">
-            <figure class="window"><div class="window__bar" aria-hidden="true"><i></i><i></i><i></i><b>ceph-landmark-yolo</b></div><pre class="tree"><span class="d">ceph-landmark-yolo/</span>
+            <figure class="window"><div class="window__bar" aria-hidden="true"><i></i><i></i><i></i><b>ceph-landmark-geo</b></div><pre class="tree"><span class="d">ceph-landmark-geo/</span>
 ├── <span class="d">data/</span>
 │   ├── raw/              <span class="c"># Aariz tải về, không sửa</span>
 │   ├── yolo/             <span class="c"># ảnh + nhãn YOLO Pose</span>
@@ -2279,15 +2349,16 @@ model.train(
 ├── <span class="d">src/</span>
 │   ├── prepare_aariz.py
 │   ├── train_yolo.py
-│   ├── train_unet.py
+│   ├── fit_priors.py
+│   ├── geo_refine.py     <span class="c"># phương án 1B</span>
+│   ├── train_yolo_geo.py <span class="c"># phương án 1A</span>
 │   ├── evaluate.py
-│   ├── benchmark_speed.py
 │   ├── plots.py
-│   └── demo.py           <span class="c"># chọn ảnh, vẽ 29 điểm</span>
+│   └── demo.py           <span class="c"># trước / sau hiệu chỉnh</span>
 ├── <span class="d">results/</span>
+│   ├── priors.json
 │   ├── predictions_*.csv
 │   ├── metrics_summary.csv
-│   ├── speed.csv
 │   └── figures/
 ├── <span class="d">configs/</span>
 │   └── aariz-pose.yaml
@@ -2295,8 +2366,8 @@ model.train(
 └── README.md</pre></figure>
             <ul class="folders">
               <li><svg class="ico" aria-hidden="true"><use href="#i-folder"/></svg><span><strong>data/</strong>Dữ liệu gốc giữ nguyên; bản chuyển đổi và bảng metadata để đổi mm.</span></li>
-              <li><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg><span><strong>src/</strong>Sáu bước ở mục 05 và một script demo cho buổi bảo vệ.</span></li>
-              <li><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg><span><strong>results/</strong>Dự đoán thô, bảng metric, số đo tốc độ và hình.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg><span><strong>src/</strong>Bảy bước ở mục 07 và một script demo cho buổi bảo vệ.</span></li>
+              <li><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg><span><strong>results/</strong>Thống kê giải phẫu, dự đoán thô và đã hiệu chỉnh, bảng metric, hình.</span></li>
               <li><svg class="ico" aria-hidden="true"><use href="#i-gear"/></svg><span><strong>configs/</strong>Khai báo dataset cho Ultralytics: <code>kpt_shape</code>, <code>flip_idx</code>.</span></li>
             </ul>
           </div>
@@ -2304,28 +2375,28 @@ model.train(
 
         <section class="sec reveal" id="lich" aria-labelledby="h-plan">
           <div class="sec__head">
-            <p class="sec__num">09</p>
+            <p class="sec__num">11</p>
             <h2 id="h-plan">Hai tuần, 14 ngày</h2>
-            <p class="sec__lead">Tuần 1 lo dữ liệu và huấn luyện, tuần 2 lo đánh giá và viết. Ngày có nhãn "Mốc kiểm tra": nếu chưa đạt thì dùng phương án dự phòng ở mục 10 thay vì kéo dài lịch.</p>
+            <p class="sec__lead">Tuần 1 lo dữ liệu, Baseline và bộ lọc 1B; tuần 2 lo 1A (nếu kịp), đánh giá và viết. Ngày có nhãn "Mốc kiểm tra": nếu chưa đạt thì dùng phương án dự phòng ở mục 12 thay vì kéo dài lịch.</p>
           </div>
 
-          <p class="week">Tuần 1 <span>Dữ liệu và mô hình</span></p>
+          <p class="week">Tuần 1 <span>Dữ liệu, Baseline và 1B</span></p>
           <ol class="timeline">
             <li class="day"><span class="day__no">Ngày 1</span><span class="kind">Chuẩn bị</span><strong>Đọc và cài đặt</strong><p>Đọc bài Aariz và bài MDPI. Tải dữ liệu, cài <code>torch</code>, <code>ultralytics</code>.</p></li>
             <li class="day"><span class="day__no">Ngày 2</span><span class="kind">Chuẩn bị</span><strong>Chuyển định dạng</strong><p>Viết <code>prepare_aariz</code>, vẽ điểm lên ảnh để kiểm tra nhãn và pixel size.</p></li>
-            <li class="day day--eval day--gate"><span class="day__no">Ngày 3</span><span class="kind">Đánh giá</span><strong>Chạy thử và chấm điểm</strong><p>YOLO11n, 640 px, 10 epoch. Viết <code>evaluate</code> ngay để có MRE đầu tiên.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
-            <li class="day day--train"><span class="day__no">Ngày 4</span><span class="kind">Huấn luyện</span><strong>YOLO11n đầy đủ</strong><p>1024 px, khoảng 150 epoch, chạy qua đêm.</p></li>
-            <li class="day day--train"><span class="day__no">Ngày 5</span><span class="kind">Huấn luyện</span><strong>YOLO11s và v8n</strong><p>Train hai biến thể còn lại; chạy ablation 640 so với 1024.</p></li>
-            <li class="day day--train"><span class="day__no">Ngày 6</span><span class="kind">Huấn luyện</span><strong>U-Net heatmap</strong><p>Viết <code>train_unet</code>, kiểm tra decode heatmap trên val, bắt đầu train.</p></li>
-            <li class="day day--train day--gate"><span class="day__no">Ngày 7</span><span class="kind">Huấn luyện</span><strong>Chốt mô hình</strong><p>U-Net xong. Chọn checkpoint tốt nhất mỗi mô hình theo MRE trên val.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
+            <li class="day day--eval day--gate"><span class="day__no">Ngày 3</span><span class="kind">Đánh giá</span><strong>Chạy thử và chấm điểm</strong><p>YOLO11n, 640 px, 10 epoch. Viết <code>evaluate</code> ngay, kể cả đếm outlier &gt; 5&nbsp;mm.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
+            <li class="day day--train"><span class="day__no">Ngày 4</span><span class="kind">Huấn luyện</span><strong>Baseline đầy đủ</strong><p>YOLO11s-Pose, 1024 px, khoảng 150 epoch, chạy qua đêm.</p></li>
+            <li class="day day--train"><span class="day__no">Ngày 5</span><span class="kind">Huấn luyện</span><strong>Học tri thức giải phẫu</strong><p>Viết <code>fit_priors</code>; vẽ phân bố từng điểm trong hệ S–N để kiểm tra bằng mắt.</p></li>
+            <li class="day day--train"><span class="day__no">Ngày 6</span><span class="kind">Huấn luyện</span><strong>Bộ lọc 1B</strong><p>Viết <code>geo_refine</code>, chạy trên dự đoán val của Baseline, quét <code>k</code>.</p></li>
+            <li class="day day--train day--gate"><span class="day__no">Ngày 7</span><span class="kind">Huấn luyện</span><strong>Chốt Baseline và 1B</strong><p>Chốt checkpoint và ngưỡng theo MRE trên val. 1B phải giảm outlier trên val mới đi tiếp.</p><span class="gate"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Mốc kiểm tra</span></li>
           </ol>
 
-          <p class="week">Tuần 2 <span>Đánh giá và báo cáo</span></p>
+          <p class="week">Tuần 2 <span>1A, đánh giá và báo cáo</span></p>
           <ol class="timeline">
-            <li class="day day--eval"><span class="day__no">Ngày 8</span><span class="kind">Đánh giá</span><strong>Chấm trên test</strong><p>Chạy test một lần: MRE, SDR, từng điểm, theo máy chụp.</p></li>
-            <li class="day day--eval"><span class="day__no">Ngày 9</span><span class="kind">Đánh giá</span><strong>Đo tốc độ</strong><p>CPU, GPU, ONNX. Đếm params, GFLOPs, MB.</p></li>
-            <li class="day day--eval"><span class="day__no">Ngày 10</span><span class="kind">Đánh giá</span><strong>Phân tích lỗi</strong><p>Xem các điểm sai nhiều nhất; tuỳ chọn thử TTA hoặc tinh chỉnh vùng crop.</p></li>
-            <li class="day day--eval"><span class="day__no">Ngày 11</span><span class="kind">Đánh giá</span><strong>Hình và bảng</strong><p>Chạy <code>plots</code>, chọn ảnh minh hoạ, viết <code>demo.py</code>.</p></li>
+            <li class="day day--train"><span class="day__no">Ngày 8</span><span class="kind">Huấn luyện</span><strong>Loss hình học 1A</strong><p>Tuỳ chọn: thêm <code>L<sub>geo</sub></code>, fine-tune từ Baseline. Bỏ qua nếu đang trễ lịch.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 9</span><span class="kind">Đánh giá</span><strong>Chấm trên test</strong><p>Chạy test một lần cho mọi cấu hình: MRE, SDR, outlier, Outlier Reduction Rate.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 10</span><span class="kind">Đánh giá</span><strong>Phân tích lỗi</strong><p>Điểm nào được sửa nhiều nhất; ca nào bị kéo sai; so sánh xương và mô mềm.</p></li>
+            <li class="day day--eval"><span class="day__no">Ngày 11</span><span class="kind">Đánh giá</span><strong>Hình và bảng</strong><p>Chạy <code>plots</code>, chọn ảnh trước/sau hiệu chỉnh, viết <code>demo.py</code>.</p></li>
             <li class="day day--write"><span class="day__no">Ngày 12</span><span class="kind">Viết</span><strong>Viết phần đầu</strong><p>Giới thiệu, tổng quan, dữ liệu và phương pháp.</p></li>
             <li class="day day--write"><span class="day__no">Ngày 13</span><span class="kind">Viết</span><strong>Kết quả và slide</strong><p>Viết RQ1–RQ4, thảo luận. Làm slide bảo vệ.</p></li>
             <li class="day day--write"><span class="day__no">Ngày 14</span><span class="kind">Viết</span><strong>Hoàn thiện</strong><p>Đối chiếu số trong bài với CSV, tập demo, đóng gói repo và nộp.</p></li>
@@ -2334,44 +2405,44 @@ model.train(
 
         <section class="sec reveal" id="rui-ro" aria-labelledby="h-risk">
           <div class="sec__head">
-            <p class="sec__num">10</p>
+            <p class="sec__num">12</p>
             <h2 id="h-risk">Bốn chỗ có thể vỡ lịch</h2>
           </div>
           <div class="grid g2">
             <article class="card risk">
-              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>YOLO không xuống dưới 2&nbsp;mm</h3>
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Ràng buộc cải thiện không đáng kể</h3>
               <dl>
                 <dt>Vì sao</dt>
-                <dd>Hồi quy keypoint ở độ phân giải thấp thường kém heatmap về độ chính xác dưới milimét.</dd>
+                <dd>Nếu Baseline đã ít outlier, MRE trung bình gần như không đổi dù vài điểm khó được sửa.</dd>
                 <dt class="fix">Dự phòng</dt>
-                <dd>Tăng <code>imgsz</code> lên 1280, hoặc thêm bước hai crop quanh từng điểm để tinh chỉnh. Nếu vẫn không đạt, báo cáo trung thực đánh đổi tốc độ và độ chính xác; đó vẫn là kết quả.</dd>
+                <dd>Báo cáo theo từng điểm khó và theo Outlier Reduction Rate, nơi tác động thể hiện rõ hơn. Kết quả "không cải thiện" vẫn là kết quả, cần giải thích vì sao.</dd>
               </dl>
             </article>
             <article class="card risk">
-              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Thiếu GPU hoặc train quá chậm</h3>
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Bộ lọc kéo sai điểm vốn đúng</h3>
               <dl>
                 <dt>Vì sao</dt>
-                <dd>Train ở 1024 px tốn nhiều bộ nhớ và thời gian nếu chỉ có CPU hoặc GPU nhỏ.</dd>
+                <dd>Bệnh nhân có giải phẫu bất thường nằm ngoài vùng thống kê; hoặc S, N dự đoán sai làm lệch cả hệ quy chiếu.</dd>
                 <dt class="fix">Dự phòng</dt>
-                <dd>Giảm batch, hoặc train trên Colab/Kaggle GPU. Tốc độ suy luận vẫn đo trên máy tính phổ thông vì đó là mục tiêu ứng dụng.</dd>
+                <dd>Chỉ sửa điểm vừa vượt ngưỡng vừa có confidence thấp; kiểm tra độ dài S–N trước khi hiệu chỉnh; đếm số điểm bị sửa sai trong <code>refine_log.csv</code>.</dd>
               </dl>
             </article>
             <article class="card risk">
-              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Đổi sang mm sai</h3>
+              <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>Custom loss 1A khó cài hoặc train lâu</h3>
               <dl>
                 <dt>Vì sao</dt>
-                <dd>Bảy máy chụp có kích thước pixel khác nhau. Dùng một hằng số chung sẽ làm MRE sai lệch.</dd>
+                <dd>Phải sửa lớp loss nội bộ của Ultralytics và train lại ở 1024 px, dễ tốn vài ngày gỡ lỗi.</dd>
                 <dt class="fix">Dự phòng</dt>
-                <dd>Kiểm tra từ Ngày 2 bằng cách đo lại vài khoảng cách đã biết; đưa pixel size vào <code>meta.csv</code> và chỉ đọc từ đó.</dd>
+                <dd>Dừng ở 1B, đưa 1A vào phần hướng mở rộng. Nếu thiếu GPU, train trên Colab/Kaggle.</dd>
               </dl>
             </article>
             <article class="card risk">
               <h3><svg class="ico" aria-hidden="true"><use href="#i-alert"/></svg>So với bài MDPI không cùng điều kiện</h3>
               <dl>
                 <dt>Vì sao</dt>
-                <dd>Số liệu trích dẫn có thể đo trên tập test, số điểm mốc hoặc độ phân giải khác.</dd>
+                <dd>Số liệu trích dẫn có thể đo trên tập test, số điểm mốc hoặc độ phân giải khác; đổi mm sai cũng làm lệch so sánh.</dd>
                 <dt class="fix">Dự phòng</dt>
-                <dd>Kiểm lại bài báo ở Ngày 1 và ghi rõ khác biệt trong bảng. Phép so sánh công bằng chính là với U-Net tự huấn luyện trên cùng split.</dd>
+                <dd>Kiểm lại bài báo ở Ngày 1 và ghi rõ khác biệt trong bảng. Phép so sánh công bằng chính là với Baseline 1 trên cùng split.</dd>
               </dl>
             </article>
           </div>
@@ -2379,28 +2450,28 @@ model.train(
 
         <section class="sec reveal" id="bao-cao" aria-labelledby="h-paper">
           <div class="sec__head">
-            <p class="sec__num">11</p>
+            <p class="sec__num">13</p>
             <h2 id="h-paper">Dàn ý báo cáo sáu phần</h2>
           </div>
           <ol class="outline">
-            <li><h3>Giới thiệu</h3><p>Vai trò phân tích sọ nghiêng trong chỉnh nha; chi phí chấm tay; nhu cầu chạy tại phòng khám.</p></li>
-            <li><h3>Tổng quan</h3><p>Heatmap (U-Net, HRNet), hồi quy trực tiếp (ResNet), YOLO-Pose; các bộ dữ liệu ISBI 2015 và Aariz.</p></li>
-            <li><h3>Dữ liệu và phương pháp</h3><p>Aariz, chuyển định dạng, cấu hình YOLO, U-Net, cách tính MRE/SDR và đo tốc độ.</p></li>
+            <li><h3>Giới thiệu</h3><p>Vai trò phân tích sọ nghiêng trong chỉnh nha; chi phí chấm tay; vì sao dự đoán vô lý ở điểm khó là vấn đề lâm sàng.</p></li>
+            <li><h3>Tổng quan</h3><p>Heatmap, hồi quy trực tiếp (ResNet), YOLO-Pose; các cách đưa tri thức hình dạng (shape priors) vào bài toán điểm mốc; bộ dữ liệu ISBI 2015 và Aariz.</p></li>
+            <li><h3>Dữ liệu và phương pháp</h3><p>Aariz, YOLOv11-Pose, hệ quy chiếu S–N, bộ lọc 1B, loss 1A; cách tính MRE, SDR và Outlier Reduction Rate.</p></li>
             <li>
               <h3>Kết quả thực nghiệm</h3>
               <ul>
-                <li>4.1 · RQ1: MRE và SDR của ba mô hình.</li>
-                <li>4.2 · RQ2: tốc độ và dung lượng mô hình.</li>
-                <li>4.3 · RQ3: điểm mốc khó, xương so với mô mềm.</li>
-                <li>4.4 · RQ4: sai số theo từng máy chụp.</li>
+                <li>4.1 · RQ1: MRE và SDR trước và sau ràng buộc.</li>
+                <li>4.2 · RQ2: số outlier &gt; 5&nbsp;mm và tỉ lệ giảm.</li>
+                <li>4.3 · RQ3: điểm mốc hưởng lợi và điểm bị kéo sai.</li>
+                <li>4.4 · RQ4: đối chiếu với ResNet-50 (MDPI).</li>
               </ul>
             </li>
-            <li><h3>Thảo luận</h3><p>Khi nào YOLO-Pose đủ dùng, khi nào cần heatmap; gợi ý triển khai ở phòng khám.</p></li>
+            <li><h3>Thảo luận</h3><p>So sánh 1A và 1B; khi nào ràng buộc giải phẫu có ích, khi nào gây hại.</p></li>
             <li><h3>Hạn chế và kết luận</h3><p>Một bộ dữ liệu, một lần chạy, chưa thẩm định lâm sàng; hướng mở rộng.</p></li>
           </ol>
           <ol class="refs">
-            <li>Aariz: bộ dữ liệu benchmark điểm mốc sọ nghiêng, <em>Nature Scientific Data</em>, 2025.</li>
-            <li>Bài báo MDPI 2025, ResNet-50 Regression (cần ghi đầy đủ tác giả, tạp chí, DOI khi trích dẫn).</li>
+            <li>Khalid M. A. et al., "A Benchmark Dataset for Automatic Cephalometric Landmark Detection and CVM Stage Classification", <em>Scientific Data</em> 12, 1336 (2025). Mã nguồn và dữ liệu: <a href="https://github.com/manwaarkhd/aariz/tree/main">github.com/manwaarkhd/aariz</a>.</li>
+            <li>Bài báo baseline ResNet-50 Single-stage Regression, MDPI: <a href="https://www.mdpi.com/2077-0383/15/13/5149">mdpi.com/2077-0383/15/13/5149</a> (cần ghi đầy đủ tác giả và DOI khi trích dẫn).</li>
             <li>Ultralytics, <a href="https://docs.ultralytics.com/tasks/pose/">tài liệu Pose Estimation</a>.</li>
           </ol>
         </section>

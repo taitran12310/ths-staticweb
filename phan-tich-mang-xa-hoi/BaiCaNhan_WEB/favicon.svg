@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="CineInfo">
+  <rect width="32" height="32" rx="8" fill="#e85d4c"/>
+  <rect x="5.5" y="4" width="21" height="24" rx="2.2" fill="#2b1412"/>
+  <g fill="#f3e6c4">
+    <rect x="7.15" y="6.15" width="2.7" height="2.45" rx="0.45"/>
+    <rect x="7.15" y="14.75" width="2.7" height="2.45" rx="0.45"/>
+    <rect x="7.15" y="23.35" width="2.7" height="2.45" rx="0.45"/>
+    <rect x="22.15" y="6.15" width="2.7" height="2.45" rx="0.45"/>
+    <rect x="22.15" y="14.75" width="2.7" height="2.45" rx="0.45"/>
+    <rect x="22.15" y="23.35" width="2.7" height="2.45" rx="0.45"/>
+  </g>
+  <rect x="11" y="6.3" width="10" height="19.4" rx="1.3" fill="#fff8ee"/>
+  <path d="M14.15 11.35v9.3l6.15-4.65z" fill="#e85d4c"/>
+</svg>

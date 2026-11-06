@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark light" />
+  <title>CineInfo — Đồ thị &amp; độ đo</title>
+  <link rel="icon" href="favicon.svg?v=logo1" type="image/svg+xml" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("tmdb-sna-theme");
+        var pref = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", saved || pref);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="base.css?v=ui9" />
+  <link rel="stylesheet" href="style.css?v=ui8" />
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+</head>
+<body data-page="graph">
+  <header class="cine-header">
+    <div class="cine-header-top">
+      <a class="course-back" href="../index.html" aria-label="Quay lại danh sách môn"><span aria-hidden="true">←</span><span>Quay lại</span></a>
+      <a class="cine-logo" href="explore.html" aria-label="CineInfo trang chủ">
+        <img class="cine-logo-mark" src="favicon.svg?v=logo1" alt="" width="34" height="34" />
+        <span class="cine-logo-text">CineInfo</span>
+      </a>
+      <nav class="cine-nav" aria-label="Chính">
+        <a href="explore.html">Kho phim</a>
+        <a href="index.html" aria-current="page">Đồ thị SNA</a>
+      </nav>
+      <div class="stats" id="statsBar" aria-live="polite">
+        <div class="stat"><span class="label">Đỉnh</span><span class="value" id="statNodes">—</span></div>
+        <div class="stat"><span class="label">Cạnh</span><span class="value" id="statEdges">—</span></div>
+        <div class="stat"><span class="label">Density</span><span class="value" id="statDensity">—</span></div>
+        <div class="stat"><span class="label">Modularity</span><span class="value" id="statModularity">—</span></div>
+        <div class="stat"><span class="label">Path</span><span class="value" id="statPath">—</span></div>
+        <div class="stat"><span class="label">Diameter</span><span class="value" id="statDiameter">—</span></div>
+      </div>
+      <div class="cine-header-end">
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Chuyển giao diện sáng / tối">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 14.3A8.5 8.5 0 0 1 9.7 3 7 7 0 1 0 21 14.3z" />
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+        <span class="sr-only">Đổi theme</span>
+      </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="viewport-wrap">
+      <div class="viewport" id="graphContainer" tabindex="0" role="region" aria-label="Đồ thị 3D tương tác — bấm vào rồi dùng WASD hoặc phím mũi tên để di chuyển"></div>
+      <div class="graph-float-label" id="graphFloatLabel" hidden></div>
+      <div class="zoom-hint" id="zoomHint">Kéo để xoay · cuộn để zoom · WASD hoặc mũi tên để di chuyển</div>
+    </section>
+
+    <aside class="sidebar" aria-label="Độ đo và bộ lọc">
+      <div class="panel graph-search-panel">
+        <h2>Tìm diễn viên</h2>
+        <form class="graph-search" id="graphSearchForm" role="search">
+          <label class="sr-only" for="graphSearch">Tìm diễn viên trên đồ thị</label>
+          <input
+            id="graphSearch"
+            type="search"
+            placeholder="Nhập tên, ví dụ Lee Byung-hun"
+            autocomplete="off"
+            spellcheck="false"
+            enterkeyhint="search"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="graphSearchDrop"
+            aria-expanded="false"
+          />
+          <ul id="graphSearchDrop" class="graph-search-drop" role="listbox" aria-label="Diễn viên khớp" hidden></ul>
+        </form>
+      </div>
+
+      <div class="panel" id="filterPanel">
+        <h2>Bộ lọc hiển thị</h2>
+        <p class="hint tiny" id="filterHint">Đồ thị đầy đủ, layout cố định — lọc để xem rõ hơn.</p>
+        <label class="field-label" for="regionFilter">Quốc gia sản xuất</label>
+        <select id="regionFilter" class="control-select">
+          <option value="all">Tất cả</option>
+          <option value="us">Mỹ</option>
+          <option value="gb">Anh</option>
+          <option value="vn">Việt Nam</option>
+          <option value="kr">Hàn Quốc</option>
+        </select>
+        <label class="field-label" for="minDegree">Degree tối thiểu: <span id="minDegreeVal">1</span></label>
+        <input id="minDegree" type="range" min="1" max="50" value="1" step="1" />
+        <label class="check-row">
+          <input id="showEdges" type="checkbox" checked />
+          <span>Hiện cạnh (tự giảm khi quá nhiều đỉnh)</span>
+        </label>
+        <fieldset class="ego-scope">
+          <legend class="field-label">Quanh node đã chọn</legend>
+          <label class="check-row">
+            <input id="egoDirect" type="radio" name="egoScope" value="direct" />
+            <span>Hiển thị node kết nối trực tiếp</span>
+          </label>
+          <label class="check-row">
+            <input id="egoIndirect" type="radio" name="egoScope" value="indirect" />
+            <span>Hiển thị cả node kết nối gián tiếp</span>
+          </label>
+        </fieldset>
+        <div id="egoHopRow" hidden>
+          <label class="field-label" for="egoHop">Số bậc gián tiếp: <span id="egoHopVal">1</span></label>
+          <input id="egoHop" type="range" min="1" max="12" value="1" step="1" />
+        </div>
+        <div class="filter-actions">
+          <button type="button" id="btnEgoClear" class="toolbar-btn" hidden>
+            Hiện toàn đồ thị
+          </button>
+        </div>
+        <p class="hint tiny" id="filterStats">—</p>
+      </div>
+
+      <div class="panel" id="actorPanel">
+        <h2>Node đã chọn</h2>
+        <p class="hint" id="actorHint">Bấm một nút trên đồ thị để xem độ đo.</p>
+        <div id="actorContent" hidden>
+          <h3 id="actorName"></h3>
+          <a id="linkExploreActor" class="cine-btn cine-btn-primary actor-lookup" href="explore.html" hidden>Tra cứu phim của diễn viên</a>
+          <dl class="metrics" id="actorMetrics">
+            <div><dt>Số phim</dt><dd id="mMovies"></dd></div>
+            <div><dt>Cộng đồng</dt><dd id="mCommunity"></dd></div>
+            <div><dt>Degree</dt><dd id="mDegree"></dd></div>
+            <div><dt>Betweenness</dt><dd id="mBetweenness"></dd></div>
+            <div><dt>Closeness</dt><dd id="mCloseness"></dd></div>
+            <div><dt>Eigenvector</dt><dd id="mEigen"></dd></div>
+            <div><dt>Clustering</dt><dd id="mClustering"></dd></div>
+            <div><dt>Hub</dt><dd id="mHub"></dd></div>
+            <div><dt>Authority</dt><dd id="mAuthority"></dd></div>
+          </dl>
+          <h4>Đồng diễn nhiều phim chung</h4>
+          <ul id="coactorList" class="list"></ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Cầu nối (top Betweenness)</h2>
+        <ol id="bridgeList" class="list ranked"></ol>
+      </div>
+
+      <div class="panel">
+        <h2>Cộng đồng lớn</h2>
+        <ul id="communityLegend" class="legend"></ul>
+      </div>
+
+      <div class="panel">
+        <h2>Phân bố bậc</h2>
+        <div id="degreeHist" class="hist" aria-label="Histogram bậc"></div>
+        <p class="hint tiny" id="viewNote"></p>
+      </div>
+    </aside>
+  </main>
+
+  <div id="loading" class="loading" role="status">Đang kiểm tra dữ liệu…</div>
+  <script src="common.js?v=ui10"></script>
+  <script src="graph.js?v=ui7"></script>
+</body>
+</html>

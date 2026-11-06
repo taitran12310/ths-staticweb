@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Slide giải thích cách lấy dữ liệu TMDB, xử lý mạng đồng diễn và tính độ đo SNA." />
+  <title>Slide — Lấy dữ liệu và độ đo SNA</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("sna-doc-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { /* storage unavailable */ }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <style>
+    /* ================= Tokens ================= */
+    :root {
+      color-scheme: light;
+      --font-sans: "Be Vietnam Pro", "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --ease: cubic-bezier(.2, .7, .2, 1);
+      --flag-vn: #da251d;
+      --flag-white: #ffffff;
+      --flag-label-bg: #061018;
+      --flag-label-ink: #ffffff;
+      --flag-label-sub: #e2e8f0;
+
+      /* light (default, like the Astronaut template) */
+      --bg: #eef2f9;
+      --card: #ffffff;
+      --surface: #f4f7ff;
+      --surface-2: #e9efff;
+      --ink: #0f172a;
+      --ink-2: #1e293b;
+      --muted: #64748b;
+      --line: rgba(15, 23, 42, 0.1);
+      --line-strong: #b4c0d8;
+      --accent: #3b5bdb;
+      --accent-2: #5b8def;
+      --accent-deep: #2b44b0;
+      --accent-tint: #e3eaff;
+      --btn-1: #3b5bdb;
+      --btn-2: #2b44b0;
+      --warm: #f59e0b;
+      --warm-ink: #b45309;
+      --on-accent: #ffffff;
+      --code-bg: #f1f5fd;
+      --code-ink: #0f172a;
+      --ghost: rgba(59, 91, 219, 0.1);
+      --blob-o: 0.14;
+      --blob-hero: 0.92;
+      --shadow: 0 30px 80px rgba(40, 60, 120, 0.16), 0 4px 14px rgba(40, 60, 120, 0.06);
+      --suit: #ffffff;
+      --suit-shade: #d9e3fb;
+      --suit-line: #b9c8ec;
+      --pack: #3b5bdb;
+      --boot: #2b44b0;
+      --visor-a: #7f9cf5;
+      --visor-b: #1e2f7a;
+      --planet-a: #7da2f8;
+      --planet-b: #3350c4;
+      --reel: #3b5bdb;
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --card: #121a33;
+      --surface: #19244a;
+      --surface-2: #213061;
+      --ink: #f1f5ff;
+      --ink-2: #d5def5;
+      --muted: #9fb0d0;
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: #3b4a78;
+      --accent: #6c8cff;
+      --accent-2: #4f74e8;
+      --accent-deep: #8aa5ff;
+      --accent-tint: #1d2a58;
+      --btn-1: #4f74e8;
+      --btn-2: #3552c9;
+      --warm: #fbbf24;
+      --warm-ink: #fbbf24;
+      --code-bg: #0b1228;
+      --code-ink: #e3ebff;
+      --ghost: rgba(108, 140, 255, 0.14);
+      --blob-o: 0.2;
+      --blob-hero: 0.85;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+      --suit: #e8eeff;
+      --suit-shade: #aebbe6;
+      --suit-line: #7c8dc4;
+      --pack: #4f74e8;
+      --boot: #3552c9;
+      --visor-a: #5b7ae8;
+      --visor-b: #0c1544;
+      --planet-a: #6c8cff;
+      --planet-b: #2a3fa0;
+      --reel: #4f74e8;
+    }
+
+    /* ================= Base ================= */
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+
+    body {
+      overflow: hidden;
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.84em;
+      padding: 0.04em 0.34em;
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .skip {
+      position: absolute; left: 12px; top: 12px;
+      transform: translateY(-160%);
+      background: var(--ink); color: var(--bg);
+      padding: 8px 14px; border-radius: 999px; z-index: 10;
+    }
+    .skip:focus { transform: none; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+    /* ================= Deck shell (outside the card) ================= */
+    .deck {
+      position: relative;
+      height: 100%;
+      height: 100dvh;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      padding: 10px 24px 12px;
+      gap: 8px;
+    }
+
+    .topbar, .controls { display: flex; align-items: center; gap: 16px; }
+
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; flex: none; }
+
+    .logo {
+      width: 32px; height: 32px; display: grid; place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(160deg, var(--btn-1), var(--btn-2));
+      color: var(--on-accent); font-size: 12px;
+    }
+
+    .crumb { margin: 0; color: var(--muted); font-size: 15px; flex: none; min-width: 12ch; font-variant-numeric: tabular-nums; }
+
+    .progress {
+      flex: 1 1 auto; min-width: 60px; height: 5px; border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 24%, transparent); overflow: hidden;
+    }
+    .progress span {
+      display: block; height: 100%; width: 0; border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      transition: width 420ms var(--ease);
+    }
+
+    .topbar a { color: var(--accent); text-decoration: none; font-size: 15px; flex: none; border-bottom: 1px solid transparent; }
+    .topbar a:hover, .topbar a:focus-visible { border-bottom-color: var(--accent); }
+    .back-link {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 38px; padding: 0 12px 0 8px; border-radius: 999px;
+      border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+      font-weight: 600;
+    }
+    .back-link:hover, .back-link:focus-visible { border-color: var(--accent); color: var(--accent); border-bottom-color: var(--accent); }
+
+    .icon-btn {
+      flex: none; width: 38px; height: 38px; display: grid; place-items: center;
+      border-radius: 999px; border: 1px solid var(--line); background: var(--card);
+      color: var(--ink); font: inherit; font-size: 17px; line-height: 1; cursor: pointer;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+
+    .controls { justify-content: space-between; }
+    .controls .mid { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 15px; }
+    .controls button {
+      min-height: 40px; min-width: 110px; border: 0; border-radius: 999px;
+      background: linear-gradient(180deg, var(--btn-1), var(--btn-2));
+      color: var(--on-accent); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+    }
+    .controls button:hover:not(:disabled) { filter: brightness(1.1); }
+    .controls button:disabled { opacity: 0.35; cursor: default; }
+    #slideStatus { margin: 0; font-variant-numeric: tabular-nums; }
+    .hint { display: inline-flex; gap: 4px; align-items: center; }
+    kbd {
+      font-family: var(--font-mono); font-size: 12px; padding: 1px 6px; border-radius: 6px;
+      border: 1px solid var(--line); background: var(--card); color: var(--ink-2);
+    }
+
+    .rotate-hint { display: none; margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+
+    /* ================= Stage: fixed 1280x720 canvas ================= */
+    .stage { position: relative; min-height: 0; touch-action: pan-y; }
+
+    .canvas {
+      position: absolute; left: 0; top: 0;
+      width: 1280px; height: 720px;
+      transform-origin: 0 0;
+    }
+
+    .slide {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      padding: 80px 72px 60px;
+      border-radius: 36px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      font-size: 24px; line-height: 1.45;
+      visibility: hidden; opacity: 0; pointer-events: none;
+    }
+
+    .slide::before, .slide::after {
+      content: ""; position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+    }
+    .slide::before {
+      width: 430px; height: 430px; right: -160px; top: -200px;
+      background: linear-gradient(140deg, var(--accent-2), var(--accent));
+      opacity: var(--blob-o);
+    }
+    .slide::after {
+      width: 320px; height: 320px; left: -130px; bottom: -170px;
+      background: linear-gradient(40deg, var(--accent), var(--accent-2));
+      opacity: var(--blob-o);
+    }
+    .slide.v2::before { right: auto; left: -150px; top: auto; bottom: -230px; width: 460px; height: 460px; }
+    .slide.v2::after { left: auto; right: -110px; bottom: -150px; }
+    .slide.v3::before { top: -230px; right: 120px; width: 380px; height: 380px; }
+    .slide.v3::after { left: auto; right: -150px; bottom: -200px; width: 360px; height: 360px; }
+
+    .slide.hero-bg { --blob-o: var(--blob-hero); }
+    .slide.hero-bg::before { width: 700px; height: 700px; right: -190px; top: -250px; }
+    .slide.hero-bg::after { width: 300px; height: 300px; left: -190px; bottom: -200px; opacity: calc(var(--blob-hero) * 0.7); }
+    .slide.hero-bg.alt::before { right: auto; left: -300px; top: auto; bottom: -390px; width: 560px; height: 560px; }
+    .slide.hero-bg.alt::after { left: auto; right: -120px; top: -150px; bottom: auto; }
+
+    .slide > * { z-index: 1; min-width: 0; }
+
+    .slide.is-current, .slide.is-leaving { visibility: visible; opacity: 1; }
+    .slide.is-current { pointer-events: auto; z-index: 2; animation: in-next 420ms var(--ease) both; }
+    .slide.is-leaving { z-index: 1; animation: out-next 420ms var(--ease) both; }
+    .deck[data-dir="back"] .slide.is-current { animation-name: in-prev; }
+    .deck[data-dir="back"] .slide.is-leaving { animation-name: out-prev; }
+    .deck[data-dir="none"] .slide.is-current { animation: none; }
+
+    @keyframes in-next { from { opacity: 0; transform: translate3d(48px, 0, 0); } }
+    @keyframes in-prev { from { opacity: 0; transform: translate3d(-48px, 0, 0); } }
+    @keyframes out-next { to { opacity: 0; transform: translate3d(-36px, 0, 0); } }
+    @keyframes out-prev { to { opacity: 0; transform: translate3d(36px, 0, 0); } }
+
+    .slide.is-current .reveal { animation: rise 380ms var(--ease) backwards; animation-delay: calc(120ms + var(--i, 0) * 60ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+
+    .draw { stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .slide.is-drawn .draw { stroke-dashoffset: 0; transition: stroke-dashoffset 900ms var(--ease) 260ms; }
+
+    .float { animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+    /* ---- slide chrome ---- */
+    .ctitle {
+      position: absolute; z-index: 3; left: 72px; top: 30px;
+      font-size: 20px; font-weight: 600; color: var(--muted); letter-spacing: 0.01em; line-height: 1.3;
+    }
+    .sna-pill {
+      position: absolute; z-index: 3; right: 56px; top: 24px;
+      padding: 3px 18px; border-radius: 999px;
+      background: linear-gradient(180deg, var(--btn-1), var(--btn-2)); color: var(--on-accent);
+      font-size: 20px; font-weight: 800; letter-spacing: 0.08em; line-height: 1.4;
+    }
+    .pnum {
+      position: absolute; z-index: 3; left: 0; right: 0; bottom: 20px; text-align: center;
+      font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.3;
+    }
+    .hero-bg .ctitle { display: none; }
+    .hero-bg .sna-pill { background: var(--card); color: var(--accent); }
+    .hero-bg .pnum { color: var(--muted); }
+
+    /* ================= Typography ================= */
+    .kicker { margin: 0; color: var(--accent); font-size: 22px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; }
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 62px; line-height: 1.08; font-weight: 800; letter-spacing: -0.03em; }
+    h2 { font-size: 44px; line-height: 1.12; font-weight: 800; letter-spacing: -0.025em; margin-top: 6px; }
+    h1:focus, h2:focus { outline: none; }
+    h3 { font-size: 26px; line-height: 1.25; font-weight: 700; color: var(--ink); }
+    p { margin: 0; color: var(--muted); max-width: 70ch; }
+    .body { flex: 1; min-height: 0; margin-top: 24px; display: flex; flex-direction: column; }
+    .body.center { justify-content: center; }
+    .lede { color: var(--ink-2); font-size: 24px; margin-bottom: 18px; }
+
+    mark, .hl { background: color-mix(in srgb, var(--accent) 18%, transparent); color: inherit; border-radius: 4px; padding: 0 2px; }
+
+    .note {
+      margin-top: 20px; padding: 16px 24px; border-radius: 20px;
+      background: var(--surface); border-left: 6px solid var(--warm);
+      color: var(--ink-2); font-size: 22px; line-height: 1.45;
+    }
+    .note b { color: var(--ink); }
+
+    /* ================= Icons & art ================= */
+    svg.ic { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .ico {
+      flex: none; width: 64px; height: 64px; display: grid; place-items: center;
+      border-radius: 50%; background: var(--accent-tint); color: var(--accent);
+    }
+    .ico.warm { color: var(--warm-ink); }
+
+    .art-svg { display: block; overflow: visible; }
+
+    .a-suit { fill: var(--suit); stroke: var(--suit-line); stroke-width: 2; }
+    .a-shade { fill: var(--suit-shade); }
+    .a-pack { fill: var(--pack); }
+    .a-pack2 { fill: var(--accent-2); opacity: 0.55; }
+    .a-boot { fill: var(--boot); }
+    .a-glove { fill: var(--accent-2); stroke: var(--boot); stroke-width: 2; }
+    .a-panel { fill: var(--surface-2); stroke: var(--suit-line); stroke-width: 2; }
+    .a-dot { fill: var(--accent); }
+    .a-dot.w { fill: var(--warm); }
+    .a-visor { fill: url(#g-visor); stroke: var(--boot); stroke-width: 3; }
+    .a-glint { fill: var(--on-accent); opacity: 0.55; }
+    .a-ant { stroke: var(--suit-line); stroke-width: 4; stroke-linecap: round; }
+    .r-body { fill: var(--suit); stroke: var(--suit-line); stroke-width: 2; }
+    .r-nose, .r-fin { fill: var(--accent); }
+    .r-ring { fill: var(--accent-tint); stroke: var(--boot); stroke-width: 5; }
+    .r-win { fill: url(#g-visor); }
+    .r-flame { fill: var(--warm); }
+    .r-flame2 { fill: var(--on-accent); opacity: 0.7; }
+    .p-ball { fill: url(#g-planet); }
+    .p-ring { fill: none; stroke: var(--accent-2); stroke-width: 7; opacity: 0.7; }
+    .p-edge { stroke: var(--on-accent); stroke-width: 2.5; opacity: 0.75; }
+    .p-node { fill: var(--on-accent); }
+    .f-reel { fill: var(--reel); }
+    .f-hole { fill: var(--card); }
+    .f-hub { fill: var(--on-accent); }
+    .n-edge { stroke: var(--accent-2); stroke-width: 2.5; opacity: 0.5; }
+    .n-node { fill: var(--accent); }
+    .n-node.w { fill: var(--warm); }
+    .star { fill: var(--warm); }
+    .star.b { fill: var(--accent-2); }
+    .orbit { fill: none; stroke: var(--accent-2); stroke-width: 2; stroke-dasharray: 3 9; stroke-linecap: round; opacity: 0.6; }
+    .s-v1 { stop-color: var(--visor-a); }
+    .s-v2 { stop-color: var(--visor-b); }
+    .s-p1 { stop-color: var(--planet-a); }
+    .s-p2 { stop-color: var(--planet-b); }
+
+    .deco-art { position: absolute; z-index: 1; pointer-events: none; }
+
+    /* ================= tpl-cover ================= */
+    .tpl-cover { flex: 1; display: grid; grid-template-columns: 690px 1fr; align-items: center; margin-top: -10px; }
+    .tpl-cover h1 { margin-top: 10px; max-width: 12.5em; }
+    .tpl-cover .sub { margin-top: 14px; color: var(--accent); font-size: 30px; font-weight: 700; }
+    .meta { display: grid; grid-template-columns: 1.15fr 0.85fr 0.7fr; gap: 18px; margin-top: 28px; }
+    .meta div { padding-left: 14px; border-left: 4px solid var(--accent-2); }
+    .meta dt { color: var(--muted); font-size: 20px; line-height: 1.3; }
+    .meta dd { margin: 2px 0 0; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+    .pills { display: flex; gap: 12px; margin-top: 26px; }
+    .pill {
+      display: inline-flex; align-items: center; padding: 4px 20px; border-radius: 999px;
+      background: linear-gradient(180deg, var(--btn-1), var(--btn-2)); color: var(--on-accent);
+      font-size: 22px; font-weight: 700;
+    }
+    .pill.ghost { background: transparent; border: 2px solid var(--line-strong); color: var(--ink-2); font-weight: 600; }
+    .cover-art { justify-self: end; margin-right: -20px; }
+
+    /* ================= tpl-toc ================= */
+    .tpl-toc { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .toc-row { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 12px; }
+    .toc-row::before {
+      content: ""; position: absolute; left: 12%; right: 12%; top: 79px; border-top: 3px dashed var(--line-strong);
+    }
+    .toc-item { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; color: inherit; text-decoration: none; }
+    .toc-num {
+      width: 158px; height: 158px; display: grid; place-items: center; border-radius: 50%;
+      background: linear-gradient(145deg, var(--btn-1), var(--btn-2));
+      color: var(--on-accent); font-size: 56px; font-weight: 800; letter-spacing: -0.02em;
+      box-shadow: 0 0 0 12px var(--card), 0 0 0 14px var(--line-strong), 0 16px 30px color-mix(in srgb, var(--accent) 30%, transparent);
+      transition: transform 0.25s var(--ease);
+    }
+    .toc-item:hover .toc-num { transform: translateY(-4px); }
+    .toc-item b { font-size: 28px; line-height: 1.25; font-weight: 700; color: var(--ink); max-width: 9em; }
+    .tpl-toc .foot { margin-top: 44px; text-align: center; margin-inline: auto; max-width: 44em; font-size: 22px; }
+
+    /* ================= tpl-chapter ================= */
+    .tpl-chapter { flex: 1; position: relative; }
+    .chap-ghost {
+      position: absolute; left: -6px; top: 96px; z-index: 0;
+      font-size: 280px; line-height: 1; font-weight: 800; letter-spacing: -0.04em;
+      color: var(--ghost); user-select: none; pointer-events: none;
+    }
+    .chap-text { position: absolute; left: 0; top: 330px; width: 640px; }
+    .chap-text .kicker { font-size: 24px; }
+    .chap-text h2 { font-size: 64px; line-height: 1.08; margin-top: 10px; }
+    .chap-art { position: absolute; right: -10px; top: -30px; }
+
+    /* ================= tpl-cards ================= */
+    .tpl-cards { display: grid; gap: 22px; align-content: start; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); }
+    .tpl-cards.c2 { --n: 2; } .tpl-cards.c4 { --n: 4; }
+    .card {
+      position: relative; padding: 26px 26px 28px; border-radius: 26px;
+      background: var(--surface); border: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .card .idx {
+      width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+      background: linear-gradient(145deg, var(--btn-1), var(--btn-2)); color: var(--on-accent);
+      font-size: 22px; font-weight: 800;
+    }
+    .card p { font-size: 22px; line-height: 1.45; }
+    .card h3 { margin-top: 2px; }
+    .card .tag-line { color: var(--accent); font-size: 20px; font-weight: 700; letter-spacing: 0.02em; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .tags span {
+      padding: 4px 16px; border-radius: 999px; border: 1px solid var(--line-strong);
+      background: var(--card); color: var(--ink-2); font-size: 22px; white-space: nowrap;
+    }
+    .tags.big span { font-size: 26px; padding: 8px 24px; }
+    .tags.mono span { font-family: var(--font-mono); font-size: 20px; }
+
+    /* ================= tpl-steps ================= */
+    .tpl-steps { display: flex; flex-direction: column; gap: 10px; position: relative; margin: 0; padding: 0; list-style: none; }
+    .tpl-steps::before {
+      content: ""; position: absolute; left: 27px; top: 30px; bottom: 30px; border-left: 3px dashed var(--line-strong);
+    }
+    .tpl-steps li { position: relative; display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: center; min-height: 72px; }
+    .tpl-steps .n {
+      width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+      background: linear-gradient(145deg, var(--btn-1), var(--btn-2)); color: var(--on-accent);
+      font-size: 22px; font-weight: 800; box-shadow: 0 0 0 6px var(--card);
+    }
+    .tpl-steps strong { display: block; font-family: var(--font-mono); font-weight: 500; font-size: 24px; color: var(--ink); line-height: 1.25; }
+    .tpl-steps p { font-size: 22px; line-height: 1.35; }
+
+    /* ================= tpl-stats ================= */
+    .tpl-stats { display: grid; gap: 22px; grid-template-columns: repeat(6, 1fr); }
+    .stat {
+      grid-column: span 3; padding: 22px 28px; border-radius: 26px;
+      background: var(--surface); border: 1px solid var(--line);
+      display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;
+    }
+    .stat::before { content: ""; position: absolute; left: 0; top: 24px; bottom: 24px; width: 6px; border-radius: 0 6px 6px 0; background: var(--accent); }
+    .stat.w::before { background: var(--warm); }
+    .stat b {
+      display: block; font-size: 64px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;
+      color: var(--accent); font-variant-numeric: tabular-nums;
+    }
+    .stat span { font-size: 22px; color: var(--muted); line-height: 1.3; margin-top: 2px; }
+    .tpl-stats.s3 .stat { grid-column: span 2; }
+    .tpl-stats.s3 .stat:nth-child(n+4) { grid-column: span 3; }
+    .tpl-stats.s2x2 .stat { min-height: 156px; }
+
+    .bar { margin-top: 22px; }
+    .bar .lab { font-size: 22px; color: var(--ink-2); }
+    .bar .track { margin-top: 8px; height: 20px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+    .bar .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+
+    /* ================= tpl-split ================= */
+    .tpl-split { display: grid; grid-template-columns: var(--cols, 1fr 1fr); gap: 40px; align-items: center; }
+    .tpl-split.top { align-items: start; }
+    .frame {
+      margin: 0; border-radius: 28px; overflow: hidden; border: 1px solid var(--line);
+      background: var(--code-bg); box-shadow: 0 14px 34px color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+    .frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+    .rows { display: flex; flex-direction: column; gap: 14px; }
+    .row {
+      display: grid; grid-template-columns: 64px 1fr; gap: 18px; align-items: center;
+      padding: 14px 22px 14px 18px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line);
+    }
+    .row h3 { font-size: 24px; }
+    .row p { font-size: 22px; line-height: 1.35; }
+    .row .ico { width: 56px; height: 56px; }
+
+    .diagram { display: block; width: 100%; height: auto; }
+    .diagram text { fill: var(--ink); font-family: var(--font-sans); }
+    .diagram text.accent { fill: var(--accent); }
+    .diagram text.warm { fill: var(--warm-ink); }
+    .diagram text.muted { fill: var(--muted); }
+    .svg-ink { fill: var(--ink); }
+    .svg-surface { fill: var(--card); }
+    .svg-tint { fill: var(--surface); }
+    .svg-accent { stroke: var(--accent); }
+    .svg-accent-2 { stroke: var(--accent-2); }
+    .svg-warm { stroke: var(--warm); }
+    .svg-muted { stroke: var(--muted); }
+    .svg-line { stroke: var(--line-strong); }
+    .svg-fill-accent { fill: var(--accent-2); }
+    .svg-fill-warm { fill: var(--warm); }
+
+    .measure-svg { display: block; width: 100%; height: auto; }
+    .measure-svg text { fill: var(--ink); font-family: var(--font-sans); font-weight: 600; }
+    .measure-art {
+      padding: 20px; border-radius: 28px; background: var(--surface); border: 1px solid var(--line);
+    }
+    .formula {
+      display: inline-block; padding: 8px 22px; border-radius: 16px; background: var(--code-bg);
+      border: 1px solid var(--line); font-family: var(--font-mono); font-size: 28px; color: var(--ink); margin: 6px 0 8px;
+    }
+    .block + .block { margin-top: 22px; }
+    .block h3 { margin-bottom: 4px; }
+    .block p { font-size: 22px; line-height: 1.45; }
+
+    /* ================= tpl-code ================= */
+    pre {
+      margin: 0; padding: 14px 22px; border-radius: 20px; overflow: hidden;
+      color: var(--code-ink); background: var(--code-bg); border: 1px solid var(--line);
+      font-family: var(--font-mono); font-size: 18px; line-height: 1.32; tab-size: 2;
+    }
+    pre.url { white-space: pre-wrap; word-break: break-all; font-size: 20px; line-height: 1.45; padding: 16px 24px; }
+    pre.big { font-size: 22px; line-height: 1.5; padding: 18px 26px; }
+    pre .hl { box-shadow: none; outline: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+
+    .tabs { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 30px; flex: 1; min-height: 0; align-items: start; }
+    .tablist { display: flex; flex-direction: column; gap: 12px; }
+    .tablist [role="tab"] {
+      text-align: left; padding: 14px 20px; border-radius: 20px; border: 1px solid var(--line);
+      background: var(--surface); color: var(--ink-2); font: inherit; font-size: 22px; font-weight: 600; line-height: 1.3; cursor: pointer;
+    }
+    .tablist [role="tab"][aria-selected="true"] {
+      background: linear-gradient(180deg, var(--btn-1), var(--btn-2)); color: var(--on-accent); border-color: transparent;
+    }
+    .tabpanel[hidden] { display: none; }
+    .tabpanel p { font-size: 22px; line-height: 1.4; margin-top: 14px; }
+    .tabpanel ul { margin: 12px 0 0; padding-left: 26px; color: var(--ink-2); font-size: 22px; line-height: 1.4; }
+    .tabpanel li + li { margin-top: 6px; }
+
+    /* ================= tpl-funnel ================= */
+    .tpl-funnel { display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; row-gap: 26px; align-items: stretch; margin-top: 4px; }
+    .fn {
+      padding: 18px 24px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line);
+      position: relative;
+    }
+    .fn small { position: absolute; right: 18px; top: 12px; font-size: 20px; font-weight: 700; color: var(--accent); }
+    .fn b { display: block; font-size: 46px; line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .fn span { display: block; font-size: 22px; color: var(--muted); line-height: 1.3; }
+    .fn.end { background: var(--accent-tint); border-color: var(--warm); border-width: 2px; }
+    .fn.end b { color: var(--accent); }
+    .fa { align-self: center; justify-self: center; width: 0; height: 0; border: 12px solid transparent; border-left: 18px solid var(--accent); border-right: 0; }
+
+    /* ================= Countries ================= */
+    .country-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 14px; align-items: center; }
+    .flag-card {
+      display: flex; flex-direction: column; height: auto;
+      border-radius: 22px; overflow: hidden;
+      border: 1px solid var(--line); background: var(--card);
+    }
+    .flag {
+      position: relative; display: block; width: 100%; aspect-ratio: 3 / 2;
+      background-repeat: no-repeat; background-position: center; background-size: cover;
+    }
+    .flag-vn {
+      background-color: var(--flag-vn);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 20'%3E%3Cpolygon fill='%23ff0' points='15,3.1 16.9,8.5 22.4,8.5 17.9,11.8 19.6,17.1 15,13.8 10.4,17.1 12.1,11.8 7.6,8.5 13.1,8.5'/%3E%3C/svg%3E");
+      background-size: 62% auto;
+    }
+    .flag-kr {
+      background-color: var(--flag-white);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 48'%3E%3Cg transform='translate(36 24) rotate(-33)'%3E%3Cpath fill='%23c60c30' d='M0-14a14 14 0 0 1 0 28 7 7 0 0 1 0-14 7 7 0 0 0 0-14z'/%3E%3Cpath fill='%230047a0' d='M0 14a14 14 0 0 1 0-28 7 7 0 0 1 0 14 7 7 0 0 0 0 14z'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 86% auto;
+    }
+    .flag-gb {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3Crect width='60' height='30' fill='%23012169'/%3E%3Cpath d='M0 0 L60 30 M60 0 L0 30' stroke='%23fff' stroke-width='6'/%3E%3Cpath d='M0 0 L60 30 M60 0 L0 30' stroke='%23C8102E' stroke-width='3'/%3E%3Cpath d='M30 0 V30 M0 15 H60' stroke='%23fff' stroke-width='10'/%3E%3Cpath d='M30 0 V30 M0 15 H60' stroke='%23C8102E' stroke-width='6'/%3E%3C/svg%3E");
+    }
+    .flag-us {
+      background-color: #3C3B6E;
+      background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20preserveAspectRatio%3D%27xMinYMin%20slice%27%20viewBox%3D%270%200%20190%20100%27%3E%3Crect%20y%3D%270.000%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%277.692%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2715.385%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%2723.077%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2730.769%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%2738.462%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2746.154%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%2753.846%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2761.538%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%2769.231%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2776.923%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20y%3D%2784.615%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23fff%27%2F%3E%3Crect%20y%3D%2792.308%27%20width%3D%27190%27%20height%3D%277.712%27%20fill%3D%27%23B22234%27%2F%3E%3Crect%20width%3D%2776%27%20height%3D%2753.846%27%20fill%3D%27%233C3B6E%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2710.86%2C3.83%2011.21%2C4.91%2012.33%2C4.91%2011.42%2C5.57%2011.77%2C6.64%2010.86%2C5.98%209.95%2C6.64%2010.29%2C5.57%209.38%2C4.91%2010.51%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2721.71%2C3.83%2022.06%2C4.91%2023.19%2C4.91%2022.28%2C5.57%2022.63%2C6.64%2021.71%2C5.98%2020.80%2C6.64%2021.15%2C5.57%2020.24%2C4.91%2021.37%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2732.57%2C3.83%2032.92%2C4.91%2034.05%2C4.91%2033.13%2C5.57%2033.48%2C6.64%2032.57%2C5.98%2031.66%2C6.64%2032.01%2C5.57%2031.10%2C4.91%2032.22%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2743.43%2C3.83%2043.78%2C4.91%2044.90%2C4.91%2043.99%2C5.57%2044.34%2C6.64%2043.43%2C5.98%2042.52%2C6.64%2042.87%2C5.57%2041.95%2C4.91%2043.08%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2754.29%2C3.83%2054.63%2C4.91%2055.76%2C4.91%2054.85%2C5.57%2055.20%2C6.64%2054.29%2C5.98%2053.37%2C6.64%2053.72%2C5.57%2052.81%2C4.91%2053.94%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2765.14%2C3.83%2065.49%2C4.91%2066.62%2C4.91%2065.71%2C5.57%2066.05%2C6.64%2065.14%2C5.98%2064.23%2C6.64%2064.58%2C5.57%2063.67%2C4.91%2064.79%2C4.91%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2716.29%2C9.22%2016.63%2C10.29%2017.76%2C10.29%2016.85%2C10.95%2017.20%2C12.02%2016.29%2C11.36%2015.37%2C12.02%2015.72%2C10.95%2014.81%2C10.29%2015.94%2C10.29%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2727.14%2C9.22%2027.49%2C10.29%2028.62%2C10.29%2027.71%2C10.95%2028.05%2C12.02%2027.14%2C11.36%2026.23%2C12.02%2026.58%2C10.95%2025.67%2C10.29%2026.79%2C10.29%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2738.00%2C9.22%2038.35%2C10.29%2039.47%2C10.29%2038.56%2C10.95%2038.91%2C12.02%2038.00%2C11.36%2037.09%2C12.02%2037.44%2C10.95%2036.53%2C10.29%2037.65%2C10.29%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2748.86%2C9.22%2049.21%2C10.29%2050.33%2C10.29%2049.42%2C10.95%2049.77%2C12.02%2048.86%2C11.36%2047.95%2C12.02%2048.29%2C10.95%2047.38%2C10.29%2048.51%2C10.29%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2759.71%2C9.22%2060.06%2C10.29%2061.19%2C10.29%2060.28%2C10.95%2060.63%2C12.02%2059.71%2C11.36%2058.80%2C12.02%2059.15%2C10.95%2058.24%2C10.29%2059.37%2C10.29%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2710.86%2C14.60%2011.21%2C15.67%2012.33%2C15.67%2011.42%2C16.34%2011.77%2C17.41%2010.86%2C16.75%209.95%2C17.41%2010.29%2C16.34%209.38%2C15.67%2010.51%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2721.71%2C14.60%2022.06%2C15.67%2023.19%2C15.67%2022.28%2C16.34%2022.63%2C17.41%2021.71%2C16.75%2020.80%2C17.41%2021.15%2C16.34%2020.24%2C15.67%2021.37%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2732.57%2C14.60%2032.92%2C15.67%2034.05%2C15.67%2033.13%2C16.34%2033.48%2C17.41%2032.57%2C16.75%2031.66%2C17.41%2032.01%2C16.34%2031.10%2C15.67%2032.22%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2743.43%2C14.60%2043.78%2C15.67%2044.90%2C15.67%2043.99%2C16.34%2044.34%2C17.41%2043.43%2C16.75%2042.52%2C17.41%2042.87%2C16.34%2041.95%2C15.67%2043.08%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2754.29%2C14.60%2054.63%2C15.67%2055.76%2C15.67%2054.85%2C16.34%2055.20%2C17.41%2054.29%2C16.75%2053.37%2C17.41%2053.72%2C16.34%2052.81%2C15.67%2053.94%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2765.14%2C14.60%2065.49%2C15.67%2066.62%2C15.67%2065.71%2C16.34%2066.05%2C17.41%2065.14%2C16.75%2064.23%2C17.41%2064.58%2C16.34%2063.67%2C15.67%2064.79%2C15.67%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2716.29%2C19.99%2016.63%2C21.06%2017.76%2C21.06%2016.85%2C21.72%2017.20%2C22.79%2016.29%2C22.13%2015.37%2C22.79%2015.72%2C21.72%2014.81%2C21.06%2015.94%2C21.06%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2727.14%2C19.99%2027.49%2C21.06%2028.62%2C21.06%2027.71%2C21.72%2028.05%2C22.79%2027.14%2C22.13%2026.23%2C22.79%2026.58%2C21.72%2025.67%2C21.06%2026.79%2C21.06%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2738.00%2C19.99%2038.35%2C21.06%2039.47%2C21.06%2038.56%2C21.72%2038.91%2C22.79%2038.00%2C22.13%2037.09%2C22.79%2037.44%2C21.72%2036.53%2C21.06%2037.65%2C21.06%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2748.86%2C19.99%2049.21%2C21.06%2050.33%2C21.06%2049.42%2C21.72%2049.77%2C22.79%2048.86%2C22.13%2047.95%2C22.79%2048.29%2C21.72%2047.38%2C21.06%2048.51%2C21.06%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2759.71%2C19.99%2060.06%2C21.06%2061.19%2C21.06%2060.28%2C21.72%2060.63%2C22.79%2059.71%2C22.13%2058.80%2C22.79%2059.15%2C21.72%2058.24%2C21.06%2059.37%2C21.06%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2710.86%2C25.37%2011.21%2C26.44%2012.33%2C26.44%2011.42%2C27.11%2011.77%2C28.18%2010.86%2C27.52%209.95%2C28.18%2010.29%2C27.11%209.38%2C26.44%2010.51%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2721.71%2C25.37%2022.06%2C26.44%2023.19%2C26.44%2022.28%2C27.11%2022.63%2C28.18%2021.71%2C27.52%2020.80%2C28.18%2021.15%2C27.11%2020.24%2C26.44%2021.37%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2732.57%2C25.37%2032.92%2C26.44%2034.05%2C26.44%2033.13%2C27.11%2033.48%2C28.18%2032.57%2C27.52%2031.66%2C28.18%2032.01%2C27.11%2031.10%2C26.44%2032.22%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2743.43%2C25.37%2043.78%2C26.44%2044.90%2C26.44%2043.99%2C27.11%2044.34%2C28.18%2043.43%2C27.52%2042.52%2C28.18%2042.87%2C27.11%2041.95%2C26.44%2043.08%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2754.29%2C25.37%2054.63%2C26.44%2055.76%2C26.44%2054.85%2C27.11%2055.20%2C28.18%2054.29%2C27.52%2053.37%2C28.18%2053.72%2C27.11%2052.81%2C26.44%2053.94%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2765.14%2C25.37%2065.49%2C26.44%2066.62%2C26.44%2065.71%2C27.11%2066.05%2C28.18%2065.14%2C27.52%2064.23%2C28.18%2064.58%2C27.11%2063.67%2C26.44%2064.79%2C26.44%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2716.29%2C30.76%2016.63%2C31.83%2017.76%2C31.83%2016.85%2C32.49%2017.20%2C33.56%2016.29%2C32.90%2015.37%2C33.56%2015.72%2C32.49%2014.81%2C31.83%2015.94%2C31.83%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2727.14%2C30.76%2027.49%2C31.83%2028.62%2C31.83%2027.71%2C32.49%2028.05%2C33.56%2027.14%2C32.90%2026.23%2C33.56%2026.58%2C32.49%2025.67%2C31.83%2026.79%2C31.83%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2738.00%2C30.76%2038.35%2C31.83%2039.47%2C31.83%2038.56%2C32.49%2038.91%2C33.56%2038.00%2C32.90%2037.09%2C33.56%2037.44%2C32.49%2036.53%2C31.83%2037.65%2C31.83%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2748.86%2C30.76%2049.21%2C31.83%2050.33%2C31.83%2049.42%2C32.49%2049.77%2C33.56%2048.86%2C32.90%2047.95%2C33.56%2048.29%2C32.49%2047.38%2C31.83%2048.51%2C31.83%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2759.71%2C30.76%2060.06%2C31.83%2061.19%2C31.83%2060.28%2C32.49%2060.63%2C33.56%2059.71%2C32.90%2058.80%2C33.56%2059.15%2C32.49%2058.24%2C31.83%2059.37%2C31.83%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2710.86%2C36.14%2011.21%2C37.21%2012.33%2C37.21%2011.42%2C37.88%2011.77%2C38.95%2010.86%2C38.28%209.95%2C38.95%2010.29%2C37.88%209.38%2C37.21%2010.51%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2721.71%2C36.14%2022.06%2C37.21%2023.19%2C37.21%2022.28%2C37.88%2022.63%2C38.95%2021.71%2C38.28%2020.80%2C38.95%2021.15%2C37.88%2020.24%2C37.21%2021.37%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2732.57%2C36.14%2032.92%2C37.21%2034.05%2C37.21%2033.13%2C37.88%2033.48%2C38.95%2032.57%2C38.28%2031.66%2C38.95%2032.01%2C37.88%2031.10%2C37.21%2032.22%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2743.43%2C36.14%2043.78%2C37.21%2044.90%2C37.21%2043.99%2C37.88%2044.34%2C38.95%2043.43%2C38.28%2042.52%2C38.95%2042.87%2C37.88%2041.95%2C37.21%2043.08%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2754.29%2C36.14%2054.63%2C37.21%2055.76%2C37.21%2054.85%2C37.88%2055.20%2C38.95%2054.29%2C38.28%2053.37%2C38.95%2053.72%2C37.88%2052.81%2C37.21%2053.94%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2765.14%2C36.14%2065.49%2C37.21%2066.62%2C37.21%2065.71%2C37.88%2066.05%2C38.95%2065.14%2C38.28%2064.23%2C38.95%2064.58%2C37.88%2063.67%2C37.21%2064.79%2C37.21%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2716.29%2C41.53%2016.63%2C42.60%2017.76%2C42.60%2016.85%2C43.26%2017.20%2C44.33%2016.29%2C43.67%2015.37%2C44.33%2015.72%2C43.26%2014.81%2C42.60%2015.94%2C42.60%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2727.14%2C41.53%2027.49%2C42.60%2028.62%2C42.60%2027.71%2C43.26%2028.05%2C44.33%2027.14%2C43.67%2026.23%2C44.33%2026.58%2C43.26%2025.67%2C42.60%2026.79%2C42.60%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2738.00%2C41.53%2038.35%2C42.60%2039.47%2C42.60%2038.56%2C43.26%2038.91%2C44.33%2038.00%2C43.67%2037.09%2C44.33%2037.44%2C43.26%2036.53%2C42.60%2037.65%2C42.60%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2748.86%2C41.53%2049.21%2C42.60%2050.33%2C42.60%2049.42%2C43.26%2049.77%2C44.33%2048.86%2C43.67%2047.95%2C44.33%2048.29%2C43.26%2047.38%2C42.60%2048.51%2C42.60%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2759.71%2C41.53%2060.06%2C42.60%2061.19%2C42.60%2060.28%2C43.26%2060.63%2C44.33%2059.71%2C43.67%2058.80%2C44.33%2059.15%2C43.26%2058.24%2C42.60%2059.37%2C42.60%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2710.86%2C46.91%2011.21%2C47.98%2012.33%2C47.98%2011.42%2C48.64%2011.77%2C49.72%2010.86%2C49.05%209.95%2C49.72%2010.29%2C48.64%209.38%2C47.98%2010.51%2C47.98%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2721.71%2C46.91%2022.06%2C47.98%2023.19%2C47.98%2022.28%2C48.64%2022.63%2C49.72%2021.71%2C49.05%2020.80%2C49.72%2021.15%2C48.64%2020.24%2C47.98%2021.37%2C47.98%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2732.57%2C46.91%2032.92%2C47.98%2034.05%2C47.98%2033.13%2C48.64%2033.48%2C49.72%2032.57%2C49.05%2031.66%2C49.72%2032.01%2C48.64%2031.10%2C47.98%2032.22%2C47.98%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2743.43%2C46.91%2043.78%2C47.98%2044.90%2C47.98%2043.99%2C48.64%2044.34%2C49.72%2043.43%2C49.05%2042.52%2C49.72%2042.87%2C48.64%2041.95%2C47.98%2043.08%2C47.98%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2754.29%2C46.91%2054.63%2C47.98%2055.76%2C47.98%2054.85%2C48.64%2055.20%2C49.72%2054.29%2C49.05%2053.37%2C49.72%2053.72%2C48.64%2052.81%2C47.98%2053.94%2C47.98%27%2F%3E%3Cpolygon%20fill%3D%27%23fff%27%20points%3D%2765.14%2C46.91%2065.49%2C47.98%2066.62%2C47.98%2065.71%2C48.64%2066.05%2C49.72%2065.14%2C49.05%2064.23%2C49.72%2064.58%2C48.64%2063.67%2C47.98%2064.79%2C47.98%27%2F%3E%3C%2Fsvg%3E");
+      background-size: cover;
+      background-position: left center;
+    }
+    .flag-name {
+      position: relative; z-index: 1; width: 100%; padding: 12px 8px 14px;
+      background: transparent; color: var(--ink);
+      font-size: 22px; font-weight: 700; text-align: center; line-height: 1.2;
+    }
+    .flag-name small { display: block; margin-top: 2px; color: var(--muted); font-size: 18px; font-weight: 600; letter-spacing: 0.06em; }
+    .flow-arrow { width: 26px; height: 3px; background: var(--accent); position: relative; }
+    .flow-arrow::after {
+      content: ""; position: absolute; right: -1px; top: -7px;
+      border-width: 8.5px 0 8.5px 12px; border-style: solid; border-color: transparent transparent transparent var(--accent);
+    }
+
+    .params { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin: 0; }
+    .params div { padding: 16px 18px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); }
+    .params dt { color: var(--accent); font-family: var(--font-mono); font-weight: 500; font-size: 22px; line-height: 1.3; }
+    .params dd { margin: 4px 0 0; font-size: 22px; color: var(--ink); line-height: 1.3; }
+
+    /* ================= tpl-thanks ================= */
+    .tpl-thanks { flex: 1; display: grid; grid-template-columns: 1fr 480px; align-items: center; }
+    .tpl-thanks h1 { font-size: 104px; letter-spacing: -0.04em; line-height: 1; }
+    .tpl-thanks p { margin-top: 16px; font-size: 24px; }
+    .btn {
+      display: inline-flex; align-items: center; margin-top: 28px; padding: 12px 30px; border-radius: 999px;
+      background: linear-gradient(180deg, var(--btn-1), var(--btn-2)); color: var(--on-accent);
+      font-size: 24px; font-weight: 700; text-decoration: none;
+    }
+    .btn:hover { filter: brightness(1.1); }
+
+    /* ================= Responsive: no nested scroll ================= */
+    @media (max-width: 760px) and (orientation: portrait) {
+      .deck { padding: 8px 10px 10px; gap: 6px; }
+      .topbar { gap: 10px; flex-wrap: wrap; }
+      .brand span:last-child, .topbar > a:not(.back-link) { display: none; }
+      .back-link span:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .crumb { min-width: 0; flex: 1 1 auto; font-size: 14px; }
+      .progress { order: 5; flex: 1 0 100%; }
+      .hint { display: none; }
+      .controls button { min-width: 84px; }
+      .rotate-hint { display: block; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .draw { stroke-dasharray: none; stroke-dashoffset: 0; }
+      .toc-item:hover .toc-num { transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== Shared art & icon definitions (drawn once, reused with <use>) ===== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-visor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="s-v1" /><stop offset="1" class="s-v2" /></linearGradient>
+      <linearGradient id="g-planet" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" class="s-p1" /><stop offset="1" class="s-p2" /></linearGradient>
+
+      <symbol id="art-astronaut" viewBox="0 0 300 400">
+        <rect class="a-pack" x="76" y="126" width="148" height="154" rx="36" />
+        <rect class="a-pack2" x="90" y="150" width="28" height="72" rx="12" />
+        <rect class="a-suit" x="104" y="248" width="44" height="100" rx="22" />
+        <rect class="a-suit" x="152" y="248" width="44" height="100" rx="22" />
+        <path class="a-boot" d="M98 338 h54 v26 a16 16 0 0 1 -16 16 h-22 a16 16 0 0 1 -16 -16z" />
+        <path class="a-boot" d="M148 338 h54 v26 a16 16 0 0 1 -16 16 h-22 a16 16 0 0 1 -16 -16z" />
+        <rect class="a-suit" x="94" y="136" width="112" height="132" rx="48" />
+        <path class="a-shade" d="M176 138 a48 48 0 0 1 30 44 v40 a48 48 0 0 1 -30 44 a56 56 0 0 0 0 -128z" />
+        <rect class="a-boot" x="98" y="238" width="104" height="14" rx="7" />
+        <rect class="a-panel" x="122" y="168" width="56" height="38" rx="10" />
+        <circle class="a-dot w" cx="136" cy="187" r="6" />
+        <circle class="a-dot" cx="154" cy="187" r="6" />
+        <circle class="a-dot" cx="170" cy="187" r="4" />
+        <g transform="rotate(26 110 160)">
+          <rect class="a-suit" x="88" y="148" width="42" height="96" rx="21" />
+          <circle class="a-glove" cx="109" cy="250" r="20" />
+        </g>
+        <g transform="rotate(-128 192 160)">
+          <rect class="a-suit" x="171" y="148" width="42" height="96" rx="21" />
+          <circle class="a-glove" cx="192" cy="250" r="20" />
+        </g>
+        <line class="a-ant" x1="196" y1="44" x2="214" y2="14" />
+        <circle class="a-dot w" cx="215" cy="12" r="7" />
+        <circle class="a-suit" cx="150" cy="92" r="68" />
+        <path class="a-shade" d="M184 36 A68 68 0 0 1 150 160 A92 76 0 0 0 184 36z" />
+        <rect class="a-boot" x="116" y="148" width="68" height="16" rx="8" />
+        <rect class="a-visor" x="102" y="56" width="96" height="68" rx="34" />
+        <ellipse class="a-glint" cx="128" cy="76" rx="15" ry="7" transform="rotate(-28 128 76)" />
+        <ellipse class="a-glint" cx="176" cy="108" rx="6" ry="3" />
+      </symbol>
+
+      <symbol id="art-rocket" viewBox="0 0 120 300">
+        <path class="r-fin" d="M30 150 L2 218 L32 198z" />
+        <path class="r-fin" d="M90 150 L118 218 L88 198z" />
+        <path class="r-flame" d="M42 210 Q60 296 78 210z" />
+        <path class="r-flame2" d="M52 210 Q60 258 68 210z" />
+        <rect class="a-boot" x="40" y="190" width="40" height="22" rx="7" />
+        <path class="r-body" d="M60 6 C102 50 106 124 92 194 H28 C14 124 18 50 60 6z" />
+        <path class="r-nose" d="M60 6 C78 24 90 46 96 70 H24 C30 46 42 24 60 6z" />
+        <circle class="r-ring" cx="60" cy="118" r="24" />
+        <circle class="r-win" cx="60" cy="118" r="17" />
+        <ellipse class="a-glint" cx="54" cy="111" rx="6" ry="3" transform="rotate(-30 54 111)" />
+        <rect class="a-boot" x="26" y="170" width="68" height="10" rx="5" />
+      </symbol>
+
+      <symbol id="art-planet" viewBox="0 0 240 240">
+        <ellipse class="p-ring" cx="120" cy="120" rx="116" ry="30" transform="rotate(-18 120 120)" />
+        <circle class="p-ball" cx="120" cy="120" r="78" />
+        <g>
+          <line class="p-edge" x1="86" y1="92" x2="132" y2="78" /><line class="p-edge" x1="132" y1="78" x2="160" y2="118" />
+          <line class="p-edge" x1="86" y1="92" x2="104" y2="146" /><line class="p-edge" x1="104" y1="146" x2="160" y2="118" />
+          <line class="p-edge" x1="104" y1="146" x2="150" y2="164" /><line class="p-edge" x1="160" y1="118" x2="150" y2="164" />
+          <circle class="p-node" cx="86" cy="92" r="7" /><circle class="p-node" cx="132" cy="78" r="9" />
+          <circle class="p-node" cx="160" cy="118" r="7" /><circle class="p-node" cx="104" cy="146" r="9" />
+          <circle class="p-node" cx="150" cy="164" r="6" />
+        </g>
+        <path class="p-ring" d="M5.5 120 A116 30 0 0 0 234.5 120" transform="rotate(-18 120 120)" />
+      </symbol>
+
+      <symbol id="art-film" viewBox="0 0 200 200">
+        <circle class="f-reel" cx="100" cy="100" r="86" />
+        <circle class="f-hole" cx="100" cy="52" r="19" />
+        <circle class="f-hole" cx="145.7" cy="85.2" r="19" />
+        <circle class="f-hole" cx="128.2" cy="138.8" r="19" />
+        <circle class="f-hole" cx="71.8" cy="138.8" r="19" />
+        <circle class="f-hole" cx="54.3" cy="85.2" r="19" />
+        <circle class="f-hub" cx="100" cy="100" r="15" />
+      </symbol>
+
+      <symbol id="art-star" viewBox="0 0 40 40"><path d="M20 0 C22 12 28 18 40 20 C28 22 22 28 20 40 C18 28 12 22 0 20 C12 18 18 12 20 0z" /></symbol>
+
+      <symbol id="art-net" viewBox="0 0 320 260">
+        <g>
+          <line class="n-edge" x1="40" y1="60" x2="110" y2="30" /><line class="n-edge" x1="40" y1="60" x2="120" y2="110" />
+          <line class="n-edge" x1="110" y1="30" x2="120" y2="110" /><line class="n-edge" x1="110" y1="30" x2="200" y2="70" />
+          <line class="n-edge" x1="120" y1="110" x2="200" y2="70" /><line class="n-edge" x1="200" y1="70" x2="260" y2="30" />
+          <line class="n-edge" x1="200" y1="70" x2="270" y2="130" /><line class="n-edge" x1="120" y1="110" x2="190" y2="170" />
+          <line class="n-edge" x1="270" y1="130" x2="190" y2="170" /><line class="n-edge" x1="120" y1="110" x2="80" y2="190" />
+          <line class="n-edge" x1="190" y1="170" x2="250" y2="215" /><line class="n-edge" x1="270" y1="130" x2="250" y2="215" />
+          <line class="n-edge" x1="80" y1="190" x2="190" y2="170" />
+          <circle class="n-node" cx="40" cy="60" r="10" /><circle class="n-node" cx="110" cy="30" r="8" />
+          <circle class="n-node w" cx="120" cy="110" r="14" /><circle class="n-node" cx="200" cy="70" r="10" />
+          <circle class="n-node" cx="260" cy="30" r="7" /><circle class="n-node" cx="270" cy="130" r="12" />
+          <circle class="n-node w" cx="190" cy="170" r="9" /><circle class="n-node" cx="80" cy="190" r="9" />
+          <circle class="n-node" cx="250" cy="215" r="8" />
+        </g>
+      </symbol>
+
+      <!-- icon set (48 grid, stroke only) -->
+      <symbol id="ic-key" viewBox="0 0 48 48"><circle cx="15" cy="24" r="8" /><path d="M23 24 H43 M36 24 v8 M43 24 v6" /></symbol>
+      <symbol id="ic-api" viewBox="0 0 48 48"><path d="M19 8 Q12 8 12 15 V20 Q12 24 7 24 Q12 24 12 28 V33 Q12 40 19 40 M29 8 Q36 8 36 15 V20 Q36 24 41 24 Q36 24 36 28 V33 Q36 40 29 40" /></symbol>
+      <symbol id="ic-csv" viewBox="0 0 48 48"><rect x="7" y="9" width="34" height="30" rx="5" /><path d="M7 19 H41 M7 29 H41 M20 9 V39" /></symbol>
+      <symbol id="ic-filter" viewBox="0 0 48 48"><path d="M6 9 H42 L28 26 V39 L20 34 V26 Z" /></symbol>
+      <symbol id="ic-graph" viewBox="0 0 48 48"><circle cx="11" cy="35" r="5" /><circle cx="24" cy="11" r="5" /><circle cx="38" cy="31" r="5" /><path d="M14 31 L21 15 M28 14 L35 27 M16 36 L33 33" /></symbol>
+      <symbol id="ic-comm" viewBox="0 0 48 48"><circle cx="18" cy="24" r="12" /><circle cx="30" cy="24" r="12" /></symbol>
+      <symbol id="ic-image" viewBox="0 0 48 48"><rect x="6" y="9" width="36" height="30" rx="5" /><circle cx="17" cy="19" r="3.5" /><path d="M6 34 L18 24 L28 33 L34 28 L42 35" /></symbol>
+      <symbol id="ic-limit" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" /><path d="M12 36 L36 12" /></symbol>
+      <symbol id="ic-db" viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="15" ry="6" /><path d="M9 12 V36 A15 6 0 0 0 39 36 V12 M9 24 A15 6 0 0 0 39 24" /></symbol>
+      <symbol id="ic-file" viewBox="0 0 48 48"><path d="M12 5 H28 L38 15 V43 H12 Z M28 5 V15 H38" /></symbol>
+      <symbol id="ic-code" viewBox="0 0 48 48"><path d="M18 14 L8 24 L18 34 M30 14 L40 24 L30 34" /></symbol>
+      <symbol id="ic-globe" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" /><ellipse cx="24" cy="24" rx="7" ry="17" /><path d="M7 24 H41" /></symbol>
+      <symbol id="ic-bolt" viewBox="0 0 48 48"><path d="M27 5 L11 27 H23 L21 43 L37 20 H25 Z" /></symbol>
+      <symbol id="ic-person" viewBox="0 0 48 48"><circle cx="24" cy="16" r="8" /><path d="M8 43 C8 29 40 29 40 43" /></symbol>
+      <symbol id="ic-path" viewBox="0 0 48 48"><circle cx="10" cy="36" r="5" /><circle cx="38" cy="12" r="5" /><path d="M14 33 C26 30 20 18 34 15" /></symbol>
+      <symbol id="ic-clock" viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" /><path d="M24 13 V25 L32 30" /></symbol>
+    </defs>
+  </svg>
+
+  <a class="skip" href="#stage">Tới slide</a>
+
+  <div class="deck" id="deck" data-dir="none">
+    <header class="topbar">
+      <a class="back-link" href="index.html"><span aria-hidden="true">←</span><span>Quay lại</span></a>
+      <div class="brand">
+        <span class="logo" aria-hidden="true">CI</span>
+        <span>CineInfo</span>
+      </div>
+      <p class="crumb" id="crumb">01 — Mở đầu</p>
+      <div class="progress" aria-hidden="true"><span id="bar"></span></div>
+      <a href="BaiCaNhan_NoiDung.html">Bản đọc đầy đủ</a>
+      <button type="button" class="icon-btn" id="themeToggle" aria-label="Chuyển giao diện sáng tối">☾</button>
+    </header>
+
+    <main class="stage" id="stage" aria-roledescription="carousel" aria-label="Slide giải thích pipeline SNA">
+      <div class="canvas" id="canvas">
+
+      <!-- 1 · COVER -->
+      <section class="slide hero-bg is-current" data-label="Mở đầu" aria-roledescription="slide">
+        <div class="tpl-cover">
+          <div>
+            <p class="kicker reveal">Pipeline dữ liệu SNA</p>
+            <h1 id="s1" class="reveal">Lấy dữ liệu, xử lý và tính độ đo</h1>
+            <p class="sub reveal">Mạng đồng diễn viên TMDB</p>
+            <dl class="meta reveal">
+              <div><dt>Môn</dt><dd>Phân tích mạng xã hội</dd></div>
+              <div><dt>Báo cáo</dt><dd>Bài cá nhân</dd></div>
+              <div><dt>Dữ liệu</dt><dd>TMDB</dd></div>
+            </dl>
+            <div class="pills reveal">
+              <span class="pill" id="slideCount">34 slide</span>
+              <span class="pill ghost">VN · KR · GB · US</span>
+            </div>
+          </div>
+          <svg class="cover-art art-svg reveal" width="520" height="560" viewBox="0 0 520 560" aria-hidden="true">
+            <use href="#art-net" x="150" y="0" width="360" height="290" opacity="0.9" />
+            <circle class="orbit" cx="270" cy="330" r="230" />
+            <use class="star" href="#art-star" x="60" y="70" width="34" height="34" />
+            <use class="star b" href="#art-star" x="460" y="400" width="26" height="26" />
+            <use class="star" href="#art-star" x="30" y="430" width="22" height="22" />
+            <use href="#art-planet" x="20" y="130" width="130" height="130" />
+            <use href="#art-rocket" x="388" y="300" width="96" height="240" transform="rotate(28 436 420)" />
+            <g class="float"><use href="#art-astronaut" x="120" y="140" width="290" height="387" /></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 2 · TOC -->
+      <section class="slide v2" data-label="Nội dung" aria-roledescription="slide">
+        <h2 id="s2" class="reveal">Nội dung</h2>
+        <div class="tpl-toc">
+          <div class="toc-row">
+            <a class="toc-item reveal" href="#slide-3"><span class="toc-num">01</span><b>Dữ liệu</b></a>
+            <a class="toc-item reveal" href="#slide-15"><span class="toc-num">02</span><b>Làm sạch &amp; đồ thị</b></a>
+            <a class="toc-item reveal" href="#slide-19"><span class="toc-num">03</span><b>Độ đo SNA</b></a>
+            <a class="toc-item reveal" href="#slide-28"><span class="toc-num">04</span><b>Xuất web &amp; giới hạn</b></a>
+          </div>
+          <p class="foot reveal">Từ TMDB tới Kho phim và đồ thị 3D. Số liệu lấy từ file đang có, không lấy từ bảng cũ trong README.</p>
+        </div>
+      </section>
+
+      <!-- 3 · CHAPTER ONE -->
+      <section class="slide hero-bg alt" data-label="Chương 01" aria-roledescription="slide">
+        <div class="tpl-chapter">
+          <div class="chap-ghost" aria-hidden="true">ONE</div>
+          <div class="chap-text">
+            <p class="kicker reveal">Chương 01</p>
+            <h2 id="s3" class="reveal">Lấy dữ liệu từ TMDB</h2>
+          </div>
+          <svg class="chap-art art-svg reveal" width="470" height="520" viewBox="0 0 470 520" aria-hidden="true">
+            <circle class="orbit" cx="235" cy="270" r="210" />
+            <use class="star" href="#art-star" x="50" y="60" width="30" height="30" />
+            <use class="star b" href="#art-star" x="400" y="440" width="24" height="24" />
+            <use href="#art-film" x="20" y="320" width="150" height="150" />
+            <use href="#art-net" x="170" y="20" width="280" height="226" opacity="0.85" />
+            <g class="float"><use href="#art-astronaut" x="110" y="120" width="270" height="360" /></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 4 · Graph definition -->
+      <section class="slide" data-label="Định nghĩa đồ thị" aria-roledescription="slide">
+        <p class="kicker reveal">Đồ thị</p>
+        <h2 id="s4" class="reveal">Đỉnh là diễn viên, cạnh là lần đóng chung</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 540px 1fr; gap: 36px;">
+            <svg class="diagram reveal" viewBox="0 0 540 300" role="img" aria-label="Hai diễn viên nối bởi một cạnh vô hướng. Trọng số là số phim đóng chung.">
+              <line class="svg-accent draw" pathLength="1" x1="120" y1="120" x2="420" y2="120" stroke-width="5" />
+              <circle class="svg-surface svg-accent" cx="120" cy="120" r="46" stroke-width="5" />
+              <circle class="svg-surface svg-warm" cx="420" cy="120" r="46" stroke-width="5" />
+              <text x="120" y="130" text-anchor="middle" font-size="30" font-weight="700">A</text>
+              <text x="420" y="130" text-anchor="middle" font-size="30" font-weight="700">B</text>
+              <text class="accent" x="270" y="72" text-anchor="middle" font-size="22" font-weight="600">weight = số phim chung</text>
+              <text x="120" y="204" text-anchor="middle" font-size="22">person_id</text>
+              <text x="420" y="204" text-anchor="middle" font-size="22">person_id</text>
+              <text class="muted" x="270" y="264" text-anchor="middle" font-size="22">Cạnh vô hướng, chỉ khi cả hai nằm</text>
+              <text class="muted" x="270" y="292" text-anchor="middle" font-size="22">trong top 10 bill</text>
+            </svg>
+            <div class="rows">
+              <article class="row reveal"><span class="ico"><svg class="ic"><use href="#ic-person" /></svg></span><div><h3>Đỉnh</h3><p>Mỗi người một <code>person_id</code> của TMDB.</p></div></article>
+              <article class="row reveal"><span class="ico"><svg class="ic"><use href="#ic-graph" /></svg></span><div><h3>Cạnh</h3><p>Hai người cùng một phim, trong top 10 bill.</p></div></article>
+              <article class="row reveal"><span class="ico warm"><svg class="ic"><use href="#ic-bolt" /></svg></span><div><h3>Trọng số</h3><p>Số phim chung. Ba người tạo ba cạnh.</p></div></article>
+            </div>
+          </div>
+          <p class="note reveal"><b>Độ đo.</b> Louvain và modularity dùng trọng số. Degree, clustering, betweenness, closeness, đường đi và diameter thì không. HITS đi được hai chiều.</p>
+        </div>
+      </section>
+
+      <!-- 5 · Pipeline -->
+      <section class="slide v3" data-label="Năm script" aria-roledescription="slide">
+        <p class="kicker reveal">Từ API đến web</p>
+        <h2 id="s5" class="reveal">Năm bước, một pipeline</h2>
+        <div class="body center">
+          <div class="tpl-split" style="--cols: 540px 1fr; gap: 44px;">
+            <figure class="frame reveal">
+              <img src="slide-art/sna-pipeline.jpg" width="1280" height="720" loading="lazy" alt="Năm khung kính xếp hàng: cuộn phim, cơ sở dữ liệu, dòng dữ liệu, mạng nhỏ và mạng lớn, nối bằng một luồng sáng." />
+            </figure>
+            <ol class="tpl-steps">
+              <li class="reveal"><span class="n">01</span><div><strong>crawler</strong><p>Gọi Discover và chi tiết phim. Ghi CSV thô.</p></div></li>
+              <li class="reveal"><span class="n">02</span><div><strong>process</strong><p>Làm sạch cast. Dựng actors.csv và edges.csv.</p></div></li>
+              <li class="reveal"><span class="n">03</span><div><strong>calculate</strong><p>Tính độ đo và cộng đồng Louvain.</p></div></li>
+              <li class="reveal"><span class="n">04</span><div><strong>export</strong><p>Xuất catalog.json và network_data.json.</p></div></li>
+              <li class="reveal"><span class="n">05</span><div><strong>media</strong><p>Lấy ảnh, tên đa ngôn ngữ, poster, keyword.</p></div></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 · API key -->
+      <section class="slide" data-label="API key" aria-roledescription="slide">
+        <p class="kicker reveal">Xác thực</p>
+        <h2 id="s6" class="reveal">Khóa nằm trong .env, gửi bằng query</h2>
+        <div class="body">
+          <pre class="big reveal">TMDB_API_KEY=your_tmdb_api_key_here</pre>
+          <div class="tpl-cards" style="margin-top: 22px;">
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-key" /></svg></span><h3>Khóa trong .env</h3><p>Script đọc <code>TMDB_API_KEY</code>. Chưa có thì lấy từ <code>tmdb_sna_project/.env</code>. Khóa không nằm trong mã nguồn.</p></article>
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-api" /></svg></span><h3>Gửi bằng query</h3><p>Mọi request crawler gửi <code>?api_key=...</code>, không dùng header. Gốc URL: <code>https://api.themoviedb.org/3</code>.</p></article>
+            <article class="card reveal"><span class="ico warm"><svg class="ic"><use href="#ic-limit" /></svg></span><h3>Giới hạn</h3><p>Khoảng 35 request / 10 giây. 429 chờ <code>Retry-After</code>. 5xx thử lại tối đa 5 lần.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 · discover URL + params -->
+      <section class="slide v2" data-label="Discover" aria-roledescription="slide">
+        <p class="kicker reveal">API 1</p>
+        <h2 id="s7" class="reveal">GET /discover/movie</h2>
+        <div class="body center">
+          <pre class="url reveal">GET /3/discover/movie?api_key=YOUR_KEY&amp;language=en-US&amp;sort_by=popularity.desc&amp;include_adult=false&amp;with_origin_country=VN&amp;page=1</pre>
+          <dl class="params" style="margin-top: 28px;">
+            <div class="reveal"><dt>language</dt><dd>en-US</dd></div>
+            <div class="reveal"><dt>sort_by</dt><dd>popularity.desc</dd></div>
+            <div class="reveal"><dt>include_adult</dt><dd>false</dd></div>
+            <div class="reveal"><dt>origin</dt><dd>VN, KR, GB, US</dd></div>
+            <div class="reveal"><dt>page</dt><dd>1…500</dd></div>
+          </dl>
+        </div>
+        <svg class="deco-art" style="right: 60px; bottom: 56px;" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true"><use href="#art-film" x="0" y="0" width="120" height="120" opacity="0.9" /></svg>
+      </section>
+
+      <!-- 8 · flags -->
+      <section class="slide" data-label="Bốn quốc gia" aria-roledescription="slide">
+        <p class="kicker reveal">API 1</p>
+        <h2 id="s8" class="reveal">Bốn nước xen kẽ từng trang</h2>
+        <div class="body center">
+          <p class="lede reveal">Bốn nước xen kẽ từng trang, phổ biến trước. Phim đồng sản xuất nhận nhãn nước gặp trước.</p>
+          <div class="country-flow reveal">
+            <article class="flag-card"><span class="flag flag-vn" aria-hidden="true"></span><span class="flag-name">Việt Nam<small>VN</small></span></article>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <article class="flag-card"><span class="flag flag-kr" aria-hidden="true"></span><span class="flag-name">Hàn Quốc<small>KR</small></span></article>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <article class="flag-card"><span class="flag flag-gb" aria-hidden="true"></span><span class="flag-name">Vương quốc Anh<small>GB</small></span></article>
+            <span class="flow-arrow" aria-hidden="true"></span>
+            <article class="flag-card"><span class="flag flag-us" aria-hidden="true"></span><span class="flag-name">Hoa Kỳ<small>US</small></span></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 · discover response (tabs) -->
+      <section class="slide v3" data-label="Response Discover" aria-roledescription="slide">
+        <p class="kicker reveal">Discover</p>
+        <h2 id="s9" class="reveal">Chỉ lấy id và số trang</h2>
+        <div class="body">
+          <div class="tabs reveal">
+            <div class="tablist" role="tablist" aria-label="Response Discover" aria-orientation="vertical">
+              <button type="button" role="tab" id="t9a" aria-controls="p9a" aria-selected="true">Response đầy đủ, rút gọn một phim</button>
+              <button type="button" role="tab" id="t9b" aria-controls="p9b" aria-selected="false" tabindex="-1">Phần crawler thực sự đọc</button>
+            </div>
+            <div>
+              <div class="tabpanel" role="tabpanel" id="p9a" aria-labelledby="t9a">
+<pre>{
+  "page": 1,
+  "results": [{
+    "adult": false,
+    <mark class="hl">"id": 637536</mark>,
+    "title": "Sister Sister",
+    "overview": "This is a psychological film...",
+    "popularity": 7.0572,
+    "release_date": "2019-12-18",
+    "vote_average": 5.5,
+    "vote_count": 11
+  }],
+  <mark class="hl">"total_pages": 80</mark>,
+  "total_results": 1600
+}</pre>
+                <p>Các số của phim 637536 lấy từ bản đã lưu. <code>total_pages</code> và <code>total_results</code> chỉ để thấy hình dạng trang.</p>
+              </div>
+              <div class="tabpanel" role="tabpanel" id="p9b" aria-labelledby="t9b" hidden>
+<pre>{
+  "results": [{ <mark class="hl">"id": 637536</mark> }],
+  <mark class="hl">"total_pages": 80</mark>
+}</pre>
+                <p><code>id</code> dùng để gọi tiếp <code>/movie/{id}</code>. <code>total_pages</code> để biết còn trang nào. Các field còn lại bị bỏ qua.</p>
+                <ul>
+                  <li>Dừng khi đủ 50.000 dòng cast, 50.000 cạnh ước lượng, và mỗi nước đã qua 20 trang.</li>
+                  <li>Ghi file <code>.next.csv</code> trước, đủ mốc mới thay file chính.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 · /movie/{id} -->
+      <section class="slide" data-label="Chi tiết phim" aria-roledescription="slide">
+        <p class="kicker reveal">API 2</p>
+        <h2 id="s10" class="reveal">GET /movie/{id} kèm cast và keyword</h2>
+        <div class="body">
+          <pre class="url reveal">GET /3/movie/637536?api_key=YOUR_KEY&amp;language=en-US&amp;append_to_response=credits,keywords</pre>
+          <div class="tpl-cards" style="margin-top: 24px;">
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-file" /></svg></span><h3>Chi tiết phim</h3><ul class="tags mono"><li><span>title</span></li><li><span>overview</span></li><li><span>release_date</span></li><li><span>runtime</span></li><li><span>genres</span></li></ul></article>
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-person" /></svg></span><h3>credits</h3><ul class="tags mono"><li><span>cast</span></li><li><span>id</span></li><li><span>name</span></li><li><span>order</span></li></ul></article>
+            <article class="card reveal"><span class="ico warm"><svg class="ic"><use href="#ic-code" /></svg></span><h3>keywords</h3><ul class="tags mono"><li><span>keywords</span></li><li><span>name</span></li></ul></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 · movie JSON tabs -->
+      <section class="slide v2" data-label="JSON chi tiết phim" aria-roledescription="slide">
+        <p class="kicker reveal">API 2</p>
+        <h2 id="s11" class="reveal">Response chi tiết phim</h2>
+        <div class="body">
+          <div class="tabs reveal">
+            <div class="tablist" role="tablist" aria-label="Response chi tiết phim" aria-orientation="vertical">
+              <button type="button" role="tab" id="t11a" aria-controls="p11a" aria-selected="true">Response đầy đủ, rút gọn</button>
+              <button type="button" role="tab" id="t11b" aria-controls="p11b" aria-selected="false" tabindex="-1">Phần được lưu</button>
+            </div>
+            <div>
+              <div class="tabpanel" role="tabpanel" id="p11a" aria-labelledby="t11a">
+<pre>{
+  "id": 637536,
+  <mark class="hl">"title"</mark>: "Sister Sister",
+  <mark class="hl">"overview"</mark>: "This is a psychological film...",
+  <mark class="hl">"release_date"</mark>: "2019-12-18",
+  <mark class="hl">"runtime"</mark>: 104,
+  <mark class="hl">"genres"</mark>: ["Thriller", "Drama", "Romance"],
+  <mark class="hl">"credits"</mark>: { "cast": [
+    { "id": 83482, "name": "Thanh Hằng", "order": 0 },
+    { "id": 1598161, "name": "Chi Pu", "order": 1 }
+  ], "crew": ["...không lưu"] },
+  <mark class="hl">"keywords"</mark>: { "keywords": [
+    { "name": "vietnam" }, { "name": "lgbt" }
+  ] }
+}</pre>
+              </div>
+              <div class="tabpanel" role="tabpanel" id="p11b" aria-labelledby="t11b" hidden>
+<pre>{
+  "title": "Sister Sister",
+  "release_date": "2019-12-18",
+  "runtime": 104,
+  "overview": <mark class="hl">"…cắt 500 ký tự"</mark>,
+  "genres": <mark class="hl">"chuỗi Python"</mark>,
+  "cast": <mark class="hl">"order 0–9, có id và tên"</mark>,
+  "keywords": [
+    "vietnam", "lgbt", "chị chị em em",
+    "psychological", "girls' love (gl)"
+  ]
+}</pre>
+                <p>404 thì bỏ phim. Budget, crew và ảnh có trong API nhưng không lưu ở bước này. Không có <code>title</code> thì lấy <code>original_title</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 12 · CSV rows -->
+      <section class="slide" data-label="Dòng CSV" aria-roledescription="slide">
+        <p class="kicker reveal">Chị Chị Em Em · 637536</p>
+        <h2 id="s12" class="reveal">Một response thành nhiều dòng CSV</h2>
+        <div class="body center">
+          <svg class="diagram reveal" viewBox="0 0 1136 230" role="img" aria-label="Một phim tách thành ba dòng cast: Thanh Hằng, Chi Pu và Lãnh Thanh.">
+            <rect class="svg-surface svg-warm" x="3" y="53" width="300" height="124" rx="26" stroke-width="4" />
+            <text x="153" y="108" text-anchor="middle" font-size="28" font-weight="700">Chị Chị Em Em</text>
+            <text class="warm" x="153" y="146" text-anchor="middle" font-size="24" font-weight="600">id 637536</text>
+            <path class="svg-accent draw" pathLength="1" d="M303 115 H372" stroke-width="4" />
+            <rect class="svg-tint svg-accent" x="374" y="3" width="759" height="58" rx="16" stroke-width="3" />
+            <rect class="svg-tint svg-accent" x="374" y="86" width="759" height="58" rx="16" stroke-width="3" />
+            <rect class="svg-tint svg-accent" x="374" y="169" width="759" height="58" rx="16" stroke-width="3" />
+            <text x="400" y="42" font-size="26">order 0 · Thanh Hằng · Thiên Kim</text>
+            <text x="400" y="125" font-size="26">order 1 · Chi Pu · Bảo Nhi</text>
+            <text x="400" y="208" font-size="26">order 2 · Lãnh Thanh</text>
+          </svg>
+          <p class="lede reveal" style="margin: 26px 0 0;">Metadata một dòng trong <code>movies_meta.csv</code>: thể loại lưu dạng chuỗi Python, cùng điểm, thời lượng, ngày chiếu và tóm tắt.</p>
+        </div>
+      </section>
+
+      <!-- 13 · filter stats -->
+      <section class="slide v3" data-label="Lọc nội dung" aria-roledescription="slide">
+        <p class="kicker reveal">Adult flag và keyword</p>
+        <h2 id="s13" class="reveal">Bỏ phim người lớn, giữ 14 phim điện ảnh</h2>
+        <div class="body">
+          <div class="tpl-split top" style="--cols: 660px 1fr; gap: 36px;">
+            <div class="tpl-stats s2x2" style="grid-template-columns: 1fr 1fr;">
+              <article class="stat reveal" style="grid-column: auto;"><b data-count="5656">0</b><span>Phim còn trong kho</span></article>
+              <article class="stat reveal" style="grid-column: auto;"><b data-count="22548">0</b><span>Diễn viên trong catalog</span></article>
+              <article class="stat reveal" style="grid-column: auto;"><b data-count="1585">0</b><span>Phim Mỹ</span></article>
+              <article class="stat reveal" style="grid-column: auto;"><b data-count="1650">0</b><span>Phim Anh</span></article>
+            </div>
+            <div class="reveal" style="align-self: center;">
+              <p style="color: var(--ink-2); font-size: 24px;"><code>include_adult=false</code> không đủ. Phim bị bỏ khi <code>adult</code> là true hoặc keyword thuộc softcore, porno, pornography, pornographic, porn, erotic movie. Việt Nam 1.227 phim, Hàn Quốc 1.194 phim.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 14 · 14 exceptions -->
+      <section class="slide" data-label="Ngoại lệ" aria-roledescription="slide">
+        <p class="kicker reveal">Danh sách ngoại lệ</p>
+        <h2 id="s14" class="reveal">14 phim điện ảnh được giữ lại</h2>
+        <div class="body center">
+          <p class="lede reveal"><strong>9 Songs, Taxi Driver và các tên bên dưới không phải phim bị xóa.</strong> Bộ lọc keyword đã gắn nhầm 14 phim điện ảnh này vào nhóm người lớn. Script có danh sách ngoại lệ để giữ chúng lại trong kho.</p>
+          <div class="tags big reveal">
+            <span>9 Songs</span><span>Taxi Driver</span><span>Samaritan Girl</span><span>Boogie Nights</span><span>The Isle</span><span>Lies</span><span>Shame</span><span>Invasion of Alien Bikini</span><span>Forbidden Quest</span><span>Plum Blossom</span><span>The Duke of Burgundy</span><span>Porno</span><span>X</span><span>Pearl</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 15 · CHAPTER TWO -->
+      <section class="slide hero-bg" data-label="Chương 02" aria-roledescription="slide">
+        <div class="tpl-chapter">
+          <div class="chap-ghost" aria-hidden="true">TWO</div>
+          <div class="chap-text">
+            <p class="kicker reveal">Chương 02</p>
+            <h2 id="s15" class="reveal">Làm sạch và dựng đồ thị</h2>
+          </div>
+          <svg class="chap-art art-svg reveal" width="470" height="520" viewBox="0 0 470 520" aria-hidden="true">
+            <circle class="orbit" cx="235" cy="270" r="210" />
+            <use class="star" href="#art-star" x="400" y="70" width="30" height="30" />
+            <use class="star b" href="#art-star" x="40" y="420" width="24" height="24" />
+            <use href="#art-planet" x="200" y="20" width="250" height="250" />
+            <g class="float"><use href="#art-astronaut" x="40" y="150" width="270" height="360" /></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 16 · funnel -->
+      <section class="slide v2" data-label="Làm sạch" aria-roledescription="slide">
+        <p class="kicker reveal">02_process_graph.py</p>
+        <h2 id="s16" class="reveal">Input là raw_movies_cast.csv</h2>
+        <div class="body center">
+          <p class="lede reveal">Script không gọi API. Tám cột đầu vào. Tên phim, ngày, vai và nhãn nước không dùng để tính cạnh.</p>
+          <div class="tpl-funnel" role="img" aria-label="Dòng cast giảm từ 48133 xuống 47988, rồi thành 189586 cạnh.">
+            <div class="fn reveal"><small>1</small><b>48.133</b><span>Cast thô</span></div><i class="fa" aria-hidden="true"></i>
+            <div class="fn reveal"><small>2</small><b>48.133</b><span>Bỏ thiếu id hoặc tên</span></div><i class="fa" aria-hidden="true"></i>
+            <div class="fn reveal"><small>3</small><b>48.126</b><span>Gộp trùng phim–người</span></div>
+            <div class="fn reveal"><small>4</small><b>48.126</b><span>Giữ bill 0–9</span></div><i class="fa" aria-hidden="true"></i>
+            <div class="fn reveal"><small>5</small><b>47.988</b><span>Phim còn ít nhất 2 người</span></div><i class="fa" aria-hidden="true"></i>
+            <div class="fn end reveal"><small>6</small><b>189.586</b><span>Cạnh duy nhất</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 17 · triangle -->
+      <section class="slide" data-label="Ba cạnh" aria-roledescription="slide">
+        <p class="kicker reveal">Output đồ thị</p>
+        <h2 id="s17" class="reveal">Ba người trong một phim thành ba cạnh</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 290px 1fr; gap: 36px; margin-bottom: 18px;">
+            <figure class="frame reveal" style="width: 290px; height: 290px;">
+              <img src="slide-art/sna-cast-triangle.jpg" width="1024" height="1024" loading="lazy" alt="Ba người đứng thành tam giác quanh một chiếc clapper, mỗi cặp có một cạnh." />
+            </figure>
+            <svg class="diagram reveal" viewBox="0 0 700 390" role="img" aria-label="Thanh Hằng, Chi Pu và Lãnh Thanh tạo ba cạnh, mỗi cạnh trọng số 1." style="height: 290px;">
+              <line class="svg-accent draw" pathLength="1" x1="350" y1="76" x2="170" y2="290" stroke-width="4" />
+              <line class="svg-accent draw" pathLength="1" x1="350" y1="76" x2="530" y2="290" stroke-width="4" />
+              <line class="svg-accent draw" pathLength="1" x1="170" y1="290" x2="530" y2="290" stroke-width="4" />
+              <circle class="svg-surface svg-accent" cx="350" cy="76" r="36" stroke-width="5" />
+              <circle class="svg-surface svg-warm" cx="170" cy="290" r="36" stroke-width="5" />
+              <circle class="svg-surface svg-accent" cx="530" cy="290" r="36" stroke-width="5" />
+              <text x="350" y="26" text-anchor="middle" font-size="24" font-weight="700">Thanh Hằng</text>
+              <text x="170" y="370" text-anchor="middle" font-size="24" font-weight="700">Chi Pu</text>
+              <text x="530" y="370" text-anchor="middle" font-size="24" font-weight="700">Lãnh Thanh</text>
+              <text class="accent" x="226" y="178" text-anchor="end" font-size="24" font-weight="600">w = 1</text>
+              <text class="accent" x="474" y="178" font-size="24" font-weight="600">w = 1</text>
+              <text class="accent" x="350" y="276" text-anchor="middle" font-size="24" font-weight="600">w = 1</text>
+              <text class="muted" x="350" y="196" text-anchor="middle" font-size="22">một phim</text>
+            </svg>
+          </div>
+          <p class="note reveal" style="margin-top: 0;"><b>n người</b> trong một phim tạo <span class="formula" style="font-size: 24px; padding: 2px 14px; margin: 0 4px;">n(n−1)/2</span> cạnh. Ở đây ba người, ba cạnh.</p>
+        </div>
+      </section>
+
+      <!-- 18 · output files -->
+      <section class="slide v3" data-label="Hai file đầu ra" aria-roledescription="slide">
+        <p class="kicker reveal">Output đồ thị</p>
+        <h2 id="s18" class="reveal">actors.csv và edges.csv</h2>
+        <div class="body">
+          <div class="tpl-cards">
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-person" /></svg></span><h3>actors.csv</h3><p><code>actors.csv</code> có <code>person_id,name,n_movies</code>. Ví dụ Mark Hamill, 10 phim.</p></article>
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-graph" /></svg></span><h3>edges.csv</h3><p><code>source</code> luôn nhỏ hơn <code>target</code>. Gặp lại thì tăng <code>weight</code>.</p></article>
+            <article class="card reveal"><span class="ico warm"><svg class="ic"><use href="#ic-csv" /></svg></span><h3>Đồ thị</h3><p><strong>22.485 đỉnh</strong>, <strong>189.586 cạnh</strong>. Catalog còn thêm 63 người không có cạnh.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 19 · CHAPTER THREE -->
+      <section class="slide hero-bg alt" data-label="Chương 03" aria-roledescription="slide">
+        <div class="tpl-chapter">
+          <div class="chap-ghost" aria-hidden="true">THR</div>
+          <div class="chap-text">
+            <p class="kicker reveal">Chương 03</p>
+            <h2 id="s19" class="reveal">Độ đo SNA</h2>
+          </div>
+          <svg class="chap-art art-svg reveal" width="470" height="520" viewBox="0 0 470 520" aria-hidden="true">
+            <circle class="orbit" cx="235" cy="270" r="210" />
+            <use class="star" href="#art-star" x="60" y="80" width="30" height="30" />
+            <use class="star b" href="#art-star" x="410" y="420" width="24" height="24" />
+            <use href="#art-net" x="120" y="10" width="340" height="276" opacity="0.95" />
+            <g class="float"><use href="#art-astronaut" x="40" y="140" width="290" height="387" /></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 20 · global stats 1 -->
+      <section class="slide" data-label="Toàn mạng" aria-roledescription="slide">
+        <p class="kicker reveal">Sau Louvain</p>
+        <h2 id="s20" class="reveal">Toàn mạng trong một bảng số</h2>
+        <div class="body">
+          <div class="tpl-stats s2x2">
+            <article class="stat reveal"><b data-count="22485">0</b><span>Đỉnh</span></article>
+            <article class="stat reveal"><b data-count="189586">0</b><span>Cạnh</span></article>
+            <article class="stat reveal"><b data-count="20255">0</b><span>Thành phần lớn nhất</span></article>
+            <article class="stat reveal w"><b data-count="0.00075" data-decimals="6">0</b><span>Density</span></article>
+          </div>
+          <div class="bar reveal" role="img" aria-label="Thành phần lớn nhất gồm 20255 trên 22485 đỉnh, khoảng 90 phần trăm.">
+            <div class="lab">Thành phần lớn nhất 20.255 / 22.485 đỉnh</div>
+            <div class="track"><div class="fill" style="width: 90.1%;"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 21 · global stats 2 -->
+      <section class="slide v2" data-label="Toàn mạng (tiếp)" aria-roledescription="slide">
+        <p class="kicker reveal">Sau Louvain</p>
+        <h2 id="s21" class="reveal">Cộng đồng, cụm và khoảng cách</h2>
+        <div class="body">
+          <div class="tpl-stats s3 s2x2">
+            <article class="stat reveal"><b data-count="0.7949" data-decimals="4">0</b><span>Clustering trung bình</span></article>
+            <article class="stat reveal"><b data-count="0.6844" data-decimals="4">0</b><span>Modularity Q</span></article>
+            <article class="stat reveal"><b data-count="489">0</b><span>Cộng đồng Louvain</span></article>
+            <article class="stat reveal"><b data-count="4.518" data-decimals="3">0</b><span>Đường đi trung bình</span></article>
+            <article class="stat reveal w"><b data-count="14">0</b><span>Diameter mẫu</span></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 22 · degree + density -->
+      <section class="slide" data-label="Degree và density" aria-roledescription="slide">
+        <p class="kicker reveal">Từng độ đo</p>
+        <h2 id="s22" class="reveal">Degree và density</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 500px 1fr; gap: 44px; flex: 1;">
+            <div class="measure-art reveal">
+              <svg class="measure-svg" viewBox="0 0 160 88" role="img" aria-label="Một đỉnh nối bốn hàng xóm nên degree bằng 4, dù một cạnh đậm hơn.">
+                <line class="svg-accent-2" x1="80" y1="36" x2="24" y2="16" stroke-width="2" />
+                <line class="svg-warm" x1="80" y1="36" x2="136" y2="16" stroke-width="4" />
+                <line class="svg-accent-2" x1="80" y1="36" x2="22" y2="62" stroke-width="2" />
+                <line class="svg-accent-2" x1="80" y1="36" x2="138" y2="62" stroke-width="2" />
+                <circle class="svg-surface svg-accent" cx="80" cy="36" r="11" stroke-width="2" />
+                <circle class="svg-surface svg-accent-2" cx="24" cy="16" r="6" />
+                <circle class="svg-surface svg-warm" cx="136" cy="16" r="6" />
+                <circle class="svg-surface svg-accent-2" cx="22" cy="62" r="6" />
+                <circle class="svg-surface svg-accent-2" cx="138" cy="62" r="6" />
+                <text x="80" y="82" text-anchor="middle" font-size="9">degree = 4</text>
+              </svg>
+            </div>
+            <div>
+              <div class="block reveal"><h3>Degree · Hàng xóm, không phải trọng số</h3><p>Cạnh vàng đậm hơn vẫn chỉ tính một người.</p></div>
+              <div class="block reveal"><h3>Density</h3><span class="formula">2E / (N × (N − 1))</span><p>Mạng thưa: 0,000750. Tam giác là cụm đủ cạnh.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 23 · clustering -->
+      <section class="slide v3" data-label="Clustering" aria-roledescription="slide">
+        <p class="kicker reveal">Từng độ đo</p>
+        <h2 id="s23" class="reveal">Clustering</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 500px 1fr; gap: 44px; flex: 1;">
+            <div class="measure-art reveal">
+              <svg class="measure-svg" viewBox="0 0 160 88" role="img" aria-label="Ba đỉnh nối đủ cả ba cạnh, mô hình clustering cao.">
+                <line class="svg-accent-2" x1="80" y1="16" x2="28" y2="64" stroke-width="2" />
+                <line class="svg-accent-2" x1="80" y1="16" x2="132" y2="64" stroke-width="2" />
+                <line class="svg-accent-2" x1="28" y1="64" x2="132" y2="64" stroke-width="2" />
+                <circle class="svg-surface svg-accent" cx="80" cy="16" r="7" stroke-width="2" />
+                <circle class="svg-surface svg-accent" cx="28" cy="64" r="7" stroke-width="2" />
+                <circle class="svg-surface svg-accent" cx="132" cy="64" r="7" stroke-width="2" />
+                <text x="80" y="84" text-anchor="middle" font-size="9">clustering 0,7949</text>
+              </svg>
+            </div>
+            <div>
+              <div class="tpl-stats" style="grid-template-columns: 1fr;"><article class="stat reveal" style="grid-column: auto;"><b data-count="0.7949" data-decimals="4">0</b><span>Clustering trung bình</span></article></div>
+              <p class="reveal" style="margin-top: 18px; font-size: 24px; color: var(--ink-2);">Ba đỉnh nối đủ cả ba cạnh: clustering cao.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24 · HITS -->
+      <section class="slide" data-label="HITS" aria-roledescription="slide">
+        <p class="kicker reveal">Từng độ đo</p>
+        <h2 id="s24" class="reveal">HITS</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 500px 1fr; gap: 44px; flex: 1;">
+            <div class="measure-art reveal">
+              <svg class="measure-svg" viewBox="0 0 160 88" role="img" aria-label="HITS cho cạnh đi được cả hai chiều.">
+                <path class="svg-accent" d="M46 30 H114" stroke-width="2" />
+                <path class="svg-warm" d="M114 50 H46" stroke-width="2" />
+                <path class="svg-accent" d="M108 24 L118 30 L108 36" fill="none" stroke-width="2" />
+                <path class="svg-warm" d="M52 44 L42 50 L52 56" fill="none" stroke-width="2" />
+                <circle class="svg-surface svg-accent" cx="36" cy="40" r="12" stroke-width="2" />
+                <circle class="svg-surface svg-warm" cx="124" cy="40" r="12" stroke-width="2" />
+                <text x="80" y="80" text-anchor="middle" font-size="9">hai chiều</text>
+              </svg>
+            </div>
+            <div>
+              <div class="block reveal"><h3>300 vòng, sai số 1e-6</h3><p>HITS cho cạnh đi được cả hai chiều.</p></div>
+              <div class="block reveal"><span class="formula">Spearman hub–degree = 0,583</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 25 · Louvain -->
+      <section class="slide v2" data-label="Louvain" aria-roledescription="slide">
+        <p class="kicker reveal">Từng độ đo</p>
+        <h2 id="s25" class="reveal">Louvain và modularity</h2>
+        <div class="body">
+          <div class="tpl-split" style="--cols: 500px 1fr; gap: 44px; flex: 1;">
+            <div class="measure-art reveal">
+              <svg class="measure-svg" viewBox="0 0 160 88" role="img" aria-label="Hai cụm màu khác nhau nối bởi một cạnh yếu, mô hình Louvain.">
+                <line class="svg-accent" x1="28" y1="28" x2="58" y2="22" stroke-width="2" />
+                <line class="svg-accent" x1="28" y1="28" x2="48" y2="52" stroke-width="2" />
+                <line class="svg-accent" x1="58" y1="22" x2="48" y2="52" stroke-width="2" />
+                <line class="svg-warm" x1="104" y1="24" x2="136" y2="30" stroke-width="2" />
+                <line class="svg-warm" x1="104" y1="24" x2="118" y2="54" stroke-width="2" />
+                <line class="svg-warm" x1="136" y1="30" x2="118" y2="54" stroke-width="2" />
+                <line class="svg-muted" x1="58" y1="22" x2="104" y2="24" stroke-width="1" />
+                <circle class="svg-surface svg-accent" cx="28" cy="28" r="6" />
+                <circle class="svg-surface svg-accent" cx="58" cy="22" r="6" />
+                <circle class="svg-surface svg-accent" cx="48" cy="52" r="6" />
+                <circle class="svg-surface svg-warm" cx="104" cy="24" r="6" />
+                <circle class="svg-surface svg-warm" cx="136" cy="30" r="6" />
+                <circle class="svg-surface svg-warm" cx="118" cy="54" r="6" />
+                <text x="80" y="82" text-anchor="middle" font-size="9">Q = 0,6844</text>
+              </svg>
+            </div>
+            <div>
+              <div class="block reveal"><h3><code>best_partition</code>, seed 42</h3><p>Có trọng số. Hai màu là hai cộng đồng.</p></div>
+              <div class="tpl-stats" style="grid-template-columns: 1fr 1fr; margin-top: 18px;">
+                <article class="stat reveal" style="grid-column: auto; padding: 16px 22px;"><b style="font-size: 46px;" data-count="0.6844" data-decimals="4">0</b><span>Modularity Q</span></article>
+                <article class="stat reveal w" style="grid-column: auto; padding: 16px 22px;"><b style="font-size: 46px;" data-count="489">0</b><span>Cộng đồng</span></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 26 · betweenness / closeness -->
+      <section class="slide" data-label="Betweenness và closeness" aria-roledescription="slide">
+        <p class="kicker reveal">Thành phần lớn hơn 8.000 đỉnh</p>
+        <h2 id="s26" class="reveal">Betweenness và closeness</h2>
+        <div class="body">
+          <svg class="diagram reveal" viewBox="0 0 1136 190" role="img" aria-label="Nút cầu nằm giữa hai cụm. Đường đi mẫu dài hơn khi phải đi qua nút đó." style="height: 170px;">
+            <line class="svg-accent draw" pathLength="1" x1="140" y1="86" x2="250" y2="40" stroke-width="4" />
+            <line class="svg-accent draw" pathLength="1" x1="140" y1="86" x2="240" y2="140" stroke-width="4" />
+            <line class="svg-warm draw" pathLength="1" x1="250" y1="40" x2="568" y2="86" stroke-width="5" />
+            <line class="svg-warm draw" pathLength="1" x1="568" y1="86" x2="880" y2="44" stroke-width="5" />
+            <line class="svg-accent draw" pathLength="1" x1="880" y1="44" x2="990" y2="90" stroke-width="4" />
+            <line class="svg-accent draw" pathLength="1" x1="880" y1="44" x2="960" y2="144" stroke-width="4" />
+            <circle class="svg-surface svg-accent" cx="140" cy="86" r="18" stroke-width="4" />
+            <circle class="svg-surface svg-accent" cx="250" cy="40" r="14" stroke-width="4" />
+            <circle class="svg-surface svg-accent" cx="240" cy="140" r="14" stroke-width="4" />
+            <circle class="svg-surface svg-warm" cx="568" cy="86" r="30" stroke-width="5" />
+            <circle class="svg-surface svg-accent" cx="880" cy="44" r="14" stroke-width="4" />
+            <circle class="svg-surface svg-accent" cx="990" cy="90" r="18" stroke-width="4" />
+            <circle class="svg-surface svg-accent" cx="960" cy="144" r="14" stroke-width="4" />
+            <text class="warm" x="568" y="156" text-anchor="middle" font-size="22" font-weight="600">nút cầu · betweenness</text>
+          </svg>
+          <div class="tpl-cards" style="margin-top: 20px;">
+            <article class="card reveal"><span class="tag-line">01 · Betweenness</span><p>k = 300 nguồn, chỉ trong thành phần lớn. Seed 42.</p></article>
+            <article class="card reveal"><span class="tag-line">02 · Closeness</span><p>2.506 đỉnh: 2.500 degree cao và 50 betweenness cao. Công thức Wasserman–Faust.</p></article>
+            <article class="card reveal"><span class="tag-line">03 · Eigenvector</span><p>Tính trên thành phần lớn, power iteration.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 27 · avg path + diameter -->
+      <section class="slide v3" data-label="Đường đi và diameter" aria-roledescription="slide">
+        <p class="kicker reveal">Xấp xỉ bằng mẫu</p>
+        <h2 id="s27" class="reveal">Đường đi trung bình và diameter</h2>
+        <div class="body">
+          <div class="tpl-split top" style="--cols: 480px 1fr; gap: 40px;">
+            <div class="tpl-stats" style="grid-template-columns: 1fr;">
+              <article class="stat reveal" style="grid-column: auto;"><b data-count="4.518" data-decimals="3">0</b><span>Đường đi trung bình</span></article>
+              <article class="stat reveal w" style="grid-column: auto;"><b data-count="14">0</b><span>Diameter mẫu</span></article>
+            </div>
+            <div class="rows">
+              <article class="row reveal"><span class="ico"><svg class="ic"><use href="#ic-path" /></svg></span><div><h3>Đường đi và diameter</h3><p>400 nguồn BFS. Diameter 14 là cận dưới, không phải mọi cặp.</p></div></article>
+              <article class="row reveal"><span class="ico"><svg class="ic"><use href="#ic-graph" /></svg></span><div><h3>Betweenness</h3><p>k = 300 nguồn</p></div></article>
+              <article class="row reveal"><span class="ico warm"><svg class="ic"><use href="#ic-clock" /></svg></span><div><h3>Closeness</h3><p>closeness: 2.506 đỉnh</p></div></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 28 · CHAPTER FOUR -->
+      <section class="slide hero-bg" data-label="Chương 04" aria-roledescription="slide">
+        <div class="tpl-chapter">
+          <div class="chap-ghost" aria-hidden="true">FOU</div>
+          <div class="chap-text">
+            <p class="kicker reveal">Chương 04</p>
+            <h2 id="s28" class="reveal">Xuất web &amp; giới hạn</h2>
+          </div>
+          <svg class="chap-art art-svg reveal" width="470" height="520" viewBox="0 0 470 520" aria-hidden="true">
+            <circle class="orbit" cx="235" cy="270" r="210" />
+            <use class="star" href="#art-star" x="70" y="70" width="30" height="30" />
+            <use class="star b" href="#art-star" x="420" y="330" width="24" height="24" />
+            <use href="#art-planet" x="20" y="300" width="190" height="190" />
+            <g class="float"><use href="#art-rocket" x="200" y="40" width="140" height="350" transform="rotate(24 270 215)" /></g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- 29 · export files -->
+      <section class="slide" data-label="Xuất web" aria-roledescription="slide">
+        <p class="kicker reveal">04_export_web.py</p>
+        <h2 id="s29" class="reveal">Hai file cho trang web</h2>
+        <div class="body">
+          <div class="tpl-cards c2">
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-db" /></svg></span><span class="tag-line">Kho phim</span><h3>catalog.json</h3><p>Tóm tắt, thể loại, điểm và danh sách phim.</p></article>
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-comm" /></svg></span><span class="tag-line">Đồ thị 3D</span><h3>network_data.json</h3><p>Tọa độ cố định theo cộng đồng Louvain, hub gần tâm cụm.</p></article>
+          </div>
+        </div>
+        <svg class="deco-art" style="right: 56px; bottom: 54px;" width="140" height="140" viewBox="0 0 140 140" aria-hidden="true"><use href="#art-planet" x="0" y="0" width="140" height="140" /></svg>
+      </section>
+
+      <!-- 30 · 25.000 edges -->
+      <section class="slide v2" data-label="25.000 cạnh" aria-roledescription="slide">
+        <p class="kicker reveal">04_export_web.py</p>
+        <h2 id="s30" class="reveal">Đủ đỉnh, chỉ vẽ 25.000 cạnh nặng</h2>
+        <div class="body">
+          <svg class="diagram reveal" viewBox="0 0 1136 240" role="img" aria-label="Cùng các đỉnh: bên trái vẽ rất nhiều cạnh, bên phải chỉ giữ các cạnh nặng để hiển thị." style="height: 232px;">
+            <defs>
+              <g id="cmp-nodes">
+                <circle class="svg-surface svg-accent" cx="60" cy="130" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="150" cy="90" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="140" cy="180" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-warm" cx="265" cy="135" r="14" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="270" cy="85" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="270" cy="205" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="390" cy="100" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="390" cy="180" r="11" stroke-width="3" />
+                <circle class="svg-surface svg-accent" cx="490" cy="135" r="11" stroke-width="3" />
+              </g>
+            </defs>
+            <rect class="svg-tint svg-line" x="2" y="2" width="540" height="236" rx="26" stroke-width="2" />
+            <rect class="svg-tint svg-accent" x="594" y="2" width="540" height="236" rx="26" stroke-width="3" />
+            <g class="svg-accent-2" stroke-width="1.6" opacity="0.8">
+              <line x1="60" y1="130" x2="150" y2="90" /><line x1="60" y1="130" x2="140" y2="180" /><line x1="150" y1="90" x2="140" y2="180" />
+              <line x1="150" y1="90" x2="265" y2="135" /><line x1="150" y1="90" x2="270" y2="85" /><line x1="140" y1="180" x2="265" y2="135" />
+              <line x1="140" y1="180" x2="270" y2="205" /><line x1="265" y1="135" x2="270" y2="85" /><line x1="265" y1="135" x2="270" y2="205" />
+              <line x1="265" y1="135" x2="390" y2="100" /><line x1="265" y1="135" x2="390" y2="180" /><line x1="270" y1="85" x2="390" y2="100" />
+              <line x1="270" y1="205" x2="390" y2="180" /><line x1="390" y1="100" x2="390" y2="180" /><line x1="390" y1="100" x2="490" y2="135" />
+              <line x1="390" y1="180" x2="490" y2="135" /><line x1="60" y1="130" x2="265" y2="135" />
+            </g>
+            <use href="#cmp-nodes" />
+            <g transform="translate(594 0)">
+              <g class="svg-accent" stroke-width="5">
+                <line class="draw" pathLength="1" x1="150" y1="90" x2="265" y2="135" />
+                <line class="draw" pathLength="1" x1="265" y1="135" x2="390" y2="100" />
+                <line class="draw" pathLength="1" x1="265" y1="135" x2="390" y2="180" />
+              </g>
+              <use href="#cmp-nodes" />
+            </g>
+            <text x="272" y="42" text-anchor="middle" font-size="22" font-weight="600">189.586 cạnh · degree dùng hết</text>
+            <text class="accent" x="864" y="42" text-anchor="middle" font-size="22" font-weight="700">25.000 cạnh được vẽ</text>
+          </svg>
+          <p class="reveal" style="margin-top: 20px; font-size: 22px; color: var(--ink-2);">Degree trên thẻ là của 189.586 cạnh. Sidebar lấy tối đa 8 đồng diễn nặng, tính trên mọi cạnh.</p>
+          <p class="reveal" style="margin-top: 8px; font-size: 22px;">Cờ nước có giao nhau: Mỹ 8.109, Anh 9.331, Việt Nam 2.865, Hàn Quốc 4.231.</p>
+        </div>
+      </section>
+
+      <!-- 31 · media stats -->
+      <section class="slide" data-label="Media" aria-roledescription="slide">
+        <p class="kicker reveal">05_fetch_media.py</p>
+        <h2 id="s31" class="reveal">Ảnh, tên, poster, keyword</h2>
+        <div class="body">
+          <div class="tpl-stats s2x2">
+            <article class="stat reveal"><b data-count="4523">0</b><span>Diễn viên không có ảnh</span></article>
+            <article class="stat reveal"><b data-count="1446">0</b><span>Phim có tên tiếng Việt</span></article>
+            <article class="stat reveal"><b data-count="195">0</b><span>Phim không có poster</span></article>
+            <article class="stat reveal w"><b>vi · en · ko</b><span>Ba ngôn ngữ được giữ</span></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 32 · media cards -->
+      <section class="slide v3" data-label="Media API" aria-roledescription="slide">
+        <p class="kicker reveal">05_fetch_media.py</p>
+        <h2 id="s32" class="reveal">Ba lời gọi lấy media</h2>
+        <div class="body">
+          <div class="tpl-cards">
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-image" /></svg></span><h3><code>GET /person/{id}</code></h3><p>Lấy <code>profile_path</code>. Thiếu thì chọn ảnh nhiều vote nhất.</p></article>
+            <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-globe" /></svg></span><h3><code>GET /movie/{id}/translations</code></h3><p>Giữ vi, en, ko. Ưu tiên vùng VN, US, KR.</p></article>
+            <article class="card reveal"><span class="ico warm"><svg class="ic"><use href="#ic-file" /></svg></span><h3>Poster Chị Chị Em Em</h3><p><code>/x6waJfEzwDqEDG47nsSar1JIlMc.jpg</code>. Keyword lưu để loại phim người lớn. Web cache JSON bằng IndexedDB và <code>If-Modified-Since</code>.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 33 · limits 1 -->
+      <section class="slide" data-label="Giới hạn (1)" aria-roledescription="slide">
+        <p class="kicker reveal">Khi đọc kết quả</p>
+        <h2 id="s33" class="reveal">Sáu giới hạn của bộ dữ liệu</h2>
+        <div class="body">
+          <ol class="tpl-cards" style="list-style: none; margin: 0; padding: 0;">
+            <li class="card reveal"><span class="idx">01</span><p style="color: var(--ink-2);">Chỉ bốn nước, theo độ phổ biến, và chỉ 10 tên đầu bill.</p></li>
+            <li class="card reveal"><span class="idx">02</span><p style="color: var(--ink-2);">Nhãn nước là nước sản xuất của phim, không phải quốc tịch.</p></li>
+            <li class="card reveal"><span class="idx">03</span><p style="color: var(--ink-2);">Hình 3D không vẽ hết cạnh, nhưng degree là của đồ thị đầy đủ.</p></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 34 · limits 2 -->
+      <section class="slide v2" data-label="Giới hạn (2)" aria-roledescription="slide">
+        <p class="kicker reveal">Khi đọc kết quả</p>
+        <h2 id="s34" class="reveal">Sáu giới hạn của bộ dữ liệu (tiếp)</h2>
+        <div class="body">
+          <ol class="tpl-cards" style="list-style: none; margin: 0; padding: 0;">
+            <li class="card reveal"><span class="idx">04</span><p style="color: var(--ink-2);">Betweenness, closeness và diameter là mẫu, không phải mọi cặp.</p></li>
+            <li class="card reveal"><span class="idx">05</span><p style="color: var(--ink-2);">Ảnh thiếu là thiếu trên TMDB. Không gán ảnh người trùng tên.</p></li>
+            <li class="card reveal"><span class="idx">06</span><p style="color: var(--ink-2);">Dữ liệu thuộc TMDB và không được TMDB chứng nhận.</p></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 35 · THANK YOU -->
+      <section class="slide hero-bg alt" data-label="Cảm ơn" aria-roledescription="slide">
+        <div class="tpl-thanks">
+          <div>
+            <p class="kicker reveal">Phân tích mạng xã hội · Dữ liệu TMDB</p>
+            <h1 id="s35" class="reveal">Cảm ơn</h1>
+            <p class="reveal">Bản đọc đầy đủ, có thêm giải thích và số liệu từng bước.</p>
+            <a class="btn reveal" href="BaiCaNhan_NoiDung.html">Mở BaiCaNhan_NoiDung.html</a>
+          </div>
+          <svg class="art-svg reveal" width="470" height="520" viewBox="0 0 470 520" aria-hidden="true">
+            <circle class="orbit" cx="235" cy="270" r="210" />
+            <use class="star" href="#art-star" x="60" y="80" width="30" height="30" />
+            <use class="star b" href="#art-star" x="420" y="440" width="24" height="24" />
+            <use href="#art-rocket" x="330" y="60" width="96" height="240" transform="rotate(30 378 180)" />
+            <use href="#art-planet" x="20" y="320" width="150" height="150" />
+            <g class="float"><use href="#art-astronaut" x="90" y="110" width="290" height="387" /></g>
+          </svg>
+        </div>
+      </section>
+
+      </div>
+    </main>
+
+    <p class="rotate-hint" aria-hidden="true">Xoay ngang để xem rõ hơn</p>
+
+    <footer class="controls">
+      <button type="button" id="prevSlide">Trước</button>
+      <div class="mid">
+        <p id="slideStatus" aria-hidden="true">Slide 1 / 35</p>
+        <span class="hint" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> · <kbd>F</kbd> · <kbd>T</kbd></span>
+      </div>
+      <button type="button" id="nextSlide">Sau</button>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const deck = document.getElementById("deck");
+      const stage = document.getElementById("stage");
+      const canvas = document.getElementById("canvas");
+      const slides = [...canvas.querySelectorAll(".slide")];
+      const status = document.getElementById("slideStatus");
+      const crumb = document.getElementById("crumb");
+      const bar = document.getElementById("bar");
+      const prev = document.getElementById("prevSlide");
+      const next = document.getElementById("nextSlide");
+      const themeBtn = document.getElementById("themeToggle");
+      const countPill = document.getElementById("slideCount");
+      const reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const TOTAL = slides.length;
+      const CW = 1280, CH = 720;
+      let index = -1;
+      let leaveTimer = 0;
+      const countRuns = new Map();
+
+      /* ---------- Fit 1280x720 canvas into stage ---------- */
+      function fit() {
+        const w = stage.clientWidth, h = stage.clientHeight;
+        if (!w || !h) return;
+        const s = Math.min(w / CW, h / CH);
+        const x = (w - CW * s) / 2;
+        const y = (h - CH * s) / 2;
+        canvas.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+      }
+      window.addEventListener("resize", fit);
+      document.addEventListener("fullscreenchange", () => setTimeout(fit, 60));
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+      /* ---------- Theme (light default) ---------- */
+      function currentTheme() {
+        return root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+      }
+      function paintThemeBtn() {
+        const dark = currentTheme() === "dark";
+        themeBtn.textContent = dark ? "☀" : "☾";
+        themeBtn.setAttribute("aria-label", dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối");
+        themeBtn.title = (dark ? "Giao diện sáng" : "Giao diện tối") + " (T)";
+      }
+      function toggleTheme() {
+        const nextTheme = currentTheme() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", nextTheme);
+        try { localStorage.setItem("sna-doc-theme", nextTheme); } catch (e) { /* ignore */ }
+        paintThemeBtn();
+      }
+      themeBtn.addEventListener("click", toggleTheme);
+      paintThemeBtn();
+
+      /* ---------- Setup ---------- */
+      countPill.textContent = `${TOTAL} slide`;
+      slides.forEach((slide, i) => {
+        slide.setAttribute("aria-label", `${i + 1} / ${TOTAL}`);
+        slide.id = slide.id || `slide-${i + 1}`;
+        const heading = slide.querySelector("h1, h2");
+        if (heading) heading.setAttribute("tabindex", "-1");
+        slide.querySelectorAll(".reveal").forEach((el, n) => el.style.setProperty("--i", Math.min(n, 12)));
+        const add = (cls, text) => {
+          const el = document.createElement("span");
+          el.className = cls; el.textContent = text; el.setAttribute("aria-hidden", "true");
+          slide.appendChild(el);
+        };
+        add("ctitle", slide.dataset.label || "");
+        add("sna-pill", "SNA");
+        add("pnum", `${i + 1} / ${TOTAL}`);
+      });
+      fit();
+
+      /* ---------- Count-up ---------- */
+      function format(value, decimals) {
+        return value.toLocaleString("vi-VN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+      }
+      function stopCounts(slide) {
+        const id = countRuns.get(slide);
+        if (id) cancelAnimationFrame(id);
+        countRuns.delete(slide);
+      }
+      function runCounts(slide) {
+        const els = [...slide.querySelectorAll("[data-count]")];
+        if (!els.length) return;
+        const targets = els.map((el) => ({ el, to: Number(el.dataset.count), d: Number(el.dataset.decimals || 0) }));
+        if (reduceMQ.matches) {
+          targets.forEach((t) => { t.el.textContent = format(t.to, t.d); });
+          return;
+        }
+        const duration = 800;
+        const start = performance.now() + 150;
+        stopCounts(slide);
+        const tick = (now) => {
+          const p = Math.min(1, Math.max(0, (now - start) / duration));
+          const e = 1 - Math.pow(1 - p, 3);
+          targets.forEach((t) => { t.el.textContent = format(t.to * e, t.d); });
+          if (p < 1) countRuns.set(slide, requestAnimationFrame(tick));
+          else countRuns.delete(slide);
+        };
+        targets.forEach((t) => { t.el.textContent = format(0, t.d); });
+        countRuns.set(slide, requestAnimationFrame(tick));
+      }
+
+      /* ---------- Navigation ---------- */
+      function show(nextIndex, opts = {}) {
+        const target = Math.max(0, Math.min(TOTAL - 1, nextIndex));
+        if (target === index) return;
+        const old = index >= 0 ? slides[index] : null;
+        const animate = !!old && !reduceMQ.matches;
+        deck.dataset.dir = !old ? "none" : (target > index ? "forward" : "back");
+
+        clearTimeout(leaveTimer);
+        slides.forEach((s) => s.classList.remove("is-leaving"));
+        slides.forEach((slide, i) => {
+          const current = i === target;
+          slide.classList.toggle("is-current", current);
+          slide.toggleAttribute("inert", !current);
+          slide.setAttribute("aria-hidden", current ? "false" : "true");
+        });
+
+        if (old) {
+          stopCounts(old);
+          if (animate) {
+            old.classList.add("is-leaving");
+            leaveTimer = setTimeout(() => old.classList.remove("is-leaving"), 440);
+          }
+        }
+
+        const slide = slides[target];
+        index = target;
+        runCounts(slide);
+        requestAnimationFrame(() => requestAnimationFrame(() => slide.classList.add("is-drawn")));
+
+        status.textContent = `Slide ${index + 1} / ${TOTAL}`;
+        crumb.textContent = `${String(index + 1).padStart(2, "0")} — ${slide.dataset.label}`;
+        bar.style.width = `${((index + 1) / TOTAL) * 100}%`;
+        prev.disabled = index === 0;
+        next.disabled = index === TOTAL - 1;
+
+        const hash = `#slide-${index + 1}`;
+        if (location.hash !== hash) {
+          try { history.replaceState(null, "", hash); } catch (e) { /* file:// edge cases */ }
+        }
+
+        if (opts.focus) {
+          const heading = slide.querySelector("h1, h2");
+          if (heading) heading.focus({ preventScroll: true });
+        }
+      }
+
+      function go(delta) { show(index + delta, { focus: true }); }
+      prev.addEventListener("click", () => go(-1));
+      next.addEventListener("click", () => go(1));
+
+      function slideFromHash() {
+        const m = /^#slide-(\d+)$/.exec(location.hash);
+        return m ? Number(m[1]) - 1 : null;
+      }
+      window.addEventListener("hashchange", () => {
+        const n = slideFromHash();
+        if (n !== null) show(n, { focus: true });
+      });
+
+      function toggleFullscreen() {
+        const el = document.documentElement;
+        if (!document.fullscreenElement) {
+          if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+        const t = event.target;
+        const tag = t && t.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (t && t.isContentEditable)) return;
+        if (t && t.closest && t.closest('[role="tablist"]') &&
+            ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+        const onButton = tag === "BUTTON" || tag === "A" || tag === "SUMMARY";
+        switch (event.key) {
+          case "ArrowRight":
+          case "PageDown":
+            event.preventDefault(); go(1); break;
+          case "ArrowLeft":
+          case "PageUp":
+            event.preventDefault(); go(-1); break;
+          case " ":
+            if (onButton) return;
+            event.preventDefault(); go(event.shiftKey ? -1 : 1); break;
+          case "Home":
+            event.preventDefault(); show(0, { focus: true }); break;
+          case "End":
+            event.preventDefault(); show(TOTAL - 1, { focus: true }); break;
+          case "f":
+          case "F":
+            event.preventDefault(); toggleFullscreen(); break;
+          case "t":
+          case "T":
+            event.preventDefault(); toggleTheme(); break;
+        }
+      });
+
+      /* ---------- Swipe ---------- */
+      let swipe = null;
+      stage.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse") return;
+        if (e.target.closest("pre, [role='tablist'], .tabpanel, a, button")) return;
+        swipe = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      }, { passive: true });
+      stage.addEventListener("pointerup", (e) => {
+        if (!swipe || e.pointerId !== swipe.id) return;
+        const dx = e.clientX - swipe.x;
+        const dy = e.clientY - swipe.y;
+        swipe = null;
+        if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+      });
+      stage.addEventListener("pointercancel", () => { swipe = null; });
+
+      /* ---------- Tabs ---------- */
+      document.querySelectorAll('[role="tablist"]').forEach((list) => {
+        const tabs = [...list.querySelectorAll('[role="tab"]')];
+        function select(tab, focus) {
+          tabs.forEach((t) => {
+            const on = t === tab;
+            t.setAttribute("aria-selected", String(on));
+            t.tabIndex = on ? 0 : -1;
+            const panel = document.getElementById(t.getAttribute("aria-controls"));
+            if (panel) panel.hidden = !on;
+          });
+          if (focus) tab.focus();
+        }
+        tabs.forEach((tab, i) => {
+          tab.addEventListener("click", () => select(tab, false));
+          tab.addEventListener("keydown", (e) => {
+            let n = null;
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") n = (i + 1) % tabs.length;
+            else if (e.key === "ArrowLeft" || e.key === "ArrowUp") n = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === "Home") n = 0;
+            else if (e.key === "End") n = tabs.length - 1;
+            if (n === null) return;
+            e.preventDefault();
+            e.stopPropagation();
+            select(tabs[n], true);
+          });
+        });
+      });
+
+      /* ---------- Init ---------- */
+      const fromHash = slideFromHash();
+      show(fromHash !== null ? fromHash : 0);
+    })();
+  </script>
+</body>
+</html>
