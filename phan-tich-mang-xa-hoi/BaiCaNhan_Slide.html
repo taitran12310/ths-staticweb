@@ -526,6 +526,9 @@
       font-family: var(--font-mono); font-size: 18px; line-height: 1.32; tab-size: 2;
     }
     pre.url { white-space: pre-wrap; word-break: break-all; font-size: 20px; line-height: 1.45; padding: 16px 24px; }
+    .doc-link { margin-top: 14px; font-size: 20px; }
+    .doc-link a { color: var(--accent); font-family: var(--font-mono); text-underline-offset: 3px; }
+    .doc-link a:hover, .doc-link a:focus-visible { color: var(--ink); }
     pre.big { font-size: 22px; line-height: 1.5; padding: 18px 26px; }
     pre .hl { box-shadow: none; outline: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
 
@@ -899,7 +902,8 @@
         <h2 id="s7" class="reveal">GET /discover/movie</h2>
         <div class="body center">
           <pre class="url reveal">GET /3/discover/movie?api_key=YOUR_KEY&amp;language=en-US&amp;sort_by=popularity.desc&amp;include_adult=false&amp;with_origin_country=VN&amp;page=1</pre>
-          <dl class="params" style="margin-top: 28px;">
+          <p class="doc-link reveal"><a href="https://developer.themoviedb.org/reference/discover-movie" target="_blank" rel="noopener noreferrer">https://developer.themoviedb.org/reference/discover-movie</a></p>
+          <dl class="params" style="margin-top: 22px;">
             <div class="reveal"><dt>language</dt><dd>en-US</dd></div>
             <div class="reveal"><dt>sort_by</dt><dd>popularity.desc</dd></div>
             <div class="reveal"><dt>include_adult</dt><dd>false</dd></div>
@@ -979,7 +983,8 @@
         <h2 id="s10" class="reveal">GET /movie/{id} kèm cast và keyword</h2>
         <div class="body">
           <pre class="url reveal">GET /3/movie/637536?api_key=YOUR_KEY&amp;language=en-US&amp;append_to_response=credits,keywords</pre>
-          <div class="tpl-cards" style="margin-top: 24px;">
+          <p class="doc-link reveal"><a href="https://developer.themoviedb.org/reference/movie-details" target="_blank" rel="noopener noreferrer">https://developer.themoviedb.org/reference/movie-details</a></p>
+          <div class="tpl-cards" style="margin-top: 18px;">
             <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-file" /></svg></span><h3>Chi tiết phim</h3><ul class="tags mono"><li><span>title</span></li><li><span>overview</span></li><li><span>release_date</span></li><li><span>runtime</span></li><li><span>genres</span></li></ul></article>
             <article class="card reveal"><span class="ico"><svg class="ic"><use href="#ic-person" /></svg></span><h3>credits</h3><ul class="tags mono"><li><span>cast</span></li><li><span>id</span></li><li><span>name</span></li><li><span>order</span></li></ul></article>
             <article class="card reveal"><span class="ico warm"><svg class="ic"><use href="#ic-code" /></svg></span><h3>keywords</h3><ul class="tags mono"><li><span>keywords</span></li><li><span>name</span></li></ul></article>
