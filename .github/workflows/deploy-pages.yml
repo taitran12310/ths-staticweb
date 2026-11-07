@@ -30,6 +30,11 @@ jobs:
       - name: Generate file listings
         run: python3 scripts/generate_listings.py
 
+      # Symlink data/ trỏ ra ngoài repo. Trên runner link đứt; tar --dereference của
+      # upload-pages-artifact báo "File removed before we read it" và fail job.
+      - name: Materialize SNA data
+        run: python3 scripts/materialize_sna_data.py
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
