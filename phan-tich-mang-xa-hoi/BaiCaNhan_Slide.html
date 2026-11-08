@@ -1552,7 +1552,13 @@
       const deck = document.getElementById("deck");
       const stage = document.getElementById("stage");
       const canvas = document.getElementById("canvas");
-      const slides = [...canvas.querySelectorAll(".slide")];
+      const PREVIEW_LIMIT = 18;
+      const fullMode = /[?#&]full-mode(?:[=&#]|$)/.test(location.href);
+      let slides = [...canvas.querySelectorAll(".slide")];
+      if (!fullMode) {
+        slides.slice(PREVIEW_LIMIT).forEach((slide) => slide.remove());
+        slides = slides.slice(0, PREVIEW_LIMIT);
+      }
       const status = document.getElementById("slideStatus");
       const crumb = document.getElementById("crumb");
       const bar = document.getElementById("bar");
@@ -1686,8 +1692,13 @@
         next.disabled = index === TOTAL - 1;
 
         const hash = `#slide-${index + 1}`;
-        if (location.hash !== hash) {
-          try { history.replaceState(null, "", hash); } catch (e) { /* file:// edge cases */ }
+        let search = location.search;
+        if (fullMode && !/[?&]full-mode(?:[=&]|$)/.test(search)) {
+          search += (search ? "&" : "?") + "full-mode";
+        }
+        const nextUrl = location.pathname + search + hash;
+        if (location.pathname + location.search + location.hash !== nextUrl) {
+          try { history.replaceState(null, "", nextUrl); } catch (e) { /* file:// edge cases */ }
         }
 
         if (opts.focus) {
