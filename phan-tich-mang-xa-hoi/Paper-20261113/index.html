@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích dễ hiểu ba bài báo về phát hiện cộng đồng (13/11/2026): Mothe 2017, Gupta & Singh 2020, Xing Su 2021." />
+  <title>Giải thích bài báo — Phát hiện cộng đồng (13/11/2026)</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("ptmxh-paper-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <link rel="stylesheet" href="paper.css" />
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="../index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Phân tích mạng xã hội · Tài liệu 13/11/2026</p>
+    <h1>Giải thích bài báo về phát hiện cộng đồng</h1>
+    <p>Ba bài báo trong thư mục <code>TaiLieu_20261113</code>, mỗi bài một trang, giải thích lần lượt từng phần bằng lời dễ hiểu và giữ đủ thông tin: định nghĩa, thuật toán, công thức, thí nghiệm, kết quả và hạn chế.</p>
+  </header>
+
+  <main id="main-content">
+    <section id="danh-sach">
+      <h2>Đọc theo thứ tự gợi ý</h2>
+      <ol class="paper-list">
+        <li><a href="mothe2017.html">
+          <span class="k">Bài 1 · CSIT 2017 · 5 trang</span>
+          <h3>So sánh các thuật toán phát hiện cộng đồng hàng đầu</h3>
+          <p>Mothe, Mkhitaryan, Haroutunian. Sáu thuật toán kinh điển (Louvain, Fast Greedy, Leading Eigenvector, Walktrap, Infomap, Label Propagation), các độ đo nội và ngoại, thí nghiệm trên mạng sinh bằng Stochastic Block Model. Bài ngắn, nên đọc trước để nắm nền tảng.</p>
+        </a></li>
+        <li><a href="gupta2020.html">
+          <span class="k">Bài 2 · Modern Physics Letters B 2020 · 24 trang</span>
+          <h3>Xu hướng gần đây của các thuật toán phát hiện cộng đồng: một bài tổng quan</h3>
+          <p>Gupta, Singh. Khảo sát chia thuật toán thành hai nhóm lớn: cộng đồng không chồng lấn (phân cụm đồ thị, modularity, phương pháp “động”) và chồng lấn (lan truyền nhãn, clique, mở rộng lõi); kèm bộ dữ liệu chuẩn và so sánh theo thời gian chạy và độ chính xác. Trang giải thích chỉ ra một số chỗ sai trong bài.</p>
+        </a></li>
+        <li><a href="xingsu2021.html">
+          <span class="k">Bài 3 · IEEE TNNLS 2021 (bản arXiv v2) · 29 trang</span>
+          <h3>Tổng quan toàn diện về phát hiện cộng đồng bằng học sâu</h3>
+          <p>Xing Su và cộng sự. Phân loại mới các phương pháp học sâu: mạng nơ-ron sâu (tích chập, graph attention, GAN, autoencoder), phân rã ma trận không âm sâu, deep sparse filtering; cùng dữ liệu chuẩn, độ đo, mã nguồn mở, ứng dụng và hướng nghiên cứu.</p>
+        </a></li>
+      </ol>
+      <div class="note">
+        <p><strong>Về số file:</strong> thư mục có 4 file PDF nhưng chỉ có 3 bài. <code>Josinane2017_…pdf</code> và <code>Paper_CSIT_MMH-Measures.pdf</code> là cùng bài của Mothe và cộng sự: một bản đăng chính thức, một bản thảo. Trang Bài 1 ghi rõ chỗ khác nhau.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Các trang giải thích được viết lại bằng lời, không sao chép nguyên văn hay hình của bài báo. Muốn trích dẫn, hãy dùng thông tin nguồn ở cuối mỗi trang.</p>
+  </footer>
+  </div>
+
+  <script src="paper.js"></script>
+</body>
+</html>

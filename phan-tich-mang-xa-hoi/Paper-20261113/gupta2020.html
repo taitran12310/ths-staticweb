@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích dễ hiểu bài tổng quan của Gupta và Singh (Modern Physics Letters B, 2020): phân loại thuật toán phát hiện cộng đồng chồng lấn và không chồng lấn, 15 thuật toán, bộ dữ liệu chuẩn và bảng so sánh." />
+  <title>Giải thích bài báo — Xu hướng thuật toán phát hiện cộng đồng (Gupta &amp; Singh 2020)</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("ptmxh-paper-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <link rel="stylesheet" href="paper.css" />
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Phân tích mạng xã hội · Giải thích bài báo 2/3</p>
+    <h1>Xu hướng gần đây của các thuật toán phát hiện cộng đồng: một bài tổng quan</h1>
+    <p><em>Recent trends on community detection algorithms: A survey</em></p>
+    <dl class="byline">
+      <div><dt>Tác giả</dt><dd>Sumit Gupta, Dhirendra Pratap Singh (MANIT Bhopal, Ấn Độ)</dd></div>
+      <div><dt>Nơi đăng</dt><dd>Modern Physics Letters B, bài số 2050408, xuất bản 17/09/2020 · DOI 10.1142/S0217984920504084</dd></div>
+      <div><dt>Độ dài</dt><dd>24 trang · bài tổng quan (survey), 70 tài liệu tham khảo, 11 bảng, 2 hình</dd></div>
+    </dl>
+
+    <div class="tldr">
+      <strong>Tóm tắt trong 30 giây</strong>
+      <ul>
+        <li>Bài chia thuật toán phát hiện cộng đồng thành hai họ lớn: <b>không chồng lấn</b> (mỗi nút thuộc đúng một cộng đồng) và <b>chồng lấn</b> (một nút có thể thuộc nhiều cộng đồng).</li>
+        <li>Họ không chồng lấn có 3 nhóm: <b>phân cụm đồ thị</b> (Girvan–Newman, Label Propagation), <b>tối ưu modularity</b> (Louvain, RNL, RSNL, Parallel Louvain), <b>“động”</b> (Attractor, P-Attractor, DynaMo).</li>
+        <li>Họ chồng lấn có 4 nhóm: <b>phân hoạch cạnh</b> (LinkLPA), <b>dựa trên tác tử</b> (DEMON), <b>dựa trên clique</b> (CPM, PercoMCV, OLCPM), <b>dựa trên tam giác</b> (CoreExp).</li>
+        <li>Bài liệt kê 10 bộ dữ liệu thật, 2 benchmark giả lập (GN, LFR), rồi tổng hợp kết quả <b>do chính tác giả các thuật toán công bố</b>. Bài <b>không tự chạy thí nghiệm</b>.</li>
+        <li>Kết luận: chọn thuật toán tùy loại mạng, kích thước mạng và số cạnh. Bài có khá nhiều chỗ sai sót nhỏ; trang này đánh dấu chúng trong các khung “Lưu ý khi đọc”.</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#tong-quan">Bài báo này là loại gì</a></li>
+        <li><a href="#bai-toan">Bài toán và hai kiểu cộng đồng</a></li>
+        <li><a href="#phan-loai">Cây phân loại của bài</a></li>
+        <li><a href="#phan-cum">Không chồng lấn 1: phân cụm đồ thị</a></li>
+        <li><a href="#modularity">Không chồng lấn 2: tối ưu modularity</a></li>
+        <li><a href="#dong">Không chồng lấn 3: phương pháp “động”</a></li>
+        <li><a href="#chong-lan">Các thuật toán chồng lấn</a></li>
+        <li><a href="#du-lieu">Bộ dữ liệu</a></li>
+        <li><a href="#do-do">Các độ đo xuất hiện trong bài</a></li>
+        <li><a href="#so-sanh">Phân tích so sánh (Bảng 9–11)</a></li>
+        <li><a href="#ket-luan">Kết luận, hạn chế và sai sót</a></li>
+        <li><a href="#thuat-ngu">Bảng thuật ngữ</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="tong-quan">
+      <h2>Bài báo này là loại gì</h2>
+      <p>Đây là một <strong>bài tổng quan</strong> (survey). Tác giả không đề xuất thuật toán mới và không chạy thí nghiệm riêng. Họ gom 15 thuật toán, xếp vào một cây phân loại, rồi với mỗi thuật toán cho biết: cách làm, bộ dữ liệu, độ đo, các thuật toán được so sánh, và kết quả <em>như tác giả gốc công bố</em>.</p>
+      <p>Bố cục bài: mục 1 giới thiệu; mục 2 là thuật toán không chồng lấn; mục 3 là thuật toán chồng lấn; mục 4 là bộ dữ liệu; mục 5 là phân tích so sánh; mục 6 là kết luận.</p>
+      <div class="stats">
+        <div class="stat"><span class="stat-num" data-to="15">15</span><span class="stat-label">thuật toán được mô tả</span></div>
+        <div class="stat"><span class="stat-num" data-to="7">7</span><span class="stat-label">nhóm phương pháp (3 không chồng lấn + 4 chồng lấn)</span></div>
+        <div class="stat"><span class="stat-num" data-to="10">10</span><span class="stat-label">bộ dữ liệu thật trong Bảng 8</span></div>
+        <div class="stat"><span class="stat-num" data-to="11">11</span><span class="stat-label">bảng tổng hợp</span></div>
+      </div>
+      <p>Bài lưu ý: trong toàn bài, các cặp từ <em>graph/network</em> (đồ thị/mạng), <em>node/vertex</em> (nút/đỉnh), <em>link/edge</em> (liên kết/cạnh), <em>community/partition</em> (cộng đồng/phân hoạch) được dùng như nhau.</p>
+    </section>
+
+    <section id="bai-toan">
+      <h2>Bài toán và hai kiểu cộng đồng</h2>
+      <p>Dữ liệu của nhiều ứng dụng có thể biểu diễn bằng đồ thị: nút là người hoặc đối tượng, cạnh là quan hệ. Khi dữ liệu tăng nhanh, đồ thị trở nên rất lớn và khó khai thác. Các quan hệ này không rải rác ngẫu nhiên mà tạo thành nhóm. <strong>Phát hiện cộng đồng</strong> (community detection) là chia các đỉnh của đồ thị thành những đồ thị con nhỏ, gọi là <strong>cộng đồng</strong>, sao cho bên trong mỗi cộng đồng các nút nối với nhau <strong>dày</strong>, còn giữa các cộng đồng thì <strong>thưa</strong>.</p>
+      <h3>Ứng dụng bài nêu</h3>
+      <ul>
+        <li><strong>Mạng xã hội:</strong> ước đoán đặc điểm chưa biết của người dùng, tìm người có cùng sở thích.</li>
+        <li><strong>Thương mại điện tử:</strong> gom khách hàng theo khẩu vị và thói quen mua sắm.</li>
+        <li><strong>Mạng sinh hóa:</strong> trong mạng tương tác protein–protein, giúp tìm các tế bào tương tự.</li>
+        <li><strong>Khai phá web</strong> (web mining): phân loại trang web.</li>
+        <li><strong>Xuất bản khoa học:</strong> phân nhóm dữ liệu đồng tác giả (co-authorship).</li>
+        <li><strong>Mạng máy tính</strong> và khai phá dữ liệu (nêu ở mục 1.1).</li>
+      </ul>
+
+      <h3>Không chồng lấn và chồng lấn</h3>
+      <div class="cards">
+        <div class="card"><b>Không chồng lấn (non-overlapping)</b><p>Mỗi nút thuộc <em>đúng một</em> cộng đồng. Phần lớn thuật toán loại này là <strong>phân cấp</strong> (hierarchical): mỗi mức của cây cho một số cộng đồng khác nhau. Có hai hướng: <strong>chia tách</strong> (divisive) đi từ một khối thành nhiều khối, và <strong>gộp dần</strong> (agglomerative) đi từ nhiều khối về một khối dựa trên độ tương tự.</p></div>
+        <div class="card"><b>Chồng lấn (overlapping)</b><p>Một nút có thể thuộc <em>hai cộng đồng trở lên</em>. Ví dụ điển hình: mạng xã hội (một người vừa ở nhóm gia đình vừa ở nhóm đồng nghiệp) và trang mua sắm (một món hàng thuộc nhiều nhóm sản phẩm). Với đồ thị quá lớn, bài gợi ý áp dụng thuật toán trên <strong>mạng ego</strong> (ego network): mạng con gồm một nút và các hàng xóm của nó, để có thông tin cụ thể hơn.</p></div>
+      </div>
+
+      <figure class="fig">
+        <svg viewBox="0 0 640 230" role="img" aria-labelledby="fig1t">
+          <title id="fig1t">Hai cộng đồng chồng lấn (trái) và không chồng lấn (phải)</title>
+          <ellipse cx="110" cy="105" rx="85" ry="70" class="f-soft s-accent" stroke-width="2" />
+          <ellipse cx="200" cy="105" rx="85" ry="70" class="f-none s-alt" stroke-width="2" />
+          <g class="s-muted" stroke-width="1.4">
+            <line x1="70" y1="70" x2="100" y2="140" /><line x1="70" y1="70" x2="155" y2="105" /><line x1="100" y1="140" x2="155" y2="105" /><line x1="70" y1="70" x2="60" y2="125" /><line x1="60" y1="125" x2="100" y2="140" />
+            <line x1="155" y1="105" x2="240" y2="70" /><line x1="155" y1="105" x2="225" y2="145" /><line x1="240" y1="70" x2="225" y2="145" /><line x1="240" y1="70" x2="260" y2="115" /><line x1="260" y1="115" x2="225" y2="145" />
+          </g>
+          <g class="f-card s-ink" stroke-width="1.4">
+            <circle cx="70" cy="70" r="11" /><circle cx="100" cy="140" r="11" /><circle cx="60" cy="125" r="11" />
+            <circle cx="240" cy="70" r="11" /><circle cx="225" cy="145" r="11" /><circle cx="260" cy="115" r="11" />
+          </g>
+          <circle cx="155" cy="105" r="12" class="f-accent" />
+          <text x="155" y="110" text-anchor="middle" class="t-on b sm">2</text>
+          <text x="155" y="205" text-anchor="middle" class="sm t-muted">(a) Chồng lấn: nút 2 thuộc cả hai nhóm</text>
+
+          <ellipse cx="420" cy="105" rx="80" ry="70" class="f-soft s-accent" stroke-width="2" />
+          <ellipse cx="565" cy="105" rx="60" ry="70" class="f-none s-alt" stroke-width="2" />
+          <g class="s-muted" stroke-width="1.4">
+            <line x1="380" y1="70" x2="410" y2="140" /><line x1="380" y1="70" x2="470" y2="105" /><line x1="410" y1="140" x2="470" y2="105" /><line x1="380" y1="70" x2="370" y2="125" /><line x1="370" y1="125" x2="410" y2="140" />
+            <line x1="470" y1="105" x2="545" y2="75" class="dash" />
+            <line x1="545" y1="75" x2="585" y2="80" /><line x1="545" y1="75" x2="560" y2="145" /><line x1="585" y1="80" x2="560" y2="145" /><line x1="585" y1="80" x2="595" y2="125" /><line x1="595" y1="125" x2="560" y2="145" />
+          </g>
+          <g class="f-card s-ink" stroke-width="1.4">
+            <circle cx="380" cy="70" r="11" /><circle cx="410" cy="140" r="11" /><circle cx="370" cy="125" r="11" />
+            <circle cx="545" cy="75" r="11" /><circle cx="585" cy="80" r="11" /><circle cx="560" cy="145" r="11" /><circle cx="595" cy="125" r="11" />
+          </g>
+          <circle cx="470" cy="105" r="12" class="f-accent" />
+          <text x="470" y="110" text-anchor="middle" class="t-on b sm">2</text>
+          <text x="480" y="205" text-anchor="middle" class="sm t-muted">(b) Không chồng lấn: nút 2 chỉ thuộc nhóm trái</text>
+        </svg>
+        <figcaption><strong>Vẽ lại ý của Hình 1 trong bài (đơn giản hóa).</strong> Ở (a), nút 2 nằm trong vùng giao của hai cộng đồng. Ở (b), mỗi nút chỉ thuộc một cộng đồng; nút 2 vẫn có cạnh sang nhóm phải nhưng được xếp vào nhóm trái.</figcaption>
+      </figure>
+      <div class="warn"><p>Trong Hình 1(b) của bài, nhãn các nút bị đánh trùng: số “3” xuất hiện 5 lần (ở cả hai cộng đồng), trong khi Hình 1(a) đánh số 1–9 riêng biệt. Đây là lỗi vẽ hình, không ảnh hưởng ý chính.</p></div>
+    </section>
+
+    <section id="phan-loai">
+      <h2>Cây phân loại của bài (Hình 2)</h2>
+      <p>Hình 2 của bài là sơ đồ một gốc “Community detection algorithms” tách thành hai nhánh. Vẽ lại như sau:</p>
+      <figure class="fig">
+        <svg viewBox="0 0 640 270" role="img" aria-labelledby="fig2t">
+          <title id="fig2t">Cây phân loại thuật toán phát hiện cộng đồng theo Gupta và Singh</title>
+          <rect x="230" y="10" width="180" height="40" rx="8" class="f-accent" />
+          <text x="320" y="35" text-anchor="middle" class="t-on b sm">Phát hiện cộng đồng</text>
+          <line x1="320" y1="50" x2="160" y2="80" class="s-muted" stroke-width="1.5" />
+          <line x1="320" y1="50" x2="480" y2="80" class="s-muted" stroke-width="1.5" />
+          <rect x="60" y="80" width="200" height="36" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="160" y="103" text-anchor="middle" class="b sm">Không chồng lấn</text>
+          <rect x="380" y="80" width="200" height="36" rx="8" class="f-card s-alt" stroke-width="1.5" />
+          <text x="480" y="103" text-anchor="middle" class="b sm">Chồng lấn</text>
+          <g class="s-line" stroke-width="1.2">
+            <line x1="160" y1="116" x2="160" y2="250" />
+            <line x1="480" y1="116" x2="480" y2="250" />
+          </g>
+          <g class="f-card s-line" stroke-width="1">
+            <rect x="8" y="132" width="306" height="30" rx="6" /><rect x="8" y="170" width="306" height="30" rx="6" /><rect x="8" y="208" width="306" height="30" rx="6" />
+            <rect x="326" y="132" width="306" height="24" rx="6" /><rect x="326" y="162" width="306" height="24" rx="6" /><rect x="326" y="192" width="306" height="24" rx="6" /><rect x="326" y="222" width="306" height="24" rx="6" />
+          </g>
+          <text x="16" y="152" class="sm">Phân cụm đồ thị: GN, LPA</text>
+          <text x="16" y="190" class="sm">Modularity: Louvain, RNL, RSNL, P-Louvain</text>
+          <text x="16" y="228" class="sm">“Động”: Attractor, P-Attractor, DynaMo</text>
+          <text x="336" y="149" class="sm">Phân hoạch cạnh: LinkLPA</text>
+          <text x="336" y="179" class="sm">Dựa trên tác tử: DEMON</text>
+          <text x="336" y="209" class="sm">Dựa trên clique: CPM, PercoMCV, OLCPM</text>
+          <text x="336" y="239" class="sm">Dựa trên tam giác: CoreExp</text>
+        </svg>
+        <figcaption><strong>Vẽ lại Hình 2</strong>, có ghi thêm tên các thuật toán thuộc từng nhóm (lấy từ mục 2 và 3 của bài; hình gốc chỉ có tên nhóm).</figcaption>
+      </figure>
+    </section>
+
+    <section id="phan-cum">
+      <h2>Không chồng lấn 1: phương pháp phân cụm đồ thị</h2>
+      <p>Theo bài, phân cụm đồ thị (graph clustering) gom các phần tử giống nhau vào cùng nhóm. Bài mô tả nó là phương pháp <strong>chia tách</strong>, cắt đồ thị thành các thành phần liên thông mạnh và tạo ra <strong>cây phân cấp</strong> (dendrogram): mỗi mức của cây là một cách chia.</p>
+
+      <h3>Girvan–Newman (GN)</h3>
+      <p>Thuật toán nền tảng của Girvan và Newman. Ý chính là <strong>độ trung gian của cạnh</strong> (edge betweenness): số đường đi ngắn nhất giữa các cặp nút đi qua cạnh đó. Cạnh nằm <em>giữa</em> hai cộng đồng có betweenness cao, vì mọi đường đi từ nhóm này sang nhóm kia đều phải qua nó; cạnh nằm <em>trong</em> cộng đồng có betweenness thấp.</p>
+      <ol>
+        <li>Tính betweenness của mọi cạnh (bản gốc dùng đường đi ngắn nhất).</li>
+        <li>Xóa cạnh có betweenness lớn nhất.</li>
+        <li><strong>Tính lại</strong> betweenness cho các cạnh còn lại (bước “recalculation” quan trọng), quay lại bước 2.</li>
+      </ol>
+      <p>Đồ thị vỡ dần thành các cụm; ghi lại thứ tự tách ta được dendrogram. Độ phức tạp bài ghi: <strong>O(n<sup>3</sup>)</strong>, chỉ phù hợp cho mạng tới khoảng <strong>10&nbsp;000 nút</strong>.</p>
+      <div class="eli5"><p>Hai làng nối nhau bằng một cây cầu. Ai muốn đi từ làng này sang làng kia đều phải qua cầu, nên cầu là “cạnh đông khách” nhất. Phá cầu đi là hai làng tách ra. Ví dụ nhỏ: hai tam giác {A, B, C} và {D, E, F} nối bằng cạnh C–D. Có 3 × 3 = 9 cặp nút ở hai bên, và đường ngắn nhất của cả 9 cặp đều qua C–D, nên C–D có betweenness cao nhất và bị xóa đầu tiên.</p></div>
+
+      <h3>Label Propagation Algorithm (LPA)</h3>
+      <p>Thuật toán đơn giản của Raghavan, Albert và Kumara (2007), chỉ dùng cấu trúc đồ thị:</p>
+      <ol>
+        <li>Gán cho mỗi nút một nhãn riêng.</li>
+        <li>Duyệt các nút theo <strong>thứ tự ngẫu nhiên</strong>; mỗi nút đổi sang nhãn xuất hiện <strong>nhiều nhất trong hàng xóm</strong>. Nếu hòa, chọn ngẫu nhiên đều.</li>
+        <li>Lặp đến khi mọi nút đều mang nhãn mà số đông hàng xóm của nó mang.</li>
+      </ol>
+      <p>Các nút cùng nhãn là một cộng đồng. Không cần hàm tối ưu, không cần biết trước số cộng đồng. Độ phức tạp bài ghi: <strong>O(m)</strong> (m: số cạnh).</p>
+      <div class="eli5"><p>Giống chọn đội áo trong sân trường: ai cũng mặc theo màu áo mà đông bạn quanh mình mặc nhất. Sau vài vòng, mỗi nhóm bạn thân sẽ chung một màu.</p></div>
+      <p>Hai biến thể được nhắc tới:</p>
+      <ul>
+        <li><strong>Liu và cộng sự:</strong> LPA có dùng <strong>thông tin biết trước</strong> (prior information), theo kiểu học bán giám sát (semi-supervised); cho kết quả tốt trên mạng thật.</li>
+        <li><strong>LPA-INTIM (Kong và cộng sự):</strong> trước khi chạy LPA, dựng <strong>ma trận thân mật</strong> (intimacy matrix) từ thông tin cấu trúc cục bộ để tính độ quan trọng của nút, rồi chạy LPA trên ma trận đó. Thêm một <strong>hàm độ chặt</strong> (tightness function) để kết quả ổn định hơn.</li>
+      </ul>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 1 của bài · Tóm tắt các thuật toán phân cụm đồ thị</caption>
+          <thead><tr><th>Thuật toán</th><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Girvan–Newman</td><td>Zachary Karate Club; mạng cộng tác (collaboration); mạng cá heo (Dolphins); mạng GN</td><td>Tỉ lệ nút được xếp đúng; modularity</td><td>Đường đi ngắn nhất; bước đi ngẫu nhiên; đường đi ngắn nhất không tính lại (đều là các biến thể của chính GN)</td></tr>
+            <tr><td>Label Propagation</td><td>Zachary Karate Club; bóng đá đại học Mỹ; tương tác protein–protein; mạng đồng tác giả</td><td>Chỉ số tương đồng Jaccard; modularity</td><td>Wu &amp; Huberman; Clauset và cộng sự</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><p>Bài gọi cả nhóm này là “chia tách, tạo dendrogram”. Điều đó đúng với Girvan–Newman, nhưng <strong>không đúng với LPA</strong>: LPA không chia tách từ trên xuống và không tạo cây phân cấp, nó cho ra một cách chia duy nhất. Xếp LPA chung nhóm với GN là lựa chọn phân loại của tác giả, không phải vì hai thuật toán cùng cơ chế.</p></div>
+    </section>
+
+    <section id="modularity">
+      <h2>Không chồng lấn 2: thuật toán dựa trên modularity</h2>
+      <p><strong>Modularity</strong> là độ đo chất lượng của một cách chia cộng đồng: nó đo mật độ cạnh bên trong các cộng đồng so với mức kỳ vọng nếu cạnh được nối ngẫu nhiên. Các thuật toán nhóm này tìm cách chia có modularity lớn nhất. Theo bài, đây là phương pháp phân cấp, gộp dần (agglomerative), tạo dendrogram.</p>
+      <p>Bài không ghi công thức. Công thức chuẩn (Newman) như sau, <em>do người giải thích bổ sung</em>:</p>
+      <span class="formula">Q = Σ<sub>c</sub> [ l<sub>c</sub>/m − ( d<sub>c</sub>/(2m) )<sup>2</sup> ]<small>m: tổng số cạnh; l<sub>c</sub>: số cạnh nằm trong cộng đồng c; d<sub>c</sub>: tổng bậc các nút trong c. Số hạng thứ nhất là tỉ lệ cạnh thật trong c, số hạng thứ hai là tỉ lệ kỳ vọng nếu nối ngẫu nhiên.</small></span>
+      <p>Ví dụ: lại là hai tam giác nối bằng một cạnh, m = 7. Mỗi tam giác có l<sub>c</sub> = 3, tổng bậc d<sub>c</sub> = 2 + 2 + 3 = 7. Mỗi cộng đồng đóng góp 3/7 − (7/14)<sup>2</sup> ≈ 0.429 − 0.25 = 0.179. Tổng Q ≈ 0.357, cho thấy cách chia này tốt hơn hẳn ngẫu nhiên.</p>
+      <div class="warn"><p>Bài viết modularity “nhận giá trị từ −1 đến +1”. Chính xác hơn, modularity nằm trong khoảng <strong>[−0.5, 1)</strong>: không bao giờ chạm 1 và không xuống dưới −0.5. Ngoài ra, ở mục 5 bài gọi <strong>resolution limit</strong> là “bài toán cực đại địa phương”. Hai khái niệm này khác nhau: resolution limit là việc tối ưu modularity <em>không nhìn thấy</em> các cộng đồng quá nhỏ (gộp chúng lại), ngay cả khi tìm được cực đại toàn cục; còn cực đại địa phương là chuyện thuật toán heuristic dừng sớm.</p></div>
+
+      <h3>Louvain (Blondel và cộng sự, 2008)</h3>
+      <p>Phương pháp heuristic, đa mức, mở rộng tốt cho mạng lớn. Lần đầu áp dụng để tìm cộng đồng ngôn ngữ trong mạng điện thoại di động Bỉ với <strong>2 triệu khách hàng</strong>. Hai pha lặp lại:</p>
+      <ol>
+        <li><strong>Di chuyển nút:</strong> ban đầu mỗi nút là một cộng đồng. Lần lượt với từng nút, thử chuyển nó sang cộng đồng của từng hàng xóm, chọn nơi cho <strong>mức tăng modularity lớn nhất</strong>; nếu không tăng được thì giữ nguyên. Lặp đến khi không nút nào chuyển được nữa.</li>
+        <li><strong>Dựng lại mạng:</strong> mỗi cộng đồng thành một nút mới; cạnh giữa các cộng đồng thành cạnh có trọng số của mạng mới.</li>
+      </ol>
+      <p>Lặp hai pha đến khi không còn thay đổi. Bài ghi độ phức tạp <strong>O(n)</strong> ở Bảng 9. Ưu điểm: kết quả trung gian (các mức của cây) cũng có ý nghĩa. Nhược điểm (Bảng 11): mắc <strong>resolution limit</strong>, và kết quả <strong>phụ thuộc thứ tự duyệt nút</strong>.</p>
+      <div class="eli5"><p>Mỗi người đứng riêng một chỗ, rồi lần lượt chạy sang nhóm hàng xóm nào làm “điểm đoàn kết” chung tăng nhiều nhất. Khi không ai muốn đổi nữa, mỗi nhóm được buộc lại thành một “người lớn”, và trò chơi chơi tiếp ở cấp cao hơn.</p></div>
+
+      <h3>Random Neighbor Louvain (RNL, Traag 2015)</h3>
+      <p>Traag nhận thấy Louvain tốn phần lớn thời gian vào việc <strong>duyệt mọi hàng xóm</strong> để tìm nơi chuyển tốt nhất. RNL chỉ <strong>chọn ngẫu nhiên một hàng xóm</strong> và thử chuyển nút sang cộng đồng của hàng xóm đó. Lý do nó vẫn hiệu quả (giải thích thêm): chọn ngẫu nhiên một hàng xóm thì khả năng cao rơi vào đúng cộng đồng “tốt”, vì phần lớn hàng xóm của một nút nằm trong cùng cộng đồng.</p>
+      <ul>
+        <li>Theo bài, độ phức tạp của RNL tuyến tính theo <strong>số nút</strong>, còn Louvain tuyến tính theo <strong>số cạnh</strong>; RNL nhanh hơn Louvain khoảng <strong>2 đến 3 lần</strong>.</li>
+        <li>Đổi lại, modularity có thể giảm nhẹ so với Louvain.</li>
+        <li>Được so với Louvain chạy trên ba hàm chất lượng: modularity CM, modularity ER và Surprise; đo bằng <strong>tỉ lệ tăng tốc</strong> (speedup ratio) và <strong>tỉ lệ chất lượng</strong> (quality ratio).</li>
+      </ul>
+      <div class="warn"><p>Mâu thuẫn trong bài: phần chữ nói Louvain “tuyến tính theo số cạnh”, nhưng Bảng 9 lại ghi độ phức tạp của Louvain là <strong>O(n)</strong>, giống hệt RNL. Nếu cả hai đều O(n) thì không giải thích được RNL nhanh hơn ở đâu. Cách đọc hợp lý: Louvain cỡ O(m) cho mỗi lượt, RNL cỡ O(n).</p></div>
+
+      <h3>Random Self-adaptive Neighbors Louvain (RSNL, Zhang và cộng sự 2018)</h3>
+      <p>Dung hòa giữa Louvain (xét <em>tất cả</em> hàng xóm) và RNL (xét <em>một</em> hàng xóm), theo nguyên tắc “không phải một, cũng không phải tất cả”. Dựa trên nguyên lý <strong>biến cố xác suất nhỏ</strong> (small probability event), RSNL chọn ngẫu nhiên <strong>một vài</strong> hàng xóm theo xác suất, rồi trong số đó chọn hàng xóm làm modularity tăng nhiều nhất. Phần còn lại giống Louvain.</p>
+      <ul>
+        <li>So với Louvain và RNL bằng <strong>tỉ lệ modularity</strong>, <strong>tỉ lệ tăng tốc</strong> và <strong>hệ số biến thiên</strong> (coefficient of variation).</li>
+        <li>Kết quả (mục 5, Bảng 9): modularity gần bằng Louvain và tốt hơn RNL; chậm hơn RNL (tỉ lệ tăng tốc nhỏ hơn RNL khoảng 25%) nhưng nhanh hơn Louvain khoảng 1.5 lần; khi mạng lớn lên, tỉ lệ tăng tốc của RNL giảm. Hệ số biến thiên của RNL cao hơn Louvain do chọn ngẫu nhiên, còn của RSNL tương đương Louvain.</li>
+      </ul>
+      <div class="eli5"><p>Đi chợ chọn rau: Louvain đi hết mọi sạp rồi mới chọn (chắc nhưng chậm); RNL ghé đại một sạp (nhanh nhưng có lúc mua phải rau kém); RSNL ghé ngẫu nhiên vài sạp rồi chọn sạp tốt nhất trong số đó.</p></div>
+
+      <h3>Parallel Louvain (Lu và cộng sự)</h3>
+      <p>Bản song song của Louvain, nhắm tới chia cộng đồng có modularity cao một cách nhanh và tiết kiệm bộ nhớ. Khó khăn: bản tuần tự luôn có thông tin mới nhất, còn bản song song thì không, nên có thể gặp tình huống <strong>mức tăng âm</strong> (negative gain), <strong>hoán đổi</strong> (swap: hai nút cùng lúc nhảy sang cộng đồng của nhau) và <strong>cực đại địa phương</strong>. Lu và cộng sự đưa ra ba heuristic: <strong>nhãn nhỏ nhất</strong> (minimum label), <strong>tô màu</strong> (coloring) và <strong>đi theo đỉnh</strong> (vertex following, VF).</p>
+      <ol>
+        <li>Hai bước tùy chọn: <strong>VF</strong>, gộp song song các đỉnh chỉ có một cạnh (bậc 1) vào cộng đồng của đỉnh mà nó nối tới; và <strong>tô màu khoảng cách k</strong> (distance-k coloring) để các đỉnh cùng màu có thể xử lý đồng thời mà không xung đột.</li>
+        <li>Nhiều vòng lặp; mỗi vòng hoán đổi đỉnh song song dựa trên thông tin cộng đồng của vòng trước.</li>
+        <li>Dựng lại đồ thị như Louvain.</li>
+      </ol>
+      <p>Ba biến thể được thử: <strong>Baseline</strong> (không bước tùy chọn), <strong>Baseline + VF</strong>, <strong>Baseline + VF + Coloring</strong>. Kết quả (Bảng 9): tăng tốc <strong>16×</strong> với <strong>32 luồng</strong> so với Louvain tuần tự; modularity cao hơn các thuật toán song song được so sánh; bài ghi độ phức tạp O(n).</p>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 2 của bài · Tóm tắt các thuật toán dựa trên modularity</caption>
+          <thead><tr><th>Thuật toán</th><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Louvain</td><td>Zachary Karate Club; ArXiv; Internet; Web nd.edu; mạng điện thoại; Web uk-2005; WebBase 2001</td><td>Tỉ lệ nút xếp đúng; NMI</td><td>Pons &amp; Latapy; Reichardt &amp; Bornholdt; Duch &amp; Arenas; mô phỏng tôi luyện (simulated annealing)</td></tr>
+            <tr><td>RNL</td><td>Health; Brightkite; Facebook; cộng tác tác giả; Web (Google); Berkeley &amp; Stanford</td><td>Tỉ lệ tăng tốc; tỉ lệ chất lượng</td><td>Louvain dựa trên: modularity CM; modularity ER; Surprise</td></tr>
+            <tr><td>RSNL</td><td>Zachary Karate Club; UK Faculty; Dolphins; Yeast; Facebook; YouTube; ArXiv astro-ph</td><td>Tỉ lệ modularity; tỉ lệ tăng tốc; hệ số biến thiên</td><td>Louvain; RNL</td></tr>
+            <tr><td>Parallel Louvain</td><td>CNR; coPapersDBLP; Channel; Friendster; soc-LiveJournal1; MG1 &amp; MG2; UK-2002; NLPKKT240; Europe-OSM</td><td>Tỉ lệ hội tụ; tỉ lệ tăng tốc; modularity cuối cùng; so sánh định tính</td><td>Louvain; Baseline; Baseline + VF; Baseline + VF + Color</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Tên bộ dữ liệu giữ như trong bài (chỉ sửa chính tả dễ thấy, ví dụ “Duch &amp; Arenes” → Arenas, “moodularity” → modularity).</p>
+    </section>
+
+    <section id="dong">
+      <h2>Không chồng lấn 3: phương pháp “động”</h2>
+      <p>Nhiều mạng thực thay đổi liên tục: trên Facebook người dùng tham gia, rời đi, bỏ theo dõi nhóm. Bài gom vào nhóm “phương pháp động” (dynamic method) ba thuật toán.</p>
+
+      <h3>Attractor (Shao và cộng sự)</h3>
+      <p>Dựa trên <strong>động lực khoảng cách</strong> (distance dynamics): xem mỗi cạnh có một “khoảng cách”, rồi mô phỏng khoảng cách này thay đổi theo thời gian.</p>
+      <ol>
+        <li>Khởi tạo khoảng cách mỗi cạnh bằng <strong>khoảng cách Jaccard</strong> giữa hai đầu mút (càng nhiều hàng xóm chung, khoảng cách càng nhỏ).</li>
+        <li>Mô phỏng ba kiểu ảnh hưởng: từ <strong>nút nối trực tiếp</strong>, từ <strong>hàng xóm chung</strong>, và từ <strong>hàng xóm riêng</strong> (exclusive neighbors).</li>
+        <li>Dưới các ảnh hưởng đó, khoảng cách giữa hai nút cùng cộng đồng giảm dần, khác cộng đồng thì tăng dần; cuối cùng mọi khoảng cách hội tụ về <strong>0 hoặc 1</strong>.</li>
+        <li>Xóa các cạnh có khoảng cách lớn nhất (bằng 1), các thành phần còn lại là cộng đồng.</li>
+      </ol>
+      <p>Khác Louvain, Attractor tìm được <strong>cộng đồng nhỏ hoặc bất thường</strong> trong mạng lớn. Bảng 11 ghi nó không mắc resolution limit và hiệu ứng “ăn theo” (free-rider). Nhược điểm: <strong>hội tụ chậm</strong>, vì phải chờ cả những cạnh mà cộng đồng đã rõ ràng hội tụ hết. Độ phức tạp bài ghi: O(m). Về thời gian: nhanh hơn modularity, Ncut và MCL; chậm hơn Louvain, Infomap và một thuật toán phát hiện cộng đồng mở rộng.</p>
+      <div class="eli5"><p>Các cặp bạn thân (có nhiều bạn chung) bị “hút” lại gần nhau, các cặp quen sơ bị “đẩy” ra xa. Sau một thời gian, mỗi cạnh hoặc là “dính chặt” (0) hoặc “đứt hẳn” (1). Cắt các cạnh đứt là thấy các nhóm.</p></div>
+
+      <h3>P-Attractor (He và cộng sự)</h3>
+      <p>Bản song song của Attractor, theo kiểu chia để trị:</p>
+      <ol>
+        <li>Chia đồ thị thành các phân vùng có số nút xấp xỉ bằng nhau; phân phối song song các cạnh vào các mạng con.</li>
+        <li>Di chuyển nút song song để giữ cấu trúc hàng xóm, sau đó di chuyển các cạnh cắt ngang (cross-edge).</li>
+        <li>Chạy tương tác động song song (bước “trị”) với mô hình động lực khoảng cách cải tiến.</li>
+        <li><strong>Tiền phán đoán</strong> (pre-judgment): khi tỉ lệ khoảng cách đã hội tụ vượt một <strong>ngưỡng hội tụ</strong>, các cạnh hội tụ chậm được gán khoảng cách cuối bằng <strong>hệ số tiền phán đoán</strong>, thay vì chờ chúng tự hội tụ. Cách này giải quyết vấn đề hội tụ chậm.</li>
+        <li>Xóa các cạnh có khoảng cách 1 để thu cộng đồng.</li>
+      </ol>
+      <p>Kết quả (Bảng 9): phù hợp mạng lớn, chất lượng gần bằng Attractor, tăng tốc <strong>4.7×</strong> với <strong>18 luồng</strong> so với Attractor, độ phức tạp O(m).</p>
+
+      <h3>DynaMo, Louvain cho đồ thị động (Zhuang và cộng sự)</h3>
+      <p>Louvain là thuật toán tĩnh: đồ thị đổi một chút cũng phải chạy lại từ đầu. DynaMo là thuật toán <strong>tăng dần, thích nghi</strong> (adaptive incremental), gồm hai pha: chạy Louvain một lần trên đồ thị ban đầu, sau đó chỉ cập nhật cục bộ theo từng thay đổi. Thay đổi được chia thành sáu loại:</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Ký hiệu</th><th>Loại thay đổi</th></tr></thead>
+          <tbody>
+            <tr><td>ICEA/WI</td><td>Thêm cạnh hoặc tăng trọng số cạnh <strong>trong</strong> một cộng đồng</td></tr>
+            <tr><td>CCEA/WI</td><td>Thêm cạnh hoặc tăng trọng số cạnh <strong>giữa</strong> hai cộng đồng</td></tr>
+            <tr><td>ICED/WD</td><td>Xóa cạnh hoặc giảm trọng số cạnh trong một cộng đồng</td></tr>
+            <tr><td>(CCED/WD)</td><td>Xóa cạnh hoặc giảm trọng số cạnh giữa hai cộng đồng (bài không ghi ký hiệu)</td></tr>
+            <tr><td>VA</td><td>Thêm đỉnh</td></tr>
+            <tr><td>VD</td><td>Xóa đỉnh</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Kết quả (Bảng 9): nhanh hơn Louvain <strong>2 đến 5 lần</strong>; so với GreMod thì chỉ tốt hơn trên Flickr và YouTube; bài ghi độ phức tạp O(n).</p>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 3 của bài · Tóm tắt các phương pháp động</caption>
+          <thead><tr><th>Thuật toán</th><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Attractor</td><td>Zachary Karate Club; Polbooks; Football; Amazon; Friendship; mạng đường bộ</td><td>NMI; ARI; độ tinh khiết cụm (purity)</td><td>N-cut; modularity; MCL; Louvain; Infomap</td></tr>
+            <tr><td>P-Attractor</td><td>YouTube; Wiki-Talk; UK-2007; LiveJournal; Orkut; LFR 1 &amp; 2</td><td>NMI; ARI; độ chính xác phát hiện cộng đồng; modularity</td><td>Fast Greedy; LPA; Louvain; Infomap; Attractor; Propinquity; COS</td></tr>
+            <tr><td>DynaMo</td><td>Cit-HepPh; Facebook; DBLP; Flickr; YouTube</td><td>NMI; ARI; modularity</td><td>Batch; QCA; GreMod; Louvain; LBTR</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><p>Chữ “động” bị dùng lẫn hai nghĩa. DynaMo đúng là thuật toán cho <strong>đồ thị thay đổi theo thời gian</strong>. Còn Attractor và P-Attractor chạy trên <strong>đồ thị tĩnh</strong>; “động” ở đây chỉ là <em>động lực khoảng cách</em> được mô phỏng bên trong thuật toán. Mục 5 của bài viết rằng cả ba dùng cho “mạng tiến hóa theo thời gian”, điều này không đúng với Attractor và P-Attractor.</p></div>
+    </section>
+
+    <section id="chong-lan">
+      <h2>Các thuật toán chồng lấn</h2>
+      <p>Mục 3 trình bày bốn nhóm, mỗi nhóm kèm cách làm, ưu và nhược điểm.</p>
+
+      <h3>Phân hoạch cạnh (link partitioning): LinkLPA</h3>
+      <p>Ý tưởng chung: trong mạng có cộng đồng chồng lấn, một <em>nút</em> có thể thuộc nhiều nhóm nhưng một <em>cạnh</em> thường chỉ thuộc một nhóm. Vậy chia <strong>cạnh</strong> (không chồng lấn) rồi suy ra cộng đồng của nút: nút thuộc mọi cộng đồng mà các cạnh của nó thuộc về.</p>
+      <div class="eli5"><p>Bạn có cạnh “bạn đại học” và cạnh “đồng nghiệp”. Mỗi cạnh chỉ thuộc một nhóm, nhưng bạn (nút) thì thuộc cả hai nhóm, vì có cạnh ở cả hai.</p></div>
+      <p><strong>LinkLPA</strong> (Sun và cộng sự) áp dụng LPA lên cạnh:</p>
+      <ol>
+        <li><strong>LPA trên cạnh:</strong> gán nhãn ngẫu nhiên cho mỗi cạnh; mỗi cạnh lặp đi lặp lại nhận nhãn phổ biến nhất trong các cạnh kề. Khi hòa, dùng độ tương tự giữa các cạnh theo cách của Ahn và cộng sự.</li>
+        <li><strong>Hậu xử lý:</strong> sửa các phân chia sai ở <strong>liên kết yếu</strong> (weak ties) và tránh <strong>chồng lấn quá mức</strong> (over-overlapping) bằng cách so số cạnh trung bình và gộp các cụm giống nhau.</li>
+      </ol>
+      <p>Kết quả (Bảng 10): độ phức tạp <strong>O(m + c·n)</strong>; tốt hơn ở mạng có <strong>tỉ lệ chồng lấn cao</strong>.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 4 của bài · LinkLPA</caption>
+          <thead><tr><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Zachary Karate Club; Dolphins; Polbooks; Football; C. elegans; Protein–protein; Word-association; DBLP; LFR</td><td>Modularity cho cộng đồng chồng lấn; F-score; mật độ modularity chồng lấn; NMI mở rộng</td><td>SLPA; CPM; COPRA; DEMON; LPA</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Ký hiệu c trong O(m + c·n) không được bài định nghĩa (thường là số nhãn hoặc số cộng đồng tối đa mỗi nút).</p>
+
+      <h3>Dựa trên tác tử (agent-based): DEMON</h3>
+      <p>Thuật toán dựa trên tác tử dùng cho mạng lớn: chia đồ thị thành các đồ thị con theo kết nối của từng nút (kiểu mạng ego), tìm cộng đồng cục bộ, rồi <strong>hợp</strong> chúng lại.</p>
+      <p><strong>DEMON</strong> (Democratic Estimate of the Modular Organization of a Network) cho mỗi nút “bỏ phiếu” cộng đồng dựa trên tầm nhìn hạn chế của nó. Cách làm “cục bộ trước”:</p>
+      <ol>
+        <li>Với mỗi nút, lấy <strong>mạng ego</strong> của nó (nút, mọi hàng xóm và các cạnh giữa chúng), rồi bỏ chính nút đó cùng các cạnh của nó, được <strong>mạng ego-trừ-ego</strong> (ego-minus-ego).</li>
+        <li>Chạy LPA trên mạng ego-trừ-ego để có các cộng đồng cục bộ.</li>
+        <li>Gộp các cộng đồng cục bộ thành cộng đồng toàn cục: hai cộng đồng được gộp khi <strong>tỉ lệ phần tử chung</strong> vượt một ngưỡng do người dùng đặt.</li>
+      </ol>
+      <div class="eli5"><p>Vì sao bỏ chính nút ego? Vì nó nối với tất cả mọi người trong mạng ego của nó, nên nếu giữ lại thì cả mạng ego dính thành một khối. Bỏ nó đi, các nhóm bạn khác nhau của nó (gia đình, đồng nghiệp…) tự tách ra. Mỗi nhóm đó trở thành một cộng đồng mà nút ego thuộc về, nên chồng lấn xuất hiện tự nhiên.</p></div>
+      <p>Kết quả (Bảng 10): tốt hơn mọi thuật toán so sánh; độ phức tạp O(m).</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 5 của bài · DEMON</caption>
+          <thead><tr><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Congress; IMDb; Amazon</td><td>Precision &amp; Recall; F-measure; số cộng đồng</td><td>HLC; CPM; Infomap; Walktrap</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dựa trên clique</h3>
+      <p><strong>Clique</strong> là đồ thị con mà mọi cặp nút đều nối nhau. Đồ thị thực tế chứa nhiều clique, nên tìm clique giúp tìm cộng đồng.</p>
+      <h3>Clique Percolation Method (CPM, Palla và cộng sự 2005)</h3>
+      <ol>
+        <li>Tìm mọi <strong>k-clique</strong> (clique gồm k nút).</li>
+        <li>Hai k-clique là <strong>kề nhau</strong> nếu chúng chung <strong>k − 1 nút</strong>. Gộp mọi chuỗi k-clique kề nhau thành một cộng đồng.</li>
+        <li>Một nút có thể nằm trong nhiều k-clique thuộc các chuỗi khác nhau, nên thuộc nhiều cộng đồng.</li>
+      </ol>
+      <div class="eli5"><p>Với k = 3 (tam giác): tam giác {A, B, C} và {B, C, D} chung hai nút B, C, nên “lăn” được từ tam giác này sang tam giác kia; A, B, C, D cùng một cộng đồng. Giống như lăn một tam giác trên đồ thị: chỗ nào lăn tới được là cùng cộng đồng.</p></div>
+      <div class="warn"><p>Bài viết “chung k − 1 <em>cạnh</em>” và gọi clique là “click”. Định nghĩa đúng của Palla và cộng sự là chung k − 1 <strong>nút</strong>.</p></div>
+      <p>Kết quả phụ thuộc mạnh vào k: k lớn thì nhiều nút không thuộc cộng đồng nào; k nhỏ thì cộng đồng tìm được nhỏ. Nhược điểm chính: các nút <strong>không nằm trong clique nào bị bỏ lại, không được phân loại</strong>. Năm 2007, Palla và cộng sự mở rộng CPM cho đồ thị thay đổi theo thời gian: chạy CPM trên từng ảnh chụp (snapshot) ở các thời điểm, rồi so cộng đồng giữa các thời điểm. Bảng 10: kết quả trung gian có ý nghĩa; chỉ hợp với mạng tới khoảng <strong>30&nbsp;000 nút</strong> vì giới hạn bộ nhớ; hệ số phân cụm trung bình của cộng đồng khá cao.</p>
+
+      <h3>PercoMCV (Kasoro và cộng sự)</h3>
+      <p>Lai hai bước để giảm số nút bị CPM bỏ sót:</p>
+      <ol>
+        <li>Chạy CPM cổ điển để có các cộng đồng tạm.</li>
+        <li>Tính <strong>độ trung tâm vectơ riêng</strong> (eigenvector centrality, dựa trên định lý Perron–Frobenius) trong mỗi cộng đồng tạm để tìm nút trung tâm. Nút chưa phân loại được gắn vào cộng đồng mà nó có nối tới nút trung tâm, có thể vào nhiều cộng đồng.</li>
+      </ol>
+      <p>Kết quả (Bảng 10): <strong>chỉ số Omega = 0.404</strong>, tốt nhất trong các thuật toán được so sánh.</p>
+      <div class="warn"><p>Bảng 10 ghi dưới dòng PercoMCV: “Complexity of <strong>RNL</strong> algorithm is O(n)”. Đây rõ ràng là lỗi chép từ dòng khác; bài không cho độ phức tạp thật của PercoMCV.</p></div>
+
+      <h3>OLCPM (Boudebza và cộng sự 2018)</h3>
+      <p>Online Label propagation Clique Percolation Method, cho <strong>mạng động</strong> có cộng đồng chồng lấn. Cải tiến CPM động của Palla 2007 theo hai hướng:</p>
+      <ul>
+        <li><strong>Cập nhật cục bộ:</strong> CPM động tính lại clique cho cả mạng sau mỗi sự kiện; OLCPM chỉ cập nhật các cộng đồng liên quan tới sự kiện (thêm/bớt nút hoặc cạnh), nên nhanh hơn.</li>
+        <li><strong>Gán nút sót bằng LPA:</strong> sau bước CPM trực tuyến, chạy lan truyền nhãn để đưa các nút chưa phân loại vào một hoặc nhiều cộng đồng.</li>
+      </ul>
+      <p>Kết quả (Bảng 10): NMI trung bình cao hơn CPM; cho kết quả kém khi cấu trúc cộng đồng trở nên mờ (fuzzy).</p>
+      <p class="note">Bài nhắc “bốn tham số” của mạng động mà OLCPM xử lý nhưng không liệt kê. Có lẽ là thêm nút, xóa nút, thêm cạnh, xóa cạnh (suy đoán của người giải thích).</p>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 6 của bài · Các thuật toán dựa trên clique</caption>
+          <thead><tr><th>Thuật toán</th><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>CPM</td><td>Đồng tác giả; liên tưởng từ (word association); tương tác protein</td><td>Nhận diện nút chồng lấn; độ chính xác phát hiện cộng đồng</td><td>Phương pháp chia tách; phương pháp gộp dần</td></tr>
+            <tr><td>PercoMCV</td><td>Mạng LFR; Karate Club</td><td>Chỉ số Omega; số cộng đồng; độ phức tạp</td><td>EAGLE; Label propagation; CPM</td></tr>
+            <tr><td>OLCPM</td><td>Mạng LFR; mạng tiếp xúc giữa học sinh một trường trung học ở Marseille (Pháp)</td><td>Thời gian tính; NMI phiên bản chồng lấn</td><td>CPM động</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dựa trên tam giác: CoreExp (Rezvani và cộng sự 2018)</h3>
+      <p>Hướng mới nhất trong bài. <strong>Tam giác</strong> (ba nút nối đôi một) đảm bảo sự gắn kết mạnh. Có hai loại tam giác: <strong>tam giác cộng đồng</strong> (cả ba nút trong cộng đồng) và <strong>tam giác cắt</strong> (một nút nằm ở cộng đồng khác hai nút kia).</p>
+      <p>Phát hiện cộng đồng theo kiểu này cần một <strong>hàm độ phù hợp</strong> (fitness metric). Có nhiều lựa chọn: mật độ cổ điển, mật độ tương đối, modularity đồ thị con, modularity cục bộ, conductance. CoreExp chọn <strong>nghịch đảo của conductance</strong>, nhưng đếm <strong>tam giác</strong> thay vì đếm cạnh khi đo mức kết nối.</p>
+      <ol>
+        <li><strong>Pha 1:</strong> tìm các <strong>cộng đồng lõi</strong> không chồng lấn bằng cách tối ưu lặp hàm fitness.</li>
+        <li><strong>Pha 2:</strong> mở rộng: tìm các nút cũng thuộc về cộng đồng khác, tạo chồng lấn.</li>
+      </ol>
+      <p>CoreExp giảm được hai hiệu ứng xấu:</p>
+      <dl class="terms">
+        <dt>Hiệu ứng tách biệt (separation effect)</dt><dd>Nút lẽ ra thuộc nhiều cộng đồng chồng lấn lại chỉ bị gán vào một cộng đồng có fitness cao nhất.</dd>
+        <dt>Hiệu ứng ăn theo (free-rider effect)</dt><dd>Hai cộng đồng bị gộp vì cộng đồng gộp có fitness cao hơn, dù chỉ cao hơn <em>một</em> trong hai cộng đồng ban đầu; tức một nhóm “ăn theo” nhóm kia.</dd>
+      </dl>
+      <p>CoreExp được so với FOCS và SeedExp (mở rộng cục bộ), DEMON (tác tử), BigClam (phân rã ma trận) và Bayes, trên 7 bộ dữ liệu thật, theo độ chính xác và thời gian. Kết quả (Bảng 10 và mục 5): CoreExp chính xác và thắng trong đa số trường hợp; riêng LiveJournal thì BigClam và FOCS tốt hơn, nhưng hai thuật toán này mắc hiệu ứng tách biệt và ăn theo.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 7 của bài · CoreExp</caption>
+          <thead><tr><th>Bộ dữ liệu</th><th>Độ đo</th><th>So sánh với</th></tr></thead>
+          <tbody>
+            <tr><td>Twitter; Facebook; DBLP; Google Plus; LiveJournal; Amazon; Orkut</td><td>Trung bình điều hòa của Precision và Recall; “phóng đại ảnh hưởng của Recall”</td><td>FOCS; DEMON; BigClam; SeedExp; Bayes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><p>Trung bình điều hòa của precision và recall là F1, vốn coi hai bên ngang nhau; độ đo “phóng đại recall” thường là F<sub>β</sub> với β &gt; 1 (ví dụ F2). Bảng 7 không nói rõ đó là một độ đo hay hai, nên không rõ CoreExp dùng chính xác độ đo nào. Ngoài ra, mục 3.4 nói CoreExp đếm tam giác thay cho <em>cạnh</em>, còn Bảng 11 lại ghi “thay cho <em>nút</em>”; bài cũng gọi tác giả là “Mojtaba et al.” (tên riêng) trong khi tài liệu tham khảo là Rezvani và cộng sự.</p></div>
+    </section>
+
+    <section id="du-lieu">
+      <h2>Bộ dữ liệu dùng trong phát hiện cộng đồng</h2>
+      <p>Để so sánh thuật toán cần chạy chúng trên bộ dữ liệu chuẩn. Bài nêu hai kho phổ biến: <strong>SNAP</strong> (Đại học Stanford) và <strong>KONECT</strong>. Dữ liệu chia làm hai loại: đồ thị thật và đồ thị giả lập.</p>
+
+      <h3>Đồ thị thật (Bảng 8)</h3>
+      <div class="table-wrap">
+        <table class="grid">
+          <caption>Bảng 8 của bài · Mô tả các bộ dữ liệu thật (số liệu giữ nguyên như bài)</caption>
+          <thead><tr><th>Tên</th><th>Loại</th><th class="num">Số nút</th><th class="num">Số cạnh</th><th class="num">Số cộng đồng</th></tr></thead>
+          <tbody>
+            <tr><td>Zachary’s Karate Club</td><td>Vô hướng</td><td class="num">34</td><td class="num">78</td><td class="num">5</td></tr>
+            <tr><td>DBLP</td><td>Vô hướng</td><td class="num">317&nbsp;080</td><td class="num">1&nbsp;049&nbsp;866</td><td class="num">13&nbsp;477</td></tr>
+            <tr><td>Football</td><td>Vô hướng</td><td class="num">114</td><td class="num">663</td><td class="num">11</td></tr>
+            <tr><td>Co-authorship</td><td>Vô hướng</td><td class="num">18&nbsp;771</td><td class="num">198&nbsp;050</td><td class="num">—</td></tr>
+            <tr><td>LiveJournal</td><td>Có hướng</td><td class="num">3&nbsp;997&nbsp;962</td><td class="num">34&nbsp;681&nbsp;189</td><td class="num">287&nbsp;512</td></tr>
+            <tr><td>Friendster</td><td>Có hướng</td><td class="num">65&nbsp;608&nbsp;366</td><td class="num">1&nbsp;806&nbsp;067&nbsp;135</td><td class="num">957&nbsp;154</td></tr>
+            <tr><td>YouTube</td><td>Vô hướng</td><td class="num">1&nbsp;134&nbsp;890</td><td class="num">2&nbsp;987&nbsp;624</td><td class="num">8&nbsp;385</td></tr>
+            <tr><td>Amazon</td><td>Vô hướng</td><td class="num">334&nbsp;863</td><td class="num">925&nbsp;872</td><td class="num">75&nbsp;149</td></tr>
+            <tr><td>Email-Eu-core</td><td>Vô hướng</td><td class="num">1&nbsp;005</td><td class="num">25&nbsp;571</td><td class="num">42</td></tr>
+            <tr><td>Wiki-topcats</td><td>Có hướng</td><td class="num">1&nbsp;791&nbsp;489</td><td class="num">28&nbsp;511&nbsp;807</td><td class="num">17&nbsp;364</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Mô tả từng bộ theo bài:</p>
+      <dl class="terms">
+        <dt>Karate Club</dt><dd>Câu lạc bộ karate ở một trường đại học (Zachary, 1977) tách làm hai vì mâu thuẫn lãnh đạo. Zachary dùng thông tin quan hệ giữa các thành viên để dự đoán nhóm nào đi theo ai. Benchmark kinh điển.</dd>
+        <dt>DBLP</dt><dd>Thư mục bài báo khoa học máy tính, có ground truth, miễn phí. Bài mô tả nút là bài báo, cạnh là trích dẫn.</dd>
+        <dt>Football</dt><dd>Các đội bóng đá đại học Mỹ; cạnh nối hai đội nếu đã đấu với nhau trong năm 2000. Các đội đấu trong nhóm (liên đoàn) nhiều hơn đấu với nhóm khác.</dd>
+        <dt>Co-authorship</dt><dd>Còn gọi là mạng cộng tác: các nhà khoa học đăng bài ở mục vật lý chất ngưng tụ (condensed matter) trên arXiv; cạnh nối hai người nếu đồng tác giả ít nhất một bài. Phần chữ ghi 16&nbsp;726 nhà khoa học.</dd>
+        <dt>LiveJournal</dt><dd>Cộng đồng viết blog trực tuyến; người dùng kết bạn theo sở thích; nhóm blogger cùng chủ đề là cộng đồng thật.</dd>
+        <dt>Friendster</dt><dd>Mạng xã hội kết bạn; nhóm do người dùng lập là cộng đồng thật.</dd>
+        <dt>YouTube</dt><dd>Mạng chia sẻ video; người dùng kết bạn và lập nhóm.</dd>
+        <dt>Amazon</dt><dd>Nút là sản phẩm; cạnh nối hai sản phẩm hay được mua cùng nhau; cộng đồng thật theo danh mục sản phẩm của Amazon.</dd>
+        <dt>Email-Eu-core</dt><dd>Email trong một viện nghiên cứu lớn ở châu Âu; cạnh nếu hai người trao đổi ít nhất một email; 42 phòng ban là cộng đồng thật, mỗi người thuộc đúng một phòng.</dd>
+        <dt>Wiki-topcats</dt><dd>Siêu liên kết Wikipedia (tháng 9/2011); một trang có thể thuộc nhiều cộng đồng; cộng đồng thật là danh mục bài viết.</dd>
+      </dl>
+      <div class="warn">
+        <ul>
+          <li><strong>Karate Club:</strong> Bảng 8 ghi 5 cộng đồng, nhưng chính phần chữ nói câu lạc bộ tách làm <strong>hai</strong>. Ground truth thường dùng là 2 nhóm.</li>
+          <li><strong>Football:</strong> Bảng 8 ghi 114 nút, phần chữ ghi 115 đội. Theo hiểu biết của người giải thích, bản phổ biến (Girvan và Newman 2002) có 115 nút và 613 cạnh; con số 663 cạnh trong bảng nên kiểm tra lại.</li>
+          <li><strong>Co-authorship:</strong> bảng ghi 18&nbsp;771 nút, chữ ghi 16&nbsp;726 nhà khoa học; hai con số không khớp (có thể là hai phiên bản dữ liệu khác nhau).</li>
+          <li><strong>DBLP:</strong> bộ 317&nbsp;080 nút / 1&nbsp;049&nbsp;866 cạnh / 13&nbsp;477 cộng đồng trên SNAP là mạng <strong>đồng tác giả</strong> (nút là tác giả), không phải mạng trích dẫn giữa bài báo như bài mô tả.</li>
+        </ul>
+      </div>
+
+      <h3>Đồ thị giả lập</h3>
+      <p>Bài nói đồ thị giả lập do người dùng tự sinh để thí nghiệm, chủ yếu để đo <strong>thời gian chạy</strong>. Hai benchmark:</p>
+      <div class="cards">
+        <div class="card"><b>GN benchmark</b><p>Của Girvan và Newman. Sinh đồ thị từ các cộng đồng định sẵn: nút cùng cộng đồng nối với xác suất cao hơn nút khác cộng đồng. Nhược điểm: mọi nút có bậc kỳ vọng như nhau và mọi cộng đồng có kích thước như nhau, không giống mạng thật. Theo bài, nay ít dùng vì không thực tế.</p></div>
+        <div class="card"><b>LFR benchmark</b><p>Của Lancichinetti, Fortunato và Radicchi. Sinh đồ thị có đặc điểm mạng xã hội: bậc nút theo <strong>luật lũy thừa</strong> (power-law). Nhiều thuật toán làm tốt trên GN vì nó đơn giản, nhưng kém đi trên LFR. Dựng được trong thời gian tuyến tính nên tiện cho học tập.</p></div>
+      </div>
+      <div class="warn"><p>Bài viết rằng đồ thị thật “đã biết ground truth”, còn đồ thị giả lập “sinh ngẫu nhiên nên không biết ground truth”. Thực tế <strong>ngược lại</strong> mới đúng: GN và LFR được sinh ra <strong>từ</strong> các cộng đồng cài sẵn, nên ground truth luôn biết chính xác; đó chính là lý do chúng được dùng làm benchmark độ chính xác (ví dụ tính NMI). Ngược lại, nhiều mạng thật không có ground truth, và “ground truth” của mạng thật (nhóm người dùng, danh mục sản phẩm) chỉ là siêu dữ liệu, chưa chắc trùng với cộng đồng cấu trúc. Bài viết LFR theo luật lũy thừa cho bậc nút; LFR còn cho kích thước cộng đồng theo luật lũy thừa (bổ sung của người giải thích).</p></div>
+    </section>
+
+    <section id="do-do">
+      <h2>Các độ đo xuất hiện trong bài</h2>
+      <p>Bài liệt kê độ đo trong Bảng 1–7 nhưng <strong>không định nghĩa</strong> chúng. Phần này do người giải thích bổ sung để đọc bảng dễ hơn.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Độ đo</th><th>Cần ground truth?</th><th>Ý nghĩa ngắn</th></tr></thead>
+          <tbody>
+            <tr><td>Modularity</td><td>Không</td><td>Cạnh trong cộng đồng nhiều hơn kỳ vọng ngẫu nhiên bao nhiêu (xem công thức ở trên).</td></tr>
+            <tr><td>Tỉ lệ nút xếp đúng</td><td>Có</td><td>Phần trăm nút được đặt đúng cộng đồng thật.</td></tr>
+            <tr><td>NMI (Normalized Mutual Information)</td><td>Có</td><td>Hai cách chia “kể cùng một chuyện” tới đâu; 1 là giống hệt, gần 0 là không liên quan. NMI mở rộng / NMI chồng lấn là phiên bản cho cộng đồng chồng lấn.</td></tr>
+            <tr><td>ARI (Adjusted Rand Index)</td><td>Có</td><td>Xét mọi cặp nút: hai cách chia có đồng ý “cùng nhóm / khác nhóm” không, đã trừ phần đồng ý do may rủi.</td></tr>
+            <tr><td>Purity</td><td>Có</td><td>Mỗi cộng đồng tìm được trùng với một cộng đồng thật nhiều nhất bao nhiêu nút.</td></tr>
+            <tr><td>Precision, Recall, F-score</td><td>Có</td><td>Precision: phần nút tìm được là đúng; Recall: phần nút thật được tìm ra; F1 là trung bình điều hòa của hai.</td></tr>
+            <tr><td>Chỉ số Omega</td><td>Có</td><td>Bản mở rộng của ARI cho cộng đồng chồng lấn: so số cộng đồng mà mỗi cặp nút cùng thuộc.</td></tr>
+            <tr><td>Jaccard</td><td>Có</td><td>|A ∩ B| / |A ∪ B| giữa cộng đồng tìm được và cộng đồng thật.</td></tr>
+            <tr><td>Tỉ lệ tăng tốc (speedup ratio)</td><td>Không</td><td>Thời gian thuật toán cũ / thời gian thuật toán mới.</td></tr>
+            <tr><td>Tỉ lệ chất lượng / tỉ lệ modularity</td><td>Không</td><td>Modularity của thuật toán mới / modularity của thuật toán gốc (Louvain).</td></tr>
+            <tr><td>Hệ số biến thiên (CV)</td><td>Không</td><td>Độ lệch chuẩn / trung bình của modularity qua nhiều lần chạy; đo độ ổn định của thuật toán ngẫu nhiên.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Ví dụ F1: một cộng đồng tìm được có 10 nút, trong đó 8 nút đúng, còn cộng đồng thật có 16 nút. Precision = 8/10 = 0.8, Recall = 8/16 = 0.5, F1 = 2 · 0.8 · 0.5 / (0.8 + 0.5) ≈ 0.62.</p>
+    </section>
+
+    <section id="so-sanh">
+      <h2>Phân tích so sánh (mục 5, Bảng 9–11)</h2>
+      <p>Đây là phần tổng hợp <strong>kết quả do các tác giả gốc công bố</strong>, không phải thí nghiệm mới. Các con số đến từ các bài khác nhau, trên bộ dữ liệu và máy khác nhau, nên không so trực tiếp giữa các dòng được.</p>
+
+      <h3>Nhận xét theo nhóm (theo bài)</h3>
+      <ul>
+        <li><strong>Phân cụm đồ thị:</strong> đơn giản, không cần biết trước về đồ thị, không cần hàm tối ưu; tốt cho mạng nhỏ, khó khi mạng lớn. GN O(n<sup>3</sup>), LPA O(m).</li>
+        <li><strong>Tối ưu modularity:</strong> phổ biến nhất, có thể mắc resolution limit. Về tỉ lệ nút xếp đúng, Duch &amp; Arenas và simulated annealing chính xác hơn Louvain nhưng tốn tính toán nên chỉ hợp mạng nhỏ. RSNL ≈ Louvain về modularity, hơn RNL; chậm hơn RNL nhưng nhanh hơn Louvain.</li>
+        <li><strong>“Động”:</strong> Attractor hội tụ chậm; P-Attractor khắc phục; DynaMo đưa Louvain sang đồ thị động bằng bộ quy tắc. Attractor đạt NMI, ARI, purity cao và thắng các thuật toán so sánh; P-Attractor còn tốt hơn.</li>
+        <li><strong>Chồng lấn:</strong> phân hoạch cạnh là cách đơn giản nhất (LinkLPA tốt khi chồng lấn nhiều); DEMON “dân chủ”, mỗi nút được hàng xóm quyết định độc lập; nhóm clique dùng nhiều nhất nhưng phụ thuộc k và bỏ sót nút (PercoMCV dùng eigenvector centrality, OLCPM dùng LPA để vá); CoreExp dùng tam giác và nghịch đảo conductance.</li>
+      </ul>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 9 của bài · Kết quả các bài gốc, thuật toán không chồng lấn</caption>
+          <thead><tr><th>Thuật toán</th><th>Kết quả</th></tr></thead>
+          <tbody>
+            <tr><td>Girvan–Newman</td><td>Độ phức tạp O(n<sup>3</sup>). Chỉ phù hợp tới 10&nbsp;000 nút. Tốt hơn các thuật toán so sánh.</td></tr>
+            <tr><td>Label propagation</td><td>Thuật toán so sánh Wu &amp; Huberman cần biết trước số cộng đồng. LPA chia nút không đồng đều (kích thước cộng đồng khác nhau), khác Wu &amp; Huberman. Độ phức tạp O(m).</td></tr>
+            <tr><td>Louvain</td><td>Kết quả trung gian cũng có ý nghĩa. Duch và simulated annealing chính xác hơn nhưng tốn tính toán hơn. Độ phức tạp O(n).</td></tr>
+            <tr><td>RNL</td><td>Nhanh hơn Louvain khoảng 2 đến 3 lần. Hệ số biến thiên modularity của RNL và Louvain là 0.26. Độ phức tạp O(n).</td></tr>
+            <tr><td>RSNL</td><td>Hệ số biến thiên modularity “của RNL và Louvain” là 0. Tỉ lệ tăng tốc nhỏ hơn RNL 25% và nhanh hơn Louvain 1.5 lần. Độ phức tạp O(n).</td></tr>
+            <tr><td>Parallel Louvain</td><td>Tăng tốc 16× với 32 luồng so với Louvain tuần tự. Modularity cao hơn các thuật toán song song khác. Độ phức tạp O(n).</td></tr>
+            <tr><td>Attractor</td><td>Nhanh hơn modularity, Ncut, MCL. Chậm hơn một thuật toán phát hiện cộng đồng mở rộng, Louvain và Infomap. Độ phức tạp O(m).</td></tr>
+            <tr><td>P-Attractor</td><td>Tốt cho mạng lớn, chất lượng cụm gần Attractor. Tăng tốc 4.7× với 18 luồng so với Attractor. Độ phức tạp O(m).</td></tr>
+            <tr><td>DynaMo</td><td>Nhanh hơn Louvain 2 đến 5 lần. So với GreMod chỉ tốt hơn trên Flickr và YouTube. Độ phức tạp O(n).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><p>Hai dòng hệ số biến thiên trong Bảng 9 khó hiểu: dòng RNL ghi “CV của RNL và Louvain là 0.26”, dòng RSNL lại ghi “CV của <strong>RNL</strong> và Louvain là 0”. Dòng thứ hai nhiều khả năng muốn nói <strong>RSNL</strong>; và cả hai dòng có lẽ đang nói về <em>chênh lệch</em> CV so với Louvain. Phần chữ chỉ khẳng định định tính: CV của RNL cao hơn Louvain, CV của RSNL tương đương Louvain. Ngoài ra, các độ phức tạp O(n) ghi cho Louvain, Parallel Louvain, DynaMo là con số rất lạc quan và không kèm giải thích.</p></div>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 10 của bài · Kết quả các bài gốc, thuật toán chồng lấn</caption>
+          <thead><tr><th>Thuật toán</th><th>Kết quả</th></tr></thead>
+          <tbody>
+            <tr><td>LinkLPA</td><td>Độ phức tạp O(m + c·n). Tốt hơn ở mạng có tỉ lệ chồng lấn cao.</td></tr>
+            <tr><td>DEMON</td><td>Tốt hơn mọi thuật toán so sánh. Độ phức tạp O(m).</td></tr>
+            <tr><td>Clique percolation</td><td>Kết quả trung gian có ý nghĩa. Phù hợp tới 30&nbsp;000 nút do giới hạn bộ nhớ. Hệ số phân cụm trung bình khá cao.</td></tr>
+            <tr><td>PercoMCV</td><td>Chỉ số Omega 0.404, tốt nhất trong các thuật toán so sánh. “Độ phức tạp của RNL là O(n)” (lỗi chép).</td></tr>
+            <tr><td>OLCPM</td><td>NMI trung bình cao hơn CPM. Kết quả kém nhất khi cấu trúc cộng đồng mờ.</td></tr>
+            <tr><td>CoreExp</td><td>Phát hiện chính xác, thắng trong đa số trường hợp. BigClam và FOCS cho kết quả tốt hơn (ở LiveJournal) nhưng mắc hiệu ứng tách biệt và ăn theo.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Bảng 11 được tác giả gọi là “điểm nhấn của cả bài”: kỹ thuật, ưu và nhược điểm của từng thuật toán, để người đọc dễ thấy khoảng trống nghiên cứu.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 11 của bài · Phân tích so sánh tổng hợp</caption>
+          <thead><tr><th>Thuật toán</th><th>Kỹ thuật</th><th>Nhận xét</th></tr></thead>
+          <tbody>
+            <tr><td>Girvan–Newman</td><td>Phân hoạch đồ thị</td><td>Dựa trên betweenness của cạnh. Hướng chia tách.</td></tr>
+            <tr><td>Label propagation</td><td>Phân hoạch đồ thị</td><td>Không cần hàm tối ưu. Đơn giản nhất nhưng hợp với mạng nhỏ.</td></tr>
+            <tr><td>Louvain</td><td>Tối ưu modularity</td><td>Mắc resolution limit. Kết quả phụ thuộc thứ tự duyệt nút.</td></tr>
+            <tr><td>RNL</td><td>Tối ưu modularity</td><td>Chọn ngẫu nhiên một hàng xóm, phần còn lại như Louvain. Nhanh hơn nhưng giảm độ chính xác.</td></tr>
+            <tr><td>RSNL</td><td>Tối ưu modularity</td><td>Chọn ngẫu nhiên một số hàng xóm, phần còn lại như Louvain. Chính xác hơn RNL.</td></tr>
+            <tr><td>Parallel Louvain</td><td>Tối ưu modularity</td><td>Nhanh hơn Louvain. Hợp với đồ thị lớn trong môi trường song song.</td></tr>
+            <tr><td>Attractor</td><td>Động lực khoảng cách</td><td>Không mắc resolution limit và free-rider. Hội tụ chậm.</td></tr>
+            <tr><td>P-Attractor</td><td>Động lực khoảng cách</td><td>Không mắc resolution limit và free-rider. Nhanh hơn Attractor, hợp môi trường song song.</td></tr>
+            <tr><td>DynaMo</td><td>Tối ưu modularity</td><td>Thích nghi, tăng dần, dựa trên Louvain. Dựa trên sáu loại thay đổi.</td></tr>
+            <tr><td>LinkLPA</td><td>Dựa trên cạnh</td><td>LPA trên cạnh. Cho cộng đồng chồng lấn.</td></tr>
+            <tr><td>DEMON</td><td>Dựa trên tác tử</td><td>Hợp cộng đồng của các mạng con. “Dân chủ”: dựa trên ý kiến mọi nút.</td></tr>
+            <tr><td>CPM</td><td>Dựa trên clique</td><td>Thuật toán chuẩn cho cộng đồng chồng lấn. Một số nút không được phân loại.</td></tr>
+            <tr><td>PercoMCV</td><td>Dựa trên clique</td><td>Dựa trên CPM. Phân loại nút sót bằng eigenvector centrality.</td></tr>
+            <tr><td>OLCPM</td><td>Dựa trên clique</td><td>Dựa trên CPM. Phân loại nút sót bằng LPA.</td></tr>
+            <tr><td>CoreExp</td><td>Hàm fitness (bài ghi “fitness matrices”)</td><td>Dùng tam giác thay cho nút khi tính fitness. Tam giác cho độ gắn kết mạnh.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): nếu phải chọn nhanh theo bảng trên thì: mạng nhỏ, cần dễ hiểu → Girvan–Newman; mạng lớn, cần nhanh → Louvain hoặc bản song song, LPA; mạng thay đổi theo thời gian → DynaMo (không chồng lấn) hoặc OLCPM (chồng lấn); cần cộng đồng chồng lấn trên mạng lớn → DEMON, LinkLPA, CoreExp. Đây chỉ là gợi ý đọc từ các nhận xét định tính, không phải kết quả thí nghiệm.</p></div>
+    </section>
+
+    <section id="ket-luan">
+      <h2>Kết luận, hạn chế và sai sót</h2>
+      <h3>Tác giả kết luận</h3>
+      <p>Khi dữ liệu tăng về khối lượng, độ xác thực và độ đa dạng, đồ thị ứng dụng trở nên phức tạp và cần thuật toán phát hiện cộng đồng hiệu quả. Bài đã khảo sát hai loại chính, chồng lấn và không chồng lấn, kèm cách làm, tham số, bộ dữ liệu và hiệu năng do chính tác giả các thuật toán công bố, rồi tóm tắt trong bảng. Theo tác giả, <strong>loại mạng, kích thước mạng và số cạnh</strong> là các yếu tố chính khi chọn thuật toán. Bài nói các thuật toán được so sánh theo thời gian và độ chính xác.</p>
+      <p>Bài <strong>không có mục riêng về thách thức hay hướng nghiên cứu tương lai</strong>. Chỉ có ý chung rằng Bảng 11 giúp người đọc tìm khoảng trống nghiên cứu. Các vấn đề mở có thể rút ra từ chính nội dung bài: resolution limit của modularity; tính ổn định của thuật toán ngẫu nhiên (thứ tự nút, CV); nút bị bỏ sót trong phương pháp clique; hội tụ chậm; mở rộng lên đồ thị rất lớn bằng song song hóa; và xử lý đồ thị thay đổi theo thời gian.</p>
+
+      <h3>Hạn chế cần biết khi trích dẫn</h3>
+      <div class="warn">
+        <ul>
+          <li><strong>Không có thí nghiệm riêng.</strong> Tóm tắt nói “so sánh theo thời gian và độ chính xác”, nhưng thực ra chỉ chép kết quả từ các bài gốc, trên dữ liệu và độ đo khác nhau. Không thể xếp hạng các thuật toán chỉ dựa vào bài này.</li>
+          <li><strong>Phạm vi hẹp so với tên “xu hướng gần đây”:</strong> chỉ 15 thuật toán, không có Infomap, Walktrap, phương pháp phổ, mô hình thống kê (SBM), hay học sâu / nhúng đồ thị (node embedding, GNN), dù nhiều thuật toán này xuất hiện trong các bảng so sánh.</li>
+          <li><strong>Phân loại chưa nhất quán:</strong> LPA bị gọi là chia tách; Attractor bị xếp vào “động”; DynaMo xếp vào nhóm động nhưng Bảng 11 ghi kỹ thuật là tối ưu modularity.</li>
+          <li><strong>Ground truth bị mô tả ngược</strong> (đồ thị giả lập có ground truth, không phải không).</li>
+          <li>Nhiều lỗi số liệu và chép bảng; xem danh sách bên dưới.</li>
+        </ul>
+      </div>
+
+      <h3>Danh sách sai sót, mâu thuẫn đã phát hiện</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Vị trí</th><th>Bài viết</th><th>Vấn đề</th></tr></thead>
+          <tbody>
+            <tr><td>Hình 1(b)</td><td>Nhãn “3” lặp 5 lần</td><td>Đánh số nút sai</td></tr>
+            <tr><td>Mục 2.2</td><td>Modularity từ −1 đến +1</td><td>Đúng là [−0.5, 1)</td></tr>
+            <tr><td>Mục 5</td><td>Resolution limit là “cực đại địa phương”</td><td>Hai khái niệm khác nhau</td></tr>
+            <tr><td>Mục 2.2.2 và Bảng 9</td><td>Louvain tuyến tính theo cạnh / Louvain O(n)</td><td>Tự mâu thuẫn</td></tr>
+            <tr><td>Bảng 9, dòng RSNL</td><td>CV “của RNL và Louvain” là 0</td><td>Có lẽ là RSNL</td></tr>
+            <tr><td>Bảng 10, dòng PercoMCV</td><td>“Độ phức tạp của RNL là O(n)”</td><td>Chép nhầm dòng</td></tr>
+            <tr><td>Mục 3.3.1</td><td>Clique kề nhau chung k − 1 cạnh; “k-click”</td><td>Phải là k − 1 nút; clique</td></tr>
+            <tr><td>Mục 4.1, Bảng 8</td><td>Karate Club 5 cộng đồng</td><td>Chữ nói tách làm 2</td></tr>
+            <tr><td>Mục 4.1, Bảng 8</td><td>Football 114 nút, chữ ghi 115 đội</td><td>Không khớp</td></tr>
+            <tr><td>Mục 4.1, Bảng 8</td><td>Co-authorship 18&nbsp;771 nút, chữ ghi 16&nbsp;726</td><td>Không khớp</td></tr>
+            <tr><td>Mục 4.1</td><td>DBLP là mạng trích dẫn bài báo</td><td>Bộ số liệu là mạng đồng tác giả</td></tr>
+            <tr><td>Mục 4.2</td><td>Đồ thị giả lập không có ground truth</td><td>Ngược lại: có ground truth cài sẵn</td></tr>
+            <tr><td>Mục 2.3 và 5</td><td>Attractor, P-Attractor cho mạng tiến hóa</td><td>Chúng chạy trên đồ thị tĩnh</td></tr>
+            <tr><td>Mục 2.1</td><td>Phân cụm đồ thị là chia tách, tạo dendrogram</td><td>Không đúng với LPA</td></tr>
+            <tr><td>Bảng 7 và 11</td><td>F-score “phóng đại recall”; tam giác thay cho “nút”</td><td>Không rõ độ đo; mục 3.4 nói thay cho cạnh</td></tr>
+            <tr><td>Bảng 3</td><td>LPA trích dẫn số 43</td><td>Số 43 là Pons &amp; Latapy; LPA là số 44</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Dù vậy, bài vẫn hữu ích như một <strong>bản đồ nhập môn</strong>: nó đặt cạnh nhau các họ thuật toán chính, cho tên bộ dữ liệu và độ đo hay gặp, và các Bảng 1–7 là danh sách tốt để tìm đọc bài gốc. Bài liên hệ với các tài liệu khác của môn học: Girvan–Newman (betweenness, modularity), Blondel và cộng sự (Louvain), Palla và cộng sự (CPM), Lancichinetti và cộng sự (LFR), và bài 1/3 (Mothe 2017) so sánh Louvain, LPA và các thuật toán khác trên mạng SBM.</p>
+    </section>
+
+    <section id="thuat-ngu">
+      <h2>Bảng thuật ngữ</h2>
+      <dl class="terms">
+        <dt>Community detection</dt><dd>Phát hiện cộng đồng: chia nút thành nhóm dày bên trong, thưa bên ngoài.</dd>
+        <dt>Non-overlapping / Overlapping</dt><dd>Không chồng lấn (mỗi nút một nhóm) / chồng lấn (một nút nhiều nhóm).</dd>
+        <dt>Divisive / Agglomerative</dt><dd>Chia tách từ trên xuống / gộp dần từ dưới lên.</dd>
+        <dt>Dendrogram</dt><dd>Cây phân cấp ghi lại các bước chia hoặc gộp.</dd>
+        <dt>Edge betweenness</dt><dd>Độ trung gian của cạnh: số đường đi ngắn nhất đi qua cạnh.</dd>
+        <dt>Label propagation</dt><dd>Lan truyền nhãn: nút theo nhãn phổ biến nhất trong hàng xóm.</dd>
+        <dt>Modularity</dt><dd>Mức cạnh trong cộng đồng vượt hơn kỳ vọng ngẫu nhiên.</dd>
+        <dt>Resolution limit</dt><dd>Giới hạn độ phân giải: tối ưu modularity bỏ sót cộng đồng quá nhỏ.</dd>
+        <dt>Speedup ratio</dt><dd>Tỉ lệ tăng tốc so với thuật toán gốc.</dd>
+        <dt>Coefficient of variation</dt><dd>Hệ số biến thiên: độ lệch chuẩn / trung bình; đo độ ổn định.</dd>
+        <dt>Vertex following (VF)</dt><dd>Gộp sẵn đỉnh bậc 1 vào cộng đồng của đỉnh nó nối tới.</dd>
+        <dt>Distance-k coloring</dt><dd>Tô màu sao cho các đỉnh cách nhau tới k bước khác màu; giúp xử lý song song không xung đột.</dd>
+        <dt>Distance dynamics</dt><dd>Động lực khoảng cách: mô phỏng khoảng cách cạnh co giãn tới 0 hoặc 1 (Attractor).</dd>
+        <dt>Jaccard distance</dt><dd>1 − (số hàng xóm chung / số hàng xóm hợp lại).</dd>
+        <dt>Incremental algorithm</dt><dd>Thuật toán tăng dần: chỉ cập nhật phần bị thay đổi.</dd>
+        <dt>Link partitioning</dt><dd>Phân hoạch cạnh thay cho nút để có cộng đồng nút chồng lấn.</dd>
+        <dt>Ego network / ego-minus-ego</dt><dd>Mạng một nút cùng hàng xóm / mạng đó sau khi bỏ chính nút trung tâm.</dd>
+        <dt>Clique, k-clique</dt><dd>Đồ thị con đầy đủ; k-clique có k nút.</dd>
+        <dt>Clique percolation</dt><dd>Gộp các k-clique chung k − 1 nút thành cộng đồng.</dd>
+        <dt>Eigenvector centrality</dt><dd>Độ trung tâm vectơ riêng: nút quan trọng nếu nối tới nút quan trọng.</dd>
+        <dt>Fitness metric</dt><dd>Hàm độ phù hợp đánh giá một tập nút có “ra dáng” cộng đồng không.</dd>
+        <dt>Conductance</dt><dd>Tỉ lệ cạnh rò ra ngoài cộng đồng; càng nhỏ càng tốt.</dd>
+        <dt>Separation / free-rider effect</dt><dd>Gán nút chồng lấn vào chỉ một nhóm / gộp nhóm “ăn theo” nhóm tốt hơn.</dd>
+        <dt>Ground truth</dt><dd>Cách chia cộng đồng chuẩn, biết trước.</dd>
+        <dt>GN / LFR benchmark</dt><dd>Hai bộ sinh đồ thị giả lập có cộng đồng cài sẵn; LFR có bậc theo luật lũy thừa.</dd>
+        <dt>NMI, ARI, Omega, F-score</dt><dd>Các độ đo so cách chia tìm được với ground truth.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nguồn: S. Gupta, D. P. Singh, “Recent trends on community detection algorithms: A survey”, <em>Modern Physics Letters B</em>, bài số 2050408 (24 trang), World Scientific, xuất bản 17/09/2020, DOI 10.1142/S0217984920504084. Trang giải thích viết lại bằng lời dễ hiểu; các hình được vẽ lại đơn giản, không sao chép hình gốc; mọi bổ sung ngoài bài đều được ghi rõ.</p>
+    <div class="next-prev"><a href="mothe2017.html">← Bài trước: Mothe 2017</a><a href="xingsu2021.html">Bài tiếp: Xing Su 2021 →</a></div>
+  </footer>
+  </div>
+
+  <script src="paper.js"></script>
+</body>
+</html>

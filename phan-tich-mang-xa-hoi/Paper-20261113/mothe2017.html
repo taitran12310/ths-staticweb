@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích dễ hiểu bài báo Mothe, Mkhitaryan, Haroutunian (CSIT 2017): so sánh 6 thuật toán phát hiện cộng đồng trên mạng sinh bằng Stochastic Block Model, cùng các độ đo đánh giá." />
+  <title>Giải thích bài báo — So sánh thuật toán phát hiện cộng đồng (Mothe 2017)</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("ptmxh-paper-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <link rel="stylesheet" href="paper.css" />
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Phân tích mạng xã hội · Giải thích bài báo 1/3</p>
+    <h1>So sánh các thuật toán phát hiện cộng đồng hàng đầu</h1>
+    <p><em>Community Detection: Comparison of State of the Art Algorithms</em></p>
+    <dl class="byline">
+      <div><dt>Tác giả</dt><dd>Josiane Mothe, Karen Mkhitaryan, Mariam Haroutunian</dd></div>
+      <div><dt>Nơi đăng</dt><dd>Hội nghị CSIT 2017, Yerevan (Armenia), tr. 125–129</dd></div>
+      <div><dt>Độ dài</dt><dd>5 trang · bài hội nghị ngắn</dd></div>
+    </dl>
+
+    <div class="tldr">
+      <strong>Tóm tắt trong 30 giây</strong>
+      <ul>
+        <li>Bài điểm lại <b>6 thuật toán</b> phát hiện cộng đồng phổ biến và các <b>độ đo</b> dùng để chấm kết quả.</li>
+        <li>Tác giả tự sinh mạng giả bằng <b>Stochastic Block Model (SBM)</b>: 200 nút, 5 cộng đồng, rồi tăng dần xác suất có cạnh giữa các cộng đồng.</li>
+        <li>Chấm bằng <b>modularity</b> và <b>thời gian chạy</b>: <b>Louvain</b> và <b>Leading Eigenvector</b> cho modularity cao nhất; <b>Louvain</b> và <b>Label Propagation</b> chạy nhanh nhất.</li>
+        <li><b>Infomap</b> và <b>Label Propagation</b> “bỏ cuộc” sớm (modularity về 0) khi cộng đồng bắt đầu mờ đi.</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#hai-file">Hai file, một bài báo</a></li>
+        <li><a href="#cong-dong">Cộng đồng là gì, vì sao khó tìm</a></li>
+        <li><a href="#mang-gia">Mạng giả lập: LFR và SBM</a></li>
+        <li><a href="#thuat-toan">Sáu thuật toán được so sánh</a></li>
+        <li><a href="#do-do">Chấm điểm cộng đồng</a></li>
+        <li><a href="#thi-nghiem">Thí nghiệm và kết quả</a></li>
+        <li><a href="#danh-gia">Kết luận và hạn chế</a></li>
+        <li><a href="#thuat-ngu">Bảng thuật ngữ</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="hai-file">
+      <h2>Hai file, một bài báo</h2>
+      <p>Trong thư mục <code>TaiLieu_20261113</code> có hai file thực chất là <strong>cùng một bài báo</strong>:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>File</th><th>Là bản nào</th><th>Khác biệt đáng chú ý</th></tr></thead>
+          <tbody>
+            <tr><td><code>Josinane2017_Community detection comparison of state of the art.pdf</code></td><td>Bản đăng chính thức (lưu trên HAL / OATAO), 7 trang gồm 2 trang bìa kho lưu trữ</td><td>Định dạng IEEE, 20 tài liệu tham khảo. Chú thích Hình 2 và Hình 3 bị chép nhầm thành giống Hình 1.</td></tr>
+            <tr><td><code>Paper_CSIT_MMH-Measures.pdf</code></td><td>Bản thảo của tác giả, 5 trang</td><td>18 tài liệu tham khảo; chú thích hình đúng; câu kết có thêm dự định thử Spinglass và Girvan–Newman.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Nội dung khoa học (thuật toán, độ đo, thí nghiệm, kết luận) giống nhau. Trang này dùng chú thích hình của bản thảo vì đúng với hình vẽ.</p>
+    </section>
+
+    <section id="cong-dong">
+      <h2>Cộng đồng là gì, vì sao khó tìm</h2>
+      <p>Mạng thực tế (mạng bạn bè, mạng protein, mạng mua hàng…) không phân bố cạnh đều như mạng ngẫu nhiên. Các nút thường gom thành <strong>nhóm</strong>: bên trong nhóm nối với nhau dày, giữa các nhóm thì thưa. Những nhóm đó gọi là <strong>cộng đồng</strong> (community, cluster). <strong>Phát hiện cộng đồng</strong> là chỉ dựa vào cấu trúc cạnh của đồ thị để tìm ra các nhóm này.</p>
+      <div class="eli5"><p>Hãy nghĩ tới một lớp học: các bạn cùng tổ nói chuyện với nhau suốt, còn giữa các tổ thì thỉnh thoảng mới trao đổi. Nhìn bảng “ai nói chuyện với ai”, ta đoán lại được lớp chia mấy tổ. Thuật toán phát hiện cộng đồng làm đúng việc đó, nhưng với hàng triệu “học sinh”.</p></div>
+      <p>Ứng dụng được bài nêu: tương tác protein–protein trong sinh học, phân tích mạng xã hội, hệ gợi ý trong mua sắm trực tuyến, học máy và hệ thích nghi.</p>
+      <h3>Ba cái khó mà bài nhấn mạnh</h3>
+      <ul>
+        <li><strong>Không có định nghĩa chung</strong> cho “cộng đồng”. Mỗi thuật toán theo đuổi một tiêu chí riêng nên cho ra kết quả khác nhau, rất khó nói thuật toán nào “đúng”.</li>
+        <li><strong>Quy mô lớn:</strong> mạng hiện đại có hàng triệu đến hàng tỷ nút và cạnh; tìm cộng đồng chính xác nhiều khi là bài toán NP-khó, nên phải dùng heuristic hoặc thuật toán xấp xỉ.</li>
+        <li><strong>Thiếu đáp án để chấm:</strong> có nhiều mạng thật lớn, nhưng rất ít mạng biết trước cộng đồng thật (<em>ground truth</em>). Vì vậy người ta dùng mạng giả lập.</li>
+      </ul>
+      <p>Quy trình làm việc mà bài mô tả gồm ba bước: <strong>chọn mạng → chạy thuật toán → đánh giá kết quả</strong>.</p>
+    </section>
+
+    <section id="mang-gia">
+      <h2>Mạng giả lập: LFR và SBM</h2>
+      <p>Để có “đề thi kèm đáp án”, người ta sinh mạng nhân tạo trong đó cộng đồng được cài sẵn. Bài nhắc tới hai mô hình:</p>
+      <div class="cards">
+        <div class="card"><b>LFR benchmark</b><p>Của Lancichinetti, Fortunato và Radicchi (2008). Bậc của nút và kích thước cộng đồng đều tuân theo luật lũy thừa (power-law), giống mạng thật: vài nút rất nhiều bạn, đa số ít bạn; vài cộng đồng rất lớn, đa số nhỏ. Tham số trộn <strong>μ</strong> quy định tỉ lệ cạnh của một nút đi ra ngoài cộng đồng của nó: μ càng lớn, cộng đồng càng mờ.</p></div>
+        <div class="card"><b>Stochastic Block Model (SBM)</b><p>Mô hình sinh đồ thị ngẫu nhiên: định trước số nút, kích thước từng cộng đồng và một <strong>ma trận xác suất</strong> cho biết khả năng có cạnh giữa hai nút cùng nhóm hoặc khác nhóm. Bài này chỉ dùng SBM vì đã có nhiều nghiên cứu so sánh bằng LFR.</p></div>
+      </div>
+      <p>Trong SBM đơn giản nhất có hai con số:</p>
+      <dl class="terms">
+        <dt>P<sub>in</sub></dt><dd>xác suất có cạnh giữa hai nút <em>cùng</em> cộng đồng.</dd>
+        <dt>P<sub>out</sub></dt><dd>xác suất có cạnh giữa hai nút <em>khác</em> cộng đồng.</dd>
+      </dl>
+      <div class="eli5"><p>P<sub>in</sub> cao, P<sub>out</sub> thấp: các tổ tách bạch rõ ràng. Khi P<sub>out</sub> tăng dần tới bằng P<sub>in</sub>, ai cũng nói chuyện với ai như nhau, ranh giới giữa các tổ biến mất. Tăng P<sub>out</sub> chính là “làm đề khó dần”.</p></div>
+    </section>
+
+    <section id="thuat-toan">
+      <h2>Sáu thuật toán được so sánh</h2>
+      <p>Bài xếp các thuật toán vào 5 nhóm ý tưởng: tối ưu modularity, phổ (vectơ riêng), bước đi ngẫu nhiên, lan truyền nhãn và lý thuyết thông tin. Sáu thuật toán cụ thể được đưa vào thí nghiệm:</p>
+
+      <h3>1. Fast Greedy (Newman 2004; Clauset, Newman, Moore 2004)</h3>
+      <p>Bắt đầu với mỗi nút là một cộng đồng. Ở mỗi bước, <strong>gộp hai cộng đồng</strong> mà phép gộp làm modularity tăng nhiều nhất. Dừng khi không còn phép gộp nào làm modularity tăng. Bản của Clauset và cộng sự là phiên bản nhanh của thuật toán tham lam gốc của Newman.</p>
+
+      <h3>2. Louvain (Blondel và cộng sự, 2008)</h3>
+      <p>Hai pha lặp lại:</p>
+      <ol>
+        <li><strong>Tối ưu cục bộ:</strong> lần lượt thử chuyển từng nút sang cộng đồng của hàng xóm, giữ lại nước đi làm modularity tăng nhiều nhất, tạo ra các cộng đồng nhỏ.</li>
+        <li><strong>Gộp nút:</strong> mỗi cộng đồng vừa tìm được co lại thành một “siêu nút”, tạo ra một mạng mới nhỏ hơn.</li>
+      </ol>
+      <p>Lặp đến khi modularity không tăng nữa. Kết quả là một <strong>cây phân cấp</strong> cộng đồng (cộng đồng lớn chứa cộng đồng nhỏ).</p>
+
+      <h3>3. Leading Eigenvector (Newman 2006)</h3>
+      <p>Dựng <strong>ma trận modularity</strong>, tìm vectơ riêng ứng với giá trị riêng lớn nhất, rồi chia nút theo <strong>dấu</strong> của từng phần tử trong vectơ đó (dương một bên, âm một bên). Đây là cách nhìn bài toán qua đại số tuyến tính thay vì thử gộp từng bước.</p>
+
+      <h3>4. Walktrap (Pons và Latapy, 2005)</h3>
+      <p>Dựa trên <strong>bước đi ngẫu nhiên ngắn</strong>: vì bên trong cộng đồng nhiều cạnh hơn bên ngoài, một người đi ngẫu nhiên vài bước thường vẫn quanh quẩn trong cộng đồng xuất phát. Hai nút có “dấu vết đi bộ” giống nhau thì nhiều khả năng cùng cộng đồng.</p>
+
+      <h3>5. Infomap (Rosvall và Bergstrom, 2008)</h3>
+      <p>Phương pháp <strong>lý thuyết thông tin</strong>. Ban đầu mỗi nút là một cộng đồng; nút được chuyển sang cộng đồng hàng xóm nếu việc đó làm <strong>map equation</strong> giảm nhiều nhất. Map equation đo độ dài mô tả đường đi của một người đi ngẫu nhiên: nếu chia cộng đồng tốt, người đi bộ ở lâu trong từng vùng nên mô tả đường đi ngắn gọn hơn. Dừng khi không còn nước đi nào làm map equation giảm.</p>
+
+      <h3>6. Label Propagation (Raghavan, Albert, Kumara, 2007)</h3>
+      <p>Không tối ưu hàm mục tiêu nào và không cần biết trước gì về mạng. Mỗi nút bắt đầu với một nhãn riêng; qua từng vòng, nút đổi sang <strong>nhãn phổ biến nhất trong hàng xóm</strong>. Dừng khi nút nào cũng mang nhãn mà nhiều hàng xóm của nó mang nhất. Ưu điểm lớn là thời gian <strong>gần tuyến tính</strong>.</p>
+      <div class="eli5"><p>Label Propagation giống tin đồn trong lớp: ai cũng nghe theo số đông bạn thân của mình. Sau vài vòng, mỗi “nhóm bạn thân” sẽ chung một tin.</p></div>
+
+      <div class="table-wrap">
+        <table class="grid">
+          <caption>Tóm tắt sáu thuật toán</caption>
+          <thead><tr><th>Thuật toán</th><th>Nhóm ý tưởng</th><th>Cách làm một dòng</th></tr></thead>
+          <tbody>
+            <tr><td>Fast Greedy</td><td>Tối ưu modularity</td><td>Gộp dần hai cộng đồng làm modularity tăng nhiều nhất</td></tr>
+            <tr><td>Louvain</td><td>Tối ưu modularity</td><td>Chuyển nút cục bộ rồi co cộng đồng thành siêu nút, lặp lại</td></tr>
+            <tr><td>Leading Eigenvector</td><td>Phổ (vectơ riêng)</td><td>Chia nút theo dấu của vectơ riêng chính của ma trận modularity</td></tr>
+            <tr><td>Walktrap</td><td>Bước đi ngẫu nhiên</td><td>Nút có xác suất đi ngẫu nhiên giống nhau thì cùng nhóm</td></tr>
+            <tr><td>Infomap</td><td>Lý thuyết thông tin</td><td>Chia sao cho mô tả đường đi ngẫu nhiên ngắn nhất (map equation)</td></tr>
+            <tr><td>Label Propagation</td><td>Lan truyền nhãn</td><td>Nút theo nhãn phổ biến nhất của hàng xóm</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="do-do">
+      <h2>Chấm điểm cộng đồng: độ đo nội và độ đo ngoại</h2>
+      <p>Sau khi chia mạng xong cần biết kết quả “tốt” hay “tệ”. Bài so sánh thuật toán theo hai mặt: <strong>hiệu năng</strong> (thời gian chạy) và <strong>chất lượng</strong> cộng đồng. Chất lượng có hai cách chấm:</p>
+      <div class="cards">
+        <div class="card"><b>Độ đo nội (internal)</b><p>Chỉ nhìn vào chính đồ thị: nhóm có “ra dáng” cộng đồng không (dày bên trong, thưa bên ngoài). Không cần đáp án.</p></div>
+        <div class="card"><b>Độ đo ngoại (external)</b><p>So kết quả với cách chia chuẩn (ground truth). Chỉ dùng được khi có đáp án, ví dụ mạng giả lập.</p></div>
+      </div>
+
+      <h3>Độ đo nội</h3>
+      <p><strong>Conductance</strong>: tỉ lệ cạnh “lọt ra ngoài” cộng đồng. Càng nhỏ càng tốt.</p>
+      <span class="formula">Conductance(c) = O<sub>c</sub> / (2·I<sub>c</sub> + O<sub>c</sub>)<small>O<sub>c</sub>: số cạnh từ cộng đồng c đi ra ngoài; I<sub>c</sub>: số cạnh nằm trong c.</small></span>
+      <p>Ví dụ: một nhóm có 10 cạnh bên trong và 2 cạnh đi ra ngoài thì conductance = 2 / (20 + 2) ≈ 0.09, rất “kín”. Leskovec và cộng sự thấy rằng cộng đồng tốt nhất thường kém “ra dáng cộng đồng” hơn khi kích thước tăng, và trên 230 mạng thật lớn, conductance cùng triangle participation ratio là hai độ đo nhận ra cộng đồng thật tốt nhất.</p>
+
+      <p><strong>Triangle participation ratio (TPR)</strong>: tỉ lệ nút trong cộng đồng có tham gia ít nhất một tam giác. Càng cao càng tốt, vì bạn bè của nhau thường cũng là bạn của nhau.</p>
+      <span class="formula">TPR(c) = T<sub>c</sub> / N<sub>c</sub><small>T<sub>c</sub>: số nút của c nằm trong một tam giác; N<sub>c</sub>: số nút của c.</small></span>
+
+      <p><strong>Modularity</strong> (Q): độ đo phổ biến nhất. So tỉ lệ cạnh nằm trong cộng đồng với tỉ lệ <em>kỳ vọng</em> nếu cạnh được nối ngẫu nhiên nhưng giữ nguyên bậc mỗi nút.</p>
+      <span class="formula">Q = (1 / 2M) · Σ<sub>x,y</sub> [ A<sub>xy</sub> − d<sub>x</sub>·d<sub>y</sub> / (2M) ] · δ(c<sub>x</sub>, c<sub>y</sub>)<small>M: số cạnh; A<sub>xy</sub> = 1 nếu x nối y; d<sub>x</sub>: bậc của x; δ = 1 khi x và y cùng cộng đồng, ngược lại 0.</small></span>
+      <div class="eli5"><p>Modularity hỏi: “Trong nhóm có nhiều cạnh hơn mức mà may rủi tạo ra không?” Q gần 0: không hơn gì ngẫu nhiên. Q càng lớn (tối đa dưới 1): cộng đồng càng rõ.</p></div>
+      <p>Nhược điểm bài nêu: <strong>giới hạn độ phân giải</strong> (resolution limit). Tối ưu modularity có thể <em>gộp nhầm</em> các nhóm nhỏ khi độ phân giải thấp, hoặc <em>tách nhầm</em> nhóm lớn khi độ phân giải cao, và thường không khử được cả hai sai lệch cùng lúc.</p>
+
+      <h3>Độ đo ngoại</h3>
+      <p><strong>Normalized Mutual Information (NMI)</strong>: đo hai cách chia “kể cùng một câu chuyện” tới mức nào. Bằng 1 nếu giống hệt, gần 0 nếu không liên quan.</p>
+      <span class="formula">NMI(X, Y) = 2·I(X, Y) / ( H(X) + H(Y) )<small>I: thông tin tương hỗ giữa hai cách chia X và Y; H: entropy của từng cách chia.</small></span>
+
+      <p><strong>Rand Index / Adjusted Rand Index</strong>: xét mọi <em>cặp</em> nút và đếm xem hai cách chia có “đồng ý” với nhau về cặp đó không:</p>
+      <dl class="terms">
+        <dt>SS</dt><dd>cặp cùng nhóm trong X và cùng nhóm trong Y (đồng ý).</dd>
+        <dt>DD</dt><dd>cặp khác nhóm trong X và khác nhóm trong Y (đồng ý).</dd>
+        <dt>SD, DS</dt><dd>cặp mà hai cách chia bất đồng.</dd>
+      </dl>
+      <span class="formula">(SS + DD) / (SS + SD + DS + DD)</span>
+      <div class="warn"><p>Công thức trên (đúng như bài viết) thực ra là <strong>Rand Index</strong> gốc. <strong>Adjusted</strong> Rand Index còn trừ đi phần “đồng ý do may rủi”: ARI = (RI − E[RI]) / (max RI − E[RI]). Nhờ vậy ARI ≈ 0 với cách chia ngẫu nhiên, còn Rand Index gốc thường vẫn khá cao. Bài gọi tên ARI nhưng ghi công thức RI.</p></div>
+
+      <p><strong>Purity</strong>: với mỗi nhóm trong X, lấy nhóm trong Y trùng với nó nhiều nút nhất, cộng lại rồi chia cho tổng số nút.</p>
+      <span class="formula">Purity(X, Y) = (1/N) · Σ<sub>p</sub> max<sub>q</sub> N<sub>x<sub>p</sub>, y<sub>q</sub></sub></span>
+      <p>Ví dụ: 10 nút, cách chia X có nhóm A (6 nút) và B (4 nút). Nhóm A có 5 nút trùng nhóm chuẩn số 1; nhóm B có 4 nút trùng nhóm chuẩn số 2. Purity = (5 + 4) / 10 = 0.9. Lưu ý purity dễ đạt cao một cách giả tạo nếu chia thật vụn (mỗi nút một nhóm thì purity = 1).</p>
+
+      <h3>Các cải tiến mới hơn được nhắc tới</h3>
+      <ul>
+        <li><strong>Orman và Labatut:</strong> NMI, ARI, purity bỏ qua cấu trúc mạng (nút quan trọng hay không đều tính như nhau). Labatut đề xuất phiên bản có <strong>trọng số theo vị trí nút</strong> (kết hợp bậc và mức gắn bó với cộng đồng); thử trên mạng nhân tạo, NMI cải tiến phản ánh được cả thành viên lẫn tính chất cấu trúc.</li>
+        <li><strong>Rossetti và cộng sự:</strong> dùng <em>community precision</em> (mức đồng nhãn giữa cộng đồng tìm được và ground truth) và <em>community recall</em> (mức cộng đồng tìm được bao phủ ground truth). Chạy nhanh hơn NMI trên mạng lớn.</li>
+        <li><strong>Zhang:</strong> <em>relative NMI</em> (rNMI) so NMI với NMI kỳ vọng của cách chia ngẫu nhiên, vì NMI thường bị sai lệch khi mạng có kích thước hữu hạn.</li>
+      </ul>
+      <p>Trong phần thí nghiệm, bài <strong>chỉ dùng modularity</strong> để chấm chất lượng, cộng với <strong>thời gian chạy</strong>.</p>
+    </section>
+
+    <section id="thi-nghiem">
+      <h2>Thí nghiệm và kết quả</h2>
+      <h3>Thiết lập</h3>
+      <div class="stats">
+        <div class="stat"><span class="stat-num" data-to="200">200</span><span class="stat-label">nút mỗi mạng</span></div>
+        <div class="stat"><span class="stat-num" data-to="5">5</span><span class="stat-label">cộng đồng bằng nhau (40 nút mỗi nhóm)</span></div>
+        <div class="stat"><span class="stat-num" data-to="300">300</span><span class="stat-label">hơn 300 mạng ngẫu nhiên, lấy trung bình</span></div>
+        <div class="stat"><span class="stat-num" data-to="6">6</span><span class="stat-label">thuật toán so sánh</span></div>
+      </div>
+      <ul>
+        <li>P<sub>in</sub> = 1: hai nút cùng cộng đồng <em>luôn</em> nối nhau, nên mỗi cộng đồng là một đồ thị đầy đủ (clique).</li>
+        <li>P<sub>out</sub> chạy từ 0 đến 1: từ “5 cụm tách rời hoàn toàn” tới “cả mạng nối đầy đủ”.</li>
+        <li>Thí nghiệm thứ ba cố định P<sub>out</sub> = 0.3 và tăng số nút N đến khoảng 250 để xem thời gian chạy.</li>
+      </ul>
+
+      <h3>Hình 1 · Modularity theo P<sub>out</sub></h3>
+      <p>Mọi đường xuất phát ở <strong>Q ≈ 0.8</strong> khi P<sub>out</sub> = 0. Con số này không ngẫu nhiên: với k cộng đồng bằng nhau, tách rời hoàn toàn, modularity đạt 1 − 1/k = 1 − 1/5 = 0.8.</p>
+      <ul>
+        <li><strong>Louvain</strong> và <strong>Leading Eigenvector</strong> cho modularity cao nhất trên toàn dải P<sub>out</sub>. Các đường Louvain, Fast Greedy, Leading Eigenvector, Walktrap giảm từ từ, sát nhau, về gần 0 khi P<sub>out</sub> → 1.</li>
+        <li><strong>Infomap</strong> và <strong>Label Propagation</strong> rơi thẳng về <strong>0</strong> từ khoảng P<sub>out</sub> ≈ 0.2–0.3: chúng gom cả mạng thành một cộng đồng, tức không tìm được cộng đồng “tốt” khi ranh giới mờ.</li>
+      </ul>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): modularity cao chưa chắc là “đúng”. Louvain, Fast Greedy và Leading Eigenvector chính là các thuật toán <em>tối ưu modularity</em>, nên chấm bằng modularity là sân nhà của chúng. Hơn nữa, tối ưu modularity vẫn có thể tìm ra Q &gt; 0 ngay cả trên mạng gần như ngẫu nhiên. Việc Infomap và Label Propagation trả về “một cộng đồng” khi P<sub>out</sub> lớn có thể được xem là cách trả lời thận trọng chứ không hẳn là thất bại. Muốn phân xử phải so với ground truth bằng NMI hoặc ARI, điều mà bài chưa làm.</p></div>
+
+      <h3>Hình 2 · Thời gian chạy theo P<sub>out</sub> (N = 200)</h3>
+      <ul>
+        <li><strong>Infomap chậm nhất</strong> và chậm dần khi P<sub>out</sub> tăng, lên tới khoảng 0.1 giây.</li>
+        <li>Walktrap và Leading Eigenvector tăng dần tới khoảng 0.04–0.05 giây; Fast Greedy quanh 0.02 giây.</li>
+        <li><strong>Louvain</strong> và <strong>Label Propagation</strong> gần như sát 0 trên toàn dải.</li>
+      </ul>
+
+      <h3>Hình 3 · Thời gian chạy theo số nút N (P<sub>out</sub> = 0.3)</h3>
+      <ul>
+        <li>Khi N tăng, thời gian của Infomap tăng nhanh nhất (khoảng 0.08 giây ở N ≈ 240).</li>
+        <li>Fast Greedy, Walktrap, Leading Eigenvector tăng vừa phải (khoảng 0.03–0.05 giây).</li>
+        <li>Louvain và Label Propagation vẫn rất nhanh.</li>
+      </ul>
+      <p class="note">Các số thời gian ở trên đọc gần đúng từ biểu đồ trong bài, không có bảng số chính xác.</p>
+
+      <div class="table-wrap">
+        <table class="grid">
+          <caption>Tổng hợp kết quả theo hai tiêu chí của bài</caption>
+          <thead><tr><th>Thuật toán</th><th class="c">Modularity</th><th class="c">Tốc độ</th></tr></thead>
+          <tbody>
+            <tr><td>Louvain</td><td class="c">Cao nhất</td><td class="c">Rất nhanh</td></tr>
+            <tr><td>Leading Eigenvector</td><td class="c">Cao nhất</td><td class="c">Trung bình</td></tr>
+            <tr><td>Fast Greedy</td><td class="c">Cao</td><td class="c">Trung bình</td></tr>
+            <tr><td>Walktrap</td><td class="c">Cao</td><td class="c">Trung bình</td></tr>
+            <tr><td>Infomap</td><td class="c">Về 0 sớm (P<sub>out</sub> ≈ 0.2–0.3)</td><td class="c">Chậm nhất</td></tr>
+            <tr><td>Label Propagation</td><td class="c">Về 0 sớm (P<sub>out</sub> ≈ 0.2–0.3)</td><td class="c">Rất nhanh</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="danh-gia">
+      <h2>Kết luận và hạn chế</h2>
+      <h3>Tác giả kết luận</h3>
+      <p>Bài đã khảo sát 6 thuật toán phát hiện cộng đồng hàng đầu, dùng SBM sinh mạng ngẫu nhiên và so sánh theo modularity, thời gian chạy và kích thước mạng. Louvain nổi bật vì vừa cho modularity cao vừa nhanh.</p>
+      <h3>Hướng phát triển tác giả đề ra</h3>
+      <ul>
+        <li>Thêm mạng thật có ground truth.</li>
+        <li>Dùng thêm độ đo nội và ngoại để đánh giá cả chất lượng lẫn mức khớp với ground truth.</li>
+        <li>Thêm thuật toán, chẳng hạn Spinglass và Girvan–Newman (bản thảo nêu rõ tên).</li>
+      </ul>
+      <h3>Hạn chế cần biết khi trích dẫn</h3>
+      <div class="warn">
+        <ul>
+          <li>Mạng rất nhỏ (200 nút, tối đa khoảng 250 nút khi đo thời gian); khác xa mạng hàng triệu nút mà phần mở đầu nhắc tới.</li>
+          <li>Chỉ chấm bằng modularity, vốn là hàm mục tiêu của chính Louvain, Fast Greedy, Leading Eigenvector, nên so sánh nghiêng về các thuật toán đó.</li>
+          <li>Mạng SBM có ground truth nhưng bài không tính NMI, ARI hay purity dù đã giới thiệu chúng.</li>
+          <li>P<sub>in</sub> = 1 là trường hợp cực đoan (cộng đồng là clique đầy đủ); không thử P<sub>in</sub> thấp hơn.</li>
+          <li>Không có mạng thật; trong bản đăng chính thức, chú thích Hình 2 và 3 bị ghi nhầm.</li>
+        </ul>
+      </div>
+      <p>Dù vậy, đây là một bài tổng quan ngắn gọn, dễ đọc, đặt cạnh nhau các thuật toán và độ đo cơ bản nhất của môn học. Bài liên hệ trực tiếp với các tài liệu khác trong thư mục <code>TaiLieu</code>: Newman–Girvan (modularity), Blondel và cộng sự (Louvain), Lancichinetti và cộng sự (LFR benchmark), Fortunato 2010 (tổng quan).</p>
+    </section>
+
+    <section id="thuat-ngu">
+      <h2>Bảng thuật ngữ</h2>
+      <dl class="terms">
+        <dt>Community</dt><dd>Cộng đồng: nhóm nút liên kết dày bên trong, thưa với bên ngoài.</dd>
+        <dt>Ground truth</dt><dd>Cách chia cộng đồng chuẩn, biết trước, dùng làm đáp án.</dd>
+        <dt>SBM</dt><dd>Stochastic Block Model, mô hình sinh đồ thị theo khối với xác suất cạnh trong/ngoài nhóm.</dd>
+        <dt>LFR</dt><dd>Benchmark Lancichinetti–Fortunato–Radicchi, sinh mạng có bậc và kích thước cộng đồng theo luật lũy thừa.</dd>
+        <dt>Modularity</dt><dd>Mức cạnh trong cộng đồng vượt hơn kỳ vọng ngẫu nhiên.</dd>
+        <dt>Resolution limit</dt><dd>Giới hạn độ phân giải: tối ưu modularity không thấy được các cộng đồng quá nhỏ.</dd>
+        <dt>Conductance</dt><dd>Tỉ lệ cạnh rò ra ngoài cộng đồng.</dd>
+        <dt>NMI, ARI, Purity</dt><dd>Các độ đo so một cách chia với đáp án.</dd>
+        <dt>Map equation</dt><dd>Hàm mục tiêu của Infomap: độ dài mô tả đường đi ngẫu nhiên.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nguồn: J. Mothe, K. Mkhitaryan, M. Haroutunian, “Community detection: comparison of state of the art algorithms”, <em>11th International Conference on Computer Science and Information Technologies (CSIT 2017)</em>, Yerevan, tr. 125–129, 2017 (hal-02641009). Trang giải thích viết lại bằng lời dễ hiểu; số liệu thời gian đọc gần đúng từ biểu đồ.</p>
+    <div class="next-prev"><a href="index.html">← Danh sách bài</a><a href="gupta2020.html">Bài tiếp: Gupta &amp; Singh 2020 →</a></div>
+  </footer>
+  </div>
+
+  <script src="paper.js"></script>
+</body>
+</html>

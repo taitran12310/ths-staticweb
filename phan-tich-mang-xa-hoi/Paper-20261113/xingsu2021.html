@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích dễ hiểu bài tổng quan của Xing Su và cộng sự (IEEE TNNLS 2021): phát hiện cộng đồng bằng học sâu, gồm CNN, GCN, GAT, GAN, autoencoder, deep NMF, deep sparse filtering, bộ dữ liệu, độ đo, mã nguồn, ứng dụng và hướng nghiên cứu." />
+  <title>Giải thích bài báo — Tổng quan phát hiện cộng đồng bằng học sâu (Su 2021)</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("ptmxh-paper-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <link rel="stylesheet" href="paper.css" />
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Phân tích mạng xã hội · Giải thích bài báo 3/3</p>
+    <h1>Tổng quan toàn diện về phát hiện cộng đồng bằng học sâu</h1>
+    <p><em>A Comprehensive Survey on Community Detection with Deep Learning</em></p>
+    <dl class="byline">
+      <div><dt>Tác giả</dt><dd>Xing Su, Shan Xue, Fanzhen Liu, Jia Wu, Jian Yang, Chuan Zhou, Wenbin Hu, Cecile Paris, Surya Nepal, Di Jin, Quan Z. Sheng, Philip S. Yu</dd></div>
+      <div><dt>Nơi đăng</dt><dd>IEEE Transactions on Neural Networks and Learning Systems, 2021 (file PDF là bản arXiv 2105.12584v2, 11/10/2021)</dd></div>
+      <div><dt>Độ dài</dt><dd>29 trang · 17 trang nội dung, 191 tài liệu tham khảo, 8 trang phụ lục</dd></div>
+    </dl>
+
+    <div class="tldr">
+      <strong>Tóm tắt trong 30 giây</strong>
+      <ul>
+        <li>Đây là <b>bài tổng quan</b> (survey), không đề xuất thuật toán mới. Bài gom các phương pháp phát hiện cộng đồng dùng <b>học sâu</b> (deep learning) và xếp chúng vào một <b>cây phân loại mới gồm 6 nhóm</b>.</li>
+        <li>6 nhóm: <b>mạng tích chập</b> (CNN và GCN), <b>mạng chú ý trên đồ thị</b> (GAT), <b>mạng đối sinh</b> (GAN), <b>autoencoder</b> (AE, chia tiếp 6 loại con), <b>phân rã ma trận không âm sâu</b> (DNMF) và <b>lọc thưa sâu</b> (DSF).</li>
+        <li>Ý tưởng chung: học sâu nén mạng lớn, nhiều chiều thành <b>vectơ ít chiều</b> (embedding) giữ được cấu trúc cộng đồng, rồi phân cụm hoặc phân lớp các vectơ đó.</li>
+        <li>Bài còn tổng hợp <b>bộ dữ liệu chuẩn</b>, <b>12 độ đo</b>, <b>mã nguồn mở</b>, <b>ứng dụng thực tế</b> và <b>12 hướng nghiên cứu mở</b> (số cộng đồng chưa biết, mạng động, mạng lớn, mạng có dấu…).</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#gioi-thieu">Bài báo nói về gì</a></li>
+        <li><a href="#dinh-nghia">Định nghĩa và ký hiệu</a></li>
+        <li><a href="#truyen-thong">Lịch sử và phương pháp truyền thống</a></li>
+        <li><a href="#phan-loai">Cây phân loại 6 nhóm</a></li>
+        <li><a href="#cnn">Nhóm 1a: CNN</a></li>
+        <li><a href="#gcn">Nhóm 1b: GCN</a></li>
+        <li><a href="#gat">Nhóm 2: GAT</a></li>
+        <li><a href="#gan">Nhóm 3: GAN</a></li>
+        <li><a href="#ae">Nhóm 4: Autoencoder</a></li>
+        <li><a href="#dnmf">Nhóm 5: Deep NMF</a></li>
+        <li><a href="#dsf">Nhóm 6: Deep Sparse Filtering</a></li>
+        <li><a href="#du-lieu">Bộ dữ liệu chuẩn</a></li>
+        <li><a href="#do-do">Độ đo đánh giá</a></li>
+        <li><a href="#ma-nguon">Mã nguồn mở</a></li>
+        <li><a href="#ung-dung">Ứng dụng thực tế</a></li>
+        <li><a href="#huong-mo">12 hướng nghiên cứu mở</a></li>
+        <li><a href="#ket-luan">Kết luận và nhận xét</a></li>
+        <li><a href="#thuat-ngu">Bảng thuật ngữ</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="gioi-thieu">
+      <h2>Bài báo nói về gì</h2>
+      <p><strong>Cộng đồng</strong> (community) là nhóm nút trong mạng có liên kết với nhau chặt hơn so với phần còn lại, và thường có đặc điểm chung. <strong>Phát hiện cộng đồng</strong> (community detection) là tìm ra các nhóm đó. Bài này là một <strong>tổng quan</strong> (survey): đọc và sắp xếp lại các công trình dùng <strong>học sâu</strong> (deep learning) để phát hiện cộng đồng, chủ yếu từ khoảng 2014 tới 2021.</p>
+      <p>Hình 1 của bài minh họa ý tưởng bằng một mạng xã hội 7 người dùng: dựa trên mức gần gũi khi hoạt động trực tuyến (cấu trúc mạng, topology) và hồ sơ tài khoản (thuộc tính, attributes), mạng được chia thành hai cộng đồng C<sub>1</sub>, C<sub>2</sub> tương ứng với nghề nghiệp của người dùng.</p>
+
+      <h3>Vì sao phát hiện cộng đồng quan trọng</h3>
+      <p>Bài nhắc lại rằng cộng đồng đã được nghiên cứu từ những năm 1920 trong xã hội học, và từ năm 2002 Girvan và Newman mở ra hướng chia đồ thị. Các ví dụ ứng dụng bài nêu ở phần mở đầu:</p>
+      <ul>
+        <li><strong>Mạng xã hội:</strong> nhà tài trợ quảng bá sản phẩm tới đúng nhóm người dùng.</li>
+        <li><strong>Mạng trích dẫn:</strong> xác định mức quan trọng, liên kết và sự tiến hóa của chủ đề nghiên cứu, nhận ra xu hướng.</li>
+        <li><strong>Mạng chuyển hóa và mạng tương tác protein–protein (PPI):</strong> tìm nhóm protein có chức năng sinh học giống nhau.</li>
+        <li><strong>Mạng não:</strong> phản ánh sự phân vùng chức năng và giải phẫu của não.</li>
+        <li>Phân tích lan truyền tin đồn, bùng phát virus, tiến triển khối u.</li>
+      </ul>
+
+      <h3>Vì sao cần học sâu</h3>
+      <p>Phương pháp truyền thống như <strong>phân cụm phổ</strong> (spectral clustering) và <strong>suy diễn thống kê</strong> (statistical inference) chạy tốt trên mạng nhỏ, trường hợp đơn giản. Mạng thật có cấu trúc phức tạp, phi tuyến, đặc trưng nhiều chiều và chi phí tính toán lớn. Theo bài, học sâu giúp:</p>
+      <ol>
+        <li>học được các tính chất <strong>phi tuyến</strong> của mạng (ví dụ quan hệ giữa các nút);</li>
+        <li>biểu diễn mạng bằng <strong>embedding ít chiều</strong> mà vẫn giữ cấu trúc phức tạp;</li>
+        <li>phát hiện cộng đồng tốt hơn nhờ kết hợp <strong>nhiều nguồn thông tin</strong> (cấu trúc, thuộc tính…).</li>
+      </ol>
+
+      <h3>Đóng góp mà tác giả nêu</h3>
+      <div class="cards">
+        <div class="card"><b>Cây phân loại mới</b><p>Phân loại hệ thống, mỗi nhóm có phần điểm lại, tóm tắt và so sánh các công trình tiêu biểu (Hình 2 và các bảng IV–VIII).</p></div>
+        <div class="card"><b>Tài nguyên mở</b><p>Bộ dữ liệu chuẩn, độ đo đánh giá, mã nguồn cài đặt; trích từ các hội nghị và tạp chí uy tín.</p></div>
+        <div class="card"><b>Hướng tương lai</b><p>Hạn chế hiện tại, thách thức then chốt và cơ hội nghiên cứu (12 hướng).</p></div>
+      </div>
+      <p>Tác giả cho rằng đây là bài tổng quan đầy đủ đầu tiên tập trung vào học sâu cho phát hiện cộng đồng. Bài là bản mở rộng của một bài tổng quan ngắn cùng nhóm đã đăng tại IJCAI-20 (Liu và cộng sự, 2020). Các bài tổng quan trước đó thường chỉ tập trung vào một kỹ thuật (mô hình đồ thị xác suất, lan truyền nhãn, tính toán tiến hóa), một loại mạng (mạng động, mạng có hướng, mạng nhiều lớp), một loại cộng đồng (rời nhau hay chồng lấn) hoặc một ứng dụng (mạng xã hội).</p>
+
+      <h3>Bố cục bài báo</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Mục</th><th>Nội dung</th></tr></thead>
+          <tbody>
+            <tr><td>II</td><td>Định nghĩa, ký hiệu, đầu vào và đầu ra</td></tr>
+            <tr><td>III</td><td>Lịch sử phát triển, 7 nhóm phương pháp truyền thống</td></tr>
+            <tr><td>IV</td><td>Cây phân loại phương pháp học sâu</td></tr>
+            <tr><td>V–X</td><td>Từng nhóm: tích chập (CNN, GCN), GAT, GAN, AE, DNMF, DSF</td></tr>
+            <tr><td>XI</td><td>Tài nguyên: dữ liệu, độ đo, mã nguồn</td></tr>
+            <tr><td>XII</td><td>Ứng dụng thực tế</td></tr>
+            <tr><td>XIII–XIV</td><td>12 hướng tương lai và kết luận</td></tr>
+            <tr><td>Phụ lục A–E</td><td>Bảng tóm tắt kỹ thuật (IV–VIII), mô tả dữ liệu, công thức độ đo, mô tả mã nguồn, bảng viết tắt</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="dinh-nghia">
+      <h2>Định nghĩa và ký hiệu</h2>
+      <h3>Mạng (Định nghĩa 1)</h3>
+      <p>Mạng G = (V, E) gồm tập nút V = {v<sub>1</sub>, …, v<sub>n</sub>} và tập cạnh E. <strong>Láng giềng</strong> (neighborhood) của nút v<sub>i</sub>, ký hiệu N(v<sub>i</sub>), là các nút nối trực tiếp với v<sub>i</sub>. Mạng được mô tả bằng <strong>ma trận kề</strong> (adjacency matrix) A kích thước n×n: a<sub>ij</sub> = 1 nếu có cạnh giữa v<sub>i</sub> và v<sub>j</sub>, ngược lại bằng 0.</p>
+      <p>Ví dụ (của người giải thích): mạng 4 nút, cạnh 1–2, 1–3, 2–3, 3–4.</p>
+      <span class="formula">A = [ 0 1 1 0 ; 1 0 1 0 ; 1 1 0 1 ; 0 0 1 0 ]<small>Mỗi đoạn giữa hai dấu chấm phẩy là một hàng; hàng i, cột j là a<sub>ij</sub>. Ví dụ hàng 3 có ba số 1 vì nút 3 nối với nút 1, 2, 4. Ma trận đối xứng vì mạng vô hướng.</small></span>
+      <p>Từ ma trận kề, bài phân biệt các loại mạng:</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Loại mạng</th><th>Điều kiện</th></tr></thead>
+          <tbody>
+            <tr><td>Có hướng (directed) / vô hướng</td><td>a<sub>ij</sub> ≠ a<sub>ji</sub> thì có hướng, ngược lại vô hướng</td></tr>
+            <tr><td>Có trọng số (weighted)</td><td>a<sub>ij</sub> mang trọng số w<sub>ij</sub>, viết G = (V, E, W)</td></tr>
+            <tr><td>Có dấu (signed)</td><td>a<sub>ij</sub> nhận +1 (tích cực, ví dụ bạn bè) hoặc −1 (tiêu cực, ví dụ đối thủ)</td></tr>
+            <tr><td>Có thuộc tính (attributed)</td><td>mỗi nút v<sub>i</sub> có vectơ thuộc tính x<sub>i</sub>; ma trận thuộc tính X kích thước n×d; viết G = (V, E, X)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cộng đồng (Định nghĩa 2)</h3>
+      <p>Tập cộng đồng C = {C<sub>1</sub>, …, C<sub>K</sub>}. Một nút được xếp vào cộng đồng C<sub>k</sub> khi <strong>bậc trong</strong> (số cạnh nối vào bên trong cộng đồng) lớn hơn <strong>bậc ngoài</strong> (số cạnh nối ra ngoài).</p>
+      <div class="cards">
+        <div class="card"><b>Cộng đồng rời nhau (disjoint)</b><p>Mỗi nút thuộc đúng một cộng đồng. Ví dụ bài nêu: câu lạc bộ sinh viên chỉ cho mỗi sinh viên tham gia một câu lạc bộ.</p></div>
+        <div class="card"><b>Cộng đồng chồng lấn (overlapping)</b><p>Một nút có thể thuộc nhiều cộng đồng. Ví dụ: người dùng tham gia nhiều vòng bạn bè. Phương pháp tìm cộng đồng chồng lấn cũng tìm được cộng đồng rời nhau.</p></div>
+      </div>
+
+      <h3>Đầu vào và đầu ra của mô hình học sâu</h3>
+      <ul>
+        <li><strong>Đầu vào:</strong> cấu trúc mạng (topology) ở dạng ma trận như A, ma trận kề có dấu A<sup>(+,−)</sup>, ma trận modularity B; và thuộc tính mạng như ma trận thuộc tính nút X.</li>
+        <li><strong>Đầu ra:</strong> một tập cộng đồng, rời nhau hoặc chồng lấn.</li>
+      </ul>
+
+      <h3>Ký hiệu cần nhớ (trích từ Bảng I)</h3>
+      <dl class="terms">
+        <dt>n, m, K, d</dt><dd>số nút, số cạnh, số cộng đồng, số thuộc tính.</dd>
+        <dt>A, Â</dt><dd>ma trận kề và ma trận kề <em>tái tạo</em> (reconstructed) do mô hình sinh lại.</dd>
+        <dt>X, X̃</dt><dd>ma trận thuộc tính và bản đã bị “làm nhiễu” (corrupted).</dd>
+        <dt>D</dt><dd>ma trận bậc (degree matrix): đường chéo là bậc của từng nút.</dd>
+        <dt>B</dt><dd>ma trận modularity, b<sub>ij</sub> = a<sub>ij</sub> − k<sub>i</sub>k<sub>j</sub>/(2m).</dd>
+        <dt>S, O, P</dt><dd>ma trận tương đồng (similarity), ma trận ràng buộc cặp nút (pairwise constraint), ma trận thành viên cộng đồng (p<sub>ij</sub> là xác suất nút v<sub>i</sub> thuộc C<sub>j</sub>).</dd>
+        <dt>L, M</dt><dd>ma trận Laplace, ma trận Markov.</dd>
+        <dt>Z, H<sup>(l)</sup></dt><dd>biến ẩn; ma trận biểu diễn (embedding) ở tầng thứ l, h<sub>i</sub><sup>(l)</sup> là vectơ của nút v<sub>i</sub>.</dd>
+        <dt>W<sup>(l)</sup>, Θ</dt><dd>ma trận trọng số tầng l của mạng nơ-ron sâu (DNN); tập tham số học được.</dd>
+        <dt>σ(·), 𝓛, Ω</dt><dd>hàm kích hoạt, hàm mất mát (loss), phạt thưa (sparsity penalty).</dd>
+        <dt>φ<sub>g</sub>, φ<sub>d</sub></dt><dd>bộ sinh (generator), bộ phân biệt (discriminator) trong GAN.</dd>
+        <dt>φ<sub>e</sub>, φ<sub>r</sub></dt><dd>bộ mã hóa (encoder), bộ giải mã (decoder) trong autoencoder.</dd>
+      </dl>
+      <div class="eli5"><p><strong>Embedding</strong> là “tọa độ” mới của mỗi nút trong một không gian ít chiều. Thay vì mô tả nút 3 bằng cả một hàng dài của ma trận kề (n số), ta mô tả nó bằng, chẳng hạn, 16 số. Nếu học tốt, các nút cùng cộng đồng sẽ có tọa độ gần nhau, và chỉ cần một thuật toán phân cụm đơn giản như k-means là tách được cộng đồng.</p></div>
+    </section>
+
+    <section id="truyen-thong">
+      <h2>Lịch sử và phương pháp truyền thống</h2>
+      <p>Hình 3 của bài là một <strong>dòng thời gian</strong> từ thập niên 1970 tới 2021. Phía trước 2014 gần như chỉ có phương pháp truyền thống; từ 2014 (GraphEncoder, autoencoder đầu tiên) các phương pháp học sâu xuất hiện và tăng nhanh. Phương pháp truyền thống chủ yếu khai thác cấu trúc mạng. Bài tóm tắt <strong>7 nhóm</strong>:</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảy nhóm phương pháp truyền thống (Mục III)</caption>
+          <thead><tr><th>Nhóm</th><th>Ý tưởng</th><th>Ví dụ bài nêu</th></tr></thead>
+          <tbody>
+            <tr><td>Chia đồ thị (graph partition)</td><td>Chia mạng thành K cộng đồng với K cho trước. Còn gọi là phân cụm đồ thị; được dùng lại trong các mô hình học sâu.</td><td>Kernighan–Lin (1970): chia tùy ý thành hai đồ thị con rồi tối ưu dần trên từng nút; Spectral bisection (1982): dùng phổ ma trận Laplace</td></tr>
+            <tr><td>Suy diễn thống kê (statistical inference)</td><td>Mô hình sinh: gán nút vào cộng đồng và điều khiển xác suất có cạnh</td><td>SBM (1983), Degree-Corrected SBM (DCSBM), Mixed Membership SBM (MMB)</td></tr>
+            <tr><td>Phân cụm phân cấp (hierarchical clustering)</td><td>Tìm cây phân cấp cộng đồng (dendrogram) theo kiểu chia nhỏ, gộp dần hoặc lai</td><td>Girvan–Newman (2002, xóa cạnh dần); FastQ (2004, gộp dần); CDASS (lai)</td></tr>
+            <tr><td>Phương pháp động (dynamical methods)</td><td>Dùng bước đi ngẫu nhiên hoặc lan truyền thông tin</td><td>WalkTrap (2005), InfoMap (2008, mã hóa độ dài tối thiểu), LPA (2007, lan truyền nhãn)</td></tr>
+            <tr><td>Phân cụm phổ (spectral clustering)</td><td>Phổ của mạng phản ánh cấu trúc cộng đồng; chia mạng trên ma trận Laplace chuẩn hóa</td><td>Phân cụm phổ kết hợp khớp SBM bằng pseudo-likelihood (2013); ứng dụng trên mạng não</td></tr>
+            <tr><td>Dựa trên mật độ (density-based)</td><td>Đo mật độ để nhận ra cộng đồng, nút trung tâm (hub) và nút ngoại lai (outlier)</td><td>DBSCAN (1996), SCAN (2007), LCCD</td></tr>
+            <tr><td>Tối ưu hóa (optimizations)</td><td>Tối đa một hàm mục tiêu, kinh điển nhất là modularity Q</td><td>Modularity, FastQ, Louvain (2008); mô phỏng luyện kim (simulated annealing), extremal optimization, tối ưu phổ; tiến hóa: MAGA-Net (một mục tiêu là modularity), Combo (kết hợp NMI và conductance)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Dòng thời gian phương pháp học sâu (đọc từ Hình 3)</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Năm</th><th>Phương pháp học sâu xuất hiện trên hình</th></tr></thead>
+          <tbody>
+            <tr><td>2014</td><td>AE: GraphEncoder</td></tr>
+            <tr><td>2016</td><td>AE: semi-DRN, DNGR</td></tr>
+            <tr><td>2017</td><td>CNN: Xin et al.; AE: DIME, GRACE, MGAE; DNMF: Sun et al.</td></tr>
+            <tr><td>2018</td><td>GCN: CayleyNets; AE: DNE-SBP, UWMNE, DANE, DFuzzy, VGAECD, ARVGA; DNMF: DANMF; DSF: DSFCD</td></tr>
+            <tr><td>2019</td><td>CNN: ComNet-R, SparseConv; GCN: LGNN, MRFasGCN, NOCD, AGC; GAN: ProGAN, CommunityGAN; AE: Transfer-CDDTA, DAEGC, DGLFRM, VGECLE, VGAECD-OPT, LGVG</td></tr>
+            <tr><td>2020</td><td>GCN: CommDGI, GCLN, IPGDN, AGE; GAT: DMGI, MAGNN; GAN: SEAL, DR-GCN, JANE; AE: sE-Autoencoder, CDMEC, GUCD, SDCN, O2MAC, MAGCN, DMGC, TVGA</td></tr>
+            <tr><td>2021</td><td>CNN: SparseConv2D; GCN: SGCN, SENet, Zhao et al.; GAT: HDMI, HeCo, CP-GNN; GAN: ACNE, CANE; AE: WCD, DNC, GEC-CSD, SGCMC; DNMF: MDNMF</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Bảng trên đọc từ hình vẽ. Hình còn ghi vài phương pháp truyền thống không được giải thích trong phần chữ, như OSBM (2011) và CE-MOEA (2020).</p>
+
+      <h3>Học sâu mang lại gì so với cách truyền thống</h3>
+      <ul>
+        <li>Khai thác trực tiếp các kết nối một cách đơn giản có thể cho kết quả <strong>chưa tối ưu</strong>.</li>
+        <li>Khung chung của học sâu: học <strong>vectơ ít chiều</strong> từ dữ liệu nhiều chiều có quan hệ cấu trúc phức tạp, sau đó dùng các kỹ thuật học máy và khai phá dữ liệu.</li>
+        <li>Dễ đưa thêm <strong>đặc trưng phi cấu trúc</strong>, ví dụ thuộc tính nút, để biết rõ hơn ai thuộc cộng đồng nào.</li>
+        <li>Có thể “chú ý” đồng thời tới thông tin của nút, cạnh, láng giềng hoặc nhiều đồ thị.</li>
+        <li>Xử lý được mạng <strong>lớn</strong>, <strong>rất thưa</strong>, <strong>cấu trúc phức tạp</strong> và <strong>động</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="phan-loai">
+      <h2>Cây phân loại 6 nhóm</h2>
+      <p>Bài phân loại theo <strong>đặc điểm nổi bật của mô hình học sâu</strong> được dùng. Có 6 nhóm; bốn nhóm đầu thuộc họ <strong>mạng nơ-ron sâu</strong> (DNN):</p>
+      <figure class="fig">
+        <svg viewBox="0 0 640 400" role="img" aria-label="Sơ đồ cây phân loại sáu nhóm phương pháp học sâu cho phát hiện cộng đồng">
+          <rect x="170" y="8" width="300" height="40" rx="10" class="f-accent" />
+          <text x="320" y="33" text-anchor="middle" class="b t-on">Phát hiện cộng đồng bằng học sâu</text>
+          <line x1="320" y1="48" x2="320" y2="68" class="s-muted" stroke-width="1.5" />
+          <line x1="105" y1="68" x2="535" y2="68" class="s-muted" stroke-width="1.5" />
+          <line x1="105" y1="68" x2="105" y2="84" class="s-muted" stroke-width="1.5" />
+          <line x1="320" y1="68" x2="320" y2="84" class="s-muted" stroke-width="1.5" />
+          <line x1="535" y1="68" x2="535" y2="84" class="s-muted" stroke-width="1.5" />
+          <!-- hàng 1 -->
+          <rect x="10" y="84" width="190" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="105" y="104" text-anchor="middle" class="b">① Mạng tích chập</text>
+          <text x="105" y="121" text-anchor="middle" class="sm t-muted">Mục V</text>
+          <rect x="225" y="84" width="190" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="320" y="104" text-anchor="middle" class="b">② GAT</text>
+          <text x="320" y="121" text-anchor="middle" class="sm t-muted">Mục VI</text>
+          <rect x="440" y="84" width="190" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="535" y="104" text-anchor="middle" class="b">③ GAN</text>
+          <text x="535" y="121" text-anchor="middle" class="sm t-muted">Mục VII</text>
+          <!-- con của tích chập -->
+          <rect x="20" y="140" width="80" height="30" rx="6" class="f-card s-line" stroke-width="1.5" />
+          <text x="60" y="160" text-anchor="middle" class="sm">CNN</text>
+          <rect x="110" y="140" width="80" height="30" rx="6" class="f-card s-line" stroke-width="1.5" />
+          <text x="150" y="160" text-anchor="middle" class="sm">GCN</text>
+          <line x1="60" y1="128" x2="60" y2="140" class="s-muted" stroke-width="1.2" />
+          <line x1="150" y1="128" x2="150" y2="140" class="s-muted" stroke-width="1.2" />
+          <!-- hàng 2 -->
+          <rect x="10" y="196" width="190" height="44" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="105" y="216" text-anchor="middle" class="b">④ Autoencoder (AE)</text>
+          <text x="105" y="233" text-anchor="middle" class="sm t-muted">Mục VIII</text>
+          <rect x="225" y="196" width="190" height="44" rx="8" class="f-card s-alt" stroke-width="1.5" />
+          <text x="320" y="216" text-anchor="middle" class="b">⑤ Deep NMF</text>
+          <text x="320" y="233" text-anchor="middle" class="sm t-muted">Mục IX</text>
+          <rect x="440" y="196" width="190" height="44" rx="8" class="f-card s-alt" stroke-width="1.5" />
+          <text x="535" y="216" text-anchor="middle" class="b">⑥ Deep Sparse Filtering</text>
+          <text x="535" y="233" text-anchor="middle" class="sm t-muted">Mục X</text>
+          <!-- con của AE -->
+          <rect x="10" y="254" width="190" height="138" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <line x1="105" y1="240" x2="105" y2="254" class="s-muted" stroke-width="1.2" />
+          <text x="24" y="276" class="sm">• Stacked AE</text>
+          <text x="24" y="296" class="sm">• Sparse AE</text>
+          <text x="24" y="316" class="sm">• Denoising AE</text>
+          <text x="24" y="336" class="sm">• Graph Convolutional AE</text>
+          <text x="24" y="356" class="sm">• Graph Attention AE</text>
+          <text x="24" y="376" class="sm">• Variational AE (VAE)</text>
+          <!-- chú giải -->
+          <rect x="240" y="290" width="22" height="14" rx="3" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="270" y="302" class="sm t-muted">họ mạng nơ-ron sâu (DNN)</text>
+          <rect x="240" y="318" width="22" height="14" rx="3" class="f-card s-alt" stroke-width="1.5" />
+          <text x="270" y="330" class="sm t-muted">hai nhóm ngoài họ DNN</text>
+        </svg>
+        <figcaption><strong>Cây phân loại.</strong> Vẽ lại theo phần phải của Hình 2 trong bài. Phần trái của Hình 2 là 7 nhóm phương pháp truyền thống ở mục trước.</figcaption>
+      </figure>
+
+      <p>Hầu hết phương pháp đi theo cùng một đường ống (pipeline): mô hình sâu <strong>mã hóa</strong> mạng thành biểu diễn, rồi <strong>tối ưu</strong> kết quả phân cụm. Bài nói rõ điều này ở phần kết luận.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 760 130" role="img" aria-label="Đường ống chung: đầu vào A và X, mô hình sâu, embedding H, phân cụm hoặc phân lớp, cộng đồng">
+          <rect x="6" y="30" width="120" height="64" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="66" y="56" text-anchor="middle" class="b">Đầu vào</text>
+          <text x="66" y="78" text-anchor="middle" class="mono sm">A, X, B, S…</text>
+          <polygon points="134,62 150,54 150,70" class="f-muted" transform="rotate(180 142 62)" />
+          <rect x="156" y="20" width="170" height="84" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="241" y="48" text-anchor="middle" class="b">Mô hình sâu</text>
+          <text x="241" y="70" text-anchor="middle" class="sm">CNN, GCN, GAT, GAN,</text>
+          <text x="241" y="88" text-anchor="middle" class="sm">AE, DNMF, DSF</text>
+          <polygon points="334,62 350,54 350,70" class="f-muted" transform="rotate(180 342 62)" />
+          <rect x="356" y="30" width="120" height="64" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="416" y="56" text-anchor="middle" class="b">Embedding</text>
+          <text x="416" y="78" text-anchor="middle" class="mono sm">H (n×d')</text>
+          <polygon points="484,62 500,54 500,70" class="f-muted" transform="rotate(180 492 62)" />
+          <rect x="506" y="20" width="130" height="84" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="571" y="48" text-anchor="middle" class="b">Gán cộng đồng</text>
+          <text x="571" y="70" text-anchor="middle" class="sm">k-means, softmax,</text>
+          <text x="571" y="88" text-anchor="middle" class="sm">ngưỡng, modularity</text>
+          <polygon points="644,62 660,54 660,70" class="f-muted" transform="rotate(180 652 62)" />
+          <rect x="666" y="30" width="88" height="64" rx="8" class="f-accent" />
+          <text x="710" y="56" text-anchor="middle" class="b t-on">Cộng đồng</text>
+          <text x="710" y="78" text-anchor="middle" class="t-on sm">C₁, C₂, …</text>
+        </svg>
+        <figcaption><strong>Đường ống chung</strong> (sơ đồ của người giải thích, tổng hợp từ các Hình 4–8 của bài). Một số phương pháp tối ưu biểu diễn và phân cụm cùng lúc thay vì tách thành hai bước.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Sáu nhóm trong một bảng</caption>
+          <thead><tr><th>Nhóm</th><th>Điểm đặc trưng theo bài</th></tr></thead>
+          <tbody>
+            <tr><td>Mạng tích chập (CNN, GCN)</td><td>Dùng phép tích chập để biểu diễn đặc trưng ẩn</td></tr>
+            <tr><td>GAT</td><td>Chú ý đặc biệt (attention) tới các tín hiệu cộng đồng</td></tr>
+            <tr><td>GAN</td><td>Huấn luyện đối kháng giữa đồ thị thật và mẫu giả</td></tr>
+            <tr><td>Autoencoder</td><td>Nén rồi tái tạo; 6 loại con: stacked, sparse, denoising, graph convolutional, graph attention, variational</td></tr>
+            <tr><td>Deep NMF</td><td>Phân rã ma trận không âm nhiều tầng</td></tr>
+            <tr><td>Deep Sparse Filtering</td><td>Học đặc trưng thưa nhiều tầng</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="cnn">
+      <h2>Nhóm 1a: Mạng nơ-ron tích chập (CNN)</h2>
+      <div class="eli5"><p>CNN vốn sinh ra để xử lý <strong>ảnh</strong>: một ô cửa sổ nhỏ (bộ lọc) trượt trên lưới điểm ảnh để nhặt ra các mẫu cục bộ. Đồ thị không phải lưới, nên muốn dùng CNN phải <strong>biến đồ thị thành “ảnh”</strong> trước, ví dụ biến mỗi nút hoặc mỗi cạnh thành một ma trận nhỏ.</p></div>
+      <p>CNN là một lớp mạng nơ-ron truyền thẳng (feed-forward) cho dữ liệu dạng lưới. Tầng tích chập giảm chi phí tính toán, tầng gộp (pooling) giúp biểu diễn bền vững hơn. Vì CNN đòi đầu vào khắt khe, các phương pháp dựa trên CNN phải <strong>tiền xử lý</strong> thành dữ liệu dạng ảnh và <strong>có nhãn</strong>.</p>
+      <h3>Khung chung (Hình 4)</h3>
+      <ul>
+        <li>Đồ thị được tiền xử lý thành ảnh theo nút hoặc theo cạnh, đi qua nhiều tầng tích chập và gộp, rồi một tầng kết nối đầy đủ (fully connected) cho ra biểu diễn của từng nút hoặc từng cạnh.</li>
+        <li><strong>Hướng theo nút:</strong> dự đoán nhãn cộng đồng trong K lớp; nút cùng nhãn thuộc cùng cộng đồng.</li>
+        <li><strong>Hướng theo cạnh:</strong> phân cạnh thành hai lớp, <em>trong</em> (inner) và <em>giữa</em> (inter) cộng đồng. Xóa cạnh “giữa” để có cộng đồng sơ bộ, sau đó gộp lại theo một độ đo như modularity.</li>
+      </ul>
+
+      <h3>Các phương pháp tiêu biểu</h3>
+      <p><strong>Xin et al. (2017)</strong>: mô hình CNN có giám sát đầu tiên cho <strong>mạng thiếu cấu trúc</strong> (topologically incomplete networks, TINs), tức mạng thật bị thiếu cạnh. Gồm hai tầng CNN có max-pooling và một tầng kết nối đầy đủ. Tầng cuối tính xác suất nút v<sub>i</sub> thuộc cộng đồng thứ k:</p>
+      <span class="formula">o<sub>i</sub><sup>k</sup> = σ( b<sub>k</sub><sup>f</sup> + W<sub>k</sub><sup>f</sup> · h<sub>i</sub><sup>(2)</sup> )<small>σ là hàm sigmoid; h<sub>i</sub><sup>(2)</sup> là biểu diễn của nút sau hai tầng tích chập; W, b là trọng số và độ lệch của nơ-ron thứ k.</small></span>
+      <span class="formula">𝓛 = ½ Σ<sub>i</sub> ‖o<sub>i</sub> − y<sub>i</sub>‖² = ½ Σ<sub>i</sub> Σ<sub>k</sub> (o<sub>i</sub><sup>k</sup> − y<sub>i</sub><sup>k</sup>)²<small>y<sub>i</sub><sup>k</sup> ∈ {0, 1} cho biết nút v<sub>i</sub> có thuộc cộng đồng k theo đáp án hay không. Huấn luyện bằng lan truyền ngược.</small></span>
+      <p>Kết quả bài dẫn lại: độ chính xác khoảng <strong>80%</strong> trên TINs khi chỉ <strong>10%</strong> nút có nhãn; cho thấy biểu diễn láng giềng bậc cao (nhiều bước nhảy) giúp tăng độ chính xác.</p>
+      <p><strong>SparseConv (Sperlì, 2019)</strong> và <strong>SparseConv2D (De Santo et al., 2021)</strong>: xử lý độ thưa của mạng xã hội lớn bằng cách chỉ làm việc với phần tử khác 0 của ma trận kề. SparseConv2D giảm đáng kể số phép tính.</p>
+      <p><strong>ComNet-R (2020)</strong>: mô hình “cạnh thành ảnh” (edge-to-image). CNN phân loại cạnh nằm trong hay giữa cộng đồng, xóa cạnh giữa để có cộng đồng sơ bộ rồi gộp theo <strong>modularity cục bộ R</strong>.</p>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng IV · Các phương pháp dựa trên CNN</caption>
+          <thead><tr><th>Phương pháp</th><th>Đầu vào</th><th>Học</th><th>Tiền xử lý</th><th>Kỹ thuật kèm</th><th class="c">Chồng lấn</th><th>Loại mạng</th></tr></thead>
+          <tbody>
+            <tr><td>Xin et al.</td><td>A</td><td>Có giám sát</td><td>Nút → ảnh</td><td>–</td><td class="c">×</td><td>TINs</td></tr>
+            <tr><td>SparseConv</td><td>A</td><td>Có giám sát</td><td>Nút → ảnh</td><td>Ma trận thưa</td><td class="c">×</td><td>Mạng thưa</td></tr>
+            <tr><td>SparseConv2D</td><td>A</td><td>Bán giám sát</td><td>Nút → ảnh</td><td>Ma trận thưa</td><td class="c">×</td><td>Mạng thưa</td></tr>
+            <tr><td>ComNet-R</td><td>A</td><td>Có giám sát</td><td>Cạnh → ảnh</td><td>Modularity cục bộ</td><td class="c">×</td><td>Mạng lớn</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="gcn">
+      <h2>Nhóm 1b: Mạng tích chập đồ thị (GCN)</h2>
+      <div class="eli5"><p>GCN làm việc trực tiếp trên đồ thị. Ở mỗi tầng, mỗi nút <strong>lấy trung bình có trọng số</strong> đặc trưng của chính nó và các láng giềng, rồi nhân với ma trận trọng số học được. Sau vài tầng, nút “mang mùi” của cả vùng xung quanh. Các nút cùng cộng đồng, vốn nối với nhau dày, sẽ có biểu diễn giống nhau.</p></div>
+      <p>GCN (Kipf và Welling) dựa trên CNN, dùng xấp xỉ bậc nhất của bộ lọc phổ. Quy tắc lan truyền theo tầng:</p>
+      <span class="formula">H<sup>(l+1)</sup> = σ( D̃<sup>−½</sup> Ã D̃<sup>−½</sup> H<sup>(l)</sup> W<sup>(l)</sup> )<small>Ã = A + I<sub>n</sub> (thêm vòng tự nối để nút giữ thông tin của chính mình); D̃ là ma trận bậc của Ã; H<sup>(0)</sup> = X; W<sup>(l)</sup> là trọng số học được ở tầng l.</small></span>
+      <p><strong>Ví dụ nhỏ</strong> (của người giải thích): đường 1–2–3, mỗi nút một đặc trưng x = (1, 0, 0), bỏ qua W và σ. Sau khi thêm vòng tự nối, bậc là 2, 3, 2. Hệ số giữa i và j là 1/√(d<sub>i</sub>d<sub>j</sub>):</p>
+      <ul>
+        <li>Nút 1: 1/2 · 1 + 1/√6 · 0 = 0.5</li>
+        <li>Nút 2: 1/√6 · 1 + 1/3 · 0 + 1/√6 · 0 ≈ 0.41</li>
+        <li>Nút 3: 0 (chưa “nghe” được nút 1; cần thêm một tầng nữa)</li>
+      </ul>
+      <p>Giá trị của nút 1 đã “lan” sang nút 2. Lặp lại nhiều tầng thì đặc trưng các nút trong vùng dày đặc sẽ dần giống nhau.</p>
+
+      <h3>Hai cách dùng GCN (Hình 5)</h3>
+      <div class="cards">
+        <div class="card"><b>Phân lớp cộng đồng</b><p>Có giám sát hoặc bán giám sát: dùng nhãn nút để huấn luyện, dự đoán cộng đồng như bài toán phân lớp nút. Hạn chế: mạng thật thiếu nhãn.</p></div>
+        <div class="card"><b>Phân cụm trên biểu diễn</b><p>Không giám sát: học embedding H rồi phân cụm, có thể tối ưu thêm bằng độ đo như thông tin tương hỗ (MI), hoặc tối ưu cùng lúc biểu diễn và phân cụm. Linh hoạt hơn.</p></div>
+      </div>
+
+      <h3>Các phương pháp tiêu biểu</h3>
+      <dl class="terms">
+        <dt>LGNN</dt><dd>Line Graph Neural Network, có giám sát. Cải tiến SBM, giảm chi phí tính toán. Kết hợp toán tử không quay lui (non-backtracking) với quy tắc truyền thông điệp của belief propagation, học đặc trưng trên mạng có hướng. Softmax cho xác suất nút thuộc từng cộng đồng; hàm mất mát cross-entropy lấy <strong>nhỏ nhất trên mọi hoán vị nhãn</strong> (vì tên cộng đồng “1”, “2” có thể đổi chỗ mà vẫn đúng).</dd>
+        <dt>MRFasGCN</dt><dd>Bán giám sát. GCN vốn không được thiết kế cho cộng đồng, nên mô hình thêm một tầng tích chập mới là trường ngẫu nhiên Markov mở rộng (eMRF), giúp “hướng cộng đồng” và làm mịn kết quả thô của GCN.</dd>
+        <dt>SGCN</dt><dd>Không giám sát. Mô hình lấy mẫu nhãn cục bộ để tìm <strong>tâm cấu trúc</strong>, kết hợp GCN, mã hóa cả cấu trúc lẫn thuộc tính mà không cần nhãn trước.</dd>
+        <dt>NOCD</dt><dd>Cộng đồng <strong>chồng lấn</strong>. Kết hợp mô hình xác suất Bernoulli–Poisson với GCN hai tầng, học vectơ thành viên bằng cách tối thiểu negative log-likelihood. Dùng ngưỡng để loại các liên kết yếu, thu được cộng đồng cuối.</dd>
+        <dt>GCLN</dt><dd>Xử lý <strong>làm mịn quá mức</strong> (over-smoothing): khi lặp nhiều tầng, đặc trưng mọi nút hội tụ về cùng giá trị. GCLN mượn kiến trúc U-Net: một nhánh co và một nhánh giãn đối xứng, ghép đặc trưng ngữ cảnh với thông tin cục bộ. Phân cụm bằng k-means.</dd>
+        <dt>IPGDN</dt><dd>Các loại kết nối khác nhau thường bị coi như cạnh thường, dẫn tới biểu diễn dư thừa. IPGDN tách láng giềng thành nhiều phần, học các đặc trưng ẩn <strong>độc lập</strong> (biểu diễn tách rời, disentangled), dùng chuẩn hóa HSIC.</dd>
+        <dt>AGC</dt><dd>Mạng có thuộc tính: nút gần nhau và nút có thuộc tính giống nhau dễ cùng cộng đồng. AGC dùng <strong>bộ lọc thông thấp</strong> để lọc nhiễu tần số cao, rồi phân cụm phổ. Chọn bậc k (số bước láng giềng) một cách thích nghi.</dd>
+        <dt>AGE</dt><dd>Adaptive Graph Encoder: bộ lọc làm mịn Laplace xếp chồng t lần, X̄ = (I − γL)<sup>t</sup>X, và học độ tương đồng giữa cặp nút một cách thích nghi trên tập cân bằng cặp giống/khác.</dd>
+        <dt>CayleyNets</dt><dd>Bộ lọc phổ dạng <strong>đa thức Cayley</strong>, chuyên lọc dải hẹp ở tần số thấp (nơi chứa nhiều thông tin cộng đồng); thêm mean pooling và bộ phân lớp softmax bán giám sát.</dd>
+        <dt>SENet</dt><dd>Đưa mất mát của phân cụm phổ vào tầng ra của một GCN ba tầng, dùng ma trận kernel K mã hóa cả cấu trúc và thuộc tính.</dd>
+        <dt>CommDGI</dt><dd>Tối ưu đồng thời biểu diễn và phân cụm qua thông tin tương hỗ giữa nút và cộng đồng, có tối đa modularity; dùng huấn luyện tương phản (contrastive) và k-means.</dd>
+        <dt>Zhao et al.</dt><dd>Học tương phản “khử thiên lệch” (debiased contrastive), vừa học biểu diễn vừa phân cụm để cả hai cùng tốt hơn.</dd>
+      </dl>
+      <p>Công thức của AGC:</p>
+      <span class="formula">p(λ<sub>q</sub>) = (1 − ½λ<sub>q</sub>)<sup>k</sup>,   X̄ = (I − ½L<sub>s</sub>)<sup>k</sup> X<small>λ<sub>q</sub>: giá trị riêng của Laplace chuẩn hóa đối xứng L<sub>s</sub>. Hàm đáp ứng p giảm và không âm, nên tần số thấp (biến đổi chậm trên đồ thị) được giữ, tần số cao (nhiễu) bị nén.</small></span>
+      <p>Mất mát của SENet:</p>
+      <span class="formula">𝓛 = − tr( (H<sup>(3)</sup>)<sup>⊤</sup> D<sup>−½</sup> K D<sup>−½</sup> H<sup>(3)</sup> )</span>
+      <div class="warn"><p>Bài viết rằng với AGC, “k càng cao thì lọc càng tốt”. Câu này dễ gây hiểu nhầm: bài cũng nói AGC <em>chọn k thích nghi</em>, và chính bài nêu vấn đề làm mịn quá mức khi lặp nhiều lần. Nhận xét của người giải thích: k lớn hơn làm mịn mạnh hơn nhưng không phải lúc nào cũng tốt hơn; vì vậy AGC mới cần cơ chế chọn k (Phụ lục D nhắc tới việc tính khoảng cách trong cụm).</p></div>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng V · Các phương pháp dựa trên GCN</caption>
+          <thead><tr><th>Phương pháp</th><th>Đầu vào</th><th>Học</th><th>Tích chập</th><th>Phân cụm</th><th>Kỹ thuật kèm</th><th class="c">Chồng lấn</th></tr></thead>
+          <tbody>
+            <tr><td>LGNN</td><td>A, X</td><td>Có giám sát</td><td>Bậc nhất + đồ thị đường (line graph)</td><td>–</td><td>Đặc trưng cạnh</td><td class="c">✓</td></tr>
+            <tr><td>MRFasGCN</td><td>A, X</td><td>Bán giám sát</td><td>Bậc nhất + xấp xỉ trường trung bình</td><td>–</td><td>eMRF</td><td class="c">×</td></tr>
+            <tr><td>SGCN</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất</td><td>–</td><td>Lấy mẫu nhãn</td><td class="c">×</td></tr>
+            <tr><td>NOCD</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất</td><td>–</td><td>Bernoulli–Poisson</td><td class="c">✓</td></tr>
+            <tr><td>GCLN</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất</td><td>k-means</td><td>Kiến trúc U-Net</td><td class="c">×</td></tr>
+            <tr><td>IPGDN</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất + biểu diễn tách rời</td><td>k-means</td><td>HSIC làm chuẩn hóa</td><td class="c">×</td></tr>
+            <tr><td>AGC</td><td>A, X</td><td>Không giám sát</td><td>Bậc k + lọc làm mịn Laplace</td><td>Phân cụm phổ</td><td>–</td><td class="c">×</td></tr>
+            <tr><td>AGE</td><td>A, X</td><td>Không giám sát</td><td>Lọc làm mịn Laplace</td><td>Phân cụm phổ</td><td>Học thích nghi</td><td class="c">×</td></tr>
+            <tr><td>CayleyNet</td><td>A, X</td><td>Bán giám sát</td><td>Lọc làm mịn Laplace</td><td>–</td><td>Đa thức Cayley</td><td class="c">×</td></tr>
+            <tr><td>SENet</td><td>A, X</td><td>Không giám sát</td><td>Bậc ba + mất mát phân cụm phổ</td><td>k-means</td><td>Học ma trận kernel</td><td class="c">×</td></tr>
+            <tr><td>CommDGI</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất + lấy mẫu</td><td>–</td><td>Tối ưu kết hợp</td><td class="c">×</td></tr>
+            <tr><td>Zhao et al.</td><td>A, X</td><td>Không giám sát</td><td>Bậc nhất + lấy mẫu</td><td>–</td><td>Tối ưu kết hợp</td><td class="c">×</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="gat">
+      <h2>Nhóm 2: Mạng chú ý trên đồ thị (GAT)</h2>
+      <div class="eli5"><p>GCN coi các láng giềng gần như ngang nhau (chỉ chia theo bậc). GAT cho mô hình <strong>tự học xem nên nghe láng giềng nào nhiều hơn</strong>. Giống như khi chọn quán ăn: bạn tin lời người bạn sành ăn hơn lời người bạn ít khi ra ngoài.</p></div>
+      <span class="formula">h<sub>i</sub><sup>(l+1)</sup> = σ( Σ<sub>j ∈ N(v<sub>i</sub>)</sub> α<sub>ij</sub><sup>(l+1)</sup> W<sup>(l+1)</sup> h<sub>j</sub><sup>(l)</sup> )<small>α<sub>ij</sub>: hệ số chú ý (attention coefficient) giữa v<sub>i</sub> và láng giềng v<sub>j</sub>, học được; h<sub>i</sub><sup>(0)</sup> = x<sub>i</sub>.</small></span>
+      <p>Trong phát hiện cộng đồng, cơ chế chú ý học mức quan trọng của từng nút trong láng giềng; tương quan giữa các nút giống nhau được tính gần với thành viên cộng đồng thật. Nhờ đó GAT xử lý tốt mạng có thuộc tính, <strong>mạng đa quan hệ</strong> (multiplex) và <strong>mạng không đồng nhất</strong> (heterogeneous). Hình 6 minh họa hai trường hợp: cạnh nhiều màu giữa cùng một cặp nút (multiplex) và các <strong>đường meta</strong> (metapath) trong mạng không đồng nhất.</p>
+      <div class="eli5"><p><strong>Mạng multiplex</strong>: cùng tập nút nhưng nhiều loại cạnh, mỗi loại là một “lớp”. Ví dụ bài nêu: bài báo nối nhau bằng quan hệ <em>trích dẫn</em> và quan hệ <em>cùng chủ đề</em>. <strong>Metapath</strong>: chuỗi loại nút mô tả một quan hệ ghép, ví dụ Tác giả → Bài báo → Tác giả nghĩa là “đồng tác giả”.</p></div>
+
+      <h3>Các phương pháp tiêu biểu</h3>
+      <dl class="terms">
+        <dt>DMGI</dt><dd>Mạng multiplex có thuộc tính. Nhúng riêng từng loại quan hệ, tối đa các đặc trưng chia sẻ toàn cục. Học tương phản giữa mạng gốc và mạng bị làm hỏng trên từng lớp qua bộ phân biệt; sau đó dùng chuẩn hóa đồng thuận (consensus) cùng hệ số chú ý để gộp embedding. Lợi ích: làm yếu những quan hệ ít quan trọng.</dd>
+        <dt>HDMI</dt><dd>DMGI chỉ nắm được tín hiệu giám sát “bên ngoài” chia sẻ giữa các quan hệ, bỏ sót tín hiệu “bên trong” từ thuộc tính nút. HDMI nắm cả hai và tương tác giữa chúng, thêm mô-đun hợp nhất dựa trên chú ý ngữ nghĩa (semantic attention).</dd>
+        <dt>MAGNN</dt><dd>Mạng không đồng nhất. Dùng metapath nhiều ngữ nghĩa trong các tầng chú ý, chú ý cả bên trong và giữa các metapath, giảm tính không đồng nhất cao và nhúng được thông tin cấu trúc lẫn ngữ nghĩa.</dd>
+        <dt>HeCo</dt><dd>Nhúng cả lược đồ mạng (network schema) và metapath; học tương phản cải tiến hướng dẫn hai phần embedding; chú ý tới mức quan trọng của nút, tính không đồng nhất và đặc trưng ngữ nghĩa.</dd>
+        <dt>CP-GNN</dt><dd>Định nghĩa metapath có ý nghĩa cần nhiều kiến thức chuyên ngành. CP-GNN học theo <strong>đường ngữ cảnh</strong> (context path) không cần định nghĩa trước, dùng chú ý để phân biệt mức quan trọng của các quan hệ, nắm được quan hệ bậc cao.</dd>
+      </dl>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng VI · Các phương pháp dựa trên GAT</caption>
+          <thead><tr><th>Phương pháp</th><th>Đầu vào</th><th class="c">Metapath</th><th>Học</th><th>Kỹ thuật kèm</th><th>Phân cụm</th><th class="c">Chồng lấn</th><th>Loại mạng</th></tr></thead>
+          <tbody>
+            <tr><td>DMGI</td><td>V, E<sup>(r)</sup>, X</td><td class="c">×</td><td>Không giám sát</td><td>Học tương phản</td><td>k-means</td><td class="c">×</td><td>Multiplex</td></tr>
+            <tr><td>HDMI</td><td>V, E<sup>(r)</sup>, X</td><td class="c">×</td><td>Không giám sát</td><td>Thông tin tương hỗ (MI)</td><td>k-means</td><td class="c">×</td><td>Multiplex</td></tr>
+            <tr><td>MAGNN</td><td>V, E, X</td><td class="c">✓</td><td>Không giám sát</td><td>–</td><td>k-means</td><td class="c">×</td><td>Không đồng nhất</td></tr>
+            <tr><td>HeCo</td><td>V, E</td><td class="c">✓</td><td>Không giám sát</td><td>Học tương phản</td><td>k-means</td><td class="c">×</td><td>Không đồng nhất</td></tr>
+            <tr><td>CP-GNN</td><td>V, E</td><td class="c">×</td><td>Không giám sát</td><td>–</td><td>k-means</td><td class="c">×</td><td>Không đồng nhất</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Bảng gốc còn có cột “cơ chế chú ý” chỉ ghi số tài liệu tham khảo ([166], [90], [167]); trang này lược bỏ cột đó.</p>
+    </section>
+
+    <section id="gan">
+      <h2>Nhóm 3: Mạng đối sinh (GAN)</h2>
+      <div class="eli5"><p>GAN là trò chơi giữa <strong>kẻ làm giả</strong> (bộ sinh φ<sub>g</sub>) và <strong>cảnh sát</strong> (bộ phân biệt φ<sub>d</sub>). Kẻ làm giả tạo mẫu giả ngày càng giống thật; cảnh sát ngày càng giỏi phân biệt. Trong phát hiện cộng đồng, “mẫu thật” có thể là embedding nút, cấu trúc cục bộ (bộ ba, clique) hoặc chính cộng đồng. Cuộc đua này làm đặc trưng cộng đồng sắc nét hơn.</p></div>
+      <span class="formula">min<sub>φ<sub>g</sub></sub> max<sub>φ<sub>d</sub></sub>  𝔼<sub>x∼p<sub>data</sub></sub>[log φ<sub>d</sub>(x)] + 𝔼<sub>z∼p<sub>z</sub></sub>[log(1 − φ<sub>d</sub>(φ<sub>g</sub>(z)))]<small>φ<sub>d</sub>(x): xác suất x là dữ liệu thật; φ<sub>g</sub>(z): mẫu giả sinh từ nhiễu z. Bộ phân biệt muốn tăng biểu thức, bộ sinh muốn giảm nó.</small></span>
+      <p>Bài lưu ý: huấn luyện đối kháng hiệu quả nhưng cần giải quyết vấn đề <strong>quá khớp</strong> (overfitting) khi áp vào phát hiện cộng đồng. Hình 7 nêu ba luồng: lấy thành viên cộng đồng qua GAN mức clique; phát hiện cộng đồng từ biểu diễn mức nút hoặc bộ ba (triplet); và phân biệt trực tiếp cộng đồng qua bộ phân biệt.</p>
+
+      <h3>Các phương pháp tiêu biểu</h3>
+      <dl class="terms">
+        <dt>SEAL</dt><dd>Mở rộng từ nút hạt giống (seed expansion). Bộ sinh là Graph Pointer Network cập nhật tăng dần (iGPN); bộ phân biệt dùng Graph Isomorphism Network (GIN) để chỉnh cộng đồng sinh ra theo nhãn thật. Bốn thành phần ở mức cộng đồng: bộ sinh, bộ phân biệt, bộ chọn hạt giống, bộ định vị (locator). Bộ định vị gửi tín hiệu để loại nút không liên quan.</dd>
+        <dt>DR-GCN</dt><dd>Cho cộng đồng <strong>mất cân bằng</strong> (lớp lớn, lớp nhỏ). Hai chuẩn hóa: (1) căn chỉnh phân phối ẩn, 𝓛 = (1 − α)𝓛<sub>gcn</sub> + α𝓛<sub>dist</sub>, trong đó 𝓛<sub>dist</sub> là phân kỳ KL giữa lớp đa số và thiểu số; (2) chuẩn hóa đối kháng có điều kiện theo lớp, bộ sinh tạo nút giả phải tái tạo được quan hệ láng giềng.</dd>
+        <dt>JANE</dt><dd>Sinh hai loại mẫu giả từ cấu trúc và thuộc tính. Embedding H tạo bởi bộ mã hóa tự chú ý nhiều đầu (multi-head self-attention); thêm nhiễu Gauss để tạo đặc trưng giả.</dd>
+        <dt>ProGAN</dt><dd>Mạng thưa thiếu cạnh, và thuộc tính không đo được bằng độ gần (proximity). ProGAN mã hóa độ gần của mỗi nút từ tập <strong>bộ ba</strong> (triplet) được tạo ra, giữ quan hệ cộng đồng trong không gian ít chiều.</dd>
+        <dt>CommunityGAN</dt><dd>Cộng đồng chồng lấn. Gán mỗi cặp nút–cộng đồng một hệ số không âm. Bộ sinh và bộ phân biệt làm việc ở mức <strong>motif</strong> (clique): mẫu thật là clique chứa nút, mẫu giả là tập nút do bộ sinh chọn.</dd>
+        <dt>CANE</dt><dd>Đưa mô hình phát hiện cộng đồng LDA (Latent Dirichlet Allocation) vào quá trình học biểu diễn đối kháng; thêm số hạng độ tương đồng cộng đồng P<sub>φ</sub>(v|v<sub>i</sub>) để biểu diễn mang tính chất cộng đồng.</dd>
+        <dt>ACNE</dt><dd>Sinh <strong>cộng đồng âm</strong> làm mẫu giả. Dùng chiến lược bước đi có nhận thức để lấy mẫu cộng đồng chồng lấn; bộ phân biệt ánh xạ chung nút và cộng đồng để giữ tương quan nút–cộng đồng.</dd>
+      </dl>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng VII · Các phương pháp dựa trên GAN</caption>
+          <thead><tr><th>Phương pháp</th><th>Đầu vào</th><th>Học</th><th>Bộ sinh</th><th>Bộ phân biệt</th><th>Mẫu sinh ra</th><th>Phân cụm</th><th class="c">Chồng lấn</th></tr></thead>
+          <tbody>
+            <tr><td>SEAL</td><td>A, X</td><td>Bán giám sát</td><td>iGPN</td><td>GINs</td><td>Cộng đồng</td><td>–</td><td class="c">✓</td></tr>
+            <tr><td>DR-GCN</td><td>A, X</td><td>Bán giám sát</td><td>MLP</td><td>MLP</td><td>Embedding</td><td>k-means</td><td class="c">×</td></tr>
+            <tr><td>JANE</td><td>A, X</td><td>Không giám sát</td><td>Nhiều loại</td><td>MLP</td><td>Cấu trúc, thuộc tính, embedding</td><td>–</td><td class="c">×</td></tr>
+            <tr><td>ProGAN</td><td>A, X</td><td>Không giám sát</td><td>MLP</td><td>MLP</td><td>Bộ ba</td><td>k-means</td><td class="c">×</td></tr>
+            <tr><td>CommunityGAN</td><td>A</td><td>Không giám sát</td><td>AGM</td><td>AGM</td><td>Motif</td><td>–</td><td class="c">✓</td></tr>
+            <tr><td>CANE</td><td>A</td><td>Không giám sát</td><td>Softmax</td><td>MLP</td><td>Cặp nút</td><td>k-means</td><td class="c">×</td></tr>
+            <tr><td>ACNE</td><td>A</td><td>Không giám sát</td><td>Softmax</td><td>MLP</td><td>Nút, cộng đồng</td><td>–</td><td class="c">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">MLP: mạng perceptron nhiều tầng. AGM: Affiliation Graph Model (bài không viết đầy đủ tên này; đây là chú thích của người giải thích).</p>
+    </section>
+
+    <section id="ae">
+      <h2>Nhóm 4: Autoencoder (AE)</h2>
+      <div class="eli5"><p>Autoencoder giống việc <strong>tóm tắt rồi kể lại</strong>. Bộ mã hóa nén cả hàng dài thông tin của nút thành vài con số (embedding). Bộ giải mã phải dựng lại thông tin gốc chỉ từ vài con số đó. Muốn dựng lại tốt, bản tóm tắt phải giữ được điều quan trọng nhất, như “nút này nằm trong nhóm nào”. Không cần nhãn, nên AE là nhóm <strong>được dùng nhiều nhất</strong> trong phát hiện cộng đồng không giám sát.</p></div>
+      <span class="formula">H = φ<sub>e</sub>(A, X),   Â = φ<sub>r</sub>(H) hoặc X̂ = φ<sub>r</sub>(H)<small>Mất mát 𝓛(x, φ<sub>r</sub>(φ<sub>e</sub>(x))) đo độ khác giữa dữ liệu gốc và dữ liệu tái tạo; huấn luyện để nó nhỏ nhất.</small></span>
+      <p>Hình 8 của bài cho khung chung: đầu vào có thể là đồ thị tĩnh không thuộc tính, tĩnh có thuộc tính, động, liên miền (cross-domain), không đồng nhất, hoặc nhiều góc nhìn có thuộc tính. Có thể dùng nhiều AE, mỗi AE nhúng một phần đầu vào. Đầu ra là embedding nút H<sub>v</sub> (rồi phân cụm) hoặc trực tiếp ma trận thành viên H<sub>c</sub>. Các mất mát hay gặp:</p>
+      <ul>
+        <li><strong>Mất mát tái tạo</strong> (reconstruction loss) — luôn có.</li>
+        <li><strong>Mất mát phân cụm</strong>: phân kỳ KL giữa hai phân phối P và Q mô tả xác suất nút thuộc cộng đồng.</li>
+        <li><strong>Ràng buộc cặp</strong> 𝓛(O, H): dùng thông tin biết trước về cặp nút cùng/khác cộng đồng.</li>
+        <li><strong>Phạt thưa</strong>, <strong>mất mát nhất quán</strong> giữa các AE hoặc các góc nhìn, <strong>chuẩn hóa trơn theo thời gian</strong> cho đồ thị động.</li>
+      </ul>
+
+      <h3>A. Stacked AE (xếp chồng)</h3>
+      <p>Nhiều AE xếp chồng trong các tầng sâu, mỗi bộ mã hóa có thể biểu diễn một loại dữ liệu, giúp mô tả thông tin nhiều mức và thông tin động.</p>
+      <p><strong>semi-DRN</strong>: AE xếp chồng học trên <strong>ma trận modularity</strong> B, rồi k-means cho cộng đồng. Thêm ma trận ràng buộc cặp O (o<sub>ij</sub> = 1 nếu biết trước hai nút cùng cộng đồng).</p>
+      <span class="formula">𝓛 = 𝓛(B, B̂) + λ · 𝓛(O, H)<small>b<sub>ij</sub> = a<sub>ij</sub> − k<sub>i</sub>k<sub>j</sub>/(2m): số cạnh thật trừ số cạnh kỳ vọng nếu nối ngẫu nhiên theo bậc; λ cân bằng giữa tái tạo và ràng buộc.</small></span>
+      <p><strong>Ví dụ ma trận modularity</strong> (của người giải thích), mạng 4 nút ở mục trước (m = 4, bậc 2, 2, 3, 1): b<sub>12</sub> = 1 − 2·2/8 = 0.5 (có cạnh, nhiều hơn kỳ vọng); b<sub>14</sub> = 0 − 2·1/8 = −0.25 (không có cạnh, ít hơn kỳ vọng). Giá trị dương gợi ý hai nút nên cùng cộng đồng.</p>
+      <p><strong>sE-Autoencoder</strong>: cho mạng <strong>động</strong>, theo khung phân cụm tiến hóa: cấu trúc ở các bước trước dẫn dắt bước hiện tại.</p>
+      <span class="formula">𝓛 = 𝓛(S<sup>(t)</sup>, Ŝ<sup>(t)</sup>) + λ𝓛(O, H<sup>(t)</sup>) + (1 − λ)𝓛(H<sup>(t)</sup>, H<sup>(t−1)</sup>)<small>Số hạng cuối là chuẩn hóa trơn theo thời gian: biểu diễn ở thời điểm t không được khác quá xa thời điểm t − 1.</small></span>
+      <p><strong>Transfer-CDDTA</strong>: dùng <strong>học chuyển giao</strong> (transfer learning) khi phân phối dịch chuyển, đặc trưng mất cân bằng hoặc thiếu dữ liệu. Hai AE cho miền nguồn và miền đích, cân bằng bằng phân kỳ KL.</p>
+      <span class="formula">𝓛 = 𝓛<sub>s</sub>(S<sub>s</sub>, Ŝ<sub>s</sub>) + 𝓛<sub>t</sub>(S<sub>t</sub>, Ŝ<sub>t</sub>) + α·KL(H<sub>s</sub>, H<sub>t</sub>) + β·𝓛(Θ; γ)</span>
+      <p>Các phương pháp khác: <strong>DNE-SBP</strong> (mạng có dấu, phân biệt cạnh dương và âm), <strong>UWMNE / WMCNE-LE</strong> (kết hợp cấu trúc và ngữ nghĩa, nhìn từ cấu trúc cục bộ), <strong>DANE</strong> (hai nhánh: một cho cấu trúc, một cho thuộc tính; tối ưu độ gần bậc nhất, bậc cao, ngữ nghĩa và một số hạng log-likelihood âm cho nhất quán), <strong>DIME</strong> (mạng xã hội không đồng nhất có liên kết neo giữa nhiều mạng; mỗi metapath có một độ đo “meta proximity”).</p>
+
+      <h3>B. Sparse AE (thưa)</h3>
+      <p>Mạng thật rất thưa, gây khó tính toán. Sparse AE thêm <strong>phạt thưa</strong> Ω(h) vào tầng ẩn: chỉ cho phép ít nơ-ron “bật” cùng lúc.</p>
+      <span class="formula">𝓛(Θ) = Σ<sub>i</sub> ‖x̂<sub>i</sub> − x<sub>i</sub>‖² + β · Ω( ρ ‖ (1/n) Σ<sub>i</sub> h<sub>i</sub> )<small>ρ là mức kích hoạt mong muốn, rất nhỏ (ví dụ 0.01); Ω phạt khi mức kích hoạt trung bình của tầng ẩn lệch khỏi ρ; β điều chỉnh độ mạnh.</small></span>
+      <ul>
+        <li><strong>GraphEncoder (2014)</strong>: công trình <strong>đầu tiên</strong> dùng AE cho phân cụm đồ thị. Tăng hiệu quả trên mạng lớn và cho thấy mạng thưa vẫn đủ thông tin cấu trúc để biểu diễn.</li>
+        <li><strong>WCD</strong>: cho mạng có trọng số, dùng láng giềng bậc hai.</li>
+        <li><strong>DFuzzy</strong>: cộng đồng chồng lấn trên mạng thưa lớn, xử lý song song; stacked sparse AE nhắm vào nút đầu (head nodes), dựa trên modularity. Bài dẫn lại kết quả: cao hơn <strong>63% (Q)</strong> và <strong>34% (CON)</strong> so với các phương pháp không học sâu.</li>
+        <li><strong>CDMEC</strong>: sparse AE kết hợp học chuyển giao; dựng 4 ma trận tương đồng, mỗi ma trận cho một kết quả (k-means), gộp bằng <strong>ma trận đồng thuận</strong> rồi phân rã ma trận này để ra cộng đồng cuối.</li>
+      </ul>
+
+      <h3>C. Denoising AE (khử nhiễu)</h3>
+      <p>Cố ý làm hỏng đầu vào thành x̃ rồi buộc mô hình dựng lại x sạch: 𝓛(x, φ<sub>r</sub>(φ<sub>e</sub>(x̃))). Mô hình nhờ vậy bền vững hơn với nhiễu.</p>
+      <ul>
+        <li><strong>DNGR</strong>: bộ mã hóa khử nhiễu xếp chồng; tạo ma trận đồng xuất hiện xác suất và ma trận PPMI (shifted positive pointwise MI) bằng bước đi ngẫu nhiên.</li>
+        <li><strong>DNC</strong>: mở rộng DNGR, học đồng thời embedding và phân cụm.</li>
+        <li><strong>GRACE</strong>: theo dõi hoạt động liên cộng đồng thay đổi động, tự huấn luyện phân cụm theo lan truyền ảnh hưởng trong láng giềng.</li>
+        <li><strong>MGAE</strong>: khử nhiễu cả thuộc tính và cấu trúc; làm hỏng thuộc tính η lần bằng cách xóa ngẫu nhiên một số thuộc tính.</li>
+      </ul>
+      <span class="formula">𝓛 = (1/η) Σ<sub>i=1..η</sub> ‖ X − D̃<sup>−½</sup> Ã D̃<sup>−½</sup> X̃ W ‖² + λ 𝓛(W)</span>
+
+      <h3>D. Graph Convolutional AE</h3>
+      <p>Đặt GCN vào AE: GCN gom thông tin láng giềng, còn AE giảm làm mịn quá mức để <strong>ranh giới cộng đồng rõ hơn</strong>.</p>
+      <ul>
+        <li><strong>SDCN</strong>: toán tử chuyển giao (delivery operator) nối AE và GCN qua các tầng; tối ưu tự giám sát kép.</li>
+        <li><strong>GUCD</strong>: bộ mã hóa là MRF (từ MRFasGCN), bộ giải mã kép tái tạo cả cấu trúc và thuộc tính.</li>
+        <li><strong>O2MAC</strong>: đồ thị nhiều góc nhìn; tách thành nhiều đồ thị một góc nhìn (One2Multi), mã hóa bằng GCN, chọn đồ thị nhiều thông tin nhất; tự huấn luyện.</li>
+      </ul>
+
+      <h3>E. Graph Attention AE</h3>
+      <p>Dùng GAT làm bộ mã hóa để xếp hạng mức quan trọng của các nút láng giềng.</p>
+      <ul>
+        <li><strong>DAEGC</strong>: dùng láng giềng bậc cao, tự huấn luyện phân cụm.</li>
+        <li><strong>GEC-CSD</strong>: AE chú ý làm bộ sinh trong khung đối kháng; bộ phân biệt đảm bảo sự đa dạng phân phối cụm.</li>
+        <li><strong>MAGCN</strong>: thuộc tính nhiều góc nhìn; bộ mã hóa hai nhánh (một nhánh GAT khử nhiễu, một nhánh cho embedding nhất quán giữa các góc nhìn). <strong>SGCMC</strong> phát triển từ MAGCN, chia sẻ ma trận hệ số giữa các góc nhìn.</li>
+        <li><strong>DMGC</strong>: nhiều đồ thị; mỗi đồ thị một AE kèm hệ số chú ý; embedding được phân cụm quanh các tâm cụm chung, dùng phân phối Cauchy.</li>
+      </ul>
+
+      <h3>F. Variational AE (VAE)</h3>
+      <div class="eli5"><p>AE thường cho mỗi nút <strong>một điểm</strong> trong không gian ẩn. VAE cho mỗi nút <strong>một đám mây</strong> (một phân phối với trung bình và phương sai). Đám mây rộng nghĩa là mô hình chưa chắc nút này thuộc đâu, ví dụ nút ranh giới nối nhiều cộng đồng.</p></div>
+      <p>VGAE (Kipf và Welling) đưa VAE vào học đồ thị, dùng GCN làm bộ mã hóa. VAE có thể kết hợp SBM để suy diễn nhanh thành viên cộng đồng, tính đến tính bất định của mạng, xử lý độ thưa và quan hệ phi tuyến sâu hơn.</p>
+      <ul>
+        <li><strong>TGA / TVGA</strong>: thay bộ giải mã bằng <strong>bộ giải mã bộ ba</strong> (triad decoder), mô tả tính chất <em>đóng tam giác</em> (triadic closure) có thật trong cộng đồng.</li>
+        <li><strong>VGECLE</strong>: tách biểu diễn thành trung bình và hiệp phương sai; tiên nghiệm hỗn hợp Gauss; chuẩn hóa thầy–trò (teacher–student): nút (trò) học phân phối gần với láng giềng (thầy).</li>
+        <li><strong>DGLFRM</strong>: embedding thưa theo quá trình Beta–Bernoulli; tìm được cộng đồng chồng lấn và <strong>suy ra số cộng đồng</strong>.</li>
+        <li><strong>LGVG</strong>: embedding nhiều tầng theo phân phối gamma, tìm cộng đồng ở cả mức mịn và mức thô.</li>
+        <li><strong>VGAECD</strong>: dùng mô hình hỗn hợp Gauss (GMM), thêm biến gán cộng đồng c vào quá trình sinh.</li>
+        <li><strong>VGAECD-OPT</strong>: VGAECD thiên về giảm mất mát tái tạo hơn mất mát cộng đồng, nên kết quả chưa tối ưu; bản OPT dùng tối ưu kép để học biểu diễn “biết cộng đồng”.</li>
+        <li><strong>ARVGA</strong>: chống thưa và nhiễu bằng chuẩn hóa đối kháng; bộ phân biệt phân biệt embedding lấy từ tiên nghiệm p<sub>z</sub> với embedding do bộ mã hóa tạo ra.</li>
+      </ul>
+      <span class="formula">p(a, z, c) = p(a | z) · p(z | c) · p(c)<small>VGAECD: p(c) = π<sub>c</sub> là xác suất tiên nghiệm của cộng đồng c; z ∼ 𝒩(μ<sub>c</sub>, σ<sub>c</sub>²I) với μ, σ từ một tầng GCN; a được lấy mẫu từ phân phối Bernoulli nhiều biến do bộ giải mã học.</small></span>
+      <span class="formula">𝓛<sub>ELBO</sub>(x) = 𝔼<sub>q(z|x,a)</sub>[log p(x, a | z)] − KL[ q(c|x) ‖ p(c|z) ]<small>Số hạng đầu: tái tạo. Số hạng KL: mất mát phân cụm. Tối đa “cận dưới bằng chứng” (ELBO).</small></span>
+      <span class="formula">VGAECD-OPT:  𝓛<sub>ELBO</sub>(a) = 𝔼<sub>q(z,c|a)</sub>[log p(a | z)] − KL[ q(z, c | a) ‖ p(z, c) ]</span>
+      <div class="warn">
+        <ul>
+          <li>Trong phần chữ, bài trích VGAECD-OPT là tài liệu [124], nhưng [124] là bài VGECLE của Chen và cộng sự. Tài liệu đúng là [136] (Choong và cộng sự, BigData 2019), như Bảng VIII ghi.</li>
+          <li>Phương trình (22) và (23) dùng ký hiệu không thống nhất: (22) chỉ có a, z, c, còn (23) lại có thêm x và số hạng KL[q(c|x) ‖ p(c|z)]. Muốn hiểu chính xác nên đọc bài gốc của VGAECD.</li>
+          <li>Phần mở đầu Mục VIII chỉ liệt kê 5 loại AE (stacked, sparse, denoising, convolutional, variational), nhưng mục con và Mục IV có 6 loại (thêm graph attention AE).</li>
+        </ul>
+      </div>
+
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng VIII · Các phương pháp dựa trên AE</caption>
+          <thead><tr><th>Loại</th><th>Phương pháp</th><th>Đầu vào</th><th>Học</th><th>Mã hóa</th><th>Giải mã</th><th>Mất mát</th><th class="c">Chồng lấn</th></tr></thead>
+          <tbody>
+            <tr><td>Stacked</td><td>semi-DRN</td><td>B</td><td>Bán GS</td><td>MLP</td><td>MLP</td><td>tái tạo + cặp</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>DNE-SBP</td><td>A<sup>(+,−)</sup></td><td>Bán GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + cặp</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>UWMNE / WMCNE-LE</td><td>B, X</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + cặp</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>sE-Autoencoder</td><td>{A<sup>t</sup>}</td><td>Bán GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + cặp</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>DANE</td><td>A, X</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + độ gần</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>Transfer-CDDTA</td><td>S<sub>s</sub>, S<sub>t</sub></td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + độ gần</td><td class="c">×</td></tr>
+            <tr><td>Stacked</td><td>DIME</td><td>V, E, X, {A<sub>ij</sub>}</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + hợp nhất thông tin</td><td class="c">×</td></tr>
+            <tr><td>Sparse</td><td>GraphEncoder</td><td>A, D, S</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + thưa</td><td class="c">×</td></tr>
+            <tr><td>Sparse</td><td>WCD</td><td>S</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + thưa</td><td class="c">×</td></tr>
+            <tr><td>Sparse</td><td>DFuzzy</td><td>A</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + thưa</td><td class="c">✓</td></tr>
+            <tr><td>Sparse</td><td>CDMEC</td><td>S<sub>s</sub>, S<sub>t</sub></td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + thưa</td><td class="c">×</td></tr>
+            <tr><td>Denoising</td><td>DNGR</td><td>A</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo</td><td class="c">×</td></tr>
+            <tr><td>Denoising</td><td>DNC</td><td>A</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Denoising</td><td>GRACE</td><td>A, X</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Denoising</td><td>MGAE</td><td>A, X</td><td>Không GS</td><td>GCN</td><td>GCN</td><td>tái tạo + chuẩn hóa</td><td class="c">×</td></tr>
+            <tr><td>Graph Conv.</td><td>GUCD</td><td>A, X</td><td>Không GS</td><td>MRFasGCN</td><td>MLP</td><td>tái tạo + cặp</td><td class="c">×</td></tr>
+            <tr><td>Graph Conv.</td><td>SDCN</td><td>A, X</td><td>Không GS</td><td>GCN + DNN</td><td>DNN</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Graph Conv.</td><td>O2MAC</td><td>{A}, X</td><td>Không GS</td><td>GCN</td><td>Tích vô hướng</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Graph Att.</td><td>DAEGC</td><td>A, X</td><td>Không GS</td><td>GAT</td><td>Tích vô hướng</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Graph Att.</td><td>GEC-CSD</td><td>A, X</td><td>Không GS</td><td>GAT</td><td>Tích vô hướng + GAT</td><td>tái tạo + chuẩn hóa + phân cụm + đối kháng</td><td class="c">×</td></tr>
+            <tr><td>Graph Att.</td><td>MAGCN</td><td>A, {X}</td><td>Không GS</td><td>GAT + MLP</td><td>Tích vô hướng + GCN</td><td>tái tạo + phân cụm + nhất quán</td><td class="c">×</td></tr>
+            <tr><td>Graph Att.</td><td>SGCMC</td><td>A, {X}</td><td>Không GS</td><td>GAT</td><td>GAT</td><td>tái tạo + chuẩn hóa + phân cụm + nhất quán</td><td class="c">×</td></tr>
+            <tr><td>Graph Att.</td><td>DMGC</td><td>{A}</td><td>Không GS</td><td>MLP</td><td>MLP</td><td>tái tạo + chuẩn hóa + độ gần + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Variational</td><td>TGA / TVGA</td><td>A, X</td><td>Không GS</td><td>GCN</td><td>Bộ ba (triad)</td><td>tái tạo</td><td class="c">×</td></tr>
+            <tr><td>Variational</td><td>VGECLE</td><td>A</td><td>Bán GS</td><td>DNN</td><td>DNN</td><td>tái tạo + cặp</td><td class="c">×</td></tr>
+            <tr><td>Variational</td><td>DGLFRM</td><td>A, X</td><td>Bán GS</td><td>GCN</td><td>DNN</td><td>tái tạo + chuẩn hóa</td><td class="c">✓</td></tr>
+            <tr><td>Variational</td><td>LGVG</td><td>A, X</td><td>Bán GS</td><td>GCN</td><td>DNN</td><td>tái tạo + chuẩn hóa</td><td class="c">✓</td></tr>
+            <tr><td>Variational</td><td>VGAECD</td><td>A, X</td><td>Không GS</td><td>GCN</td><td>Tích vô hướng</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Variational</td><td>VGAECD-OPT</td><td>A, X</td><td>Không GS</td><td>GCN</td><td>Tích vô hướng</td><td>tái tạo + phân cụm</td><td class="c">×</td></tr>
+            <tr><td>Variational</td><td>ARGA / ARVGA</td><td>A, X</td><td>Không GS</td><td>GCN</td><td>Tích vô hướng</td><td>tái tạo</td><td class="c">×</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">GS: giám sát. Bảng gốc ghi “semi-DNR” cho dòng đầu, trong khi phần chữ và bảng viết tắt ghi “semi-DRN”; đây là lỗi đánh máy của bảng.</p>
+    </section>
+
+    <section id="dnmf">
+      <h2>Nhóm 5: Phân rã ma trận không âm sâu (Deep NMF)</h2>
+      <div class="eli5"><p>NMF viết ma trận kề như tích của hai ma trận chỉ chứa số không âm: A ≈ U·P. Cột của P là “phiếu thành viên” của một nút: nút đó thuộc mỗi cộng đồng với mức bao nhiêu. Vì số không âm nên dễ đọc như tỉ lệ, và một nút có thể có điểm ở nhiều cộng đồng (chồng lấn). Bản “sâu” xếp nhiều lớp phân rã nối tiếp nhau.</p></div>
+      <p><strong>NMF</strong> phân rã A thành U ∈ ℝ<sup>n×k</sup> và P ∈ ℝ<sup>k×n</sup> với U ≥ 0, P ≥ 0. U ánh xạ từ mạng sang không gian thành viên cộng đồng; p<sub>ij</sub> cho xác suất nút thuộc cộng đồng. Dùng được cho cả cộng đồng rời nhau và chồng lấn. NMF truyền thống không khai thác hết cấu trúc phức tạp, nên <strong>DNMF</strong> xếp chồng nhiều tầng {U<sub>1</sub>, …, U<sub>p</sub>} để nắm độ tương đồng cặp nút ở nhiều mức.</p>
+      <p><strong>DANMF</strong> (Deep Autoencoder-like NMF): mô hình có ảnh hưởng lớn, không giám sát. Dùng khung AE: vừa “giải mã” A từ P, vừa “mã hóa” P từ A.</p>
+      <span class="formula">min ‖A − U<sub>1</sub>⋯U<sub>p</sub>P<sub>p</sub>‖²<sub>F</sub> + ‖P<sub>p</sub> − U<sub>p</sub><sup>T</sup>⋯U<sub>1</sub><sup>T</sup>A‖²<sub>F</sub> + λ·tr(P<sub>p</sub> L P<sub>p</sub><sup>T</sup>),   P<sub>p</sub> ≥ 0, U<sub>i</sub> ≥ 0<small>Số hạng 1: giải mã (dựng lại A). Số hạng 2: mã hóa (dựng lại P). Số hạng 3: chuẩn hóa đồ thị bằng Laplace L, kéo các nút kề nhau về cùng cộng đồng. ‖·‖<sub>F</sub>: chuẩn Frobenius.</small></span>
+      <p>Một công trình khác (Sun et al., 2017) thêm ràng buộc thưa vào DNMF.</p>
+      <p><strong>MDNMF</strong> (Modularized DNMF): DNMF tốn chi phí phân rã ma trận; MDNMF đưa trực tiếp <strong>modularity</strong> vào cấu trúc nhiều tầng.</p>
+      <span class="formula">𝓛 = ‖A − U<sub>1</sub>⋯U<sub>p</sub>P<sub>p</sub>‖²<sub>F</sub> + α‖M′ − P<sub>p</sub><sup>T</sup>K<sup>T</sup>‖²<sub>F</sub> − β·tr(M′<sup>T</sup>BM′) + λ·tr(P<sub>p</sub>LP<sub>p</sub><sup>T</sup>)<small>B: ma trận modularity; M′: ma trận thành viên tương ứng; K: ma trận không âm phụ trợ kết hợp thông tin modularity. Dấu trừ trước β nghĩa là tối đa modularity.</small></span>
+      <p><strong>Ví dụ trực giác</strong> (của người giải thích): nếu cột P của nút 5 là (0.9, 0.1) thì nút 5 gần như thuộc cộng đồng 1; nếu là (0.5, 0.5) thì nút có thể nằm ở ranh giới, thuộc cả hai.</p>
+    </section>
+
+    <section id="dsf">
+      <h2>Nhóm 6: Lọc thưa sâu (Deep Sparse Filtering)</h2>
+      <div class="eli5"><p>Ma trận kề của mạng thật gần như toàn số 0. <strong>Sparse Filtering</strong> biến hàng dài toàn số 0 ấy thành vectơ ngắn mà mỗi nút chỉ “bật” vài đặc trưng nổi bật. Nút có cùng kiểu đặc trưng bật lên thì gần nhau và được gom thành cộng đồng.</p></div>
+      <p><strong>Sparse Filtering (SF)</strong> là mô hình học hai tầng, xử lý dữ liệu đồ thị nhiều chiều: biến đầu vào A rất thưa thành vectơ đặc trưng h<sub>i</sub> ít chiều. <strong>Deep SF</strong> xếp chồng nhiều tầng ẩn để tinh chỉnh tham số và làm trơn phân phối dữ liệu.</p>
+      <p><strong>DSFCD</strong> gồm 3 giai đoạn:</p>
+      <ol>
+        <li><strong>Biểu diễn mạng:</strong> thử trên ma trận kề A, ma trận modularity B và hai ma trận tương đồng S, S′; chọn biểu diễn tốt nhất.</li>
+        <li><strong>Ánh xạ đặc trưng cộng đồng:</strong> đưa vào DSF, được h<sub>i</sub> cho từng nút, giữ cả độ tương đồng gốc lẫn đặc trưng thành viên cộng đồng.</li>
+        <li><strong>Phát hiện cộng đồng:</strong> nút giống nhau được gom cụm.</li>
+      </ol>
+      <span class="formula">𝓛 = Σ<sub>i</sub> ‖h<sub>i</sub>‖<sub>1</sub> + λ Σ<sub>i</sub> KL(h<sub>i</sub>, h<sub>j</sub><sup>*</sup>)<small>‖·‖<sub>1</sub>: phạt L1 để biểu diễn thưa; h<sub>j</sub><sup>*</sup>: biểu diễn của nút giống v<sub>i</sub> nhất (đo bằng phân kỳ KL).</small></span>
+      <p>Theo bài, thí nghiệm trên dữ liệu thật cho thấy kiến trúc DSF có ý nghĩa, và DSFCD chính xác hơn SF.</p>
+    </section>
+
+    <section id="du-lieu">
+      <h2>Bộ dữ liệu chuẩn</h2>
+      <p>Có hai loại: <strong>dữ liệu thật</strong> (kiểm tra khả năng ứng dụng) và <strong>dữ liệu tổng hợp</strong> (sinh theo luật định sẵn để kiểm tra từng chức năng cụ thể). Dữ liệu thật phổ biến gồm mạng trích dẫn/đồng tác giả, mạng xã hội (trực tuyến và truyền thống), mạng trang web và mạng đồng mua sản phẩm.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng IX · Bộ dữ liệu thật (phần mạng không thuộc tính và có thuộc tính; giữ đủ các dòng, bỏ cột danh sách tài liệu sử dụng)</caption>
+          <thead><tr><th>Loại mạng</th><th>Tên</th><th class="num">Số nút</th><th class="num">Số cạnh</th><th class="num">Số thuộc tính</th><th class="num">Số cộng đồng</th></tr></thead>
+          <tbody>
+            <tr><td>Không thuộc tính</td><td>Karate</td><td class="num">34</td><td class="num">78</td><td class="num">0</td><td class="num">2</td></tr>
+            <tr><td>Không thuộc tính</td><td>Dolphins</td><td class="num">62</td><td class="num">159</td><td class="num">0</td><td class="num">2</td></tr>
+            <tr><td>Không thuộc tính</td><td>Friendship6</td><td class="num">69</td><td class="num">220</td><td class="num">0</td><td class="num">6</td></tr>
+            <tr><td>Không thuộc tính</td><td>Friendship7</td><td class="num">69</td><td class="num">220</td><td class="num">0</td><td class="num">7</td></tr>
+            <tr><td>Không thuộc tính</td><td>Polbooks</td><td class="num">105</td><td class="num">441</td><td class="num">0</td><td class="num">3</td></tr>
+            <tr><td>Không thuộc tính</td><td>Football</td><td class="num">115</td><td class="num">613</td><td class="num">0</td><td class="num">12</td></tr>
+            <tr><td>Không thuộc tính</td><td>Email</td><td class="num">1&nbsp;005</td><td class="num">25&nbsp;571</td><td class="num">0</td><td class="num">42</td></tr>
+            <tr><td>Không thuộc tính</td><td>Polblogs</td><td class="num">1&nbsp;490</td><td class="num">16&nbsp;718</td><td class="num">0</td><td class="num">2</td></tr>
+            <tr><td>Không thuộc tính</td><td>Amazon</td><td class="num">334&nbsp;863</td><td class="num">925&nbsp;872</td><td class="num">0</td><td class="num">75&nbsp;149</td></tr>
+            <tr><td>Không thuộc tính</td><td>DBLP</td><td class="num">317&nbsp;080</td><td class="num">1&nbsp;049&nbsp;866</td><td class="num">0</td><td class="num">13&nbsp;477</td></tr>
+            <tr><td>Không thuộc tính</td><td>YouTube</td><td class="num">1&nbsp;134&nbsp;890</td><td class="num">2&nbsp;987&nbsp;624</td><td class="num">0</td><td class="num">8&nbsp;385</td></tr>
+            <tr><td>Không thuộc tính</td><td>LiveJournal</td><td class="num">3&nbsp;997&nbsp;962</td><td class="num">34&nbsp;681&nbsp;189</td><td class="num">0</td><td class="num">287&nbsp;512</td></tr>
+            <tr><td>Có thuộc tính</td><td>Texas</td><td class="num">187</td><td class="num">328</td><td class="num">1&nbsp;703</td><td class="num">5</td></tr>
+            <tr><td>Có thuộc tính</td><td>Cornell</td><td class="num">195</td><td class="num">304</td><td class="num">1&nbsp;703</td><td class="num">5</td></tr>
+            <tr><td>Có thuộc tính</td><td>Washington</td><td class="num">230</td><td class="num">446</td><td class="num">1&nbsp;703</td><td class="num">5</td></tr>
+            <tr><td>Có thuộc tính</td><td>Wisconsin</td><td class="num">265</td><td class="num">530</td><td class="num">1&nbsp;703</td><td class="num">5</td></tr>
+            <tr><td>Có thuộc tính</td><td>Wiki</td><td class="num">2&nbsp;405</td><td class="num">17&nbsp;981</td><td class="num">4&nbsp;973</td><td class="num">19</td></tr>
+            <tr><td>Có thuộc tính</td><td>Cora</td><td class="num">2&nbsp;708</td><td class="num">5&nbsp;429</td><td class="num">1&nbsp;433</td><td class="num">7</td></tr>
+            <tr><td>Có thuộc tính</td><td>Citeseer</td><td class="num">3&nbsp;312</td><td class="num">4&nbsp;715</td><td class="num">3&nbsp;703</td><td class="num">6</td></tr>
+            <tr><td>Có thuộc tính</td><td>UAI2010</td><td class="num">3&nbsp;363</td><td class="num">45&nbsp;006</td><td class="num">4&nbsp;972</td><td class="num">19</td></tr>
+            <tr><td>Có thuộc tính</td><td>Facebook</td><td class="num">4&nbsp;039</td><td class="num">88&nbsp;234</td><td class="num">1&nbsp;283</td><td class="num">193</td></tr>
+            <tr><td>Có thuộc tính</td><td>Blogcatalog</td><td class="num">5&nbsp;196</td><td class="num">171&nbsp;743</td><td class="num">8&nbsp;189</td><td class="num">6</td></tr>
+            <tr><td>Có thuộc tính</td><td>Flickr</td><td class="num">7&nbsp;564</td><td class="num">239&nbsp;365</td><td class="num">12&nbsp;047</td><td class="num">9</td></tr>
+            <tr><td>Có thuộc tính</td><td>DBLP</td><td class="num">17&nbsp;725</td><td class="num">52&nbsp;890</td><td class="num">6&nbsp;974</td><td class="num">4</td></tr>
+            <tr><td>Có thuộc tính</td><td>PubMed</td><td class="num">19&nbsp;717</td><td class="num">44&nbsp;338</td><td class="num">500</td><td class="num">3</td></tr>
+            <tr><td>Có thuộc tính</td><td>Twitter</td><td class="num">81&nbsp;306</td><td class="num">1&nbsp;768&nbsp;149</td><td class="num">216&nbsp;839</td><td class="num">4&nbsp;065</td></tr>
+            <tr><td>Có thuộc tính</td><td>GPlus</td><td class="num">107&nbsp;614</td><td class="num">13&nbsp;673&nbsp;453</td><td class="num">15&nbsp;907</td><td class="num">468</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng IX (tiếp) · Các loại mạng đặc biệt; tên cột thay đổi theo loại mạng</caption>
+          <thead><tr><th>Loại mạng</th><th>Tên</th><th class="num">Số nút</th><th>Cột 2</th><th>Cột 3</th><th>Cột 4</th><th class="num">Số cộng đồng</th></tr></thead>
+          <tbody>
+            <tr><td>Nhiều góc nhìn</td><td>ACM</td><td class="num">3&nbsp;025</td><td>Cạnh View1: 29&nbsp;281</td><td>Cạnh View2: 2&nbsp;210&nbsp;761</td><td>Thuộc tính: 1&nbsp;830</td><td class="num">3</td></tr>
+            <tr><td>Nhiều góc nhìn</td><td>IMDB</td><td class="num">4&nbsp;780</td><td>Cạnh View1: 98&nbsp;010</td><td>Cạnh View2: 21&nbsp;018</td><td>Thuộc tính: 1&nbsp;232</td><td class="num">3</td></tr>
+            <tr><td>Có dấu</td><td>Epinions</td><td class="num">7&nbsp;000</td><td>Cạnh (+): 404&nbsp;006</td><td>Cạnh (−): 47&nbsp;143</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Có dấu</td><td>Slashdot</td><td class="num">7&nbsp;000</td><td>Cạnh (+): 181&nbsp;354</td><td>Cạnh (−): 56&nbsp;675</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Có dấu</td><td>Wiki</td><td class="num">7&nbsp;118</td><td>Cạnh (+): 81&nbsp;318</td><td>Cạnh (−): 22&nbsp;357</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>ACM</td><td class="num">8&nbsp;916</td><td>Cạnh: 12&nbsp;769</td><td>Metapath: ✓</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>IMDB</td><td class="num">11&nbsp;616</td><td>Cạnh: 17&nbsp;106</td><td>Metapath: ✓</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>Last.fm</td><td class="num">20&nbsp;612</td><td>Cạnh: 128&nbsp;804</td><td>Metapath: ✓</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>DBLP</td><td class="num">26&nbsp;128</td><td>Cạnh: 119&nbsp;783</td><td>Metapath: ✓</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>Foursquare</td><td class="num">93&nbsp;069</td><td>Cạnh: 174&nbsp;484</td><td>Metapath: ×</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Không đồng nhất</td><td>Twitter</td><td class="num">9&nbsp;793&nbsp;112</td><td>Cạnh: 10&nbsp;271&nbsp;142</td><td>Metapath: ×</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>Hospital</td><td class="num">75</td><td>Cạnh: 32&nbsp;424</td><td>Bước thời gian: 9</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>Hypertext</td><td class="num">113</td><td>Cạnh: 20&nbsp;818</td><td>Bước thời gian: 5</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>Enron Mail</td><td class="num">151</td><td>Cạnh: 33&nbsp;124</td><td>Bước thời gian: 12</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>Rados</td><td class="num">167</td><td>Cạnh: 82&nbsp;927</td><td>Bước thời gian: 10</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>High School</td><td class="num">327</td><td>Cạnh: 188&nbsp;508</td><td>Bước thời gian: 9</td><td>–</td><td class="num">–</td></tr>
+            <tr><td>Động</td><td>Cellphone Calls</td><td class="num">400</td><td>Cạnh: 9&nbsp;834</td><td>Bước thời gian: 10</td><td>–</td><td class="num">–</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Theo cột “tài liệu sử dụng” của bảng gốc, <strong>Cora</strong>, <strong>Citeseer</strong> và <strong>PubMed</strong> là ba bộ được dùng nhiều nhất; mạng có dấu và mạng động mỗi bộ chỉ có một công trình dùng.</p>
+      <h3>Mô tả ngắn một số bộ dữ liệu (Phụ lục B)</h3>
+      <ul>
+        <li><strong>Cora, Citeseer, PubMed:</strong> mạng trích dẫn; nút là bài báo, thuộc tính là vectơ từ nhị phân, nhãn là chủ đề.</li>
+        <li><strong>DBLP:</strong> mạng đồng tác giả; cộng đồng thật là nhóm tác giả cùng đăng ở một hội nghị/tạp chí. Có cả bản không đồng nhất.</li>
+        <li><strong>ACM:</strong> mạng bài báo hai góc nhìn (cùng tác giả; cùng chủ đề), thuộc tính là túi từ khóa.</li>
+        <li><strong>YouTube, LiveJournal:</strong> mạng bạn bè; nhóm do người dùng lập là cộng đồng thật.</li>
+        <li><strong>Facebook, Twitter, GPlus:</strong> mạng ego, thuộc tính là hồ sơ người dùng.</li>
+        <li><strong>Epinions, Slashdot, Wiki (có dấu):</strong> tin/không tin, bạn/thù, bầu thuận/chống quản trị viên Wikipedia.</li>
+        <li><strong>Karate, Dolphins, Football:</strong> mạng xã hội kinh điển (34 thành viên câu lạc bộ karate của Zachary; đàn cá heo; các đội bóng và trận đấu).</li>
+        <li><strong>Hospital, High School, Hypertext, Enron, Rados, Cellphone Calls:</strong> mạng tiếp xúc hoặc liên lạc thay đổi theo thời gian.</li>
+        <li><strong>Amazon, Polbooks:</strong> đồng mua sản phẩm; cộng đồng là loại sản phẩm hoặc khuynh hướng chính trị người mua.</li>
+        <li><strong>WebKB</strong> (Texas, Cornell, Washington, Wisconsin), <strong>Wiki</strong>, <strong>UAI2010</strong>, <strong>IMDB</strong>: mạng trang web.</li>
+      </ul>
+      <div class="warn"><p>Tên “DBLP”, “ACM”, “IMDB”, “Twitter” và “Wiki” xuất hiện ở nhiều dòng với số nút rất khác nhau (ví dụ DBLP có 317&nbsp;080, 17&nbsp;725 và 26&nbsp;128 nút). Đó là các phiên bản khác nhau của cùng một nguồn. Khi so sánh kết quả giữa các bài, phải kiểm tra đúng phiên bản.</p></div>
+
+      <h3>Dữ liệu tổng hợp</h3>
+      <div class="cards">
+        <div class="card"><b>Girvan–Newman (GN)</b><p>128 nút, 4 cộng đồng, mỗi cộng đồng 32 nút. Mỗi nút có số cạnh trong k<sub>in</sub> và số cạnh ra ngoài k<sub>out</sub> cố định, ví dụ k<sub>in</sub> + k<sub>out</sub> = 16. Tham số μ điều khiển tỉ lệ láng giềng ở cộng đồng khác.</p></div>
+        <div class="card"><b>LFR (Lancichinetti–Fortunato–Radicchi)</b><p>Mô phỏng bậc nút và tính phi tỉ lệ (scale-free) của mạng thật. Tham số: số nút n, bậc trung bình và lớn nhất, kích thước cộng đồng nhỏ nhất và lớn nhất, tham số trộn μ. Bậc và kích thước cộng đồng theo luật lũy thừa với số mũ γ và β. Là benchmark phổ biến nhất; bản mở rộng sinh được cộng đồng chồng lấn trên mạng có hướng và có trọng số.</p></div>
+      </div>
+    </section>
+
+    <section id="do-do">
+      <h2>Độ đo đánh giá</h2>
+      <p>Bài tổng hợp <strong>12 độ đo</strong> phổ biến nhất. Chúng khác nhau ở hai điểm: có đánh giá được <strong>cộng đồng chồng lấn</strong> không, và có cần <strong>đáp án</strong> (ground truth) không.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng II · Độ đo đánh giá (bỏ cột danh sách tài liệu)</caption>
+          <thead><tr><th>Độ đo</th><th class="c">Chồng lấn</th><th class="c">Cần đáp án</th></tr></thead>
+          <tbody>
+            <tr><td>ACC (Accuracy)</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>NMI</td><td class="c">×</td><td class="c">Có</td></tr>
+            <tr><td>Overlapping-NMI</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>Precision</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>Recall</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>F1-score</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>ARI</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>Modularity Q</td><td class="c">×</td><td class="c">Không</td></tr>
+            <tr><td>Extended-Q</td><td class="c">✓</td><td class="c">Không</td></tr>
+            <tr><td>Jaccard</td><td class="c">✓</td><td class="c">Có</td></tr>
+            <tr><td>CON (Conductance)</td><td class="c">✓</td><td class="c">Không</td></tr>
+            <tr><td>TPR</td><td class="c">✓</td><td class="c">Không</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Độ đo so với đáp án</h3>
+      <p><strong>Accuracy (ACC):</strong> tỉ lệ nút được gán đúng nhãn.</p>
+      <span class="formula">ACC(C, C*) = (1/n) Σ<sub>i</sub> δ(y<sub>i</sub>, y<sub>i</sub>*)<small>δ = 1 nếu nhãn dự đoán y<sub>i</sub> trùng nhãn thật y<sub>i</sub>*, ngược lại 0.</small></span>
+      <div class="warn"><p>Nhận xét thêm của người giải thích: tên cộng đồng do thuật toán đặt (“cụm 1”, “cụm 2”) không tự khớp với tên trong đáp án, nên trong thực tế phải <strong>ghép nhãn</strong> tốt nhất trước (thường bằng thuật toán Hungary). Bài không nhắc bước này. Ngoài ra Bảng II đánh dấu ACC dùng được cho cộng đồng chồng lấn, trong khi công thức (30) chỉ cho mỗi nút một nhãn; điểm này chưa rõ.</p></div>
+
+      <p><strong>NMI (Normalized Mutual Information):</strong> đo hai cách chia chia sẻ bao nhiêu thông tin. Bằng 1 khi giống hệt.</p>
+      <span class="formula">NMI(C, C*) = −2 Σ<sub>i</sub>Σ<sub>j</sub> n<sub>ij</sub> log( n<sub>ij</sub>n / (n<sub>i</sub>n<sub>j</sub>) ) / [ Σ<sub>i</sub> n<sub>i</sub> log(n<sub>i</sub>/n) + Σ<sub>j</sub> n<sub>j</sub> log(n<sub>j</sub>/n) ]<small>n<sub>ij</sub>: số nút vừa ở cộng đồng tìm được C<sub>i</sub> vừa ở cộng đồng thật C<sub>j</sub>*; n<sub>i</sub>, n<sub>j</sub>: kích thước hai cộng đồng; n: tổng số nút. Bản cho cộng đồng chồng lấn là Overlapping-NMI.</small></span>
+
+      <p><strong>Precision, Recall, F1:</strong> so cộng đồng C<sub>k</sub> tìm được với cộng đồng thật C<sub>k</sub>*.</p>
+      <span class="formula">Precision = |C<sub>k</sub> ∩ C<sub>k</sub>*| / |C<sub>k</sub>|,   Recall = |C<sub>k</sub> ∩ C<sub>k</sub>*| / |C<sub>k</sub>*|,   F1 = 2·P·R / (P + R)<small>F1 cho cả tập: lấy với mỗi C<sub>k</sub> cộng đồng thật khớp tốt nhất (max F1), rồi lấy trung bình có trọng số theo kích thước |C<sub>k</sub>|.</small></span>
+      <p><strong>Ví dụ</strong> (của người giải thích): C<sub>k</sub> = {1, 2, 3, 4}, C<sub>k</sub>* = {1, 2, 3, 5, 6}. Giao có 3 nút. Precision = 3/4 = 0.75; Recall = 3/5 = 0.6; F1 = 2·0.75·0.6 / 1.35 ≈ 0.67; Jaccard = 3/6 = 0.5 (hợp có 6 nút).</p>
+
+      <p><strong>Jaccard:</strong> tỉ lệ giao trên hợp.</p>
+      <span class="formula">JC(C<sub>k</sub>, C<sub>k</sub>*) = |C<sub>k</sub> ∩ C<sub>k</sub>*| / |C<sub>k</sub> ∪ C<sub>k</sub>*|<small>Cho cả tập: trung bình hai chiều, Σ<sub>C<sub>k</sub></sub> max JC / (2|C|) + Σ<sub>C<sub>k</sub>*</sub> max JC / (2|C*|).</small></span>
+
+      <p><strong>ARI (Adjusted Rand Index):</strong> biến thể của Rand Index, xét các <em>cặp</em> nút và trừ đi phần trùng khớp do ngẫu nhiên.</p>
+      <span class="formula">ARI = [ Σ<sub>ij</sub> C(n<sub>ij</sub>, 2) − Σ<sub>i</sub>C(n<sub>i</sub>, 2)·Σ<sub>j</sub>C(n<sub>j</sub>, 2) / C(n, 2) ] / [ ½(Σ<sub>i</sub>C(n<sub>i</sub>, 2) + Σ<sub>j</sub>C(n<sub>j</sub>, 2)) − Σ<sub>i</sub>C(n<sub>i</sub>, 2)·Σ<sub>j</sub>C(n<sub>j</sub>, 2) / C(n, 2) ]<small>C(x, 2) = x(x − 1)/2 là số cặp chọn từ x nút. Tử số: số cặp “cùng nhóm ở cả hai cách chia” trừ giá trị kỳ vọng nếu ngẫu nhiên.</small></span>
+
+      <h3>Độ đo không cần đáp án</h3>
+      <p><strong>Modularity Q:</strong> so mạng với một <strong>mô hình rỗng</strong> (null model) là đồ thị ngẫu nhiên có cùng phân phối bậc.</p>
+      <span class="formula">Q = Σ<sub>k</sub> ( e<sub>kk</sub> − a<sub>k</sub>² )<small>e<sub>kk</sub>: tỉ lệ cạnh nằm trong cộng đồng C<sub>k</sub> trên tổng số cạnh; a<sub>k</sub>: tỉ lệ cạnh gắn với nút của C<sub>k</sub>. Bản mở rộng (Extended-Q) dùng cho cộng đồng chồng lấn.</small></span>
+      <p><strong>Ví dụ</strong> (của người giải thích): hai tam giác {1, 2, 3} và {4, 5, 6} nối nhau bằng một cạnh 3–4; tổng 7 cạnh. Mỗi cộng đồng có 3 cạnh trong: e<sub>kk</sub> = 3/7 ≈ 0.43. Tổng bậc mỗi cộng đồng là 7 trên tổng bậc 14, nên a<sub>k</sub> = 0.5. Q = 2 × (0.43 − 0.25) ≈ 0.36.</p>
+
+      <p><strong>Conductance (CON):</strong> mức “rò rỉ” cạnh ra ngoài. Càng nhỏ càng tốt.</p>
+      <span class="formula">CON(C<sub>k</sub>) = m<sub>k</sub><sup>out</sup> / ( 2m<sub>k</sub><sup>in</sup> + m<sub>k</sub><sup>out</sup> )<small>m<sup>in</sup>: số cạnh bên trong; m<sup>out</sup>: số cạnh vượt ranh giới. Ví dụ tam giác ở trên: 1 / (6 + 1) ≈ 0.14.</small></span>
+
+      <p><strong>TPR (Triangle Participation Ratio):</strong> tỉ lệ nút trong C<sub>k</sub> nằm trong ít nhất một tam giác mà cả ba đỉnh đều thuộc C<sub>k</sub>. Càng cao, cộng đồng càng dày. Ví dụ tam giác ở trên: TPR = 3/3 = 1.</p>
+    </section>
+
+    <section id="ma-nguon">
+      <h2>Mã nguồn mở</h2>
+      <p>Phần lớn cài đặt viết bằng <strong>Python 3.x</strong> (PyTorch, TensorFlow, Keras); một số dùng <strong>Matlab</strong>.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng III · Cài đặt mã nguồn mở</caption>
+          <thead><tr><th>Nhóm</th><th>Công cụ</th><th>Phương pháp</th><th>Địa chỉ</th></tr></thead>
+          <tbody>
+            <tr><td>GCN</td><td>PyTorch</td><td>AGE</td><td><code>github.com/thunlp/AGE</code></td></tr>
+            <tr><td>GCN</td><td>PyTorch</td><td>LGNN</td><td><code>github.com/zhengdao-chen/GNN4CD</code></td></tr>
+            <tr><td>GCN</td><td>PyTorch</td><td>NOCD</td><td><code>github.com/shchur/overlapping-community-detection</code></td></tr>
+            <tr><td>GCN</td><td>TensorFlow</td><td>AGC</td><td><code>github.com/karenlatong/AGC-master</code></td></tr>
+            <tr><td>GCN</td><td>TensorFlow</td><td>CayleyNet</td><td><code>github.com/amoliu/CayleyNet</code></td></tr>
+            <tr><td>GAT</td><td>PyTorch</td><td>CP-GNN</td><td><code>github.com/RManLuo/CP-GNN</code></td></tr>
+            <tr><td>GAT</td><td>PyTorch</td><td>DMGI</td><td><code>github.com/pcy1302/DMGI</code></td></tr>
+            <tr><td>GAT</td><td>PyTorch</td><td>MAGNN</td><td><code>github.com/cynricfu/MAGNN</code></td></tr>
+            <tr><td>GAT</td><td>PyTorch</td><td>HDMI</td><td><code>github.com/baoyujing/HDMI</code></td></tr>
+            <tr><td>GAT</td><td>PyTorch</td><td>HeCo</td><td><code>github.com/liun-online/HeCo</code></td></tr>
+            <tr><td>GAN</td><td>PyTorch</td><td>SEAL</td><td><code>github.com/yzhang1918/kdd2020seal</code></td></tr>
+            <tr><td>GAN</td><td>TensorFlow</td><td>CommunityGAN</td><td><code>github.com/SamJia/CommunityGAN</code></td></tr>
+            <tr><td>Stacked AE</td><td>TensorFlow</td><td>DANE</td><td><code>github.com/gaoghc/DANE</code></td></tr>
+            <tr><td>Stacked AE</td><td>TensorFlow</td><td>DIME</td><td><code>www.ifmlab.org/files/code/Aligned-Autoencoder.zip</code></td></tr>
+            <tr><td>Stacked AE</td><td>Matlab</td><td>DNE-SBP</td><td><code>github.com/shenxiaocam/Deep-network-embedding-for-graph-representation-learning-in-signed-networks</code></td></tr>
+            <tr><td>Stacked AE</td><td>Matlab</td><td>semi-DRN</td><td><code>yangliang.github.io/code/DC.zip</code></td></tr>
+            <tr><td>Sparse AE</td><td>PyTorch</td><td>GraphEncoder</td><td><code>github.com/zepx/graphencoder</code></td></tr>
+            <tr><td>Denoising AE</td><td>Keras</td><td>DNGR</td><td><code>github.com/MdAsifKhan/DNGR-Keras</code></td></tr>
+            <tr><td>Denoising AE</td><td>Matlab</td><td>MGAE</td><td><code>github.com/FakeTibbers/MGAE</code></td></tr>
+            <tr><td>Graph Conv. AE</td><td>PyTorch</td><td>SDCN</td><td><code>github.com/bdy9527/SDCN</code></td></tr>
+            <tr><td>Graph Conv. AE</td><td>TensorFlow</td><td>O2MAC</td><td><code>github.com/songzuolong/WWW2020-O2MAC</code></td></tr>
+            <tr><td>Graph Attention AE</td><td>TensorFlow</td><td>DMGC</td><td><code>github.com/flyingdoog/DMGC</code></td></tr>
+            <tr><td>Graph Attention AE</td><td>TensorFlow</td><td>SGCMC</td><td><code>github.com/xdweixia/SGCMC</code></td></tr>
+            <tr><td>Variational AE</td><td>TensorFlow</td><td>ARGA / ARVGA</td><td><code>github.com/Ruiqi-Hu/ARGA</code></td></tr>
+            <tr><td>Variational AE</td><td>TensorFlow</td><td>DGLFRM</td><td><code>github.com/nikhil-dce/SBM-meet-GNN</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Địa chỉ chép từ bài (2021); người giải thích chưa kiểm tra các liên kết còn hoạt động hay không. Không có cài đặt nào cho nhóm CNN, DNMF hoặc DSF trong bảng.</p>
+      <p>Phụ lục D mô tả thêm: LGNN chạy trên SBM 5 lớp; NOCD cài đặt cộng đồng chồng lấn; HeCo kèm 4 bộ dữ liệu đã tiền xử lý; CP-GNN thí nghiệm trên 4 đồ thị không đồng nhất thật; SEAL thử trên 50 cộng đồng; DIME thí nghiệm trên Foursquare và Twitter; DNE-SBP nhận ma trận kề có dấu.</p>
+    </section>
+
+    <section id="ung-dung">
+      <h2>Ứng dụng thực tế</h2>
+      <p>Hình 9 của bài vẽ 6 lĩnh vực ứng dụng; các ví dụ trên hình gồm gợi ý phim, sách, gợi ý bạn bè, quảng cáo thông minh, nhóm khủng bố, bot (phần mềm tự động), tìm phức hợp trong mạng PPI, phát hiện ung thư và phân tích gen.</p>
+      <dl class="terms">
+        <dt>Hệ gợi ý</dt><dd>Thành viên một cộng đồng thường có sở thích giống nhau. Phát hiện quan hệ người–người, sản phẩm–sản phẩm, người–sản phẩm giúp gợi ý tốt hơn (bài nêu CayleyNets, UWMNE/WMCNE-LE).</dd>
+        <dt>Hóa sinh</dt><dd>Nút là protein hoặc nguyên tử, cạnh là tương tác. Tìm phức hợp protein mới, hợp chất có chức năng ở vùng não hoặc là tác nhân gây bệnh (ví dụ phát hiện ung thư phổi dựa trên cộng đồng). Nghiên cứu trên dữ liệu gen cho thấy liên hệ giữa tỉ lệ sống của cộng đồng và phân bố loại khối u.</dd>
+        <dt>Mạng xã hội trực tuyến</dt><dd>Twitter, LinkedIn, Facebook: tìm người dùng có sở thích giống nhau để cá nhân hóa; dùng cho quyền riêng tư; nhận diện tội phạm qua hành vi trực tuyến, kể cả người lan truyền tư tưởng tội phạm hoặc khủng bố.</dd>
+        <dt>Che giấu cộng đồng</dt><dd>Community deception: một nhóm người dùng tìm cách tránh bị phát hiện. Có thể có hại hoặc vô hại (có lý do chính đáng). Ví dụ REM (Residual Entropy Minimization) dựa trên entropy cấu trúc có thể vô hiệu hóa thuật toán phát hiện; có nghiên cứu đánh giá độ bền của thuật toán trước việc che giấu trên mạng lớn.</dd>
+        <dt>Tìm kiếm cộng đồng</dt><dd>Community search: từ một nút truy vấn, tìm cộng đồng chứa nó. Tìm kiếm cục bộ mở rộng dần quanh nút truy vấn cho tới khi đủ thành viên; ATC (Attributed Truss Communities) tìm cộng đồng quanh nút truy vấn có thuộc tính tương tự.</dd>
+      </dl>
+    </section>
+
+    <section id="huong-mo">
+      <h2>12 hướng nghiên cứu mở</h2>
+      <p>Mỗi hướng bài đều trình bày theo cặp: <strong>vấn đề</strong> và <strong>cơ hội</strong>.</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Hướng</th><th>Vấn đề</th><th>Cơ hội / gợi ý của bài</th></tr></thead>
+          <tbody>
+            <tr><td>A. Số cộng đồng chưa biết</td><td>Dữ liệu thật hầu như không có nhãn nên K thường không biết, nhưng phương pháp không giám sát lại cần K cho trước: một vòng luẩn quẩn (catch-22).</td><td>Phân tích cấu trúc mạng: bước đi ngẫu nhiên cho cộng đồng sơ bộ, tinh chỉnh bằng modularity (như DFuzzy). Nhưng bước đi ngẫu nhiên không phủ hết nút khi mạng không liên thông; cần giải pháp đầy đủ.</td></tr>
+            <tr><td>B. Nhúng cộng đồng</td><td>Nhúng nút thường chỉ giữ thông tin láng giềng, bỏ qua cấu trúc cộng đồng.</td><td>Ít công trình đưa community embedding vào mô hình sâu. Cần thuật toán nhanh (vì tốn chi phí) và cơ chế tối ưu siêu tham số mới.</td></tr>
+            <tr><td>C. Mạng phân cấp</td><td>Như Web: cộng đồng nhỏ gộp thành cộng đồng lớn ở nhiều tầng.</td><td>Ba hướng truyền thống (ước lượng trực tiếp, gộp từ dưới lên, tách từ trên xuống) bị giới hạn bởi số tham số hoặc yêu cầu mật độ. Nhúng mạng hiệu quả hơn, nhưng giữ được phân cấp trong embedding vẫn chưa giải được.</td></tr>
+            <tr><td>D. Mạng nhiều lớp</td><td>Nhiều đồ thị phụ thuộc nhau, mỗi lớp một kiểu tương tác (bạn bè, họ hàng, bạn học), liên kết giữa lớp nối cùng một người.</td><td>Mới ở giai đoạn đầu. Cách đơn giản là gộp về một lớp. Vấn đề mở: khác biệt kiểu tương tác, độ thưa khác nhau giữa lớp, kết nối xuyên lớp, khả năng mở rộng số lớp.</td></tr>
+            <tr><td>E. Mạng không đồng nhất</td><td>Nhiều loại thực thể và quan hệ (diễn viên–phim); phương pháp cho mạng đồng nhất không dùng trực tiếp được.</td><td>Metapath hứa hẹn, nhưng chọn metapath có ý nghĩa nhất vẫn là vấn đề mở; cần lược đồ chọn linh hoạt.</td></tr>
+            <tr><td>F. Tính dị biệt (heterophily)</td><td>Nút nối nhau nhưng thuộc cộng đồng khác hoặc đặc trưng khác; ví dụ kẻ gian cố kết bạn với người dùng bình thường để ẩn mình. Nút ranh giới có tính chất này.</td><td>Hầu hết phương pháp dựa vào <em>đồng dị</em> (homophily: nút nối nhau thì giống nhau). Cần mô hình sâu khai thác được heterophily.</td></tr>
+            <tr><td>G. Mạng thiếu cấu trúc (TIN)</td><td>Quan hệ không đầy đủ, có đồ thị con cô lập; ví dụ mạng PPI vì đo mọi tương tác rất tốn kém.</td><td>Phương pháp gom láng giềng đòi cấu trúc đầy đủ. Cần cơ chế khôi phục thông tin.</td></tr>
+            <tr><td>H. Mạng liên miền</td><td>Nhiều mạng tương tự (Facebook, Twitter); mượn tri thức từ miền giàu thông tin.</td><td>Thách thức: thiếu cấu trúc cộng đồng rõ, thiếu nhãn nút, thiếu đáp án, cấu trúc mạng kém, học sâu trên mạng nhỏ. Cần đo hệ số liên miền, dịch chuyển phân phối, kiểm soát chi phí.</td></tr>
+            <tr><td>I. Mạng nhiều góc nhìn có thuộc tính</td><td>Mỗi góc nhìn một loại thuộc tính; phát hiện riêng từng góc rồi mã hóa sâu qua các góc tốn kém.</td><td>Gộp biểu diễn từng góc có thể sinh nhiễu và dư thừa. Cần học embedding phân cụm chung, cách tích hợp tốt hơn và biểu diễn toàn cục để tránh tối ưu cục bộ.</td></tr>
+            <tr><td>J. Mạng có dấu</td><td>Cạnh dương (thích, ủng hộ) và âm (ghét); phương pháp cho mạng không dấu không áp dụng được.</td><td>Thách thức chính là xử lý cạnh âm; cạnh âm lại cho thông tin phân biệt cộng đồng. Cần tự nhận biết thông tin dương/âm trên cạnh.</td></tr>
+            <tr><td>K. Mạng động</td><td>Thêm/bớt nút, cạnh làm cộng đồng thay đổi. Theo bài, chỉ <strong>một</strong> công trình (sE-Autoencoder) chạm tới chủ đề này.</td><td>Huấn luyện lại trên từng ảnh chụp chậm và tốn. Hướng: phân tích thay đổi không gian của cộng đồng, nhận diện mẫu động, theo dõi động lực và độ bền.</td></tr>
+            <tr><td>L. Mạng quy mô lớn</td><td>Số nút, cạnh, cộng đồng khổng lồ; phân phối bậc luật lũy thừa; khả năng mở rộng.</td><td>Giảm chiều kiểu xấp xỉ hạng thấp không đủ; tính toán phân tán quá đắt. Cần khung, mô hình, thuật toán mới vượt chuẩn hiện tại về độ chính xác và tốc độ.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="ket-luan">
+      <h2>Kết luận và nhận xét</h2>
+      <h3>Tác giả kết luận</h3>
+      <ul>
+        <li>Trong khoảng mười năm gần đây, phương pháp dựa trên học sâu phát triển mạnh và thay đổi khung phát hiện cộng đồng.</li>
+        <li>Theo khảo sát của tác giả, các phương pháp này tăng đáng kể hiệu quả, hiệu suất, độ bền và khả năng áp dụng; linh hoạt hơn và dùng được lượng dữ liệu lớn hơn với tiền xử lý thô.</li>
+        <li>Trong mỗi nhóm của cây phân loại, mô hình sâu phục vụ hai việc: <strong>mã hóa biểu diễn</strong> và <strong>tối ưu kết quả phân cụm</strong>.</li>
+        <li>Bài cung cấp tài nguyên (dữ liệu, độ đo, mã nguồn), các ứng dụng và 12 hướng mở.</li>
+      </ul>
+
+      <h3>Những điểm cần lưu ý khi đọc và trích dẫn</h3>
+      <div class="warn">
+        <ul>
+          <li><strong>Không có thí nghiệm so sánh.</strong> Bài không chạy lại các phương pháp trên cùng dữ liệu và cùng độ đo. Câu “tăng đáng kể hiệu quả…” là nhận định tổng hợp, không kèm bảng số đối chiếu. Hai con số cụ thể duy nhất là dẫn lại từ bài gốc: Xin et al. khoảng 80% độ chính xác với 10% nút có nhãn, và DFuzzy cao hơn 63% (Q), 34% (CON).</li>
+          <li><strong>Lỗi trích dẫn:</strong> VGAECD-OPT được trích [124] trong phần chữ, đúng ra là [136].</li>
+          <li><strong>Lỗi đánh máy và không thống nhất:</strong> “semi-DNR” trong Bảng VIII; số loại AE ở đầu Mục VIII (5) khác Mục IV (6); ký hiệu x/a trong phương trình (22)–(23); MRFasGCN được nêu trong phần chữ mà không kèm số trích dẫn (Bảng V ghi [10]).</li>
+          <li><strong>Hình 3 có phương pháp không được giải thích</strong> (OSBM, CE-MOEA).</li>
+          <li><strong>Thông tin xuất bản:</strong> file PDF là bản arXiv v2 với đầu trang “VOL.XX, NO.XX, 2021”, chưa có số tập, trang và DOI chính thức.</li>
+        </ul>
+      </div>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): với người học Phân tích mạng xã hội, giá trị lớn nhất của bài là <strong>bản đồ</strong>: biết một phương pháp mới thuộc họ nào, dùng đầu vào gì (chỉ A hay cả X), học có giám sát hay không, có tìm cộng đồng chồng lấn không. Muốn biết phương pháp nào <em>tốt hơn</em> thì phải xem các bài gốc hoặc tự chạy thử, vì survey này không xếp hạng. Một điểm đáng chú ý từ Bảng V–VIII: phần lớn phương pháp vẫn cần k-means hoặc phân cụm phổ ở bước cuối, tức vẫn cần biết trước số cộng đồng K — đúng như hướng mở A.</p></div>
+      <p>Bài liên hệ với hai bài trước trong loạt: các thuật toán truyền thống mà Mothe 2017 so sánh (Louvain, Fast Greedy, Leading Eigenvector, Walktrap, Infomap, Label Propagation) nằm ở nhánh “phương pháp truyền thống” của cây phân loại; còn các độ đo NMI, ARI, modularity, conductance, TPR xuất hiện lại ở đây như công cụ đánh giá chuẩn cho cả phương pháp học sâu.</p>
+    </section>
+
+    <section id="thuat-ngu">
+      <h2>Bảng thuật ngữ</h2>
+      <dl class="terms">
+        <dt>Community detection</dt><dd>Phát hiện cộng đồng: tìm các nhóm nút liên kết dày bên trong, thưa với bên ngoài.</dd>
+        <dt>Disjoint / Overlapping</dt><dd>Cộng đồng rời nhau (mỗi nút một nhóm) / chồng lấn (một nút nhiều nhóm).</dd>
+        <dt>Ground truth</dt><dd>Đáp án: cách chia cộng đồng chuẩn biết trước.</dd>
+        <dt>Adjacency matrix (A)</dt><dd>Ma trận kề: a<sub>ij</sub> = 1 nếu có cạnh giữa i và j.</dd>
+        <dt>Attributed network</dt><dd>Mạng có thuộc tính: mỗi nút kèm vectơ đặc trưng (ma trận X).</dd>
+        <dt>Signed network</dt><dd>Mạng có dấu: cạnh dương (+1) và âm (−1).</dd>
+        <dt>Multiplex / multi-layer</dt><dd>Mạng đa quan hệ / nhiều lớp: nhiều loại cạnh trên cùng tập nút.</dd>
+        <dt>Heterogeneous network (HIN)</dt><dd>Mạng không đồng nhất: nhiều loại nút và cạnh.</dd>
+        <dt>Metapath</dt><dd>Đường meta: chuỗi loại nút/cạnh mô tả một quan hệ ghép, ví dụ Tác giả–Bài báo–Tác giả.</dd>
+        <dt>Multi-view</dt><dd>Nhiều góc nhìn: cùng mạng nhưng nhiều tập cạnh hoặc tập thuộc tính khác nhau.</dd>
+        <dt>Embedding / representation</dt><dd>Biểu diễn: vectơ ít chiều thay cho nút (hoặc cộng đồng).</dd>
+        <dt>Encoder / Decoder</dt><dd>Bộ mã hóa (nén thành embedding) / bộ giải mã (dựng lại dữ liệu từ embedding).</dd>
+        <dt>Reconstruction loss</dt><dd>Mất mát tái tạo: dữ liệu dựng lại khác dữ liệu gốc bao nhiêu.</dd>
+        <dt>Supervised / semi- / unsupervised</dt><dd>Có giám sát (cần nhãn) / bán giám sát (ít nhãn) / không giám sát (không nhãn).</dd>
+        <dt>CNN</dt><dd>Convolutional Neural Network: mạng nơ-ron tích chập cho dữ liệu lưới.</dd>
+        <dt>GCN</dt><dd>Graph Convolutional Network: tích chập trên đồ thị, gom thông tin láng giềng.</dd>
+        <dt>Over-smoothing</dt><dd>Làm mịn quá mức: sau nhiều tầng GCN, đặc trưng mọi nút giống nhau.</dd>
+        <dt>Laplacian (L)</dt><dd>Ma trận Laplace, L = D − A (hoặc bản chuẩn hóa); phổ của nó phản ánh cấu trúc cộng đồng.</dd>
+        <dt>GAT</dt><dd>Graph Attention Network: gom láng giềng với trọng số chú ý học được.</dd>
+        <dt>GAN</dt><dd>Generative Adversarial Network: bộ sinh và bộ phân biệt đấu với nhau.</dd>
+        <dt>Autoencoder (AE)</dt><dd>Mạng nén rồi dựng lại; các loại: stacked, sparse, denoising, graph convolutional, graph attention, variational.</dd>
+        <dt>VAE / VGAE</dt><dd>Variational (Graph) AutoEncoder: embedding là phân phối (trung bình, phương sai).</dd>
+        <dt>ELBO</dt><dd>Evidence Lower Bound: cận dưới của log-likelihood, hàm mục tiêu của VAE.</dd>
+        <dt>KL divergence</dt><dd>Phân kỳ Kullback–Leibler: đo hai phân phối xác suất khác nhau bao nhiêu.</dd>
+        <dt>NMF / DNMF</dt><dd>(Deep) Nonnegative Matrix Factorization: phân rã ma trận thành tích các ma trận không âm, một hoặc nhiều tầng.</dd>
+        <dt>Sparse Filtering (SF / DSF)</dt><dd>Lọc thưa: học đặc trưng thưa từ dữ liệu nhiều chiều; DSF là bản nhiều tầng.</dd>
+        <dt>Contrastive learning</dt><dd>Học tương phản: kéo mẫu “giống” lại gần, đẩy mẫu “khác” ra xa.</dd>
+        <dt>Mutual Information (MI)</dt><dd>Thông tin tương hỗ: biết biến này thì giảm bất định về biến kia bao nhiêu.</dd>
+        <dt>Modularity (Q, B)</dt><dd>Mức cạnh trong cộng đồng vượt hơn kỳ vọng ngẫu nhiên; B là ma trận modularity.</dd>
+        <dt>NMI, ARI, ACC, F1, Jaccard</dt><dd>Các độ đo so kết quả với đáp án.</dd>
+        <dt>Conductance, TPR</dt><dd>Độ đo không cần đáp án: tỉ lệ cạnh rò ra ngoài; tỉ lệ nút nằm trong tam giác.</dd>
+        <dt>SBM, LFR, GN</dt><dd>Stochastic Block Model; benchmark Lancichinetti–Fortunato–Radicchi; benchmark Girvan–Newman.</dd>
+        <dt>Homophily / Heterophily</dt><dd>Đồng dị (nút nối nhau thì giống nhau) / dị biệt (nút nối nhau nhưng khác nhau).</dd>
+        <dt>TIN</dt><dd>Topologically Incomplete Network: mạng bị thiếu cạnh.</dd>
+        <dt>Transfer learning</dt><dd>Học chuyển giao: dùng tri thức từ miền nguồn cho miền đích.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nguồn: X. Su, S. Xue, F. Liu, J. Wu, J. Yang, C. Zhou, W. Hu, C. Paris, S. Nepal, D. Jin, Q. Z. Sheng, P. S. Yu, “A Comprehensive Survey on Community Detection with Deep Learning”, <em>IEEE Transactions on Neural Networks and Learning Systems</em>, 2021 (bản arXiv:2105.12584v2, 11/10/2021). Trang giải thích viết lại bằng lời dễ hiểu; các ví dụ tính tay và nhận xét được ghi rõ là của người giải thích.</p>
+    <div class="next-prev"><a href="gupta2020.html">← Bài trước: Gupta &amp; Singh 2020</a><a href="index.html">Danh sách bài →</a></div>
+  </footer>
+  </div>
+
+  <script src="paper.js"></script>
+</body>
+</html>
