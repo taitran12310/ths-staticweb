@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Bản đọc đầy đủ đề án: tinh chỉnh LoRA kết hợp truy hồi commit tương tự cho BitNet b1.58 và Qwen2.5 sinh commit message Java trên MCMD." />
+  <title>Đề án — Sinh commit message Java với LoRA và truy hồi</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("dean2-doc-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --line: #e7e5e4;
+      --paper: #fafaf9;
+      --card: #ffffff;
+      --accent: #9a3412;
+      --accent-soft: #fff7ed;
+      --code: #44403c;
+      --code-bg: #f5f5f4;
+      --pre-bg: #1c1917;
+      --pre-ink: #fafaf9;
+      --alt: #0f766e;
+      --on-accent: #ffffff;
+      --zebra: #f5f5f4;
+      --shadow: 0 1px 2px rgba(28, 25, 23, .06), 0 4px 14px rgba(28, 25, 23, .06);
+      --ease: cubic-bezier(.2, .7, .2, 1);
+      --f-body: "Noto Serif", "Iowan Old Style", Georgia, serif;
+      --f-ui: "Be Vietnam Pro", "Avenir Next", "Segoe UI", sans-serif;
+      --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --ink: #ece7e2;
+        --muted: #a8a29e;
+        --line: #3a342e;
+        --paper: #1a1714;
+        --card: #24201c;
+        --accent: #fb923c;
+        --accent-soft: rgba(251, 146, 60, .12);
+        --code: #d6d3d1;
+        --code-bg: #2e2924;
+        --pre-bg: #110f0d;
+        --pre-ink: #ece7e2;
+        --alt: #2dd4bf;
+        --on-accent: #1a1714;
+        --zebra: rgba(255, 255, 255, .03);
+        --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --ink: #ece7e2;
+      --muted: #a8a29e;
+      --line: #3a342e;
+      --paper: #1a1714;
+      --card: #24201c;
+      --accent: #fb923c;
+      --accent-soft: rgba(251, 146, 60, .12);
+      --code: #d6d3d1;
+      --code-bg: #2e2924;
+      --pre-bg: #110f0d;
+      --pre-ink: #ece7e2;
+      --alt: #2dd4bf;
+      --on-accent: #1a1714;
+      --zebra: rgba(255, 255, 255, .03);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--f-body);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      overflow-x: hidden;
+      transition: background-color .25s ease, color .25s ease;
+    }
+
+    a { color: var(--accent); }
+    a:hover { text-decoration: none; }
+
+    .skip {
+      position: absolute;
+      left: 0.75rem;
+      top: 0.75rem;
+      transform: translateY(-150%);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      z-index: 30;
+      font-family: var(--f-ui);
+    }
+
+    .skip:focus { transform: none; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ---------- Thanh tiến độ, nút nổi ---------- */
+    .progress {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: 3px;
+      background: var(--accent);
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      z-index: 25;
+    }
+
+    .fab {
+      position: fixed;
+      z-index: 20;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      font: 600 1.1rem/1 var(--f-ui);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform .2s var(--ease), opacity .3s var(--ease), border-color .2s;
+    }
+
+    .fab:hover { border-color: var(--accent); color: var(--accent); }
+    .theme-toggle { top: 0.9rem; right: 1rem; }
+    .to-top { bottom: 1.2rem; right: 1rem; opacity: 0; pointer-events: none; transform: translateY(8px); }
+    .to-top.show { opacity: 1; pointer-events: auto; transform: none; }
+
+    /* ---------- Bố cục ---------- */
+    .page > header, .page > main, .page > footer, .page > .toc {
+      width: min(52rem, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    header {
+      padding: 1.4rem 0 0.5rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0 0 1rem;
+      padding: 0.35rem 0.8rem 0.35rem 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--ink);
+      font: 600 0.9rem/1 var(--f-ui);
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+
+    .back-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    header p {
+      color: var(--muted);
+      margin: 0.6rem 0 0;
+    }
+
+    .hero {
+      margin: 0 0 1.4rem;
+      border-radius: 14px;
+      overflow: hidden;
+      aspect-ratio: 16 / 7;
+      background: var(--pre-bg);
+      box-shadow: var(--shadow);
+    }
+
+    .hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .eyebrow {
+      font: 600 0.78rem/1 var(--f-ui);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 .6rem;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--f-ui);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0; font-weight: 700; }
+    h2 { font-size: 1.5rem; margin: 2.6rem 0 0.7rem; font-weight: 700; scroll-margin-top: 1.5rem; }
+    h3 { font-size: 1.12rem; margin: 1.6rem 0 0.4rem; font-weight: 600; }
+    h2::before {
+      content: "";
+      display: block;
+      width: 2.2rem;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-bottom: .7rem;
+    }
+
+    .toc nav {
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      font-family: var(--f-ui);
+      font-size: 0.95rem;
+    }
+
+    .toc ol { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+    .toc li { margin: .15rem 0; }
+    .toc a { text-decoration: none; color: var(--muted); transition: color .2s; }
+    .toc a:hover { text-decoration: underline; color: var(--accent); }
+    .toc a[aria-current="true"] { color: var(--accent); font-weight: 600; }
+
+    @media (min-width: 1100px) {
+      .page {
+        display: grid;
+        grid-template-columns: 13rem minmax(0, 52rem);
+        column-gap: 3rem;
+        justify-content: center;
+      }
+      .page > header, .page > main, .page > footer, .page > .toc { width: auto; margin-inline: 0; }
+      .page > header { grid-column: 2; grid-row: 1; }
+      .page > .toc { grid-column: 1; grid-row: 1 / span 3; }
+      .page > main { grid-column: 2; grid-row: 2; }
+      .page > footer { grid-column: 2; grid-row: 3; }
+      .toc nav {
+        position: sticky;
+        top: 2rem;
+        margin-top: 2.5rem;
+        background: transparent;
+        border: 0;
+        border-left: 1px solid var(--line);
+        border-radius: 0;
+        padding: 0 0 0 1rem;
+        font-size: 0.9rem;
+      }
+      .toc ol { list-style: none; padding-left: 0; }
+      .toc li { position: relative; }
+      .toc li:has(a[aria-current="true"])::before {
+        content: "";
+        position: absolute;
+        left: -1.06rem;
+        top: .25em;
+        bottom: .25em;
+        width: 2px;
+        background: var(--accent);
+      }
+    }
+
+    section {
+      padding-bottom: 0.4rem;
+    }
+
+    .reveal { opacity: 0; transform: translateY(10px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    p, li { overflow-wrap: anywhere; }
+
+    /* ---------- Bảng ---------- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.8rem 0 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      font-size: 0.95rem;
+    }
+
+    caption {
+      text-align: left;
+      padding: 0.6rem 0.7rem 0.4rem;
+      font: 500 0.85rem/1.4 var(--f-ui);
+      color: var(--muted);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) { background: var(--zebra); }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    th { font-family: var(--f-ui); font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* ---------- Mã ---------- */
+    code, .formula {
+      font-family: var(--f-mono);
+      font-size: 0.84em;
+    }
+
+    code {
+      background: var(--code-bg);
+      color: var(--code);
+      padding: 0.05rem 0.28rem;
+      border-radius: 4px;
+    }
+
+    .formula {
+      display: block;
+      margin: 0.8rem 0 1rem;
+      padding: 0.85rem 1rem;
+      background: var(--accent-soft);
+      color: var(--ink);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    .note {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      color: var(--code);
+    }
+
+    pre {
+      margin: 0.7rem 0 1rem;
+      padding: 0.85rem 1rem;
+      overflow-x: auto;
+      border-radius: 10px;
+      background: var(--pre-bg);
+      color: var(--pre-ink);
+      border: 1px solid var(--line);
+      font-family: var(--f-mono);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+
+    /* ---------- Hình ---------- */
+    .fig {
+      margin: 1.2rem 0 1.6rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .fig svg { display: block; width: 100%; height: auto; }
+    .fig img { display: block; width: 100%; height: auto; border-radius: 8px; background: var(--pre-bg); }
+
+    .fig figcaption {
+      margin-top: .7rem;
+      font: 400 0.86rem/1.5 var(--f-ui);
+      color: var(--muted);
+    }
+
+    .fig figcaption strong { color: var(--ink); font-weight: 600; }
+
+    .fig-pair {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    @media (min-width: 640px) {
+      .fig-pair { grid-template-columns: 1fr 1fr; }
+    }
+
+    .fig svg text { font-family: var(--f-ui); font-size: 14px; fill: var(--ink); }
+    .fig svg text.mono { font-family: var(--f-mono); font-size: 13px; }
+    .fig svg text.sm { font-size: 12.5px; }
+    .fig svg text.b { font-weight: 600; }
+    .fig svg text.lg { font-size: 16px; font-weight: 700; }
+
+    .f-accent { fill: var(--accent); }
+    .f-soft { fill: var(--accent-soft); }
+    .f-card { fill: var(--card); }
+    .f-paper { fill: var(--paper); }
+    .f-ink { fill: var(--ink); }
+    .f-muted { fill: var(--muted); }
+    .f-line { fill: var(--line); }
+    .f-alt { fill: var(--alt); }
+    .f-none { fill: none; }
+    .s-line { stroke: var(--line); }
+    .s-ink { stroke: var(--ink); }
+    .s-muted { stroke: var(--muted); }
+    .s-accent { stroke: var(--accent); }
+    .s-alt { stroke: var(--alt); }
+    .dash { stroke-dasharray: 5 5; }
+    .fig svg text.t-ink { fill: var(--ink); }
+    .fig svg text.t-muted { fill: var(--muted); }
+    .fig svg text.t-accent { fill: var(--accent); }
+    .fig svg text.t-on { fill: var(--on-accent); }
+    .fig svg text.t-alt { fill: var(--alt); }
+    .op-6 { opacity: .6; }
+    .op-8 { opacity: .85; }
+
+    /* ---------- Ô số liệu ---------- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: .75rem;
+      margin: 1.2rem 0 1.2rem;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: .85rem 1rem;
+    }
+
+    .stat-num {
+      display: block;
+      font: 700 1.7rem/1.1 var(--f-ui);
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.02em;
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: .35rem;
+      font: 500 .82rem/1.35 var(--f-ui);
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 2rem;
+      padding: 1.2rem 0 2.5rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 1rem; }
+      .fig { padding: .7rem; }
+      .stat-num { font-size: 1.4rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+
+    /* ---------- Tông màu đề án (navy, cam) ---------- */
+    :root { --accent: #1f3a5f; --accent-soft: #eaf0f7; --alt: #c2410c; --pre-bg: #14202e; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --accent: #8fb8e8; --accent-soft: rgba(143, 184, 232, .12); --alt: #fb923c; --paper: #12171d; --card: #1a212a; --line: #2c3642; --code-bg: #222b36; --pre-bg: #0c1117; --zebra: rgba(255, 255, 255, .03); --ink: #e6ebf0; --muted: #9aa6b2; --code: #cfd8e2; }
+    }
+    :root[data-theme="dark"] { --accent: #8fb8e8; --accent-soft: rgba(143, 184, 232, .12); --alt: #fb923c; --paper: #12171d; --card: #1a212a; --line: #2c3642; --code-bg: #222b36; --pre-bg: #0c1117; --zebra: rgba(255, 255, 255, .03); --ink: #e6ebf0; --muted: #9aa6b2; --code: #cfd8e2; }
+
+    .subtitle { font: 600 1.1rem/1.4 var(--f-ui); color: var(--accent) !important; margin-top: .5rem !important; }
+    .byline { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .6rem 1rem; margin: 1rem 0 .4rem; font-family: var(--f-ui); }
+    .byline div { border-left: 3px solid var(--accent); padding-left: .7rem; }
+    .byline dt { font-size: .78rem; color: var(--muted); }
+    .byline dd { margin: 0; font-size: .92rem; font-weight: 600; }
+
+    .rq { margin: .8rem 0 1rem; display: grid; gap: .6rem; }
+    .rq p { margin: 0; padding: .7rem .9rem; background: var(--accent-soft); border-left: 4px solid var(--alt); border-radius: 0 10px 10px 0; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem; margin: .9rem 0 1.1rem; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: .8rem .95rem; box-shadow: var(--shadow); }
+    .card b { display: block; font-family: var(--f-ui); color: var(--accent); margin-bottom: .25rem; }
+    .card p { margin: 0; font-size: .95rem; line-height: 1.6; }
+
+    details.abstract { margin: .8rem 0 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .6rem .9rem; }
+    details.abstract summary { cursor: pointer; font: 600 .92rem/1.4 var(--f-ui); color: var(--accent); }
+    details.abstract p { margin: .6rem 0 .2rem; font-size: .96rem; }
+
+    tr.hi td { background: var(--accent-soft); font-weight: 600; }
+    table.small { font-size: .86rem; }
+    .note { margin: .6rem 0 1rem; border-left: 4px solid var(--alt); }
+
+    .refs { padding-left: 2.2rem; font-size: .93rem; }
+    .refs li { margin: .3rem 0; }
+    .refs li::marker { content: "[" counter(list-item) "]  "; font-family: var(--f-ui); color: var(--muted); }
+
+    /* ---------- Biểu đồ thanh ngang ---------- */
+    .hbars { display: grid; gap: .45rem; font-family: var(--f-ui); }
+    .hb { display: grid; grid-template-columns: 8.5rem 1fr 4.2rem; align-items: center; gap: .7rem; }
+    .hb-l { font-size: .88rem; font-weight: 600; text-align: right; }
+    .hb-t { position: relative; height: 1.15rem; background: var(--zebra); border-radius: 4px; }
+    .hb-t i { position: absolute; inset: 0 auto 0 0; width: calc(var(--v) / var(--max) * 100%); background: color-mix(in srgb, var(--muted) 55%, transparent); border-radius: 4px; }
+    .hb-t s { position: absolute; top: -.2rem; bottom: -.2rem; left: calc(var(--v) / var(--max) * 100%); width: 2px; background: var(--ink); text-decoration: none; }
+    .hb b { font-size: .88rem; font-variant-numeric: tabular-nums; }
+    .hb-main i { background: var(--accent); }
+    .hb-top i { background: var(--alt); }
+    .hb-base i { background: color-mix(in srgb, var(--accent) 40%, transparent); }
+    @media (max-width: 600px) { .hb { grid-template-columns: 5.6rem 1fr 3.4rem; gap: .45rem; } .hb-l { font-size: .78rem; } }
+    /* ---------- Nút quay lại luôn hiện ---------- */
+    .back-link { position: fixed; top: 0.9rem; left: 1rem; z-index: 22; margin: 0; height: 2.6rem; padding: 0 0.95rem 0 0.75rem; }
+    header { padding-top: 4.2rem; }
+    @media (min-width: 1100px) { .toc nav { top: 4.5rem; } }
+    table.grid th + th, table.grid td + td { border-left: 1px solid var(--line); }
+    table.grid col.c-me { background: var(--accent-soft); }
+    .small-note { font: 400 .85rem/1.5 var(--f-ui); color: var(--muted); margin-top: -.6rem; }
+    .hb { grid-template-columns: 15.5rem 1fr 4.2rem; }
+    .hb-l { text-align: left !important; display: flex; flex-direction: column; line-height: 1.2; }
+    .hb-l b { font-size: .9rem; }
+    .hb-l small { font-size: .76rem; font-weight: 400; color: var(--muted); }
+    @media (max-width: 600px) { .hb { grid-template-columns: 8.6rem 1fr 3.3rem !important; } .hb-l small { font-size: .68rem; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Đề án môn học · Công nghệ phần mềm tiên tiến · Nhóm 4</p>
+    <h1>Tinh chỉnh LoRA kết hợp truy hồi commit tương tự cho mô hình ngôn ngữ nhỏ sinh commit message Java</h1>
+    <p class="subtitle">BitNet b1.58 2B4T và Qwen2.5-0.5B trên bộ dữ liệu MCMD</p>
+    <dl class="byline">
+      <div><dt>Thực hiện</dt><dd>Trần Tuấn Tài · La Hoàng Tú · Võ Văn Hải</dd></div>
+      <div><dt>Giảng viên hướng dẫn</dt><dd>TS. Nguyễn Thị Bích Ngân</dd></div>
+      <div><dt>Đơn vị</dt><dd>Trường Đại học Công Thương TP. Hồ Chí Minh, 2026</dd></div>
+    </dl>
+    <p>Bản đọc trên web của tài liệu đề án (TaiLieu_DoAn.docx). Bản trình chiếu nằm ở <a href="DeAn_slide.html">DeAn_slide.html</a>.</p>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-num" data-to="12.73" data-dec="2">12.73</span><span class="stat-label">B-Norm của R4 trên test_paper (1 000 mẫu)</span></div>
+      <div class="stat"><span class="stat-num" data-to="1.85" data-dec="2">1.85</span><span class="stat-label">điểm hơn NNGen dùng đủ 360 000 commit</span></div>
+      <div class="stat"><span class="stat-num" data-to="13.47" data-dec="2">13.47</span><span class="stat-label">B-Norm của mô hình thứ hai, Qwen2.5-0.5B (Q05)</span></div>
+      <div class="stat"><span class="stat-num" data-to="2.1" data-dec="1">2.1</span><span class="stat-label">lần giảm độ trễ CPU nhờ rút gọn diff</span></div>
+    </div>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#tom-tat">Tóm tắt</a></li>
+        <li><a href="#mo-dau">1. Mở đầu</a></li>
+        <li><a href="#tong-quan">2. Tổng quan</a></li>
+        <li><a href="#co-so-ly-thuyet">3. Cơ sở lý thuyết</a></li>
+        <li><a href="#phuong-phap">4. Phương pháp thực hiện</a></li>
+        <li><a href="#thuc-nghiem">5. Thực nghiệm và đánh giá</a></li>
+        <li><a href="#ket-luan">6. Kết luận và hướng phát triển</a></li>
+        <li><a href="#tai-lieu">Tài liệu tham khảo</a></li>
+        <li><a href="#phu-luc">Phụ lục</a></li>
+        <li><a href="#viet-tat">Từ viết tắt</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="tom-tat">
+      <h2>Tóm tắt</h2>
+      <p>Đề án khảo sát việc tinh chỉnh hai mô hình ngôn ngữ nhỏ, BitNet b1.58 2B4T và Qwen2.5-0.5B-Instruct, bằng LoRA để sinh commit message cho mã Java, trên dữ liệu MCMD chia theo thời gian. Chúng tôi đề xuất một bước rút gọn diff, giảm số token trung bình từ 987 xuống 277, và qua ba vòng thí nghiệm so sánh các cấu hình huấn luyện với các baseline gồm BitNet zero-shot, few-shot và NNGen. Điểm được chấm bằng B-Norm đã hiệu chuẩn với bài báo gốc, kèm kiểm định Wilcoxon có hiệu chỉnh Holm và khoảng tin cậy bootstrap.</p>
+      <p>Ở vòng cuối, tập huấn luyện sạch 4 971 commit và truy hồi NNGen từ toàn bộ 359 960 commit train được dùng cho BitNet kèm LoRA (R4). Trên tập đại diện 1 000 mẫu, R4 đạt B-Norm 12.73, cao hơn NNGen dùng đủ 360 000 commit (10.88) là 1.85 điểm (khoảng tin cậy 95% từ 1.00 đến 2.64), đạt tiêu chí đặt trước nhưng cận dưới sát ngưỡng và chỉ có một hạt giống. Mô hình thứ hai, Qwen2.5-0.5B-Instruct, cùng công thức đạt 13.47, bằng hoặc cao hơn R4, nên BitNet không có lợi thế riêng.</p>
+      <p>Lợi thế không đến từ việc chép message truy hồi, và truy hồi không giúp mô hình chưa huấn luyện. Rút gọn diff giảm độ trễ suy luận trên MacBook khoảng 2.1 lần. Đề án cũng phát hiện một rò rỉ nhỏ giữa train và test ở vòng 2, đã sửa ở vòng 3, và có một bản demo chạy trên máy chủ cục bộ.</p>
+      <details class="abstract">
+        <summary>Abstract (English)</summary>
+        <p lang="en">This project studies LoRA fine-tuning of two small language models, BitNet b1.58 2B4T and Qwen2.5-0.5B-Instruct, for commit message generation on Java code, using the time-based MCMD split. A diff condensing step reduces the mean input from 987 to 277 tokens. Over three rounds of experiments, several training setups are compared against zero-shot and few-shot BitNet and NNGen, scored with a calibrated B-Norm metric, with Holm-corrected Wilcoxon tests and bootstrap confidence intervals. In the last round, a clean training set of 4,971 commits and NNGen retrieval over all 359,960 training commits are used for BitNet with LoRA (R4). On a 1,000-sample representative set, R4 reaches a B-Norm of 12.73, which is 1.85 points above NNGen trained on all 360,000 commits (10.88; 95% CI 1.00 to 2.64). This meets the pre-registered criterion, but the lower bound is close to the threshold and only one seed was run. The second model, a conventional Qwen2.5-0.5B-Instruct trained the same way, scores 13.47, equal to or above R4, so BitNet shows no advantage of its own. The gain does not come from copying retrieved messages, and retrieval does not help an untrained model. Condensing the diff cuts CPU inference latency on a laptop by about 2.1 times. The project also reports a small train-test leakage in round 2, fixed in round 3, and a demo running on a local server.</p>
+      </details>
+    </section>
+
+    <section id="mo-dau">
+      <h2>1. Mở đầu</h2>
+      <h3>1.1. Lý do chọn đề tài</h3>
+      <p>Lịch sử commit là phần tài liệu sống động nhất của một dự án phần mềm. Khi tìm nguyên nhân của một lỗi, khi xem xét mã nguồn do người khác viết hoặc khi tiếp quản một mô-đun cũ, lập trình viên thường đọc commit message trước khi đọc mã. Một message rõ ràng tiết kiệm được nhiều thời gian, nhưng trên thực tế rất nhiều message chỉ là một chữ “fix” hoặc một cụm từ quá chung chung. Từ năm 2017, cộng đồng nghiên cứu đã đề xuất nhiều phương pháp sinh message tự động từ phần thay đổi mã (diff), từ dịch máy thần kinh đến mô hình có truy hồi và mô hình ngôn ngữ lớn.</p>
+      <p>Mô hình ngôn ngữ lớn cho kết quả tốt ở nhiều tác vụ về mã, nhưng đòi hỏi tài nguyên lớn và thường phải gọi qua dịch vụ đám mây. Với một công cụ gắn vào quy trình làm việc hằng ngày, điều này gây ra hai vấn đề: chi phí và độ trễ, và mã nguồn của doanh nghiệp phải rời khỏi máy cá nhân. Hướng đi hấp dẫn là dùng mô hình nhỏ chạy ngay trên laptop. Các mô hình lượng tử hóa cực thấp như BitNet b1.58 mở ra khả năng đó vì trọng số chỉ nhận ba giá trị −1, 0 và +1, nên bộ nhớ và năng lượng giảm rõ so với mô hình cùng cỡ ở độ chính xác đầy đủ.</p>
+      <p>Câu hỏi cụ thể của đề tài: nếu lấy các mô hình ngôn ngữ nhỏ, cụ thể là BitNet b1.58 2B4T và Qwen2.5-0.5B-Instruct, tinh chỉnh bằng LoRA trên một lượng dữ liệu nhỏ và hạ tầng miễn phí (hai GPU T4 của Kaggle), thì kết quả sinh commit message cho mã Java đạt đến đâu so với các phương pháp truy hồi cổ điển, và chi phí suy luận trên một chiếc MacBook thông thường là bao nhiêu. Câu trả lời cần một quy trình đánh giá đủ chặt để người khác có thể tin vào các con số.</p>
+
+      <h3>1.2. Mục tiêu và câu hỏi nghiên cứu</h3>
+      <p>Mục tiêu là khảo sát việc tinh chỉnh LoRA kết hợp truy hồi commit tương tự cho các mô hình ngôn ngữ nhỏ, gồm BitNet b1.58 2B4T và Qwen2.5-0.5B, trong bài toán sinh commit message Java, đồng thời xây dựng một quy trình đánh giá có kiểm soát.</p>
+      <div class="rq">
+        <p><strong>RQ1.</strong> Tinh chỉnh LoRA có làm chất lượng message của mỗi mô hình (BitNet và Qwen) tốt hơn chính mô hình đó khi chưa tinh chỉnh (zero-shot hoặc few-shot), và tốt hơn phương pháp truy hồi NNGen, kể cả khi NNGen dùng đủ 360 000 commit, hay không? Đồng thời, hai mô hình nhỏ này so với nhau ra sao khi dùng cùng dữ liệu, cùng prompt, cùng công thức và được chấm trên cùng tập kiểm tra bằng cùng bộ chấm điểm?</p>
+        <p><strong>RQ2.</strong> Chi phí suy luận trên máy cá nhân (độ trễ và bộ nhớ) thay đổi thế nào theo cách xây dựng đầu vào: diff thô, diff rút gọn, diff rút gọn kèm message truy hồi và prompt few-shot?</p>
+      </div>
+      <p>Việc đặt cả hai mô hình làm đối tượng nhằm biết lợi ích đến từ kiến trúc ba trạng thái của BitNet, từ kho truy hồi lớn hay từ chính việc tinh chỉnh. Về trình tự: vòng 1 và vòng 2 chỉ dùng BitNet; Qwen được đưa vào ở vòng 3 sau khi thấy các hệ BitNet chưa vượt NNGen đủ dữ liệu. Vì thế tiêu chí thành công đặt trước chỉ áp dụng cho cấu hình BitNet R4, còn các so sánh có Qwen mang tính khám phá.</p>
+
+      <h3>1.3. Đối tượng và phạm vi</h3>
+      <p>Đối tượng là bài toán sinh commit message từ diff của mã Java trên bộ dữ liệu MCMD của Tao và cộng sự [1], [2]. Hai mô hình được khảo sát là BitNet b1.58 2B4T và Qwen2.5-0.5B-Instruct, thích nghi bằng LoRA, huấn luyện ở fp32 trên GPU T4.</p>
+      <ul>
+        <li>Chỉ xét ngôn ngữ Java và hai mô hình nền BitNet b1.58 2B4T, Qwen2.5-0.5B-Instruct, huấn luyện cùng công thức.</li>
+        <li>Tập huấn luyện 4 971 commit, nhỏ hơn hơn 70 lần tập train đầy đủ của MCMD (359 960 commit); riêng kho truy hồi dùng toàn bộ 359 960 commit.</li>
+        <li>Mỗi cấu hình chỉ huấn luyện với một hạt giống ngẫu nhiên.</li>
+        <li>Không xét QLoRA, ngôn ngữ khác, đánh giá của con người, và chưa chạy bộ chuyển LoRA bên trong bitnet.cpp.</li>
+      </ul>
+
+      <h3>1.4. Đóng góp của đề án</h3>
+      <p>Kết quả cần được đọc đúng mức. Cấu hình chính R4 (BitNet, LoRA, truy hồi từ 360 000 commit) đạt B-Norm 12.73 trên tập đại diện 1 000 mẫu, cao hơn NNGen dùng đủ 360 000 commit (10.88) là 1.85 điểm, khoảng tin cậy 95% từ 1.00 đến 2.64. Chênh lệch thỏa tiêu chí đặt trước, nhưng cận dưới sát ngưỡng, delta của Cliff nhỏ và chỉ có một hạt giống. Mô hình thứ hai, Qwen2.5-0.5B (Q05), cùng công thức đạt 13.47, bằng hoặc cao hơn R4, nên đề án không chứng minh được BitNet có lợi thế riêng. Đề án đóng góp ở năm điểm:</p>
+      <ol>
+        <li>Quy trình rút gọn diff giảm số token trung bình từ 987 xuống 277 và giảm độ trễ suy luận CPU khoảng 2.1 lần.</li>
+        <li>Thiết kế đánh giá chặt: B-Norm hiệu chuẩn với bài báo gốc, tập kiểm tra đại diện 1 000 mẫu, NNGen ở hai ngân sách dữ liệu.</li>
+        <li>Kết quả kèm kiểm định thống kê, kể cả kết quả âm: beam search không cải thiện, truy hồi không giúp mô hình chưa huấn luyện.</li>
+        <li>Phát hiện một rò rỉ dữ liệu ở vòng 2 do chính quy trình chia tập, đo ảnh hưởng và sửa bằng tập huấn luyện sạch.</li>
+        <li>Bản demo chạy trên máy chủ cục bộ, kèm ghi chép lý do phương án chạy trong trình duyệt bị loại.</li>
+      </ol>
+
+      <h3>1.5. Bố cục</h3>
+      <p>Chương 2 điểm lại các hướng nghiên cứu về sinh commit message, đánh giá và mô hình 1-bit. Chương 3 trình bày cơ sở lý thuyết. Chương 4 mô tả phương pháp. Chương 5 báo cáo kết quả ba vòng, phân tích và demo. Chương 6 tổng kết, nêu hạn chế và hướng phát triển.</p>
+    </section>
+
+    <section id="tong-quan">
+      <h2>2. Tổng quan</h2>
+      <h3>2.1. Các hướng tiếp cận sinh commit message</h3>
+      <div class="cards">
+        <div class="card"><b>Luật và mẫu</b><p>Trích tên phương thức, loại thay đổi, tên tệp rồi điền vào khuôn. Đúng định dạng nhưng nghèo ý nghĩa, mỗi ngôn ngữ cần bộ luật riêng.</p></div>
+        <div class="card"><b>Dịch máy thần kinh</b><p>Jiang và cộng sự [3] coi diff → message là bài toán dịch. CoDiSum [4] tách cấu trúc và nội dung; pointer-generator [5] chép từ hiếm từ diff. Cần nhiều dữ liệu.</p></div>
+        <div class="card"><b>Truy hồi (NNGen)</b><p>Z. Liu và cộng sự [6]: chỉ tìm diff giống nhất trong train và trả về message của nó đã vượt mô hình dịch máy của [3], nhanh hơn nhiều. Từ đó NNGen thành baseline gần như bắt buộc.</p></div>
+        <div class="card"><b>Tiền huấn luyện + truy hồi</b><p>RACE [7] kết hợp mô hình sinh với các commit tương tự được truy hồi. Đây là cơ sở của cấu hình R3 và R4: đưa message của commit tương tự vào prompt.</p></div>
+      </div>
+      <h3>2.2. Vấn đề đánh giá</h3>
+      <p>Kết quả các bài báo khó so sánh vì mỗi nhóm dùng dữ liệu, cách chia tập và độ đo khác nhau. Tao và cộng sự [1] công bố MCMD với năm ngôn ngữ, mỗi ngôn ngữ chừng 450 000 commit, cùng một nghiên cứu thực nghiệm. Hai kết luận quan trọng với đề án: <strong>chia ngẫu nhiên làm điểm cao hơn thực tế</strong> vì commit gần nhau theo thời gian thường giống nhau, nên chia theo thời gian; và <strong>BLEU có nhiều biến thể</strong> cho kết quả khác nhau, nên dùng B-Norm để ổn định hơn. Đề án áp dụng cả hai.</p>
+      <h3>2.3. Mô hình ngôn ngữ nhỏ và mô hình 1-bit</h3>
+      <p>Ma và cộng sự [8] cho thấy có thể huấn luyện mô hình ngôn ngữ với trọng số ba trạng thái, tương ứng 1.58 bit mỗi tham số, chất lượng gần mô hình cùng cỡ ở độ chính xác đầy đủ. BitNet b1.58 2B4T [9] là mô hình công khai đầu tiên ở quy mô 2 tỷ tham số, huấn luyện từ đầu trên 4 nghìn tỷ token. Khác với lượng tử hóa sau huấn luyện, mô hình học trực tiếp với trọng số ba trạng thái nên không mất mát do làm tròn sau cùng. Nhóm tác giả cũng cung cấp bitnet.cpp, thư viện suy luận tối ưu cho CPU.</p>
+      <h3>2.4. Tinh chỉnh hiệu quả tham số</h3>
+      <p>Tinh chỉnh toàn bộ hai tỷ tham số vượt bộ nhớ GPU miễn phí. LoRA [10] đóng băng trọng số gốc và chỉ học hai ma trận hạng thấp cho mỗi lớp được chọn, giảm số tham số cần học hàng trăm lần. Đây là cách duy nhất khả thi để thích nghi BitNet 2B4T trên GPU T4 16 GB.</p>
+      <h3>2.5. Vị trí của đề án</h3>
+      <p>Phần lớn công trình tập trung tăng điểm số. Đề án đi hướng khác: lấy một mô hình nhỏ, ít dữ liệu và hạ tầng miễn phí, rồi trả lời chặt chẽ việc thích nghi mô hình đó mang lại gì và không mang lại gì, với baseline khớp ngân sách và có kiểm định thống kê.</p>
+    </section>
+
+    <section id="co-so-ly-thuyet">
+      <h2>3. Cơ sở lý thuyết</h2>
+      <h3>3.1. Phát biểu bài toán</h3>
+      <p>Cho một commit có phần thay đổi mã <em>D</em> (danh sách tệp bị sửa và các dòng thêm “+”, xóa “−”), cần sinh một câu <em>m</em> bằng ngôn ngữ tự nhiên mô tả ngắn gọn thay đổi. Message tham chiếu <em>m*</em> do lập trình viên viết. Chất lượng được đo bằng độ giống giữa <em>m</em> và <em>m*</em>; vì cùng một thay đổi có nhiều cách mô tả hợp lệ, mọi độ đo dựa trên từ vựng chỉ là xấp xỉ.</p>
+      <h3>3.2. Truy hồi: TF-IDF, cosine và BM25</h3>
+      <p>NNGen biểu diễn mỗi diff thành vectơ túi từ, tính cosine với từng diff trong train, lấy vài ứng viên gần nhất rồi chọn message của ứng viên có BLEU cao nhất so với diff đầu vào. Bản gốc dùng đếm từ với từ vựng tối đa 100 000 từ và năm ứng viên. TF-IDF nhân thêm trọng số nghịch đảo tần suất tài liệu. BM25 [11] có hiệu chỉnh theo độ dài tài liệu, được dùng để chọn ví dụ few-shot. Ở vòng cuối, truy hồi dùng đúng NNGen nguyên bản trên kho 359 960 commit; TF-IDF chỉ còn ở hệ N0 của các vòng trước.</p>
+      <h3>3.3. Mô hình sinh và prompt</h3>
+      <p>BitNet b1.58 2B4T chỉ có bộ giải mã, sinh từng token dựa trên các token trước, dùng qua mẫu hội thoại gồm thông điệp hệ thống và người dùng. Zero-shot chỉ có yêu cầu và diff; few-shot thêm vài cặp (diff, message) ví dụ; chế độ có truy hồi ghi message của các commit tương tự vào đầu yêu cầu để mô hình tham khảo cách diễn đạt.</p>
+      <h3>3.4. BitNet b1.58</h3>
+      <p>Mỗi lớp tuyến tính được thay bằng BitLinear: trọng số được chia cho giá trị tuyệt đối trung bình của ma trận, làm tròn rồi cắt về khoảng [−1, 1]; kích hoạt lượng tử hóa 8 bit. Vì trọng số chỉ có ba giá trị, phép nhân ma trận quy về cộng và trừ [8]. Bản bf16 [9] lưu trọng số chủ để tinh chỉnh; bản GGUF i2_s gói trọng số ba giá trị vào hai bit cho bitnet.cpp. Khi tinh chỉnh LoRA trong PyTorch, tính toán vẫn ở độ chính xác cao, nên lợi ích tốc độ của nhân ba trạng thái chỉ có ở bước suy luận bằng bitnet.cpp.</p>
+      <h3>3.5. LoRA</h3>
+      <p>Với ma trận gốc <em>W</em> kích thước d×k, LoRA giữ <em>W</em> cố định và học <em>B</em> (d×r), <em>A</em> (r×k), với r ≪ d, k:</p>
+      <span class="formula">W′ = W + (α / r) · B · A</span>
+      <p>Đề án dùng r = 16, α = 32, áp dụng cho bảy ma trận chiếu mỗi khối Transformer (q, k, v, o, gate, up, down). Tổng tham số huấn luyện là <strong>21.6 triệu</strong>, chiếm <strong>0.89%</strong> tham số mô hình.</p>
+      <h3>3.6. Giải mã</h3>
+      <p><strong>Greedy</strong> chọn token xác suất cao nhất mỗi bước, nhanh và tất định. <strong>Beam search</strong> giữ một số chuỗi có xác suất tích lũy cao nhất và có thể trả về nhiều ứng viên. <strong>MBR</strong> chọn ứng viên có độ giống trung bình cao nhất với các ứng viên còn lại. Trong đề án, tập ứng viên MBR gồm bốn kết quả beam và ba message truy hồi, độ giống tính bằng B-Norm.</p>
+      <h3>3.7. Độ đo</h3>
+      <p>BLEU [12] đo tỉ lệ n-gram khớp kèm phạt câu ngắn; ở mức câu điểm rất thô nên có nhiều biến thể làm mượt. <strong>B-Norm</strong> [1] chuẩn hóa văn bản (chữ thường, tách dấu câu) và làm mượt cộng một cho n-gram bậc 2 trở lên; bản cài đặt của đề án đã đối chiếu với đầu ra do Tao và cộng sự công bố (mục 5.1). METEOR [13] thêm khớp theo gốc từ và đồng nghĩa; ROUGE-L [14] dựa trên chuỗi con chung dài nhất; BERTScore [15] so sánh vectơ ngữ cảnh RoBERTa-large.</p>
+      <h3>3.8. Kiểm định thống kê</h3>
+      <p>Các hệ được chấm trên cùng tập mẫu nên kiểm định theo cặp: Wilcoxon hạng dấu [16] (điểm câu không phân phối chuẩn), hiệu chỉnh Holm [17] cho nhiều phép so sánh, khoảng tin cậy 95% bootstrap [18] cho chênh lệch trung bình, và delta của Cliff [19] cho mức độ ảnh hưởng. Kiểm định hạng và chênh lệch trung bình có thể cho hướng hơi khác nhau khi phân phối có đuôi dài, nên báo cáo cả hai.</p>
+    </section>
+
+    <section id="phuong-phap">
+      <h2>4. Phương pháp thực hiện</h2>
+      <h3>4.1. Tổng quan quy trình</h3>
+      <p>Dữ liệu lấy từ phần train của MCMD, được lọc, khử trùng và rút gọn diff; mỗi diff được truy hồi ba message từ kho 359 960 commit bằng NNGen nguyên bản rồi đưa vào prompt. Mô hình nền (BitNet cho R4, Qwen2.5-0.5B-Instruct cho Q05) kèm bộ chuyển LoRA sinh message bằng greedy, chấm bằng B-Norm. Vòng 2 tương tự nhưng truy hồi trong kho 5 000 commit, có thêm beam + MBR và BERTScore.</p>
+      <figure class="fig">
+        <img src="assets/dean2/quy-trinh.png" width="1600" height="815" loading="lazy" alt="Sơ đồ hai hàng. A, chuẩn bị dữ liệu: MCMD Java, chỉ lấy phần train lọc khử trùng, rút gọn diff tối đa 512 token, truy hồi 3 message từ kho 360 000 commit, dữ liệu processed_v3. B, huấn luyện và suy luận: prompt, BitNet 2B hoặc Qwen 0.5B kèm LoRA, giải mã greedy, commit message, chấm điểm B-Norm và BERTScore." />
+        <figcaption><strong>Hình 4.1.</strong> Quy trình tổng quan của hệ thống.</figcaption>
+      </figure>
+
+      <h3>4.2. Dữ liệu và cách chia tập</h3>
+      <p>Phần Java của MCMD đã được tác giả chia theo thời gian: train 359 960, valid 45 000, test 45 000 commit. Do thời gian huấn luyện hạn chế, đề án lấy mẫu từ 90 kho mã. Chỉ giữ commit mà mọi tệp đều là Java, diff không quá 20 000 ký tự, message không rỗng, không phải merge, có giới hạn số commit mỗi kho; sau đó loại commit do bot tạo và message ít hơn ba từ, rồi khử trùng theo giá trị băm của diff.</p>
+      <p>Tập huấn luyện vòng cuối (<code>processed_v3</code>) có <strong>4 971 commit</strong>, chỉ lấy từ phần train: 5 580 commit thô → 4 978 sau lọc → 4 971 sau khử trùng và loại diff trùng với tập đánh giá. Các lệnh assert bắt buộc: không sha nào trùng giữa train với val, test, test_paper; mọi sha của train nằm trong train của MCMD; val, test, test_paper không nằm trong train của MCMD. Val 300 mẫu, test 500 mẫu giữ nguyên từ vòng 2. <strong>test_paper</strong> gồm 1 000 commit lấy ngẫu nhiên đều từ file test 45 000 commit, không lọc Java-only và không giới hạn theo kho, để đại diện cho phân bố gốc.</p>
+      <figure class="fig">
+        <img src="assets/dean2/chia-du-lieu.png" width="1600" height="831" loading="lazy" alt="Thanh thời gian MCMD Java: train 359 960, valid 45 000, test 45 000. Từ train tách ra kho truy hồi toàn bộ 359 960 commit và tập huấn luyện 4 971 commit; từ valid và test tách ra tập đánh giá val 300, test 500, test_paper 1 000. Ghi chú: assert xác nhận không trùng sha; vòng 2 có 8 trên 1 000 mẫu trùng, vòng 3 là 0." />
+        <figcaption><strong>Hình 4.2.</strong> Cách chia dữ liệu vòng 3: kho truy hồi, tập huấn luyện sạch và các tập đánh giá.</figcaption>
+      </figure>
+      <p>Tập huấn luyện vòng 2 (<code>processed_v2</code>) dựng khác: lấy mẫu 9 772 commit từ cả ba phần của MCMD, còn 8 815 sau lọc, sắp theo thời gian, dành 800 commit mới nhất cho val và test rồi chọn ngẫu nhiên 5 000 commit vùng cũ làm train. Cách này để lọt 195 commit thuộc phần test của MCMD vào train, và tám mẫu test_paper trùng với train. Mục 5.5 phân tích ảnh hưởng, vòng 3 sửa bằng tập sạch.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 4.1. Thống kê các tập sau khi rút gọn diff (train là tập sạch của vòng 3).</caption>
+          <thead><tr><th>Tập</th><th class="num">Số mẫu</th><th class="num">Token TB trước</th><th class="num">Token TB sau</th><th class="num">Bị cắt trước</th><th class="num">Bị cắt sau</th></tr></thead>
+          <tbody>
+            <tr><td>train (vòng 3)</td><td class="num">4 971</td><td class="num">986</td><td class="num">279</td><td class="num">n/a</td><td class="num">25.5%</td></tr>
+            <tr><td>val</td><td class="num">300</td><td class="num">900</td><td class="num">263</td><td class="num">30.7%</td><td class="num">22.7%</td></tr>
+            <tr><td>test</td><td class="num">500</td><td class="num">998</td><td class="num">281</td><td class="num">33.2%</td><td class="num">24.0%</td></tr>
+            <tr><td>test_paper</td><td class="num">1 000</td><td class="num">n/a</td><td class="num">299</td><td class="num">n/a</td><td class="num">32.1%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.3. Rút gọn diff</h3>
+      <p>Diff thô trong MCMD đã được token hóa (mỗi dấu câu tách bằng khoảng trắng) và chứa nhiều dòng không mang thông tin thay đổi: đường dẫn dài, dòng ngữ cảnh, thân hàm không bị sửa. Trung bình một diff có 987 token BPE. Bước tiền xử lý của đề án:</p>
+      <ul>
+        <li>Rút tên tệp còn ba thành phần cuối của đường dẫn.</li>
+        <li>Mỗi đoạn thay đổi giữ dòng tiêu đề (chữ ký hàm hoặc lớp bao quanh) cùng các dòng thêm và xóa; bỏ dòng ngữ cảnh thông thường.</li>
+        <li>Chia ngân sách token luân phiên giữa các tệp để tệp nào cũng có mặt; phần dư của tệp ngắn dồn cho tệp dài.</li>
+        <li>Khôi phục khoảng trắng quanh dấu câu cho giống mã thường, để mô hình tiền huấn luyện quen dạng này.</li>
+        <li>Giới hạn toàn bộ diff ở 512 token BPE.</li>
+      </ul>
+      <figure class="fig">
+        <img src="assets/dean2/rut-gon-diff.png" width="1600" height="601" loading="lazy" alt="Bên trái: diff thô sau token hóa, 196 token, gồm đường dẫn dài và các dòng ngữ cảnh. Bên phải: diff rút gọn, 86 token, chỉ còn tên tệp ngắn, các dòng tiêu đề hàm bắt đầu bằng @@ và các dòng thêm, xóa." />
+        <figcaption><strong>Hình 4.3.</strong> Ví dụ rút gọn diff thật từ tập test (196 → 86 token).</figcaption>
+      </figure>
+      <p>Số token trung bình trên train giảm từ 987 xuống 277 ở vòng 2 (986 → 279 ở tập sạch vòng 3), nhưng tỉ lệ diff vẫn bị cắt vì quá dài chỉ giảm từ 31.9% xuống 24.9% (25.5% ở vòng 3). Các commit rất lớn vẫn vượt ngân sách dù đã loại phần không cần thiết.</p>
+
+      <h3>4.4. Truy hồi message</h3>
+      <p>Truy hồi dùng NNGen nguyên bản trên toàn bộ 359 960 commit train: CountVectorizer từ vựng 100 nghìn từ, lấy năm ứng viên cosine cao nhất, chọn ứng viên có BLEU cao nhất so với diff đầu vào. Prompt nhận ba message: của ứng viên được chọn và của hai hàng xóm cosine còn lại.</p>
+      <p>Khi dựng dữ liệu cho chính tập train, commit đang xét bị loại khỏi danh sách ứng viên (leave-one-out) và các ứng viên có diff trùng hệt cũng bị loại; nếu không, mô hình sẽ thấy đáp án trong prompt và học cách sao chép. Việc loại diff trùng hệt ảnh hưởng 13.7% mẫu train và 0% mẫu val, test, test_paper.</p>
+      <p>Message NNGen chọn đạt B-Norm 10.94 trên test_paper và 7.52 trên test 500; nếu luôn chọn được ứng viên tốt nhất trong năm thì là 17.96 và 13.80. Ở vòng 2, truy hồi dùng TF-IDF trong kho 5 000 commit và chỉ đưa hai message vào prompt.</p>
+
+      <h3>4.5. Prompt</h3>
+      <p>Thông điệp hệ thống là <code>You write git commit messages.</code> Thông điệp người dùng yêu cầu viết một câu commit message ở thức mệnh lệnh, tối đa 15 từ, cho diff Java đặt giữa thẻ diff. Cấu hình có truy hồi thêm phía trước đoạn “Commit messages of similar past changes (for style reference)” và danh sách message (xem Phụ lục A). Ở few-shot, mỗi diff ví dụ bị cắt tối đa 190 từ để prompt không vượt cửa sổ 4096 token. Lần chạy few-shot đầu không cắt ví dụ và 24/100 đầu ra rỗng vì vượt cửa sổ; sau khi sửa còn 5/100 đầu ra rỗng ở lần chạy bitnet.cpp.</p>
+
+      <h3>4.6. Huấn luyện LoRA</h3>
+      <p>Mô hình nền là bản bf16 của BitNet b1.58 2B4T, huấn luyện bằng transformers [20] và PEFT [21], nạp ở fp32 vì T4 không hỗ trợ bf16. Q05 dùng cùng công thức LoRA, dữ liệu và prompt. Hàm mất mát chỉ tính trên phần message (prompt bị che). Mỗi bước xử lý một mẫu, gradient cộng dồn qua 16 bước (tương đương batch 16), bật gradient checkpointing.</p>
+      <div class="table-wrap">
+        <table class="grid">
+          <caption>Bảng 4.2. Thiết lập huấn luyện của các lượt tinh chỉnh (cột R4 là cấu hình chính).</caption>
+          <colgroup><col><col><col><col><col class="c-me"><col></colgroup>
+          <thead><tr><th>Thiết lập</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>Q05</th></tr></thead>
+          <tbody>
+            <tr><td>Vòng</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td></tr>
+            <tr><td>Mô hình nền</td><td>BitNet 2B4T</td><td>BitNet 2B4T</td><td>BitNet 2B4T</td><td>BitNet 2B4T</td><td>Qwen 0.5B</td></tr>
+            <tr><td>Đầu vào</td><td>diff thô, 1024 token</td><td>diff rút gọn, 512 token</td><td>diff rút gọn, 512 token</td><td>diff rút gọn, 512 token</td><td>diff rút gọn, 512 token</td></tr>
+            <tr><td>Truy hồi trong prompt</td><td>không</td><td>không</td><td>2 message (kho 5k)</td><td>3 message (kho 360k)</td><td>3 message (kho 360k)</td></tr>
+            <tr><td>Số mẫu train</td><td>3 000</td><td>5 000*</td><td>5 000*</td><td>4 971</td><td>4 971</td></tr>
+            <tr><td>Số epoch</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+            <tr><td>Số bước</td><td>188</td><td>626</td><td>626</td><td>622</td><td>622</td></tr>
+            <tr><td>LoRA</td><td>r 16, α 32, drop 0.05</td><td>r 16, α 32, drop 0.05</td><td>r 16, α 32, drop 0.05</td><td>r 16, α 32, drop 0.05</td><td>r 16, α 32, drop 0.05</td></tr>
+            <tr><td>Tốc độ học</td><td>2e-4</td><td>2e-4</td><td>2e-4</td><td>2e-4</td><td>2e-4</td></tr>
+            <tr><td>Thời gian mỗi bước (T4)</td><td>65–72 giây</td><td>32.6 giây</td><td>33.0 giây</td><td>40.36 giây</td><td>8.93 giây</td></tr>
+            <tr><td>VRAM đỉnh</td><td>12.2 GB</td><td>11.2 GB</td><td>11.3 GB</td><td>11.4 GB</td><td>3.7 GB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small-note">* Tập train vòng 2 có rò rỉ nhỏ (mục 5.5).</p>
+      <p>R2 và R3 chạy song song, mỗi lượt một GPU Kaggle. Lượt chạy đầu của cặp này bị Kaggle ngắt phiên ở khoảng 54% vì phiên nháp không có thao tác, phải chạy lại; thời gian thật mỗi lượt khoảng 5.7 giờ. Ở vòng 3, R4 và Q05 chạy song song trên hai GPU, không gặp NaN; R4 mất khoảng 7.0 giờ, Q05 khoảng 1.5 giờ. Loss giảm 4.83 → 2.66 ở R4 và 4.65 → 2.21 ở Q05, nhưng hai giá trị không so trực tiếp được vì khác cỡ mô hình và tokenizer.</p>
+
+      <h3>4.7. Suy luận và giải mã</h3>
+      <p>Chế độ chính là greedy, tối đa 32 token mới, lấy dòng đầu tiên. Chế độ thứ hai là beam search bốn beam, cộng ba message truy hồi, chọn bằng MBR. Mẫu được chia hai nửa chạy song song trên hai GPU rồi ghép theo thứ tự. Ở vòng 3, vì Kaggle hết hạn mức tuần, suy luận R4 và Q05 chạy trên Colab một GPU T4, cùng <code>infer.py</code>, cùng bộ chuyển LoRA, chỉ greedy.</p>
+
+      <h3>4.8. Các hệ so sánh</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 4.3. Các hệ được so sánh.</caption>
+          <thead><tr><th>Ký hiệu</th><th>Mô tả</th><th>Runtime</th></tr></thead>
+          <tbody>
+            <tr><td><strong>N0</strong></td><td>NNGen dạng TF-IDF, lấy message của diff gần nhất, train 5 000 mẫu (vòng 1 và 2)</td><td>scikit-learn</td></tr>
+            <tr><td><strong>NNGen nguyên bản</strong></td><td>CountVectorizer 100 nghìn từ, 5 ứng viên, chọn theo BLEU; train 360 000 hoặc 5 000 mẫu</td><td>Python</td></tr>
+            <tr><td><strong>B0, B1</strong></td><td>BitNet gốc, zero-shot và few-shot BM25, diff thô (vòng 1)</td><td>bitnet.cpp</td></tr>
+            <tr><td><strong>B0t, B1t</strong></td><td>BitNet gốc, zero-shot và few-shot, diff rút gọn, cùng runtime với R2 và R3</td><td>transformers</td></tr>
+            <tr><td><strong>B0r</strong></td><td>BitNet gốc không huấn luyện, diff rút gọn kèm 3 message truy hồi từ kho 360k</td><td>transformers</td></tr>
+            <tr><td><strong>R1, R2, R3</strong></td><td>BitNet kèm LoRA như Bảng 4.2</td><td>transformers + PEFT</td></tr>
+            <tr><td><strong>R4</strong></td><td>BitNet kèm LoRA, truy hồi 360k, train sạch; cấu hình chính của vòng 3</td><td>transformers + PEFT</td></tr>
+            <tr><td><strong>Q05</strong></td><td>Qwen2.5-0.5B-Instruct kèm LoRA, cùng dữ liệu, prompt, công thức với R4; mô hình thứ hai, loại thông thường (không ba trạng thái)</td><td>transformers + PEFT</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>4.9. Thiết kế đánh giá</h3>
+      <ol>
+        <li>Hiệu chuẩn B-Norm với bài báo gốc trước mọi so sánh (mục 5.1).</li>
+        <li>Test 500 mẫu dùng để chọn cấu hình; số cuối cùng báo cáo trên test_paper 1 000 mẫu đại diện.</li>
+        <li>Mọi hệ so sánh với nhau chạy lại bằng cùng đầu vào, runtime và script chấm; số của bài báo gốc chỉ để tham khảo.</li>
+        <li>NNGen chạy ở hai ngân sách: đầy đủ và 5 000 mẫu (đúng các commit train của R2, R3).</li>
+        <li>Chốt cấu hình và tiêu chí trước khi chấm. Vòng 3: R4 phải hơn NNGen 360 000 <strong>ít nhất 1.0 điểm</strong> B-Norm trên test_paper, <strong>khoảng tin cậy 95% không chứa 0</strong> và <strong>p Holm &lt; 0.05</strong>. Tiêu chí chỉ áp cho cấu hình BitNet R4; các so sánh có Qwen mang tính khám phá. Mọi hệ, kể cả Q05, đều được báo cáo.</li>
+        <li>Mọi so sánh dùng kiểm định theo cặp, hiệu chỉnh Holm trong họ so sánh của từng bảng.</li>
+      </ol>
+
+      <h3>4.10. Môi trường thực hiện</h3>
+      <p>Huấn luyện trên Kaggle với hai GPU T4. Suy luận vòng 1, 2 trên Kaggle; vòng 3 trên Colab. Truy hồi 360 000 commit và chấm điểm chạy trên MacBook. Phép đo chi phí chạy trên MacBook M1 bằng bitnet.cpp [22] với GGUF i2_s và 4 luồng. Tệp GGUF xuất sẵn từ máy x86 có cách sắp xếp khối khác bản ARM, cho kết quả vô nghĩa và rất chậm; nhóm phải lượng tử hóa lại trên máy ARM bằng một commit cũ của bitnet.cpp.</p>
+      <figure class="fig">
+        <img src="assets/dean2/moi-truong.png" width="1600" height="670" loading="lazy" alt="Ba khối: Kaggle hai GPU T4 huấn luyện R4 trên GPU 0 trong 7 giờ và Q05 trên GPU 1 trong 1.5 giờ; Colab một GPU T4 suy luận greedy R4 và Q05; MacBook M1 chấm điểm, kiểm định, truy hồi 360k, bitnet.cpp và chạy demo FastAPI." />
+        <figcaption><strong>Hình 4.4.</strong> Môi trường vòng 3: Kaggle huấn luyện, Colab suy luận, MacBook chấm điểm và chạy demo.</figcaption>
+      </figure>
+
+      <h3>4.11. Lý do chọn mô hình</h3>
+      <p>BitNet b1.58 2B4T là mô hình đầu tiên của đề tài, có từ đề cương: mô hình 1-bit gốc mã nguồn mở đầu tiên ở quy mô hai tỉ tham số [9], có bản bf16 để tinh chỉnh và bản GGUF cho bitnet.cpp. Qwen2.5-0.5B-Instruct [23] được thêm ở vòng 3 và là mô hình thứ hai của đề tài, đồng thời là mô hình thông thường (không ba trạng thái) để đối chiếu với BitNet: nhỏ hơn khoảng bốn lần, giấy phép Apache 2.0, tên mô-đun chú ý và MLP trùng với BitNet nên áp dụng được đúng công thức của R4, chiếm khoảng 3.7 GB VRAM khi huấn luyện. Phép so sánh vì vậy trả lời câu hỏi một mô hình nhỏ thông thường có đủ không, không phải so cùng cỡ.</p>
+      <p>Hai mô hình này không được khẳng định là tối ưu. CodeT5, Qwen2.5-Coder, Llama hay Phi chưa được thử vì GPU miễn phí chỉ có T4 16 GB, không có bf16, và mỗi lượt R4 đã mất khoảng bảy giờ. Kết quả vòng 3 cho thấy với bài toán này, việc chọn dữ liệu và truy hồi quan trọng hơn chọn kiến trúc.</p>
+    </section>
+
+    <section id="thuc-nghiem">
+      <h2>5. Thực nghiệm và đánh giá kết quả</h2>
+      <h3>5.1. Hiệu chuẩn bộ chấm điểm</h3>
+      <p>Chấm lại các đầu ra do Tao và cộng sự công bố trên tập Java chia theo thời gian, bản cài đặt cho NNGen 10.73, NMT 9.49, PtrGNCMsg 13.30 và CommitGen 8.08, khớp bài báo gốc (NMT là 9.50). Chạy NNGen nguyên bản với 360 000 commit train:</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.1. Hiệu chuẩn với bài báo gốc (B-Norm, NNGen nguyên bản, train 360 000 commit).</caption>
+          <thead><tr><th>Tập kiểm tra</th><th class="num">B-Norm</th><th class="num">Khoảng tin cậy 95%</th></tr></thead>
+          <tbody>
+            <tr><td>test_paper, 1 000 mẫu</td><td class="num">10.88</td><td class="num">9.89 – 11.93</td></tr>
+            <tr><td>Mẫu ngẫu nhiên 5 000</td><td class="num">10.45</td><td class="num">10.01 – 10.90</td></tr>
+            <tr><td>Bài báo gốc (Java, chia theo thời gian)</td><td class="num">10.73</td><td class="num">n/a</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Hai khoảng tin cậy chồng lên nhau và cả hai giá trị cách 10.73 chưa đến một điểm, nên bộ chấm và cách cài NNGen được xem là khớp, và test_paper 1 000 mẫu là đại diện.</p>
+
+      <h3>5.2. Kết quả vòng 1</h3>
+      <p>Chạy thử trên 200 mẫu test đầu với cấu hình nhẹ: N0 đạt 7.44, BitNet zero-shot bằng bitnet.cpp (B0) 6.90, R1 8.08; không cặp nào khác nhau có ý nghĩa (p Holm ≥ 0.76). Trên 100 mẫu đầu, B1 (few-shot) đạt 10.02, hơn B0 có ý nghĩa trong họ bốn hệ (p Holm 0.035), nhưng p tăng lên 0.058 khi thêm một hệ, nên kết luận mong manh. LoRA với diff thô và 3 000 mẫu chưa cho lợi thế rõ, và <strong>62% đầu ra của R1 mở đầu bằng “fix”</strong> trong khi tham chiếu chỉ 18.0%: mô hình sụp về một kiểu câu chung chung. Đây là cơ sở để rút gọn diff và huấn luyện nhiều hơn ở vòng 2.</p>
+
+      <h3>5.3. Kết quả vòng 2 trên 500 mẫu test</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.2. Kết quả trên test 500 mẫu (một hạt giống, greedy).</caption>
+          <thead><tr><th>Hệ</th><th class="num">B-Norm</th><th class="num">BLEU</th><th class="num">METEOR</th><th class="num">ROUGE-L</th><th class="num">BERTScore F1</th></tr></thead>
+          <tbody>
+            <tr><td>N0 (NNGen TF-IDF, 5k)</td><td class="num">7.11</td><td class="num">6.90</td><td class="num">9.59</td><td class="num">5.93</td><td class="num">84.14</td></tr>
+            <tr><td>B0t (zero-shot)</td><td class="num">7.12</td><td class="num">7.05</td><td class="num">9.96</td><td class="num">11.00</td><td class="num">84.80</td></tr>
+            <tr><td>B1t (few-shot)</td><td class="num">8.18</td><td class="num">7.90</td><td class="num">11.00</td><td class="num">10.74</td><td class="num">84.99</td></tr>
+            <tr><td>R2 (LoRA, không truy hồi)</td><td class="num">9.38</td><td class="num">8.77</td><td class="num">10.99</td><td class="num">13.61</td><td class="num">84.96</td></tr>
+            <tr class="hi"><td>R3 (LoRA, có truy hồi)</td><td class="num">9.91</td><td class="num">9.27</td><td class="num">12.29</td><td class="num">13.36</td><td class="num">85.33</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>R3 hơn N0 2.80 điểm (KTC 95% 1.65 – 3.98, p Holm 9e-5) và hơn B0t 2.79 điểm (p Holm 1e-4). R2 cũng hơn N0 và B0t (p Holm 0.003 và 0.001). R3 cao hơn B1t 1.73 điểm (KTC 0.58 – 2.92) nhưng Wilcoxon cho p Holm 0.32, chưa kết luận được. R3 và R2 chênh 0.53 điểm (KTC −0.45 – 1.56, p = 0.47): truy hồi kho 5k chưa cải thiện có ý nghĩa.</p>
+
+      <h3>5.4. Ảnh hưởng của beam search và MBR</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.3. Greedy so với beam search kết hợp MBR trên test 500 mẫu.</caption>
+          <thead><tr><th>Hệ</th><th class="num">B-Norm</th><th class="num">METEOR</th><th class="num">ROUGE-L</th><th class="num">BERTScore F1</th><th class="num">Mở đầu “fix”</th><th class="num">Độ dài TB (từ)</th></tr></thead>
+          <tbody>
+            <tr><td>R2 greedy</td><td class="num">9.38</td><td class="num">10.99</td><td class="num">13.61</td><td class="num">84.96</td><td class="num">40.2%</td><td class="num">7.2</td></tr>
+            <tr><td>R2 beam + MBR</td><td class="num">9.75</td><td class="num">13.39</td><td class="num">12.82</td><td class="num">84.66</td><td class="num">12.2%</td><td class="num">9.9</td></tr>
+            <tr><td>R3 greedy</td><td class="num">9.91</td><td class="num">12.29</td><td class="num">13.36</td><td class="num">85.33</td><td class="num">37.4%</td><td class="num">7.3</td></tr>
+            <tr><td>R3 beam + MBR</td><td class="num">9.69</td><td class="num">13.51</td><td class="num">11.79</td><td class="num">84.86</td><td class="num">11.4%</td><td class="num">9.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Không cặp nào trong bốn biến thể khác nhau có ý nghĩa về B-Norm (p Holm = 1.0). Với BERTScore, R3 greedy hơn R3 beam 0.47 điểm (p Holm 2e-4). Beam + MBR <strong>đổi phong cách hơn là đổi chất lượng</strong>: tỉ lệ mở đầu “fix” giảm từ khoảng 40% xuống 11–12%, độ dài tăng từ 7.2 lên 9.4–9.9 từ (gần 9.5 của tham chiếu), METEOR tăng nhưng ROUGE-L giảm. Với R3, 78/500 đầu ra beam + MBR là bản sao của một trong ba message truy hồi.</p>
+
+      <h3>5.5. Rò rỉ dữ liệu ở vòng 2 và cách sửa</h3>
+      <p>So sha của <code>processed_v2</code> với test_paper, nhóm thấy tám commit xuất hiện ở cả hai. Nguyên nhân nằm ở cách chia của nhóm, không phải ở MCMD (bản chia gốc không có sha trùng). Do lấy mẫu từ cả ba phần rồi sắp lại theo thời gian và chọn ngẫu nhiên train trong vùng cũ, 195/5 000 commit train thực ra đến từ phần test của MCMD. Tập test 500 mẫu không bị ảnh hưởng vì là phần mới nhất theo thời gian.</p>
+      <div class="cards">
+        <div class="card"><b>Trên 8 mẫu trùng</b><p>NNGen 5 000 chép nguyên message (100.0); R3 đạt 41.0; B1t 35.7; R2 chỉ 10.6. R2 không ghi nhớ, các hệ có truy hồi hoặc few-shot thì sao chép.</p></div>
+        <div class="card"><b>Khi loại 8 mẫu</b><p>R3 giảm khoảng 0.25; B1t 0.22; NNGen 5 000 0.76. NNGen 360 000, R2, B0t gần như không đổi; thứ hạng không đổi.</p></div>
+        <div class="card"><b>Cách sửa</b><p>Tập train sạch vòng 3 chỉ lấy từ phần train MCMD, có assert xác nhận không còn sha nào trùng.</p></div>
+      </div>
+      <p class="note">Bài học: khi lấy mẫu rồi chia lại dữ liệu có sẵn, phải kiểm tra sha giữa các tập thay vì chỉ tin vào nhãn chia ban đầu.</p>
+
+      <h3>5.6. Kết quả vòng 3 trên 500 mẫu test</h3>
+      <figure class="fig">
+        <div class="hbars" style="--max: 12" role="img" aria-label="B-Norm trên test 500 mẫu: Q05 11.46; R4 10.17; R3 9.91; R2 9.38; B1t 8.18; B0t 7.12; N0 7.11.">
+          <div class="hb hb-top"><span class="hb-l"><b>Q05</b><small>Qwen 0.5B + LoRA, truy hồi 360k</small></span><span class="hb-t"><i style="--v: 11.46"></i></span><b>11.46</b></div>
+          <div class="hb hb-main"><span class="hb-l"><b>R4</b><small>BitNet + LoRA, truy hồi 360k (chính)</small></span><span class="hb-t"><i style="--v: 10.17"></i></span><b>10.17</b></div>
+          <div class="hb"><span class="hb-l"><b>R3</b><small>BitNet + LoRA, truy hồi 5k</small></span><span class="hb-t"><i style="--v: 9.91"></i></span><b>9.91</b></div>
+          <div class="hb"><span class="hb-l"><b>R2</b><small>BitNet + LoRA, không truy hồi</small></span><span class="hb-t"><i style="--v: 9.38"></i></span><b>9.38</b></div>
+          <div class="hb"><span class="hb-l"><b>B1t</b><small>BitNet chưa tinh chỉnh, few-shot</small></span><span class="hb-t"><i style="--v: 8.18"></i></span><b>8.18</b></div>
+          <div class="hb"><span class="hb-l"><b>B0t</b><small>BitNet chưa tinh chỉnh, zero-shot</small></span><span class="hb-t"><i style="--v: 7.12"></i></span><b>7.12</b></div>
+          <div class="hb"><span class="hb-l"><b>N0</b><small>NNGen TF-IDF, kho 5 000</small></span><span class="hb-t"><i style="--v: 7.11"></i></span><b>7.11</b></div>
+        </div>
+        <figcaption><strong>Hình 5.1.</strong> B-Norm trên 500 mẫu test (một hạt giống, greedy). Khoảng tin cậy của các cặp so sánh ghi trong phần chữ.</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.4. Kết quả trên test 500 mẫu (R2, R3, B1t, B0t, N0 là các hệ của vòng 2).</caption>
+          <thead><tr><th>Hệ</th><th class="num">B-Norm</th><th class="num">BLEU</th><th class="num">METEOR</th><th class="num">ROUGE-L</th></tr></thead>
+          <tbody>
+            <tr><td>Q05 (Qwen 0.5B, LoRA, truy hồi 360k)</td><td class="num">11.46</td><td class="num">10.81</td><td class="num">15.41</td><td class="num">14.85</td></tr>
+            <tr class="hi"><td>R4 (BitNet, LoRA, truy hồi 360k)</td><td class="num">10.17</td><td class="num">9.47</td><td class="num">13.28</td><td class="num">12.76</td></tr>
+            <tr><td>R3 (LoRA, truy hồi 5k)</td><td class="num">9.91</td><td class="num">9.27</td><td class="num">12.29</td><td class="num">13.36</td></tr>
+            <tr><td>R2 (LoRA, không truy hồi)</td><td class="num">9.38</td><td class="num">8.77</td><td class="num">10.99</td><td class="num">13.61</td></tr>
+            <tr><td>B1t (few-shot)</td><td class="num">8.18</td><td class="num">7.90</td><td class="num">11.00</td><td class="num">10.74</td></tr>
+            <tr><td>B0t (zero-shot)</td><td class="num">7.12</td><td class="num">7.05</td><td class="num">9.96</td><td class="num">11.00</td></tr>
+            <tr><td>N0 (NNGen TF-IDF, 5k)</td><td class="num">7.11</td><td class="num">6.90</td><td class="num">9.59</td><td class="num">5.93</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>R4 hơn R3 0.26 điểm, không có ý nghĩa (KTC −0.86 – 1.35, p Holm 1.0). R4 hơn B1t 1.99 điểm (KTC 0.90 – 3.08) nhưng p Holm 0.084; hơn N0 3.06 điểm (p Holm 8e-7). Q05 hơn R4 1.28 điểm (KTC 0.23 – 2.37, p Holm 0.048), có ý nghĩa nhưng sát ngưỡng. Họ bảy hệ, 21 cặp. Để tham chiếu, message NNGen 360 000 chọn trực tiếp đạt 7.52 trên tập này.</p>
+
+      <h3>5.7. Kết quả vòng 3 trên tập đại diện test_paper</h3>
+      <figure class="fig">
+        <div class="hbars" style="--max: 14" role="img" aria-label="B-Norm trên test_paper 1 000 mẫu: Q05 13.47; R4 12.73; NNGen 360 000 10.88; R3 9.57; B1t 9.12; R2 8.74; B0t 8.29; B0r 7.94; NNGen 5 000 6.39.">
+          <div class="hb hb-top"><span class="hb-l"><b>Q05</b><small>Qwen 0.5B + LoRA, truy hồi 360k</small></span><span class="hb-t"><i style="--v: 13.47"></i></span><b>13.47</b></div>
+          <div class="hb hb-main"><span class="hb-l"><b>R4</b><small>BitNet + LoRA, truy hồi 360k (chính)</small></span><span class="hb-t"><i style="--v: 12.73"></i></span><b>12.73</b></div>
+          <div class="hb hb-base"><span class="hb-l"><b>NNGen 360k</b><small>truy hồi thuần, kho 360 000</small></span><span class="hb-t"><i style="--v: 10.88"></i></span><b>10.88</b></div>
+          <div class="hb"><span class="hb-l"><b>R3</b><small>BitNet + LoRA, truy hồi 5k</small></span><span class="hb-t"><i style="--v: 9.57"></i></span><b>9.57</b></div>
+          <div class="hb"><span class="hb-l"><b>B1t</b><small>BitNet chưa tinh chỉnh, few-shot</small></span><span class="hb-t"><i style="--v: 9.12"></i></span><b>9.12</b></div>
+          <div class="hb"><span class="hb-l"><b>R2</b><small>BitNet + LoRA, không truy hồi</small></span><span class="hb-t"><i style="--v: 8.74"></i></span><b>8.74</b></div>
+          <div class="hb"><span class="hb-l"><b>B0t</b><small>BitNet chưa tinh chỉnh, zero-shot</small></span><span class="hb-t"><i style="--v: 8.29"></i></span><b>8.29</b></div>
+          <div class="hb"><span class="hb-l"><b>B0r</b><small>BitNet chưa tinh chỉnh + truy hồi 360k</small></span><span class="hb-t"><i style="--v: 7.94"></i></span><b>7.94</b></div>
+          <div class="hb"><span class="hb-l"><b>NNGen 5k</b><small>truy hồi thuần, kho 5 000</small></span><span class="hb-t"><i style="--v: 6.39"></i></span><b>6.39</b></div>
+        </div>
+        <figcaption><strong>Hình 5.2.</strong> B-Norm trên test_paper, 1 000 mẫu. NNGen 360 000 có KTC 95% 9.89 – 11.93.</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.5. Kết quả trên test_paper 1 000 mẫu (một hạt giống, greedy).</caption>
+          <thead><tr><th>Hệ</th><th class="num">B-Norm</th><th class="num">BLEU</th><th class="num">METEOR</th><th class="num">ROUGE-L</th></tr></thead>
+          <tbody>
+            <tr><td>Q05 (Qwen 0.5B, LoRA, truy hồi 360k)</td><td class="num">13.47</td><td class="num">13.08</td><td class="num">19.05</td><td class="num">17.23</td></tr>
+            <tr class="hi"><td>R4 (BitNet, LoRA, truy hồi 360k)</td><td class="num">12.73</td><td class="num">12.09</td><td class="num">17.11</td><td class="num">15.76</td></tr>
+            <tr><td>NNGen nguyên bản, train 360 000</td><td class="num">10.88</td><td class="num">10.46</td><td class="num">14.14</td><td class="num">11.15</td></tr>
+            <tr><td>R3 (LoRA, truy hồi 5k; vòng 2)</td><td class="num">9.57</td><td class="num">9.00</td><td class="num">12.59</td><td class="num">13.24</td></tr>
+            <tr><td>B1t (few-shot)</td><td class="num">9.12</td><td class="num">8.78</td><td class="num">12.31</td><td class="num">12.78</td></tr>
+            <tr><td>R2 (LoRA, không truy hồi; vòng 2)</td><td class="num">8.74</td><td class="num">8.09</td><td class="num">10.77</td><td class="num">13.86</td></tr>
+            <tr><td>B0t (zero-shot)</td><td class="num">8.29</td><td class="num">8.06</td><td class="num">11.50</td><td class="num">12.74</td></tr>
+            <tr><td>B0r (BitNet gốc, truy hồi 360k)</td><td class="num">7.94</td><td class="num">7.75</td><td class="num">11.47</td><td class="num">11.49</td></tr>
+            <tr><td>NNGen nguyên bản, train 5 000</td><td class="num">6.39</td><td class="num">6.20</td><td class="num">8.21</td><td class="num">4.68</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>test_paper nay không còn mẫu nào trùng với train của R4 và Q05. Điểm của R2, R3, B1t là của vòng 2, tính trên tập train có rò rỉ nhỏ nên hơi cao, và không phải cấu hình chính của vòng 3.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.6. Các so sánh chính trên test_paper (B-Norm, chênh lệch trung bình; họ 6 hệ, 15 cặp, Holm).</caption>
+          <thead><tr><th>Cặp so sánh</th><th class="num">Chênh lệch</th><th class="num">KTC 95%</th><th class="num">p Holm</th><th class="num">Cliff δ</th></tr></thead>
+          <tbody>
+            <tr class="hi"><td>R4 so với NNGen 360 000</td><td class="num">+1.85</td><td class="num">1.00 – 2.64</td><td class="num">7e-12</td><td class="num">0.11</td></tr>
+            <tr><td>Q05 so với NNGen 360 000</td><td class="num">+2.58</td><td class="num">1.62 – 3.52</td><td class="num">9e-19</td><td class="num">0.18</td></tr>
+            <tr><td>R4 so với NNGen 5 000</td><td class="num">+6.35</td><td class="num">5.14 – 7.56</td><td class="num">7e-38</td><td class="num">0.31</td></tr>
+            <tr><td>R4 so với R3</td><td class="num">+3.16</td><td class="num">2.01 – 4.32</td><td class="num">1e-5</td><td class="num">0.09</td></tr>
+            <tr><td>R4 so với B1t</td><td class="num">+3.62</td><td class="num">2.49 – 4.76</td><td class="num">2e-8</td><td class="num">0.13</td></tr>
+            <tr><td>Q05 so với R4</td><td class="num">+0.73</td><td class="num">−0.16 – 1.65</td><td class="num">0.005</td><td class="num">0.07</td></tr>
+            <tr><td>R3 so với NNGen 360 000</td><td class="num">−1.31</td><td class="num">−2.56 – −0.10</td><td class="num">0.74</td><td class="num">0.03</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>R4 thỏa tiêu chí đặt trước</strong>: chênh lệch ≥ 1.0, KTC không chứa 0, p Holm &lt; 0.05. Tuy vậy cận dưới là 1.00, sát ngưỡng; Cliff δ = 0.11 là mức nhỏ, nghĩa là ở từng mẫu R4 không áp đảo NNGen; và chỉ có một hạt giống. Vì thế đề án chỉ nói R4 đạt tiêu chí đã đặt, không nói R4 hơn hẳn NNGen.</p>
+      <p>Q05 cao hơn R4 0.73 điểm nhưng hai kiểm định mâu thuẫn: KTC bootstrap chứa 0 trong khi Wilcoxon cho p Holm 0.005, nên không khẳng định Q05 hơn R4 trên test_paper. Cặp R3 – NNGen 360 000 tương tự: KTC của hiệu trung bình nghiêng về NNGen còn kiểm định hạng cho p Holm 0.74, vì điểm B-Norm câu có đuôi dài. R4 hơn R3 3.16 điểm nhưng hai hệ khác nhau ở hai yếu tố cùng lúc (train sạch và kho 360k), và R3 còn hưởng khoảng 0.25 điểm từ rò rỉ, nên chưa tách được đóng góp từng yếu tố.</p>
+
+      <h3>5.8. Lợi thế có đến từ việc chép message truy hồi không?</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.7. Mức chép message NNGen chọn và điểm trên phần không chép (test_paper, 1 000 mẫu).</caption>
+          <thead><tr><th>Hệ</th><th class="num">Tỉ lệ chép</th><th class="num">B-Norm phần không chép</th><th class="num">B-Norm message NNGen chọn, cùng nhóm</th></tr></thead>
+          <tbody>
+            <tr><td>R4</td><td class="num">14.3%</td><td class="num">12.60</td><td class="num">10.51</td></tr>
+            <tr><td>Q05</td><td class="num">4.6%</td><td class="num">13.15</td><td class="num">10.50</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>R4 chép nguyên văn message NNGen chọn ở 143/1 000 mẫu, Q05 ở 46 mẫu; trên test 500 là 68 (13.6%) và 12 (2.4%). Khi chỉ xét phần không chép, R4 vẫn đạt 12.60 và Q05 13.15, trong khi message NNGen trên cùng nhóm mẫu chỉ 10.51 và 10.50. Lợi thế so với NNGen <strong>không đến từ việc chép</strong>.</p>
+
+      <h3>5.9. Truy hồi 360k với mô hình chưa huấn luyện</h3>
+      <p>BitNet gốc không huấn luyện kèm ba message truy hồi (B0r) đạt 7.94 trên test_paper, thấp hơn B0t không truy hồi (8.29), và ROUGE-L giảm từ 12.74 xuống 11.49; trên test 500, B0r đạt 7.04, cũng không cao hơn B0t (7.12). Chênh lệch trên test_paper chưa được kiểm định, nhưng cho thấy message truy hồi chỉ có ích sau khi mô hình được tinh chỉnh để biết cách dùng chúng.</p>
+
+      <h3>5.10. Chi phí huấn luyện và suy luận</h3>
+      <p>Đo trên 50 mẫu bằng bitnet.cpp, GGUF i2_s, 4 luồng, sau 3 mẫu khởi động, máy đóng hết ứng dụng nền. B0 đo lặp lại cuối chuỗi lệch 1.4% (20.48 và 20.76 giây). Lượt đo đầu khi máy còn mở nhiều ứng dụng chậm hơn 17–27% nên bị loại.</p>
+      <figure class="fig">
+        <div class="hbars" style="--max: 50" role="img" aria-label="Độ trễ p50 theo kiểu prompt: diff thô zero-shot 20.5 giây; diff rút gọn zero-shot 9.6 giây; rút gọn kèm 2 message 10.4 giây; few-shot diff thô 42.9 giây.">
+          <div class="hb"><span class="hb-l"><b>Diff thô</b><small>zero-shot, 567 từ</small></span><span class="hb-t"><i style="--v: 20.5"></i><s style="--v: 25.7"></s></span><b>20.5 s</b></div>
+          <div class="hb hb-main"><span class="hb-l"><b>Rút gọn</b><small>zero-shot, 185 từ</small></span><span class="hb-t"><i style="--v: 9.6"></i><s style="--v: 14.0"></s></span><b>9.6 s</b></div>
+          <div class="hb hb-main"><span class="hb-l"><b>Rút gọn + 2 msg</b><small>có truy hồi, 212 từ</small></span><span class="hb-t"><i style="--v: 10.4"></i><s style="--v: 14.6"></s></span><b>10.4 s</b></div>
+          <div class="hb"><span class="hb-l"><b>Few-shot thô</b><small>diff thô, 1 263 từ</small></span><span class="hb-t"><i style="--v: 42.9"></i><s style="--v: 49.3"></s></span><b>42.9 s</b></div>
+        </div>
+        <figcaption><strong>Hình 5.3.</strong> Độ trễ suy luận theo kiểu prompt trên MacBook M1 (thanh là p50, vạch dọc là p95).</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.8. Chi phí suy luận theo kiểu prompt (MacBook M1, 4 luồng, 50 mẫu).</caption>
+          <thead><tr><th>Kiểu prompt</th><th class="num">Số từ prompt</th><th class="num">p50 (giây)</th><th class="num">p95 (giây)</th><th class="num">RAM đỉnh (MB)</th><th class="num">Sinh (token/giây)</th></tr></thead>
+          <tbody>
+            <tr><td>Diff thô, zero-shot</td><td class="num">567</td><td class="num">20.5</td><td class="num">25.7</td><td class="num">1 675</td><td class="num">18.9</td></tr>
+            <tr class="hi"><td>Diff rút gọn, zero-shot</td><td class="num">185</td><td class="num">9.6</td><td class="num">14.0</td><td class="num">1 634</td><td class="num">19.4</td></tr>
+            <tr><td>Rút gọn kèm 2 message truy hồi</td><td class="num">212</td><td class="num">10.4</td><td class="num">14.6</td><td class="num">1 633</td><td class="num">19.1</td></tr>
+            <tr><td>Few-shot, diff thô</td><td class="num">1 263</td><td class="num">42.9</td><td class="num">49.3</td><td class="num">1 790</td><td class="num">15.6</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Độ trễ chủ yếu do bước đọc prompt (khoảng 30 token/giây trên CPU). Rút gọn diff giảm độ trễ khoảng <strong>2.1 lần</strong>, few-shot làm chậm khoảng 2.1 lần so với zero-shot, thêm hai message truy hồi chỉ tốn khoảng 0.8 giây. Bộ nhớ gần như không đổi, khoảng 1.6–1.8 GB. Phép đo chưa gồm bộ chuyển LoRA (bitnet.cpp chưa nạp trực tiếp được), và đo ở vòng 2 với hai message; prompt vòng 3 có ba message, chưa đo lại. Về huấn luyện, R4 mất khoảng 7.0 giờ với 11.4 GB VRAM, Q05 khoảng 1.5 giờ với 3.7 GB.</p>
+
+      <h3>5.11. Demo web</h3>
+      <p><strong>Phương án 1, chạy trong trình duyệt (bị loại).</strong> Gộp LoRA của Q05 vào mô hình, xuất ONNX, lượng tử hóa 4 bit theo khối, chạy bằng transformers.js với WebGPU: khoảng 15 giây mỗi lượt, 555 MB, sau khi bỏ lượng tử hóa 8 bit cho ma trận embedding vì nó làm WebGPU sinh chữ rác. Nhưng điểm tụt rõ trên 100 mẫu đầu: fp32 đạt 11.33, bản 4 bit có truy hồi 9.76, bản 4 bit không truy hồi (cấu hình trang tĩnh) chỉ 8.14. Demo không còn minh họa đúng kết quả báo cáo.</p>
+      <p><strong>Phương án 2, máy chủ FastAPI (được chọn).</strong> <code>demo/server.py</code> chạy Q05 ở fp32 và truy hồi từ kho 360 000 commit qua chỉ mục lưu trên đĩa (dựng một lần trong 1 311 giây). Người dùng dán git diff; máy chủ đổi sang dạng MCMD, rút gọn diff, truy hồi ba message và sinh một dòng, mất 3–11 giây trên Mac (MPS; đo không kiểm soát, chỉ minh họa). Kiểm chứng ở 10 mẫu: truy hồi khớp top-3 trong <code>processed_v3</code> 10/10 và đầu ra giống hệt dự đoán Q05 đã chấm trên Colab 10/10. Với ví dụ tự viết, kho truy hồi đôi khi kéo kiểu commit của dự án có đường dẫn tương tự (ví dụ tiền tố mã vé).</p>
+      <figure class="fig">
+        <img src="assets/dean2/demo.png" width="1600" height="622" loading="lazy" alt="Trình duyệt gửi git diff tới máy chủ demo FastAPI. Trong máy chủ: đổi sang dạng MCMD và rút gọn diff 512 token, truy hồi 360k cosine top-5 chọn theo BLEU lấy 3 message, dựng prompt gồm diff và 3 message, rồi Qwen2.5-0.5B kèm LoRA fp32 greedy sinh commit message một dòng trả về trình duyệt." />
+        <figcaption><strong>Hình 5.4.</strong> Kiến trúc bản demo chạy trên máy chủ cục bộ.</figcaption>
+      </figure>
+
+      <h3>5.12. Phân tích đầu ra</h3>
+      <div class="table-wrap">
+        <table class="small">
+          <caption>Bảng 5.9. Ví dụ đầu ra trên tập test (hệ vòng 2: R2, R3 greedy; B1t few-shot; N0 NNGen TF-IDF).</caption>
+          <thead><tr><th>Tham chiếu</th><th>R3</th><th>R2</th><th>B1t</th><th>N0</th></tr></thead>
+          <tbody>
+            <tr><td>= remove unused import</td><td>Remove unused imports</td><td>Remove unused imports</td><td>Fix NPE in Aviater regex filter and update MySQL event parser</td><td>add setAlarmHandler for otter</td></tr>
+            <tr><td>fix travis - ci failed problem .</td><td>fix travis - ci failed problem</td><td>Fix travis - ci failed problem</td><td>Fix travis ci failed problem by setting time zone in DownloadUtilsTest .</td><td>fix log path error .</td></tr>
+            <tr><td>Remove unused field declaration</td><td>Remove unused static variables</td><td>Remove unused static final variables</td><td>Use the same component tags for both submitters ( )</td><td>Added VitoUtils class for common Vito functionality</td></tr>
+            <tr><td>ServletServerHttpResponse reflects Content - Type override</td><td>Fix for Content - Type override</td><td>Fix for Content - Type override issue</td><td>Ensure headers are set correctly in response</td><td>Respect existing content - length for HTTP HEAD</td></tr>
+            <tr><td>Ordering check fixed</td><td>fixes</td><td>[ ] Add missing condition to hasFilter ( )</td><td>Check if attribute has filter condition in DBDAttributeConstraintBase .</td><td>Transaction manager refactoring . Session logging is in interface</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Với message ngắn, điển hình như “remove unused import” hay “fix travis-ci failed problem”, R2 và R3 sinh gần như đúng, còn B1t và NNGen thường trả về câu không liên quan. Ví dụ thứ tư cho thấy mô hình nắm được ý chính (“Content-Type override”) nhưng mở đầu bằng “Fix for”. Ở commit cần hiểu ngữ cảnh dự án như ví dụ cuối, mọi mô hình đều thất bại.</p>
+      <p>Hiện tượng sụp về “fix” giảm dần qua các bước: 62% ở R1 (tham chiếu 18.0% trên 200 mẫu), 40.2% ở R2 và 37.4% ở R3 trên 500 mẫu (tham chiếu 17.4%). Đầu ra greedy vẫn ngắn hơn tham chiếu (7.2–7.3 từ so với 9.5). Với R3, 35/500 đầu ra greedy là bản sao nguyên văn của một message truy hồi, như “bug fix for sql wall” trùng hoàn toàn với tham chiếu.</p>
+
+      <h3>5.13. So sánh trước và sau tinh chỉnh</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.10. Trước và sau tinh chỉnh (B-Norm, một hạt giống, greedy).</caption>
+          <thead><tr><th>Mô hình</th><th>Tập</th><th class="num">Chưa tinh chỉnh</th><th class="num">Có truy hồi, chưa tinh chỉnh</th><th class="num">Sau tinh chỉnh (LoRA, truy hồi 360k)</th></tr></thead>
+          <tbody>
+            <tr><td>Qwen2.5-0.5B</td><td>test_paper</td><td class="num">8.12 (Q0t)</td><td class="num">8.34 (Q0r)</td><td class="num"><strong>13.47</strong> (Q05)</td></tr>
+            <tr><td>Qwen2.5-0.5B</td><td>test 500</td><td class="num">7.82 (Q0t)</td><td class="num">7.44 (Q0r)</td><td class="num"><strong>11.46</strong> (Q05)</td></tr>
+            <tr><td>BitNet 2B</td><td>test_paper</td><td class="num">8.29 (B0t)</td><td class="num">7.94 (B0r)</td><td class="num"><strong>12.73</strong> (R4)</td></tr>
+            <tr><td>BitNet 2B</td><td>test 500</td><td class="num">7.12 (B0t)</td><td class="num">7.04 (B0r)</td><td class="num"><strong>10.17</strong> (R4)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Tinh chỉnh tăng điểm rõ ở cả hai mô hình. Trên test_paper, Qwen tăng +5.35 điểm (KTC 4.39 – 6.33; p Holm 6e-30), BitNet +4.45 điểm (p Holm 8e-12). Trên test 500 là +3.64 (p Holm 1e-7) và +3.05 (p Holm 9e-6). Hai mô hình chưa tinh chỉnh gần như ngang nhau, nên khoảng cách Q05 – R4 chỉ xuất hiện sau tinh chỉnh. Thêm truy hồi vào mô hình chưa tinh chỉnh không giúp: Q0r (8.34) không khác Q0t, B0r (7.94 trên test_paper, 7.04 trên test 500) không cao hơn B0t; trên test 500, R4 hơn B0r 3.14 điểm (p Holm 4e-7). Ba hệ chưa tinh chỉnh đều dưới NNGen đầy đủ (10.88), dù chênh lệch không có ý nghĩa trong họ bảy hệ (p Holm 0.05 – 0.11).</p>
+      <p>Về vai trò riêng của truy hồi sau tinh chỉnh: chưa huấn luyện Q05 không truy hồi. Phép đo gần đúng là chạy Q05 đã huấn luyện không kèm truy hồi lúc suy luận: 9.67 so với 11.33 có truy hồi trên 100 mẫu đầu của test. Đây chưa phải đối chứng sạch vì mô hình luôn thấy truy hồi lúc huấn luyện.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng 5.11. BERTScore F1 của các hệ vòng 3 (roberta-large, chưa rescale).</caption>
+          <thead><tr><th>Hệ</th><th class="num">test_paper (1 000)</th><th class="num">test 500</th></tr></thead>
+          <tbody>
+            <tr><td>Q05 (Qwen 0.5B, LoRA, truy hồi 360k)</td><td class="num">85.83</td><td class="num">86.11</td></tr>
+            <tr class="hi"><td>R4 (BitNet, LoRA, truy hồi 360k)</td><td class="num">85.49</td><td class="num">85.65</td></tr>
+            <tr><td>R3 (vòng 2)</td><td class="num">84.67</td><td class="num">85.33</td></tr>
+            <tr><td>R2 (vòng 2)</td><td class="num">84.37</td><td class="num">84.96</td></tr>
+            <tr><td>B1t (few-shot)</td><td class="num">84.43</td><td class="num">84.99</td></tr>
+            <tr><td>B0t (zero-shot)</td><td class="num">84.14</td><td class="num">84.80</td></tr>
+            <tr><td>NNGen nguyên bản, train 360 000</td><td class="num">84.42</td><td class="num">chưa tính</td></tr>
+            <tr><td>NNGen, train 5 000</td><td class="num">83.26</td><td class="num">84.14 (N0)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>BERTScore cho thứ tự hệ giống B-Norm nhưng thang bị nén (các hệ cách nhau dưới 3 điểm), nên chỉ dùng để kiểm tra chiều hướng, không để kết luận mức độ hơn kém.</p>
+
+      <h3>5.14. Thảo luận</h3>
+      <ol>
+        <li><strong>R4 đạt tiêu chí nhưng sát ngưỡng.</strong> R4 hơn NNGen 360 000 1.85 điểm, cận dưới KTC sát 1.0 và một hạt giống. Điều thay đổi so với vòng 2 là kho truy hồi (5 000 → 360 000 commit) và tập train sạch, không phải kiến trúc.</li>
+        <li><strong>BitNet không có lợi thế riêng.</strong> Q05, nhỏ hơn nhiều, bằng hoặc cao hơn R4 (13.47 so với 12.73 trên test_paper; 11.46 so với 10.17 trên test 500).</li>
+        <li><strong>Không phải do chép.</strong> Trên phần không chép, cả hai mô hình vẫn cao hơn NNGen.</li>
+        <li><strong>Truy hồi cần đi cùng tinh chỉnh.</strong> B0r thấp hơn B0t; phần lợi đến từ sự kết hợp, chưa tách được hai phần trong kết quả của Q05.</li>
+      </ol>
+      <p>Từ vòng 2 còn hai kết luận: beam + MBR đổi phong cách đầu ra hơn là điểm số, và rút gọn diff giảm độ trễ CPU khoảng 2.1 lần mà không làm điểm thấp hơn.</p>
+      <p><strong>Mối đe dọa đến tính hợp lệ.</strong> Một hạt giống; R4 và R3 khác hai yếu tố; R4 và Q05 khác cả kích thước lẫn tokenizer; suy luận vòng 3 trên Colab còn hệ cũ trên Kaggle (demo trên Mac khớp 10/10 cho thấy sai khác số học nhỏ); B0, B1 (bitnet.cpp, diff thô) không so trực tiếp được với B0t, B1t (transformers, diff rút gọn); kho truy hồi gồm dự án mã nguồn mở nên đầu ra mang phong cách của chúng; chưa chứng minh lợi ích khi triển khai ở dạng ba trạng thái; không có đánh giá của con người.</p>
+    </section>
+
+    <section id="ket-luan">
+      <h2>6. Kết luận và hướng phát triển</h2>
+      <h3>6.1. Kết quả đạt được</h3>
+      <p>Đề án đã xây dựng quy trình tinh chỉnh LoRA cho hai mô hình nhỏ, BitNet b1.58 2B4T và Qwen2.5-0.5B-Instruct, để sinh commit message Java và đánh giá một cách có kiểm soát.</p>
+      <p><strong>RQ1.</strong> R4 đạt B-Norm 12.73 trên 1 000 mẫu đại diện, cao hơn NNGen dùng đủ 360 000 commit 1.85 điểm (KTC 95% 1.00 – 2.64, p Holm 7e-12): đạt tiêu chí đặt trước nhưng cận dưới sát ngưỡng và một hạt giống. Cùng ngân sách 5 000 commit, các hệ BitNet hơn NNGen khoảng ba điểm (R3 hơn 3.19 điểm ở vòng 2). Q05 đạt 13.47 và 11.46, bằng hoặc cao hơn R4, nên không thể nói BitNet tốt hơn. Truy hồi 360k không giúp mô hình chưa huấn luyện (7.94 so với 8.29). Tinh chỉnh tăng 4.45 điểm với BitNet và 5.35 điểm với Qwen trên test_paper.</p>
+      <p><strong>RQ2.</strong> Rút gọn diff giảm độ trễ suy luận CPU khoảng 2.1 lần, bộ nhớ khoảng 1.6 GB; phép đo chưa gồm bộ chuyển LoRA.</p>
+      <h3>6.2. Đóng góp</h3>
+      <p>Về khoa học: chuỗi kết quả có kiểm định cho thấy lợi ích của mô hình sinh so với NNGen phụ thuộc mạnh vào kho truy hồi và độ sạch tập huấn luyện. Cùng ngân sách 5 000 commit, LoRA hơn NNGen rõ rệt; khi NNGen có đủ 360 000 commit thì chỉ khi mô hình cũng truy hồi từ kho đó và huấn luyện trên dữ liệu sạch mới có chênh lệch nhỏ theo hướng có lợi. Kèm theo là quy trình đánh giá gồm hiệu chuẩn bộ chấm, baseline khớp ngân sách, chốt tiêu chí trước, đối chứng không ba trạng thái và phân tích rò rỉ. Về thực tiễn: rút gọn diff giúp công cụ chạy nhanh hơn rõ trên máy cá nhân, có bản demo chạy được, và toàn bộ mã, cấu hình, kết quả được lưu để tái lập.</p>
+      <h3>6.3. Hạn chế</h3>
+      <ul>
+        <li>Chỉ một hạt giống mỗi cấu hình, trong khi chênh lệch R4 – NNGen nằm sát ngưỡng.</li>
+        <li>R4 khác R3 ở hai yếu tố; Q05 khác R4 ở cỡ mô hình và tokenizer; chưa huấn luyện Q05 không truy hồi.</li>
+        <li>Chỉ 4 971 commit Java; khoảng 25% diff vẫn bị cắt ở 512 token.</li>
+        <li>Suy luận vòng 3 trên Colab thay vì Kaggle; demo có thể lệch phong cách với mã ngoài các dự án nguồn.</li>
+        <li>Chưa đo chi phí bộ chuyển LoRA trong bitnet.cpp; chưa thử mô hình chuyên về mã; không có đánh giá của con người.</li>
+      </ul>
+      <h3>6.4. Hướng phát triển</h3>
+      <ul>
+        <li>Chạy thêm hạt giống và huấn luyện Q05 không truy hồi làm đối chứng sạch.</li>
+        <li>Tách hai yếu tố: R4 trên tập sạch với kho 5 000, hoặc trên tập cũ với kho 360 000.</li>
+        <li>Kết hợp NNGen đề xuất ứng viên và mô hình chọn lại hoặc viết lại: message NNGen chọn đạt 10.94 trên test_paper trong khi ứng viên tốt nhất trong năm đạt 17.96.</li>
+        <li>Cắt diff dài thông minh hơn, đo bộ chuyển LoRA đã gộp trong bitnet.cpp, bổ sung đánh giá của con người.</li>
+      </ul>
+    </section>
+
+    <section id="tai-lieu">
+      <h2>Tài liệu tham khảo</h2>
+      <ol class="refs">
+        <li>W. Tao, Y. Wang, E. Shi, L. Du, S. Han, H. Zhang, D. Zhang và W. Zhang, “On the evaluation of commit message generation models: An experimental study,” trong <em>Proc. IEEE ICSME</em>, 2021, tr. 126–136.</li>
+        <li>W. Tao và cộng sự, “CommitMsgEmpirical: Code and data for the empirical study of commit message generation,” GitHub. <a href="https://github.com/DeepSoftwareAnalytics/CommitMsgEmpirical" rel="noopener noreferrer">github.com/DeepSoftwareAnalytics/CommitMsgEmpirical</a></li>
+        <li>S. Jiang, A. Armaly và C. McMillan, “Automatically generating commit messages from diffs using neural machine translation,” trong <em>Proc. ASE</em>, 2017, tr. 135–146.</li>
+        <li>S. Xu, Y. Yao, F. Xu, T. Gu, H. Tong và J. Lu, “Commit message generation for source code changes,” trong <em>Proc. IJCAI</em>, 2019, tr. 3975–3981.</li>
+        <li>Q. Liu, Z. Liu, H. Zhu, H. Fan, B. Du và Y. Qian, “Generating commit messages from diffs using pointer-generator network,” trong <em>Proc. MSR</em>, 2019, tr. 299–309.</li>
+        <li>Z. Liu, X. Xia, A. E. Hassan, D. Lo, Z. Xing và X. Wang, “Neural-machine-translation-based commit message generation: How far are we?,” trong <em>Proc. ASE</em>, 2018, tr. 373–384.</li>
+        <li>E. Shi, Y. Wang, W. Tao, L. Du, H. Zhang, S. Han, D. Zhang và H. Sun, “RACE: Retrieval-augmented commit message generation,” trong <em>Proc. EMNLP</em>, 2022, tr. 5520–5530.</li>
+        <li>S. Ma và cộng sự, “The era of 1-bit LLMs: All large language models are in 1.58 bits,” arXiv:2402.17764, 2024.</li>
+        <li>S. Ma và cộng sự, “BitNet b1.58 2B4T technical report,” arXiv:2504.12285, 2025.</li>
+        <li>E. J. Hu và cộng sự, “LoRA: Low-rank adaptation of large language models,” trong <em>Proc. ICLR</em>, 2022.</li>
+        <li>S. Robertson và H. Zaragoza, “The probabilistic relevance framework: BM25 and beyond,” <em>Found. Trends Inf. Retr.</em>, 3(4), tr. 333–389, 2009.</li>
+        <li>K. Papineni, S. Roukos, T. Ward và W.-J. Zhu, “BLEU: A method for automatic evaluation of machine translation,” trong <em>Proc. ACL</em>, 2002, tr. 311–318.</li>
+        <li>S. Banerjee và A. Lavie, “METEOR: An automatic metric for MT evaluation with improved correlation with human judgments,” ACL Workshop, 2005, tr. 65–72.</li>
+        <li>C.-Y. Lin, “ROUGE: A package for automatic evaluation of summaries,” <em>Text Summarization Branches Out</em>, 2004, tr. 74–81.</li>
+        <li>T. Zhang, V. Kishore, F. Wu, K. Q. Weinberger và Y. Artzi, “BERTScore: Evaluating text generation with BERT,” trong <em>Proc. ICLR</em>, 2020.</li>
+        <li>F. Wilcoxon, “Individual comparisons by ranking methods,” <em>Biometrics Bulletin</em>, 1(6), tr. 80–83, 1945.</li>
+        <li>S. Holm, “A simple sequentially rejective multiple test procedure,” <em>Scand. J. Statist.</em>, 6(2), tr. 65–70, 1979.</li>
+        <li>B. Efron, “Bootstrap methods: Another look at the jackknife,” <em>Ann. Statist.</em>, 7(1), tr. 1–26, 1979.</li>
+        <li>N. Cliff, “Dominance statistics: Ordinal analyses to answer ordinal questions,” <em>Psychol. Bull.</em>, 114(3), tr. 494–509, 1993.</li>
+        <li>T. Wolf và cộng sự, “Transformers: State-of-the-art natural language processing,” trong <em>Proc. EMNLP: System Demonstrations</em>, 2020, tr. 38–45.</li>
+        <li>S. Mangrulkar, S. Gugger, L. Debut, Y. Belkada và S. Paul, “PEFT: State-of-the-art parameter-efficient fine-tuning methods,” GitHub, 2022. <a href="https://github.com/huggingface/peft" rel="noopener noreferrer">github.com/huggingface/peft</a></li>
+        <li>Microsoft, “bitnet.cpp: Official inference framework for 1-bit LLMs,” GitHub. <a href="https://github.com/microsoft/BitNet" rel="noopener noreferrer">github.com/microsoft/BitNet</a></li>
+        <li>Qwen Team, “Qwen2.5 technical report,” arXiv:2412.15115, 2024.</li>
+      </ol>
+    </section>
+
+    <section id="phu-luc">
+      <h2>Phụ lục</h2>
+      <h3>A. Mẫu prompt</h3>
+      <p>Thông điệp hệ thống: <code>You write git commit messages.</code> Thông điệp người dùng (zero-shot):</p>
+<pre><code>Write a one-line commit message (imperative mood, at most 15 words)
+for this Java diff.
+&lt;diff&gt;
+{diff đã rút gọn}
+&lt;/diff&gt;</code></pre>
+      <p>Với cấu hình có truy hồi, phía trước đoạn trên có thêm (ví dụ vòng 3, ba message):</p>
+<pre><code>Commit messages of similar past changes (for style reference):
+- {message truy hồi 1}
+- {message truy hồi 2}
+- {message truy hồi 3}</code></pre>
+      <h3>B. Cấu trúc mã nguồn nộp kèm</h3>
+      <div class="table-wrap">
+        <table>
+          <caption>Bảng B.1. Các thư mục chính của mã nguồn.</caption>
+          <thead><tr><th>Thư mục</th><th>Nội dung</th></tr></thead>
+          <tbody>
+            <tr><td><code>src/</code></td><td>Chuẩn bị dữ liệu, rút gọn diff, truy hồi, huấn luyện LoRA, suy luận, độ đo và kiểm định</td></tr>
+            <tr><td><code>configs/</code></td><td>Cấu hình YAML của từng hệ (B0, B1, B0t, B1t, B0r, N0, R1–R4, Q05)</td></tr>
+            <tr><td><code>notebooks/</code></td><td>Notebook Colab và Kaggle cho huấn luyện và suy luận</td></tr>
+            <tr><td><code>tests/</code></td><td>Kiểm thử đơn vị cho rút gọn diff và đường ống dữ liệu</td></tr>
+            <tr><td><code>data/processed_v3/</code></td><td>Dữ liệu vòng 3: train sạch, val, test, test_paper</td></tr>
+            <tr><td><code>demo/</code></td><td>Máy chủ demo FastAPI và mã dựng chỉ mục truy hồi 360k</td></tr>
+            <tr><td><code>results/</code></td><td>Bảng kết quả (CSV), hiệu chuẩn và điểm từng mẫu</td></tr>
+            <tr><td><code>reports/</code></td><td>Báo cáo vòng 1, 2, 3, thống kê dữ liệu, nhật ký sự cố</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="viet-tat">
+      <h2>Danh mục từ viết tắt</h2>
+      <div class="table-wrap">
+        <table class="small">
+          <thead><tr><th>Viết tắt</th><th>Tiếng Anh</th><th>Tiếng Việt</th></tr></thead>
+          <tbody>
+            <tr><td>B-Norm</td><td>Normalized BLEU</td><td>BLEU có chuẩn hóa văn bản và làm mượt</td></tr>
+            <tr><td>BERTScore</td><td>BERT-based Score</td><td>Độ đo dựa trên vectơ ngữ cảnh</td></tr>
+            <tr><td>BLEU</td><td>Bilingual Evaluation Understudy</td><td>Độ đo tương đồng n-gram</td></tr>
+            <tr><td>BM25</td><td>Best Matching 25</td><td>Hàm xếp hạng truy hồi</td></tr>
+            <tr><td>BPE</td><td>Byte Pair Encoding</td><td>Mã hóa cặp byte (token)</td></tr>
+            <tr><td>CMG</td><td>Commit Message Generation</td><td>Sinh commit message</td></tr>
+            <tr><td>GGUF</td><td>GPT-Generated Unified Format</td><td>Định dạng tệp mô hình cho bitnet.cpp</td></tr>
+            <tr><td>LLM</td><td>Large Language Model</td><td>Mô hình ngôn ngữ lớn</td></tr>
+            <tr><td>LoRA</td><td>Low-Rank Adaptation</td><td>Thích nghi hạng thấp</td></tr>
+            <tr><td>MBR</td><td>Minimum Bayes Risk</td><td>Chọn ứng viên theo rủi ro Bayes tối thiểu</td></tr>
+            <tr><td>MCMD</td><td>Multi-programming-language Commit Message Dataset</td><td>Bộ dữ liệu commit đa ngôn ngữ</td></tr>
+            <tr><td>METEOR</td><td>Metric for Evaluation of Translation with Explicit ORdering</td><td>Độ đo có khớp gốc từ và đồng nghĩa</td></tr>
+            <tr><td>NMT</td><td>Neural Machine Translation</td><td>Dịch máy thần kinh</td></tr>
+            <tr><td>NNGen</td><td>Nearest Neighbor Generator</td><td>Truy hồi diff gần nhất</td></tr>
+            <tr><td>PEFT</td><td>Parameter-Efficient Fine-Tuning</td><td>Tinh chỉnh hiệu quả tham số</td></tr>
+            <tr><td>ROUGE-L</td><td>Recall-Oriented Understudy for Gisting Evaluation (L)</td><td>Độ đo theo chuỗi con chung dài nhất</td></tr>
+            <tr><td>TF-IDF</td><td>Term Frequency, Inverse Document Frequency</td><td>Trọng số tần suất từ</td></tr>
+            <tr><td>VRAM</td><td>Video RAM</td><td>Bộ nhớ của GPU</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nội dung tổng hợp từ tài liệu đề án <code>TaiLieu_DoAn.docx</code> của Nhóm 4 (Trần Tuấn Tài, La Hoàng Tú, Võ Văn Hải), môn Công nghệ phần mềm tiên tiến, Trường Đại học Công Thương TP. HCM, 2026. Mọi số liệu là của một hạt giống, giải mã greedy, trừ khi ghi khác. Bản trình chiếu: <a href="DeAn_slide.html">DeAn_slide.html</a>.</p>
+  </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var root = document.documentElement;
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var hasIO = "IntersectionObserver" in window;
+
+      /* ---------- Giao diện sáng / tối ---------- */
+      var toggle = document.querySelector(".theme-toggle");
+      function currentTheme() {
+        var t = root.getAttribute("data-theme");
+        if (t === "light" || t === "dark") return t;
+        return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function paintToggle() {
+        var dark = currentTheme() === "dark";
+        toggle.firstElementChild.textContent = dark ? "☀" : "☾";
+        toggle.setAttribute("aria-label", dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối");
+      }
+      toggle.addEventListener("click", function () {
+        var next = currentTheme() === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("dean2-doc-theme", next); } catch (e) {}
+        paintToggle();
+      });
+      if (window.matchMedia) {
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        if (mq.addEventListener) mq.addEventListener("change", paintToggle);
+      }
+      paintToggle();
+
+      /* ---------- Thanh tiến độ và nút lên đầu ---------- */
+      var bar = document.querySelector(".progress");
+      var topBtn = document.querySelector(".to-top");
+      var ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(function () {
+          var max = document.documentElement.scrollHeight - window.innerHeight;
+          var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+          bar.style.transform = "scaleX(" + p + ")";
+          topBtn.classList.toggle("show", window.scrollY > 600);
+          ticking = false;
+        });
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      onScroll();
+      topBtn.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+        var skip = document.querySelector(".skip");
+        if (skip) skip.focus({ preventScroll: true });
+      });
+
+      var sections = Array.prototype.slice.call(document.querySelectorAll("main section[id]"));
+
+      /* ---------- Mục lục: đánh dấu mục đang đọc ---------- */
+      var links = {};
+      Array.prototype.forEach.call(document.querySelectorAll(".toc a[href^='#']"), function (a) {
+        links[a.getAttribute("href").slice(1)] = a;
+      });
+      function setActive(id) {
+        Object.keys(links).forEach(function (k) {
+          if (k === id) links[k].setAttribute("aria-current", "true");
+          else links[k].removeAttribute("aria-current");
+        });
+      }
+      if (hasIO) {
+        var visible = {};
+        var tocIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+          for (var i = 0; i < sections.length; i++) {
+            if (visible[sections[i].id]) { setActive(sections[i].id); break; }
+          }
+        }, { rootMargin: "-20% 0px -70% 0px" });
+        sections.forEach(function (s) { tocIO.observe(s); });
+      }
+
+      /* ---------- Hiện dần từng mục ---------- */
+      if (hasIO && !reduce) {
+        var revealIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("in"); revealIO.unobserve(e.target); }
+          });
+        }, { rootMargin: "0px 0px -8% 0px", threshold: 0.02 });
+        sections.forEach(function (s) {
+          var r = s.getBoundingClientRect();
+          if (r.top < window.innerHeight) return;
+          s.classList.add("reveal");
+          revealIO.observe(s);
+        });
+      }
+
+      /* ---------- Đếm số ---------- */
+      function fmt(v, dec) {
+        var s = v.toFixed(dec).split(".");
+        s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0");
+        return s.join(".");
+      }
+      var nums = Array.prototype.slice.call(document.querySelectorAll(".stat-num[data-to]"));
+      function countUp(el) {
+        var to = parseFloat(el.getAttribute("data-to"));
+        var dec = parseInt(el.getAttribute("data-dec"), 10) || 0;
+        var start = null, dur = 1100;
+        function step(ts) {
+          if (start === null) start = ts;
+          var k = Math.min(1, (ts - start) / dur);
+          var e = 1 - Math.pow(1 - k, 3);
+          el.textContent = fmt(to * e, dec);
+          if (k < 1) window.requestAnimationFrame(step);
+          else el.textContent = fmt(to, dec);
+        }
+        window.requestAnimationFrame(step);
+      }
+      if (hasIO && !reduce) {
+        var numIO = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { countUp(e.target); numIO.unobserve(e.target); }
+          });
+        }, { threshold: 0.6 });
+        nums.forEach(function (n) { numIO.observe(n); });
+      }
+    })();
+  </script>
+</body>
+</html>
