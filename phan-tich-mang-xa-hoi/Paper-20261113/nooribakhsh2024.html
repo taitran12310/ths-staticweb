@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Giải thích dễ hiểu bài báo Nooribakhsh, Fernández-Diego, González-Ladrón-De-Guevara, Mollamotalebi (Knowledge and Information Systems 2024): nghiên cứu lập bản đồ hệ thống về phát hiện cộng đồng trong mạng xã hội bằng học máy, 246 bài báo, bốn câu hỏi nghiên cứu." />
+  <title>Giải thích bài báo — Bản đồ học máy cho phát hiện cộng đồng (Nooribakhsh 2024)</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("ptmxh-paper-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" />
+  <link rel="stylesheet" href="paper.css" />
+</head>
+<body>
+  <a class="skip" href="#main-content">Tới nội dung</a>
+  <div class="progress" aria-hidden="true"></div>
+  <button class="fab theme-toggle" type="button" aria-label="Chuyển giao diện sáng hoặc tối"><span aria-hidden="true">☾</span></button>
+  <button class="fab to-top" type="button" aria-label="Lên đầu trang"><span aria-hidden="true">↑</span></button>
+
+  <div class="page">
+  <header>
+    <a class="back-link" href="index.html"><span aria-hidden="true">←</span> Quay lại</a>
+    <p class="eyebrow">Phân tích mạng xã hội · Giải thích bài báo 4/4</p>
+    <h1>Phát hiện cộng đồng trong mạng xã hội bằng học máy: một bản đồ hệ thống</h1>
+    <p><em>Community detection in social networks using machine learning: a systematic mapping study</em></p>
+    <dl class="byline">
+      <div><dt>Tác giả</dt><dd>Mahsa Nooribakhsh, Marta Fernández-Diego, Fernando González-Ladrón-De-Guevara, Mahdi Mollamotalebi</dd></div>
+      <div><dt>Nơi đăng</dt><dd>Knowledge and Information Systems 66 (2024), tr. 7205–7259 · Springer, truy cập mở</dd></div>
+      <div><dt>Độ dài</dt><dd>55 trang (56 trang PDF) · 246 bài được lập bản đồ</dd></div>
+    </dl>
+
+    <div class="tldr">
+      <strong>Tóm tắt trong 30 giây</strong>
+      <ul>
+        <li>Đây là một <b>nghiên cứu lập bản đồ hệ thống</b> (systematic mapping study, SMS): không so sánh thuật toán nào tốt hơn, mà <b>đếm và phân loại</b> các bài báo đã dùng học máy để phát hiện cộng đồng trong mạng xã hội.</li>
+        <li>Tìm trên 5 cơ sở dữ liệu (ACM, Scopus, Web of Science, IEEE Xplore, Springer), giai đoạn 2000 đến tháng 7/2024: <b>589 → 439 → 314 → 221 → 246 bài</b> sau loại trùng, lọc, chấm chất lượng và snowballing.</li>
+        <li>Học <b>không giám sát</b> (ví dụ k-means, phân cụm) được dùng nhiều nhất: <b>41.46%</b>. Học sâu tăng mạnh từ 2020.</li>
+        <li>Độ đo hay dùng nhất là <b>NMI (53.25%)</b>, sau đó modularity (36.17%) và F-measure (26.42%). Bộ dữ liệu hay dùng nhất là <b>Zachary’s Karate Club (26.42%)</b>, rồi LFR (23.98%) và American College Football (22.35%).</li>
+        <li>Về loại cộng đồng: <b>không chồng lấn 67.88%</b>, chồng lấn 29.67%, ẩn chỉ 2.43%.</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="toc">
+    <nav aria-label="Mục lục">
+      <strong>Mục lục</strong>
+      <ol>
+        <li><a href="#sms">Bản đồ hệ thống là gì</a></li>
+        <li><a href="#dong-luc">Động lực và đóng góp</a></li>
+        <li><a href="#nen-tang">Kiến thức nền</a></li>
+        <li><a href="#lien-quan">Các tổng quan trước đó</a></li>
+        <li><a href="#phuong-phap">Phương pháp lập bản đồ</a></li>
+        <li><a href="#thu-muc">Bức tranh 246 bài</a></li>
+        <li><a href="#rq1">RQ1: Thuật toán học máy</a></li>
+        <li><a href="#rq2">RQ2: Độ đo đánh giá</a></li>
+        <li><a href="#rq3">RQ3: Bộ dữ liệu</a></li>
+        <li><a href="#rq4">RQ4: Loại cộng đồng</a></li>
+        <li><a href="#thao-luan">Thảo luận và xu hướng</a></li>
+        <li><a href="#do-phuc-tap">Độ phức tạp tính toán</a></li>
+        <li><a href="#han-che">Hạn chế của nghiên cứu</a></li>
+        <li><a href="#ket-luan">Hàm ý, hướng mở, kết luận</a></li>
+        <li><a href="#loi">Lỗi và điểm chưa khớp</a></li>
+        <li><a href="#thuat-ngu">Bảng thuật ngữ</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <main id="main-content">
+    <section id="sms">
+      <h2>Bản đồ hệ thống là gì, khác survey ở đâu</h2>
+      <p>Bài này thuộc loại <strong>nghiên cứu thứ cấp</strong> (secondary study): nó không đề xuất thuật toán mới mà nghiên cứu <em>các bài báo khác</em>. Các bài được nghiên cứu gọi là <strong>nghiên cứu sơ cấp</strong> (primary studies). Có ba kiểu nghiên cứu thứ cấp hay gặp:</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Ba kiểu bài tổng hợp tài liệu</caption>
+          <thead><tr><th>Kiểu</th><th>Câu hỏi chính</th><th>Cách chọn bài</th><th>Kết quả trả về</th></tr></thead>
+          <tbody>
+            <tr><td>Survey / bài tổng quan thông thường (ví dụ Gupta 2020, Xing Su 2021)</td><td>Có những phương pháp nào, chúng hoạt động ra sao?</td><td>Tác giả tự chọn theo hiểu biết, không cần quy trình công bố trước</td><td>Phân loại, giải thích, so sánh định tính</td></tr>
+            <tr><td>Tổng quan tài liệu có hệ thống (systematic literature review, SLR)</td><td>Phương pháp nào <em>hiệu quả hơn</em> cho một câu hỏi hẹp?</td><td>Quy trình chặt: chuỗi tìm kiếm, tiêu chí chọn/loại, chấm chất lượng</td><td>Tổng hợp <em>bằng chứng</em> về hiệu quả, đôi khi gộp số liệu</td></tr>
+            <tr><td>Nghiên cứu lập bản đồ hệ thống (systematic mapping study, SMS) — bài này</td><td>Lĩnh vực có những gì, nhiều hay ít, đang đi về đâu?</td><td>Quy trình chặt giống SLR, nhưng câu hỏi rộng hơn</td><td>Phân loại và <em>thống kê</em>: bao nhiêu bài, bao nhiêu phần trăm, theo năm, theo nơi</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Theo bài: SLR tổng hợp nhiều nghiên cứu thành một và quan tâm đến hiệu quả của các phương pháp; còn SMS <strong>phân loại các nghiên cứu sơ cấp theo thống kê</strong>, vẽ bản đồ một vùng nghiên cứu và tìm xu hướng qua số liệu xuất bản. Nhờ vậy SMS chỉ ra <strong>khoảng trống</strong> để định hướng nghiên cứu sau. Khâu trích xuất dữ liệu của SMS rộng hơn survey thường vì có thêm bước <strong>phân loại</strong> từng bài; khâu phân tích chủ yếu là trình bày thống kê. Tác giả làm theo hướng dẫn của <strong>Petersen</strong> và cộng sự.</p>
+      <div class="eli5"><p>Survey giống một hướng dẫn viên kể cho bạn nghe về các món ăn nổi tiếng. SLR giống một cuộc thử nghiệm nếm xem món nào ngon nhất. SMS giống một người đi đếm: thành phố có bao nhiêu quán, mỗi loại món chiếm bao nhiêu phần trăm, quán mới mở nhiều nhất ở khu nào. Bạn biết “bản đồ” khu ẩm thực, nhưng không biết món nào ngon hơn.</p></div>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): vì vậy khi đọc bài này, đừng hiểu “k-means được dùng nhiều nhất” là “k-means tốt nhất”. Con số chỉ cho biết <em>mức độ phổ biến</em> trong tài liệu.</p></div>
+    </section>
+
+    <section id="dong-luc">
+      <h2>Động lực và đóng góp</h2>
+      <p>Mạng xã hội được biểu diễn thành đồ thị <span class="formula">G = (V, E)<small>V: tập nút (cá nhân hoặc tổ chức); E: tập cạnh (quan hệ như bạn bè, giao dịch tài chính, niềm tin…).</small></span></p>
+      <p>Một <strong>cộng đồng</strong> là một đồ thị con có mật độ cạnh bên trong lớn hơn mật độ cạnh nối ra ngoài. Cộng đồng cho biết quan hệ giữa người dùng, từ đó giúp phân tích và dự đoán hành vi trong kinh doanh, giáo dục, chính trị, khám phá tri thức, phát hiện tội phạm. Ví dụ bài nêu: máy tìm kiếm chỉ cần tìm trong nhóm trang web cùng chủ đề, nên giảm tải và giảm thời gian phản hồi.</p>
+      <p>Mạng xã hội có thể <strong>tĩnh</strong> (static) hoặc <strong>động</strong> (dynamic). Tìm cộng đồng trên mạng tĩnh dễ hơn, nhưng mạng động ngày càng được quan tâm.</p>
+      <h3>Tác giả nói bài của mình khác ở chỗ</h3>
+      <ul>
+        <li>Lập bản đồ <strong>246 bài</strong>, chỉ tập trung vào <strong>phương pháp học máy</strong>, thay vì phân loại theo thống kê, ngữ nghĩa hay đặc điểm tính toán như các tổng quan khác.</li>
+        <li>Xét riêng ba loại cộng đồng: <strong>chồng lấn</strong>, <strong>không chồng lấn</strong>, <strong>ẩn</strong>.</li>
+        <li>Chỉ ra xu hướng học sâu tăng từ 2020.</li>
+        <li>Thống kê độ đo và bộ dữ liệu hay dùng (NMI, Zachary’s Karate Club), giúp người nghiên cứu chọn công cụ và chuẩn so sánh.</li>
+      </ul>
+    </section>
+
+    <section id="nen-tang">
+      <h2>Kiến thức nền mà bài nhắc tới</h2>
+      <h3>Vì sao phát hiện cộng đồng khó: NP-khó</h3>
+      <p>Tìm cách chia nút thành cộng đồng sao cho một hàm mục tiêu đạt tối ưu là bài toán <strong>NP-khó</strong> (NP-hard). Các bài toán NP-khó liên quan mà bài kể: tối đa hóa modularity, phân hoạch đồ thị cân bằng, tối ưu clique lớn nhất, phát hiện cộng đồng đa mục tiêu. Hệ quả: cần thuật toán xấp xỉ, có khả năng mở rộng.</p>
+      <div class="eli5"><p>NP-khó nghĩa là khi mạng lớn dần, số cách chia nhóm tăng nhanh tới mức không thể thử hết. Người ta đành chấp nhận lời giải “đủ tốt” tìm được trong thời gian hợp lý.</p></div>
+
+      <h3>Sáu bối cảnh mạng và thách thức riêng</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Loại mạng</th><th>Ý nghĩa</th><th>Thách thức bài nêu</th></tr></thead>
+          <tbody>
+            <tr><td>Tĩnh (static)</td><td>Quan hệ không đổi theo thời gian; xét một ảnh chụp mạng</td><td>Xác định đúng cộng đồng ổn định chỉ dựa vào tương tác tĩnh</td></tr>
+            <tr><td>Động (dynamic)</td><td>Theo dõi cộng đồng hình thành, tan rã, biến đổi</td><td>Chọn thang thời gian; bắt được sự chuyển đổi giữa cộng đồng; khả năng mở rộng vì mạng lớn dần</td></tr>
+            <tr><td>Có thuộc tính (attributed)</td><td>Dùng cả cấu trúc lẫn thuộc tính nút/cạnh</td><td>Kết hợp nhiều kiểu thuộc tính (phân loại, số, văn bản) có mức quan trọng khác nhau</td></tr>
+            <tr><td>Có trọng số cạnh (edge-weighted)</td><td>Cạnh có độ mạnh khác nhau</td><td>Cần thuật toán riêng để xác định ranh giới và tối ưu chất lượng</td></tr>
+            <tr><td>Không gian (spatial)</td><td>Dựa vào vị trí địa lý của nút</td><td>Cộng đồng chồng lấn; phân bố không gian không luôn khớp với cấu trúc cộng đồng</td></tr>
+            <tr><td>Theo thời gian (temporal)</td><td>Cộng đồng tiến hóa theo thời gian</td><td>Ranh giới thay đổi; chồng lấn theo chiều thời gian</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Một cách phân loại thuật toán phát hiện cộng đồng</h3>
+      <p>Bài nói rằng không có cách phân loại nào được chấp nhận chung, rồi dùng cách chia thành: phân hoạch đồ thị, dựa trên mật độ, phân cụm phân cấp, phân cụm phổ, tối ưu hóa, lý thuyết trò chơi, học sâu. Ba nhóm <strong>không phải học máy</strong> được mô tả ngay:</p>
+      <div class="cards">
+        <div class="card"><b>Phân hoạch đồ thị</b><p>Chia mạng để tối đa cạnh trong nhóm, tối thiểu cạnh giữa nhóm. Mở rộng tốt, nhưng bị <em>giới hạn độ phân giải</em> (bỏ sót nhóm nhỏ nằm trong nhóm lớn) và phụ thuộc điều kiện khởi tạo.</p></div>
+        <div class="card"><b>Tối ưu hóa</b><p>Dùng kỹ thuật tối ưu để tìm cách chia tốt nhất. Chính xác hơn, nhưng tính toán nặng và nhạy với tham số.</p></div>
+        <div class="card"><b>Lý thuyết trò chơi</b><p>Mỗi nút là “người chơi” tối đa lợi ích (người chơi, chiến lược, hàm lợi ích). Chịu được dữ liệu nhiễu hoặc thiếu, nhưng giả định nút hành xử hợp lý, điều không phải lúc nào cũng đúng.</p></div>
+      </div>
+      <p>Bốn nhóm còn lại (mật độ, phân cấp, phổ, học sâu) được xếp vào <strong>học máy</strong>. Theo tác giả, học máy là hướng phổ biến nhất vì: mở rộng được cho mạng lớn, tự động hóa (giảm can thiệp và thiên kiến của con người), chính xác hơn nhờ nắm được mẫu phức tạp, và thích nghi với dữ liệu mới nên hợp với mạng động.</p>
+      <p>Bài cũng nhắc: học máy truyền thống coi phát hiện cộng đồng là bài toán tạo, trích và kiểm tra cụm; cách biểu diễn trong không gian ít chiều thường là <em>tuyến tính</em>, trong khi mạng thật có cấu trúc phi tuyến. Học sâu xử lý tốt hơn dữ liệu đồ thị nhiều chiều.</p>
+    </section>
+
+    <section id="lien-quan">
+      <h2>Các tổng quan trước đó</h2>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Các bài tổng quan được bài điểm lại</caption>
+          <thead><tr><th>Bài</th><th>Cách tiếp cận</th></tr></thead>
+          <tbody>
+            <tr><td>Fortunato (2010)</td><td>Phân loại thuật toán, nhấn mạnh kỹ thuật thống kê và cách đánh giá</td></tr>
+            <tr><td>Coscia và cộng sự (2011)</td><td>Phân loại theo định nghĩa cộng đồng được dùng; “cẩm nang” theo kích thước mạng, hướng cạnh, đa chiều</td></tr>
+            <tr><td>Plantié và Crampes (2013)</td><td>Phân loại theo ngữ nghĩa và kiểu đầu ra</td></tr>
+            <tr><td>Malliaros và Vazirgiannis (2013)</td><td>Mạng có hướng; hai cách phân loại vuông góc (nguyên lý phương pháp và tính chất cụm tốt); độ đo đánh giá</td></tr>
+            <tr><td>Azaouzi và cộng sự (2019)</td><td>Theo bản chất tính toán (tập trung hay phân tán), mạng tĩnh và động</td></tr>
+            <tr><td>Vieira và cộng sự (2020)</td><td>So sánh phương pháp tìm cộng đồng chồng lấn theo tính chất cấu trúc</td></tr>
+            <tr><td>Yassine và cộng sự</td><td>SLR về phát hiện cộng đồng, 65 nghiên cứu, mẫu tương tác của người học trực tuyến</td></tr>
+            <tr><td>Liu và cộng sự</td><td>Học sâu: mạng nơ-ron sâu, nhúng đồ thị sâu, GNN, cùng thách thức chưa giải</td></tr>
+            <tr><td>Souravlas và cộng sự</td><td>Học sâu cho mạng xã hội dữ liệu lớn, chủ yếu bài 2019–2020</td></tr>
+            <tr><td>Su và cộng sự (bài Xing Su 2021 trong bộ này)</td><td>Học sâu theo dòng thời gian, kèm bộ dữ liệu, độ đo, mã nguồn mở</td></tr>
+            <tr><td>Alotaibi và Rhouma (2022)</td><td>Đặc điểm và thách thức của mạng xã hội động</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Kết luận của phần này: không có thuật toán nào phù hợp với mọi loại dữ liệu và ứng dụng; cần một bản đồ hệ thống riêng cho các phương pháp <strong>dựa trên học máy</strong>.</p>
+    </section>
+
+    <section id="phuong-phap">
+      <h2>Phương pháp lập bản đồ</h2>
+      <p>Quy trình theo Petersen (Hình 1 của bài): đặt câu hỏi nghiên cứu → chiến lược tìm nghiên cứu sơ cấp (chuẩn bị chuỗi tìm kiếm, chọn thư viện số, chạy tìm kiếm, loại trùng) → tiêu chí chọn/loại → đánh giá chất lượng → snowballing → thu thập dữ liệu.</p>
+      <figure class="fig">
+        <svg viewBox="0 0 760 170" role="img" aria-label="Phễu chọn bài: 589 tài liệu, loại trùng còn 439, lọc còn 314, chấm chất lượng còn 221, snowballing thành 246">
+          <rect x="6" y="30" width="128" height="80" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="70" y="56" text-anchor="middle" class="b">Tìm trên 5 CSDL</text>
+          <text x="70" y="88" text-anchor="middle" class="lg">589</text>
+          <polygon points="138,62 152,70 138,78" class="f-muted" />
+          <rect x="158" y="30" width="128" height="80" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="222" y="56" text-anchor="middle" class="b">Loại trùng</text>
+          <text x="222" y="88" text-anchor="middle" class="lg">439</text>
+          <polygon points="290,62 304,70 290,78" class="f-muted" />
+          <rect x="310" y="30" width="128" height="80" rx="8" class="f-card s-line" stroke-width="1.5" />
+          <text x="374" y="56" text-anchor="middle" class="b">Chọn / loại</text>
+          <text x="374" y="88" text-anchor="middle" class="lg">314</text>
+          <polygon points="442,62 456,70 442,78" class="f-muted" />
+          <rect x="462" y="30" width="128" height="80" rx="8" class="f-soft s-accent" stroke-width="1.5" />
+          <text x="526" y="56" text-anchor="middle" class="b">Chấm chất lượng</text>
+          <text x="526" y="88" text-anchor="middle" class="lg">221</text>
+          <polygon points="594,62 608,70 594,78" class="f-muted" />
+          <rect x="614" y="30" width="140" height="80" rx="8" class="f-accent" />
+          <text x="684" y="56" text-anchor="middle" class="b t-on">Snowballing</text>
+          <text x="684" y="88" text-anchor="middle" class="lg t-on">246</text>
+          <text x="222" y="134" text-anchor="middle" class="sm t-muted">−150 bản trùng</text>
+          <text x="374" y="134" text-anchor="middle" class="sm t-muted">−125 (Bảng 3)</text>
+          <text x="526" y="134" text-anchor="middle" class="sm t-muted">−93 (điểm &lt; 6.5)</text>
+          <text x="684" y="134" text-anchor="middle" class="sm t-muted">+20 rồi +5</text>
+          <text x="380" y="160" text-anchor="middle" class="sm t-muted">Số “−93” do người giải thích tính (314 − 221); bài chỉ ghi 314 và 221.</text>
+        </svg>
+        <figcaption><strong>Quá trình chọn bài</strong> (vẽ lại từ Hình 1 và Hình 5 của bài).</figcaption>
+      </figure>
+
+      <h3>Bốn câu hỏi nghiên cứu (nguyên văn, dịch)</h3>
+      <p>Khoảng thời gian: các bài đăng từ <strong>năm 2000 đến tháng 7/2024</strong>, vì các mạng xã hội phổ biến (Facebook, Twitter, LinkedIn) ra đời sau 2000.</p>
+      <dl class="terms">
+        <dt>RQ1</dt><dd><em>What algorithms of machine learning have been used for community detection in social networks?</em> Những thuật toán học máy nào đã được dùng để phát hiện cộng đồng trong mạng xã hội?</dd>
+        <dt>RQ2</dt><dd><em>Which metrics/parameters are used to distinguish communities in social networks? (E.g., accuracy, running time).</em> Những độ đo/tham số nào được dùng để phân biệt (đánh giá) cộng đồng? (ví dụ độ chính xác, thời gian chạy)</dd>
+        <dt>RQ3</dt><dd><em>Which datasets are used for community detection in social networks?</em> Những bộ dữ liệu nào được dùng?</dd>
+        <dt>RQ4</dt><dd><em>What types of communities are on social networks?</em> Mạng xã hội có những loại cộng đồng nào?</dd>
+      </dl>
+
+      <h3>Chuỗi tìm kiếm</h3>
+      <p>Chỉ tìm trong <strong>tiêu đề, tóm tắt và từ khóa</strong>. Chuỗi gồm ba khối nối bằng AND:</p>
+      <pre><code>("social network" OR "social networks" OR "social networking")
+AND ("community detection" OR "community discovery" OR "community recognition"
+     OR "community search" OR "community identification")
+AND ("machine" OR "supervised" OR "unsupervised" OR "semi-supervised"
+     OR "reinforcement" OR "ensemble" OR "instance-based" OR "learning"
+     OR "clustering" OR "deep" OR "regularization")</code></pre>
+      <p>Vì không phải CSDL nào cũng hỗ trợ ký tự đại diện (wildcard), tác giả viết rõ các biến thể (social network, social networks, social networking) để giữ tìm kiếm đồng nhất.</p>
+
+      <h3>Năm cơ sở dữ liệu và những trục trặc khi tìm</h3>
+      <ul>
+        <li>Chọn <strong>ACM, Scopus, Web of Science, IEEE Xplore, Springer</strong> vì dễ dùng, đáng tin và sát lĩnh vực khoa học máy tính. ScienceDirect bị bỏ vì không cho tìm kiếm tương đương.</li>
+        <li><strong>Springer</strong> không giới hạn được theo tiêu đề/tóm tắt/từ khóa: tìm toàn văn ra 7&nbsp;731 kết quả, rồi lọc lại bằng EndNote.</li>
+        <li><strong>ACM</strong> có hai cơ sở dữ liệu con: tìm cả hai rồi gộp.</li>
+        <li><strong>IEEE và ACM</strong> không tìm đồng thời trên ba trường: tìm từng trường rồi gộp, sau đó loại trùng.</li>
+        <li>EndNote không trích được từ khóa từ tài liệu nhập vào, nên phần từ khóa xử lý thủ công.</li>
+      </ul>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 1 và Bảng 2 của bài: số tài liệu trước và sau khi loại trùng</caption>
+          <thead><tr><th>CSDL</th><th class="num">Sách</th><th class="num">Bài tạp chí</th><th class="num">Chương sách</th><th class="num">Bài hội nghị*</th><th class="num">Tổng trước</th><th class="num">Tổng sau loại trùng</th></tr></thead>
+          <tbody>
+            <tr><td>Scopus</td><td class="num">0 → 0</td><td class="num">56 → 29</td><td class="num">3 → 1</td><td class="num">95 → 74</td><td class="num">154</td><td class="num">104</td></tr>
+            <tr><td>IEEE</td><td class="num">1 → 0</td><td class="num">23 → 16</td><td class="num">1 → 0</td><td class="num">82 → 68</td><td class="num">107</td><td class="num">84</td></tr>
+            <tr><td>ACM</td><td class="num">13 → 12</td><td class="num">21 → 15</td><td class="num">1 → 0</td><td class="num">17 → 11</td><td class="num">52</td><td class="num">38</td></tr>
+            <tr><td>WoS</td><td class="num">0 → 0</td><td class="num">58 → 41</td><td class="num">3 → 1</td><td class="num">50 → 34</td><td class="num">111</td><td class="num">76</td></tr>
+            <tr><td>Springer</td><td class="num">3 → 1</td><td class="num">62 → 55</td><td class="num">11 → 9</td><td class="num">89 → 72</td><td class="num">165</td><td class="num">137</td></tr>
+            <tr><td><strong>Tổng</strong></td><td class="num">17 → 13</td><td class="num">220 → 156</td><td class="num">19 → 11</td><td class="num">333 → 259</td><td class="num"><strong>589</strong></td><td class="num"><strong>439</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">* Gồm bài hội nghị, kỷ yếu hội nghị và “serial” (tập bài của một hội nghị, tương đương kỷ yếu). Mỗi ô ghi “trước → sau” loại trùng. Người giải thích đã cộng lại mọi hàng và cột: khớp.</p>
+
+      <h3>Loại trùng</h3>
+      <p>Sắp xếp theo tiêu đề để tìm bản trùng. Ba nguồn gây trùng: (a) cùng tài liệu nhưng khác năm xuất bản, giữ bản mới; (b) khác thứ tự từ khóa hoặc cách ghi tên tác giả, loại thủ công; (c) cùng tài liệu xuất hiện ở nhiều CSDL. Còn <strong>439</strong> tài liệu.</p>
+
+      <h3>Tiêu chí chọn và loại</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 3 của bài: kết quả sau khi sàng lọc toàn văn</caption>
+          <thead><tr><th>Lý do loại</th><th class="num">Số bài</th></tr></thead>
+          <tbody>
+            <tr><td>Tổng từ bước trước</td><td class="num">439</td></tr>
+            <tr><td>a1) Không đăng ở hội nghị hay tạp chí có bình duyệt (ví dụ mục “kỷ yếu” không chứa bài đầy đủ)</td><td class="num">99</td></tr>
+            <tr><td>a2) Không viết bằng tiếng Anh</td><td class="num">3</td></tr>
+            <tr><td>b1) Không có toàn văn</td><td class="num">3</td></tr>
+            <tr><td>b2) Không liên quan đến phát hiện cộng đồng trong mạng xã hội dựa trên học máy (đọc toàn bộ để quyết định)</td><td class="num">20</td></tr>
+            <tr><td><strong>Tổng bị loại</strong></td><td class="num"><strong>125</strong></td></tr>
+            <tr><td><strong>Còn lại</strong></td><td class="num"><strong>314</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>a1, a2 là tiêu chí <em>chọn</em> (inclusion); b1, b2 là tiêu chí <em>loại</em> (exclusion).</p>
+
+      <h3>Đánh giá chất lượng: 13 câu hỏi, ngưỡng 6.5</h3>
+      <p>11 câu hỏi lấy theo <strong>Kitchenham</strong> và cộng sự, thêm 2 câu (12 và 13) của tác giả. Câu 1–11 chấm: trả lời đầy đủ = 1; trên trung bình = 0.75; trung bình = 0.5; dưới trung bình = 0.25; không trả lời = 0. Điểm tổng là tổng 13 câu (tối đa 13). Bài dưới <strong>6.5 điểm</strong> bị coi là chất lượng thấp và bị loại.</p>
+      <ol>
+        <li>Vấn đề nghiên cứu có được nêu rõ?</li>
+        <li>Tài liệu liên quan có được điểm lại thích đáng?</li>
+        <li>Mục tiêu nghiên cứu có rõ?</li>
+        <li>Phạm vi có được xác định rõ?</li>
+        <li>Đóng góp/điểm mới có được nêu?</li>
+        <li>Chi tiết kỹ thuật đề xuất có được mô tả rõ (thuật toán, lưu đồ…)?</li>
+        <li>Kết quả có được so với nhiều nghiên cứu gần đây?</li>
+        <li>So sánh có dựa trên nhiều độ đo?</li>
+        <li>Quá trình thu thập dữ liệu có được mô tả đủ?</li>
+        <li>Kết quả có được trình bày và giải thích hợp lý?</li>
+        <li>Cấu hình thực nghiệm (phần cứng/phần mềm) có rõ?</li>
+        <li>Số trích dẫn: 1 nếu ít nhất 4 lần/năm; 0.75 nếu tối đa 3; 0.5 nếu tối đa 2; 0.25 nếu tối đa 1 lần/năm.</li>
+        <li>Chất lượng nơi đăng: 1 = tạp chí ISI có IF, hạng Q ≤ 3; 0.75 = tạp chí ISI có IF; 0.5 = tạp chí quốc tế; 0.25 = hội nghị hợp lệ; 0 = không được chỉ mục.</li>
+      </ol>
+      <p>Sau bước này còn <strong>221</strong> bài (theo Hình 5).</p>
+
+      <h3>Snowballing ngược</h3>
+      <p>Lấy danh mục tài liệu tham khảo của các bài đã chọn để tìm thêm bài phù hợp, áp lại các bước trên, lặp cho đến khi không có bài mới.</p>
+      <ul>
+        <li>Vòng 1: từ 221 bài tìm thêm 49; 29 bài trượt tiêu chí chất lượng; thêm <strong>20</strong>.</li>
+        <li>Vòng 2: thêm <strong>5</strong>.</li>
+        <li>Kết quả: 221 + 20 + 5 = <strong>246</strong> bài sơ cấp (danh sách ở Phụ lục trực tuyến B, đánh số A1–A246).</li>
+      </ul>
+      <div class="eli5"><p>Snowballing giống lăn quả cầu tuyết: đọc một bài hay, lật phần tài liệu tham khảo để tìm thêm bài khác, rồi lại lật tài liệu tham khảo của bài mới. Cách này vớt được những bài mà chuỗi tìm kiếm bỏ sót.</p></div>
+
+      <h3>Thu thập dữ liệu và kiểm soát thiên lệch</h3>
+      <p>Mỗi bài được đọc và điền vào một <strong>biểu mẫu trích xuất</strong> trên bảng tính, gồm thông tin chung và dữ liệu trả lời các câu hỏi nghiên cứu. Việc chọn bài làm <strong>theo cặp</strong>; bất đồng do người thứ ba phân xử, có thảo luận đến khi đồng thuận; mọi lý do chọn/loại được ghi lại. Hai tác giả đầu đọc độc lập toàn bộ bài tìm được ở lần tìm đầu để giảm nguy cơ bỏ sót. Trích xuất dữ liệu do cùng nhóm bốn người làm.</p>
+      <p>Mọi phần trăm trong các Bảng 4–9 đều tính bằng <strong>số bài chia cho 246</strong>. Một bài dùng nhiều độ đo hoặc nhiều bộ dữ liệu được đếm ở nhiều hàng, nên phần trăm các bảng độ đo và dữ liệu cộng lại vượt 100%.</p>
+    </section>
+
+    <section id="thu-muc">
+      <h2>Bức tranh 246 bài: năm, loại, quốc gia</h2>
+      <div class="stats">
+        <div class="stat"><span class="stat-num" data-to="246">246</span><span class="stat-label">bài sơ cấp</span></div>
+        <div class="stat"><span class="stat-num" data-to="138">138</span><span class="stat-label">bài tạp chí</span></div>
+        <div class="stat"><span class="stat-num" data-to="108">108</span><span class="stat-label">bài hội nghị</span></div>
+        <div class="stat"><span class="stat-num" data-to="42">42</span><span class="stat-label">quốc gia (theo tác giả đầu)</span></div>
+      </div>
+      <figure class="fig">
+        <svg viewBox="0 0 680 300" role="img" aria-label="Biểu đồ cột chồng: số bài báo hội nghị và tạp chí theo năm, 2005 đến 2024">
+          <line x1="46" y1="240.0" x2="666" y2="240.0" class="s-line" stroke-width="1" />
+          <text x="40" y="244.0" text-anchor="end" class="sm t-muted">0</text>
+          <line x1="46" y1="185.0" x2="666" y2="185.0" class="s-line" stroke-width="1" />
+          <text x="40" y="189.0" text-anchor="end" class="sm t-muted">10</text>
+          <line x1="46" y1="130.0" x2="666" y2="130.0" class="s-line" stroke-width="1" />
+          <text x="40" y="134.0" text-anchor="end" class="sm t-muted">20</text>
+          <line x1="46" y1="75.0" x2="666" y2="75.0" class="s-line" stroke-width="1" />
+          <text x="40" y="79.0" text-anchor="end" class="sm t-muted">30</text>
+          <line x1="46" y1="20.0" x2="666" y2="20.0" class="s-line" stroke-width="1" />
+          <text x="40" y="24.0" text-anchor="end" class="sm t-muted">40</text>
+          <rect x="52.2" y="234.5" width="22" height="5.5" class="f-alt" />
+          <text x="63.2" y="229.5" text-anchor="middle" class="sm b">1</text>
+          <text x="63.2" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 63.2 256)">2005</text>
+          <rect x="86.7" y="234.5" width="22" height="5.5" class="f-alt" />
+          <text x="97.7" y="229.5" text-anchor="middle" class="sm b">1</text>
+          <text x="97.7" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 97.7 256)">2007</text>
+          <rect x="121.1" y="234.5" width="22" height="5.5" class="f-alt" />
+          <text x="132.1" y="229.5" text-anchor="middle" class="sm b">1</text>
+          <text x="132.1" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 132.1 256)">2009</text>
+          <rect x="155.6" y="223.5" width="22" height="16.5" class="f-alt" />
+          <rect x="155.6" y="218.0" width="22" height="5.5" class="f-accent" />
+          <text x="166.6" y="213.0" text-anchor="middle" class="sm b">4</text>
+          <text x="166.6" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 166.6 256)">2010</text>
+          <rect x="190.0" y="234.5" width="22" height="5.5" class="f-alt" />
+          <rect x="190.0" y="218.0" width="22" height="16.5" class="f-accent" />
+          <text x="201.0" y="213.0" text-anchor="middle" class="sm b">4</text>
+          <text x="201.0" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 201.0 256)">2011</text>
+          <rect x="224.4" y="201.5" width="22" height="38.5" class="f-alt" />
+          <rect x="224.4" y="190.5" width="22" height="11.0" class="f-accent" />
+          <text x="235.4" y="185.5" text-anchor="middle" class="sm b">9</text>
+          <text x="235.4" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 235.4 256)">2012</text>
+          <rect x="258.9" y="207.0" width="22" height="33.0" class="f-alt" />
+          <rect x="258.9" y="168.5" width="22" height="38.5" class="f-accent" />
+          <text x="269.9" y="163.5" text-anchor="middle" class="sm b">13</text>
+          <text x="269.9" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 269.9 256)">2013</text>
+          <rect x="293.3" y="196.0" width="22" height="44.0" class="f-alt" />
+          <rect x="293.3" y="179.5" width="22" height="16.5" class="f-accent" />
+          <text x="304.3" y="174.5" text-anchor="middle" class="sm b">11</text>
+          <text x="304.3" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 304.3 256)">2014</text>
+          <rect x="327.8" y="207.0" width="22" height="33.0" class="f-alt" />
+          <rect x="327.8" y="190.5" width="22" height="16.5" class="f-accent" />
+          <text x="338.8" y="185.5" text-anchor="middle" class="sm b">9</text>
+          <text x="338.8" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 338.8 256)">2015</text>
+          <rect x="362.2" y="218.0" width="22" height="22.0" class="f-alt" />
+          <rect x="362.2" y="201.5" width="22" height="16.5" class="f-accent" />
+          <text x="373.2" y="196.5" text-anchor="middle" class="sm b">7</text>
+          <text x="373.2" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 373.2 256)">2016</text>
+          <rect x="396.7" y="196.0" width="22" height="44.0" class="f-alt" />
+          <rect x="396.7" y="168.5" width="22" height="27.5" class="f-accent" />
+          <text x="407.7" y="163.5" text-anchor="middle" class="sm b">13</text>
+          <text x="407.7" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 407.7 256)">2017</text>
+          <rect x="431.1" y="201.5" width="22" height="38.5" class="f-alt" />
+          <rect x="431.1" y="124.5" width="22" height="77.0" class="f-accent" />
+          <text x="442.1" y="119.5" text-anchor="middle" class="sm b">21</text>
+          <text x="442.1" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 442.1 256)">2018</text>
+          <rect x="465.6" y="163.0" width="22" height="77.0" class="f-alt" />
+          <rect x="465.6" y="102.5" width="22" height="60.5" class="f-accent" />
+          <text x="476.6" y="97.5" text-anchor="middle" class="sm b">25</text>
+          <text x="476.6" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 476.6 256)">2019</text>
+          <rect x="500.0" y="174.0" width="22" height="66.0" class="f-alt" />
+          <rect x="500.0" y="91.5" width="22" height="82.5" class="f-accent" />
+          <text x="511.0" y="86.5" text-anchor="middle" class="sm b">27</text>
+          <text x="511.0" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 511.0 256)">2020</text>
+          <rect x="534.4" y="201.5" width="22" height="38.5" class="f-alt" />
+          <rect x="534.4" y="108.0" width="22" height="93.5" class="f-accent" />
+          <text x="545.4" y="103.0" text-anchor="middle" class="sm b">24</text>
+          <text x="545.4" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 545.4 256)">2021</text>
+          <rect x="568.9" y="196.0" width="22" height="44.0" class="f-alt" />
+          <rect x="568.9" y="69.5" width="22" height="126.5" class="f-accent" />
+          <text x="579.9" y="64.5" text-anchor="middle" class="sm b">31</text>
+          <text x="579.9" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 579.9 256)">2022</text>
+          <rect x="603.3" y="174.0" width="22" height="66.0" class="f-alt" />
+          <rect x="603.3" y="47.5" width="22" height="126.5" class="f-accent" />
+          <text x="614.3" y="42.5" text-anchor="middle" class="sm b">35</text>
+          <text x="614.3" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 614.3 256)">2023</text>
+          <rect x="637.8" y="229.0" width="22" height="11.0" class="f-alt" />
+          <rect x="637.8" y="185.0" width="22" height="44.0" class="f-accent" />
+          <text x="648.8" y="180.0" text-anchor="middle" class="sm b">10</text>
+          <text x="648.8" y="256" text-anchor="middle" class="sm t-muted" transform="rotate(-45 648.8 256)">2024</text>
+          <rect x="200" y="282" width="14" height="12" class="f-alt" /><text x="220" y="292" class="sm">Hội nghị (108)</text>
+          <rect x="360" y="282" width="14" height="12" class="f-accent" /><text x="380" y="292" class="sm">Tạp chí (138)</text>
+          </svg>
+        <figcaption><strong>Số bài theo năm</strong> (vẽ lại từ Hình 2 của bài; số liệu lấy từ bảng ngay dưới biểu đồ gốc). Năm 2024 chỉ tính đến tháng 7. Không có bài nào trước 2005; các năm 2006 và 2008 không có trong biểu đồ.</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 2 dạng bảng: tạp chí / hội nghị theo năm</caption>
+          <thead><tr><th>Năm</th><th class="num">2005</th><th class="num">2007</th><th class="num">2009</th><th class="num">2010</th><th class="num">2011</th><th class="num">2012</th><th class="num">2013</th><th class="num">2014</th><th class="num">2015</th><th class="num">2016</th><th class="num">2017</th><th class="num">2018</th><th class="num">2019</th><th class="num">2020</th><th class="num">2021</th><th class="num">2022</th><th class="num">2023</th><th class="num">2024</th></tr></thead>
+          <tbody>
+            <tr><td>Tạp chí</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">3</td><td class="num">2</td><td class="num">7</td><td class="num">3</td><td class="num">3</td><td class="num">3</td><td class="num">5</td><td class="num">14</td><td class="num">11</td><td class="num">15</td><td class="num">17</td><td class="num">23</td><td class="num">23</td><td class="num">8</td></tr>
+            <tr><td>Hội nghị</td><td class="num">1</td><td class="num">1</td><td class="num">1</td><td class="num">3</td><td class="num">1</td><td class="num">7</td><td class="num">6</td><td class="num">8</td><td class="num">6</td><td class="num">4</td><td class="num">8</td><td class="num">7</td><td class="num">14</td><td class="num">12</td><td class="num">7</td><td class="num">8</td><td class="num">12</td><td class="num">2</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Từ 2018, số bài tăng rõ (21 bài) và đạt đỉnh 35 bài năm 2023. Từ 2018 trở đi bài tạp chí thường nhiều hơn bài hội nghị (trừ 2019).</p>
+
+      <h3>Phân bố địa lý</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 3 (theo châu lục) và Hình 4 (theo quốc gia), tính theo nơi công tác của tác giả đầu</caption>
+          <thead><tr><th>Nhóm</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td>Châu Á</td><td class="num">164</td><td class="num">66.66 (theo bài)</td></tr>
+            <tr><td>“USA” (nhãn trong Hình 3)</td><td class="num">33</td><td class="num">13.41</td></tr>
+            <tr><td>Châu Âu</td><td class="num">30</td><td class="num">—</td></tr>
+            <tr><td>Châu Phi</td><td class="num">15</td><td class="num">—</td></tr>
+            <tr><td>Châu Đại Dương</td><td class="num">4</td><td class="num">—</td></tr>
+            <tr><td colspan="3"><em>Theo quốc gia</em></td></tr>
+            <tr><td>Trung Quốc</td><td class="num">96</td><td class="num">39.02</td></tr>
+            <tr><td>Ấn Độ</td><td class="num">28</td><td class="num">11.38</td></tr>
+            <tr><td>Mỹ</td><td class="num">26</td><td class="num">10.56</td></tr>
+            <tr><td>Iran</td><td class="num">15</td><td class="num">—</td></tr>
+            <tr><td>Algeria, Tây Ban Nha</td><td class="num">6 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>Ý, Hy Lạp</td><td class="num">5 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>Morocco, Brazil, Úc, Malaysia</td><td class="num">4 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>Đài Loan, Tunisia, Nhật Bản, Pháp</td><td class="num">3 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>Ai Cập, UAE, Singapore, Hàn Quốc, Pakistan</td><td class="num">2 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>21 nước còn lại (trong đó có Việt Nam)</td><td class="num">1 mỗi nước</td><td class="num">—</td></tr>
+            <tr><td>Các nước ngoài ba nước đầu (bài gộp lại)</td><td class="num">96</td><td class="num">39.02</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Phần trăm có trong bài được ghi nguyên văn; ô “—” là bài không ghi phần trăm. Số theo nước đọc từ nhãn trên Hình 4. Người giải thích đã cộng: 42 nước, tổng đúng 246.</p>
+      <div class="warn"><p>Bài viết “chủ yếu ở châu Á (66.66%) và <strong>USA (13.41%)</strong>”, rồi ngay sau đó lại viết USA có 10.56%. Hai con số khác nhau vì 13.41% ứng với 33 bài trong Hình 3, còn Hình 4 chỉ cho Mỹ 26 bài. Người giải thích kiểm tra: 26 (Mỹ) + 4 (Brazil) + 1 (Colombia) + 1 (Cuba) + 1 (Canada) = 33, nên cột “USA” trong Hình 3 nhiều khả năng là <strong>châu Mỹ</strong> bị đặt nhãn nhầm (tr. 7215–7216).</p></div>
+    </section>
+
+    <section id="rq1">
+      <h2>RQ1: Những thuật toán học máy nào được dùng?</h2>
+      <p>RQ1 được chia thành ba câu hỏi con: (1) loại học máy chính; (2) phân nhóm con trong từng loại; (3) thuật toán cụ thể.</p>
+
+      <h3>Bảy loại học máy, hiểu nhanh</h3>
+      <div class="cards">
+        <div class="card"><b>Có giám sát (supervised)</b><p>Học từ dữ liệu <em>có nhãn</em> để dự đoán hoặc phân lớp (ví dụ phân loại rối loạn tâm thần). Còn gọi là học quy nạp.</p></div>
+        <div class="card"><b>Không giám sát (unsupervised)</b><p>Dữ liệu <em>không nhãn</em>; tự tìm mẫu ẩn, ví dụ gom cụm.</p></div>
+        <div class="card"><b>Bán giám sát (semi-supervised)</b><p>Dùng cả dữ liệu có nhãn (ít) và không nhãn (nhiều) khi huấn luyện.</p></div>
+        <div class="card"><b>Học sâu (deep learning)</b><p>Dùng kỹ thuật có hoặc không giám sát, học đặc trưng nhiều tầng theo thứ bậc để phân lớp và nhận dạng mẫu.</p></div>
+        <div class="card"><b>Học tăng cường (reinforcement, RL)</b><p>Tác tử được thưởng khi làm đúng, bị phạt khi làm sai, tìm tổng phần thưởng dài hạn lớn nhất.</p></div>
+        <div class="card"><b>Học kết hợp (ensemble)</b><p>Chạy nhiều mô hình rồi gộp kết quả (ví dụ bỏ phiếu) để chính xác hơn.</p></div>
+        <div class="card"><b>Học dựa trên mẫu (instance-based)</b><p>Lưu toàn bộ dữ liệu; dự đoán dựa vào các láng giềng gần nhất của điểm cần hỏi.</p></div>
+      </div>
+      <div class="eli5"><p>Có giám sát: thầy cho đáp án, trò học theo. Không giám sát: không có đáp án, trò tự xếp các bài giống nhau vào một chồng. Bán giám sát: chỉ vài bài có đáp án, trò dùng chúng để đoán phần còn lại. Tăng cường: không ai chỉ đáp án, chỉ có điểm thưởng hay phạt sau mỗi lần thử.</p></div>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): bảy nhóm này không cùng một trục phân loại. “Học sâu” là một <em>loại mô hình</em> và có thể học có giám sát, không giám sát hay bán giám sát; “ensemble” là một <em>cách kết hợp</em>. Bài xếp mỗi bài vào đúng một nhóm theo thuật toán chính mà tác giả bài đó nhấn mạnh, nên một bài dùng autoencoder rồi k-means sẽ chỉ được đếm một lần.</p></div>
+
+      <h3>Kết quả: Bảng 4</h3>
+      <figure class="fig">
+        <svg viewBox="0 0 720 250" role="img" aria-label="Biểu đồ thanh ngang: số bài theo bảy nhóm học máy">
+          <text x="168" y="27" text-anchor="end">Không giám sát</text>
+          <rect x="176" y="13" width="360.0" height="20" rx="3" class="f-accent" stroke-width="1" />
+          <text x="544.0" y="27" class="sm b">102 bài · 41.46%</text>
+          <text x="168" y="61" text-anchor="end">Bán giám sát</text>
+          <rect x="176" y="47" width="183.5" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="367.5" y="61" class="sm b">52 bài · 21.13%</text>
+          <text x="168" y="95" text-anchor="end">Học sâu</text>
+          <rect x="176" y="81" width="165.9" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="349.9" y="95" class="sm b">47 bài · 19.10%</text>
+          <text x="168" y="129" text-anchor="end">Có giám sát</text>
+          <rect x="176" y="115" width="91.8" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="275.8" y="129" class="sm b">26 bài · 10.56%</text>
+          <text x="168" y="163" text-anchor="end">Học kết hợp (ensemble)</text>
+          <rect x="176" y="149" width="35.3" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="219.3" y="163" class="sm b">10 bài · 4.06%</text>
+          <text x="168" y="197" text-anchor="end">Học tăng cường</text>
+          <rect x="176" y="183" width="17.6" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="201.6" y="197" class="sm b">5 bài · 2.03%</text>
+          <text x="168" y="231" text-anchor="end">Học dựa trên mẫu</text>
+          <rect x="176" y="217" width="14.1" height="20" rx="3" class="f-soft s-accent" stroke-width="1" />
+          <text x="198.1" y="231" class="sm b">4 bài · 1.62%</text>
+          </svg>
+        <figcaption><strong>Số bài theo loại học máy</strong> (vẽ từ Bảng 4 của bài). Tổng đúng 246, mỗi bài một loại.</figcaption>
+      </figure>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 4: loại học máy dùng để phát hiện cộng đồng</caption>
+          <thead><tr><th>Loại</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td>Không giám sát</td><td class="num">102</td><td class="num">41.46</td></tr>
+            <tr><td>Bán giám sát</td><td class="num">52</td><td class="num">21.13</td></tr>
+            <tr><td>Học sâu</td><td class="num">47</td><td class="num">19.10</td></tr>
+            <tr><td>Có giám sát</td><td class="num">26</td><td class="num">10.56</td></tr>
+            <tr><td>Ensemble</td><td class="num">10</td><td class="num">4.06</td></tr>
+            <tr><td>Học tăng cường</td><td class="num">5</td><td class="num">2.03</td></tr>
+            <tr><td>Dựa trên mẫu</td><td class="num">4</td><td class="num">1.62</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Không giám sát nhiều nhất, sau đó bán giám sát; dựa trên mẫu ít nhất (dưới 2%). Bài có phương pháp lai được xếp theo thuật toán chính mà tác giả bài đó tập trung.</p>
+      <p class="note">Bảng gốc liệt kê mã bài (A1–A246) cho từng hàng; trang này không chép lại danh sách mã.</p>
+      <div class="warn"><p>Trong lời văn ngay sau Bảng 4 (tr. 7218), bài viết học không giám sát chiếm “<strong>1.46%</strong>”; đúng phải là <strong>41.46%</strong> như trong bảng và tóm tắt. Đây là lỗi đánh máy.</p></div>
+
+      <h3>Phân nhóm con: Bảng 5</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 5: phân nhóm con trong từng loại học máy</caption>
+          <thead><tr><th>Loại</th><th>Phân nhóm con</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2">Có giám sát</td><td>Phân lớp / phân lớp xác suất (classification)</td><td class="num">20</td><td class="num">8.13</td></tr>
+            <tr><td>Phân lớp tuyến tính (linear classifier)</td><td class="num">6</td><td class="num">2.43</td></tr>
+            <tr><td rowspan="4">Không giám sát</td><td>Phân cụm (clustering)</td><td class="num">60</td><td class="num">24.39</td></tr>
+            <tr><td>Phân cụm theo mật độ (DBSCAN)</td><td class="num">15</td><td class="num">6.09</td></tr>
+            <tr><td>Phân cụm phổ (spectral clustering)</td><td class="num">14</td><td class="num">5.69</td></tr>
+            <tr><td>Khác: phân cụm qua học biểu diễn 10 bài (4.06%); EM 2 bài (0.81%); học tăng dần dựa trên LPA 1 bài (0.40%)</td><td class="num">13</td><td class="num">5.28</td></tr>
+            <tr><td rowspan="3">Bán giám sát</td><td>Heuristic: thuật toán lan truyền nhãn (LPA)</td><td class="num">28</td><td class="num">11.38</td></tr>
+            <tr><td>Lý thuyết đồ thị (graph theory)</td><td class="num">12</td><td class="num">4.87</td></tr>
+            <tr><td>Khác: học biểu diễn bán giám sát 3 bài (1.21%); NMF 6 bài (2.43%); học chủ động 2 bài (0.81%); đồng huấn luyện (co-training) 1 bài (0.40%)</td><td class="num">12</td><td class="num">4.87</td></tr>
+            <tr><td rowspan="2">Học sâu</td><td>Autoencoder</td><td class="num">21</td><td class="num">8.53</td></tr>
+            <tr><td>Khác: mạng tích chập đồ thị (GCN) 13 bài (5.28%); GNN 8 bài (3.25%); RNN 4 bài (1.62%); RBM 1 bài (0.40%)</td><td class="num">26</td><td class="num">10.56</td></tr>
+            <tr><td>Ensemble</td><td>Ma trận tương đồng 1; bagging 1; stacking 2; boosting 1; random forest 1; song song 1; phân cụm kết hợp 3</td><td class="num">10</td><td class="num">4.06</td></tr>
+            <tr><td>Học tăng cường</td><td>Policy gradient 1; Q-learning 3; khác 1</td><td class="num">5</td><td class="num">2.03</td></tr>
+            <tr><td>Dựa trên mẫu</td><td>Đồ thị k láng giềng gần nhất (k-NN graph)</td><td class="num">4</td><td class="num">1.62</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Ba phân nhóm con phổ biến nhất: <strong>phân cụm</strong> (không giám sát) 24.39%, <strong>heuristic / LPA</strong> (bán giám sát) 11.38%, <strong>phân lớp</strong> (có giám sát) 8.13%. Người giải thích đã cộng các phân nhóm con: mỗi loại đều khớp với tổng ở Bảng 4.</p>
+
+      <h3>Ưu và nhược của từng phân nhóm con theo bài</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Phân nhóm</th><th>Ưu điểm</th><th>Nhược điểm</th></tr></thead>
+          <tbody>
+            <tr><td>Phân lớp, phân lớp tuyến tính</td><td>Dự đoán chính xác</td><td>Cần dữ liệu có nhãn; phân lớp sai quan hệ phi tuyến</td></tr>
+            <tr><td>Phân cụm</td><td>Không cần nhãn</td><td>Nhạy với khởi tạo và tham số; nặng với mạng lớn</td></tr>
+            <tr><td>DBSCAN</td><td>Chịu nhiễu và điểm ngoại lai</td><td>Nhạy tham số; kém khi các cụm có mật độ khác nhau</td></tr>
+            <tr><td>Phân cụm phổ</td><td>Tốt với dữ liệu tách được phi tuyến</td><td>Khó chọn ma trận tương đồng (affinity) và tham số; tính trị riêng tốn kém</td></tr>
+            <tr><td>Học biểu diễn (feature learning)</td><td>Tự rút đặc trưng có ý nghĩa từ dữ liệu thô</td><td>Biểu diễn có thể rất phức tạp</td></tr>
+            <tr><td>EM (expectation maximization)</td><td>Xử lý được dữ liệu thiếu</td><td>Nhạy khởi tạo, dễ kẹt cực trị địa phương</td></tr>
+            <tr><td>Bán giám sát theo đồ thị</td><td>Tận dụng cấu trúc mạng</td><td>Phụ thuộc chất lượng việc dựng đồ thị (láng giềng, trọng số)</td></tr>
+            <tr><td>LPA</td><td>Nhanh, xử lý tập lớn nhiều điểm không nhãn</td><td>Phụ thuộc cấu trúc đồ thị</td></tr>
+            <tr><td>Heuristic</td><td>Thường nhanh</td><td>Dựa nặng vào luật định trước</td></tr>
+            <tr><td>Học biểu diễn bán giám sát</td><td>Biểu diễn giàu thông tin, bền vững</td><td>Phụ thuộc số lượng và chất lượng nhãn</td></tr>
+            <tr><td>NMF</td><td>Biểu diễn theo “phần”, dễ diễn giải</td><td>Bài toán không lồi; có thể hội tụ về cực tiểu địa phương</td></tr>
+            <tr><td>Học chủ động (active learning)</td><td>Chọn điểm đáng gán nhãn nhất, tiết kiệm công gán nhãn</td><td>Phụ thuộc mô hình ban đầu</td></tr>
+            <tr><td>Co-training</td><td>Hợp khi có nhiều “góc nhìn” dữ liệu</td><td>Giả định các góc nhìn độc lập có điều kiện</td></tr>
+            <tr><td>Autoencoder</td><td>Giảm chiều rất hiệu quả</td><td>Khó diễn giải đặc trưng học được</td></tr>
+            <tr><td>GNN</td><td>Tận dụng quan hệ và phụ thuộc giữa các nút</td><td>Có thể vất vả với đồ thị lớn hoặc bất thường</td></tr>
+            <tr><td>RNN</td><td>Mô hình hóa phụ thuộc thời gian, dữ liệu tuần tự</td><td>Gradient tiêu biến hoặc bùng nổ</td></tr>
+            <tr><td>GCN</td><td>Học đặc trưng từ cấu trúc đồ thị</td><td>Chi phí tính toán với đồ thị phức tạp</td></tr>
+            <tr><td>RBM</td><td>Tự học đặc trưng</td><td>Khó mở rộng khi mô hình lớn</td></tr>
+            <tr><td>Bagging</td><td>Giảm quá khớp</td><td>Tăng thời gian huấn luyện, độ phức tạp</td></tr>
+            <tr><td>Stacking</td><td>Kết hợp nhiều mô hình nền qua một mô hình meta</td><td>Phức tạp, có thể quá khớp</td></tr>
+            <tr><td>Boosting (GBM là một dạng)</td><td>Mô hình sau sửa lỗi mô hình trước</td><td>Nhạy với nhiễu và ngoại lai</td></tr>
+            <tr><td>Random forest</td><td>Nhiều cây quyết định, chính xác và ổn định hơn</td><td>Khó hiểu quá trình ra quyết định</td></tr>
+            <tr><td>k-NN graph</td><td>Đơn giản, nắm quan hệ cục bộ</td><td>Nhạy nhiễu và việc chọn k</td></tr>
+            <tr><td>Policy gradient</td><td>Tối ưu trực tiếp chính sách, hành động liên tục</td><td>Phương sai lớn, hội tụ chậm, huấn luyện bất ổn</td></tr>
+            <tr><td>Q-learning</td><td>Không cần mô hình môi trường</td><td>“Lời nguyền số chiều” khi không gian trạng thái và hành động lớn</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Thuật toán cụ thể</h3>
+      <ul>
+        <li><strong>Có giám sát:</strong> Naïve Bayes, SVM, cây quyết định.</li>
+        <li><strong>Không giám sát:</strong> <strong>phân cụm phân cấp</strong> (13 bài được trích) và <strong>k-means</strong> (9 bài được trích) dùng nhiều nhất. k-means còn được dùng làm bước phụ trong các phương pháp lai: học biểu diễn, phân cụm mật độ, bán giám sát theo đồ thị, autoencoder, GNN.</li>
+        <li><strong>Bán giám sát:</strong> LPA là thuật toán chính ở nhiều bài và là bước phụ ở một số bài khác.</li>
+        <li><strong>Học biểu diễn</strong> xuất hiện ở cả có giám sát, không giám sát, bán giám sát. <strong>NMF</strong> chủ yếu ở bán giám sát và không giám sát.</li>
+        <li>Danh sách đầy đủ theo từng nhóm ở các Bảng 8-1 đến 8-7 của Phụ lục trực tuyến A (không có trong bài chính).</li>
+      </ul>
+      <div class="eli5"><p><strong>k-means:</strong> chọn trước k “tâm”, gán mỗi điểm vào tâm gần nhất, dời tâm về giữa nhóm, lặp lại. Nhanh và dễ, nhưng phải biết trước k và kết quả phụ thuộc chỗ đặt tâm ban đầu. <strong>Phân cụm phân cấp:</strong> gộp dần các nhóm gần nhau (hoặc tách dần), tạo cây; không cần biết trước số nhóm. <strong>DBSCAN:</strong> một nhóm là vùng điểm đứng dày; điểm lẻ loi coi là nhiễu. <strong>Phân cụm phổ:</strong> dùng vectơ riêng của ma trận đồ thị để “trải” nút ra không gian mới rồi mới gom cụm.</p></div>
+      <div class="eli5"><p><strong>LPA:</strong> mỗi nút lấy nhãn mà đa số hàng xóm đang mang, lặp đến khi ổn định. <strong>NMF:</strong> tách ma trận kề thành tích hai ma trận không âm; mỗi cột ứng với một cộng đồng, giá trị cho biết nút thuộc cộng đồng đó bao nhiêu. <strong>Autoencoder:</strong> mạng nơ-ron nén dữ liệu thành mã ngắn rồi giải nén lại; mã ngắn được đem đi gom cụm. <strong>GNN/GCN:</strong> mỗi nút cập nhật vectơ của mình bằng cách tổng hợp vectơ hàng xóm, nên nút cùng vùng có vectơ giống nhau.</p></div>
+    </section>
+
+    <section id="rq2">
+      <h2>RQ2: Đánh giá cộng đồng bằng độ đo nào?</h2>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 6: các độ đo được dùng (một bài có thể dùng nhiều độ đo)</caption>
+          <thead><tr><th>Độ đo</th><th class="num">Số bài</th><th class="num">%</th><th>Cần đáp án?</th></tr></thead>
+          <tbody>
+            <tr><td>NMI</td><td class="num">131</td><td class="num">53.25</td><td>Có</td></tr>
+            <tr><td>Modularity</td><td class="num">89</td><td class="num">36.17</td><td>Không</td></tr>
+            <tr><td>F-measure (gồm F-score, pairwise F1, macro F1, micro F1)</td><td class="num">65</td><td class="num">26.42</td><td>Có</td></tr>
+            <tr><td>Accuracy</td><td class="num">59</td><td class="num">23.98</td><td>Có</td></tr>
+            <tr><td>Thời gian chạy</td><td class="num">56</td><td class="num">22.76</td><td>Không</td></tr>
+            <tr><td>Precision</td><td class="num">34</td><td class="num">13.82</td><td>Có</td></tr>
+            <tr><td>Recall</td><td class="num">29</td><td class="num">11.78</td><td>Có</td></tr>
+            <tr><td>ARI</td><td class="num">27</td><td class="num">10.97</td><td>Có</td></tr>
+            <tr><td>AUC-ROC</td><td class="num">16</td><td class="num">6.50</td><td>Có</td></tr>
+            <tr><td>Jaccard</td><td class="num">14</td><td class="num">5.69</td><td>Thường có</td></tr>
+            <tr><td>Conductance</td><td class="num">12</td><td class="num">4.87</td><td>Không</td></tr>
+            <tr><td>Density (gồm “density without isolates”)</td><td class="num">10</td><td class="num">4.06</td><td>Không</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Cột “Cần đáp án?” là phân loại của người giải thích (không có trong bài): độ đo cần ground truth là độ đo ngoại; độ đo chỉ nhìn đồ thị là độ đo nội.</p>
+      <p>Độ đo dùng ở dưới 10 bài được coi là “ít dùng”: có <strong>57</strong> độ đo như vậy, xuất hiện trong tổng cộng 133 lượt; mức dùng trung bình mỗi độ đo là <strong>0.94%</strong> (danh sách ở Phụ lục A, Bảng 2). Công thức: (133 / 246) / 57 × 100.</p>
+
+      <h3>Các độ đo chính, theo cách bài giải thích</h3>
+      <p><strong>NMI</strong> (normalized mutual information): đo mức giống nhau giữa cách chia tìm được và cách chia thật, chuẩn hóa về khoảng 0 (khác hoàn toàn) đến 1 (giống hệt).</p>
+      <span class="formula">NMI(Y, C) = 2 × I(Y; C) / [H(Y) + H(C)]<small>Y: nhãn lớp thật; C: nhãn cụm tìm được; H: entropy; I(Y; C): thông tin tương hỗ giữa Y và C.</small></span>
+      <div class="eli5"><p>NMI hỏi: “Biết một người ở cụm nào trong kết quả, ta đoán được người đó thuộc nhóm thật nào tới mức nào?” Đoán chắc chắn: NMI = 1. Không đoán được gì: NMI ≈ 0. Ưu điểm bài nêu: so được hai cách chia có <em>số cụm khác nhau</em>.</p></div>
+
+      <p><strong>Modularity Q</strong> (Newman và Girvan): Q = (số cạnh trong cộng đồng) − (số cạnh kỳ vọng nếu nối ngẫu nhiên), tính theo tỉ lệ. Dùng khi <em>không biết</em> cấu trúc cộng đồng thật. Q lớn thường là cách chia tốt hơn.</p>
+      <div class="eli5"><p>Modularity so nhóm của bạn với một mạng “xáo trộn ngẫu nhiên” giữ nguyên số bạn của mỗi người. Nếu trong nhóm có nhiều cạnh hơn hẳn mức may rủi thì Q dương và lớn.</p></div>
+
+      <p><strong>F-measure</strong>: trung bình điều hòa của precision P và recall R.</p>
+      <span class="formula">F = 2PR / (P + R)  ·  P = TP / (TP + FP)  ·  R = TP / (TP + FN)<small>TP: dương đúng; FP: dương sai; FN: âm sai. F = 1 khi P và R đều bằng 1; F = 0 khi cả hai bằng 0.</small></span>
+      <div class="eli5"><p>Precision: trong những người thuật toán xếp chung nhóm, bao nhiêu phần trăm thật sự chung nhóm? Recall: trong những người thật sự chung nhóm, thuật toán gom được bao nhiêu phần trăm? F-measure phạt nặng nếu một trong hai thấp.</p></div>
+
+      <p><strong>Accuracy</strong>: tỉ lệ nút được gán vào đúng cộng đồng. <strong>Thời gian chạy</strong>: phụ thuộc kích thước đầu vào, độ phức tạp thuật toán và tốc độ bộ xử lý.</p>
+      <p><strong>ARI</strong> (adjusted Rand index): so cách chia tìm được với cách chia thật theo từng cặp nút, có <em>trừ đi phần trùng do ngẫu nhiên</em>. Bài ghi công thức Rand index gốc: (TP + TN) / (TP + FP + FN + TN).</p>
+      <p><strong>AUC-ROC</strong>: diện tích dưới đường ROC (vẽ tỉ lệ dương đúng TPR theo tỉ lệ dương sai FPR); có thể hiểu là xác suất một liên kết dự đoán đúng được chấm điểm cao hơn một liên kết dự đoán sai. <strong>Jaccard</strong>: đo độ giống giữa hai tập; hai nút càng giống càng dễ chung cộng đồng. <strong>Conductance</strong>: tỉ lệ cạnh bị cắt so với “thể tích” của phần nhỏ hơn; càng thấp càng giống cộng đồng. <strong>Density</strong>: số cạnh chia cho số cạnh tối đa có thể.</p>
+      <div class="warn"><p>Một số định nghĩa trong bài viết lỏng: công thức F, P, R ghi thiếu ngoặc (ví dụ “F = 2PR/P + R”); bài gọi tên ARI nhưng ghi công thức Rand index chưa hiệu chỉnh; phần precision lại giải thích theo nghĩa “độ chụm của phép đo” trong đo lường, không phải nghĩa precision trong phân lớp; câu “F-measure thấp cho thấy dữ liệu mất cân bằng” không đúng như một quy tắc chung (tr. 7239–7240). Trang này dùng dạng công thức chuẩn ở trên.</p></div>
+    </section>
+
+    <section id="rq3">
+      <h2>RQ3: Bộ dữ liệu nào được dùng?</h2>
+      <p>Bài phân biệt <strong>dữ liệu thật</strong> (lấy từ hệ thống đang hoạt động, hồ sơ công khai…) và <strong>dữ liệu tổng hợp</strong> (synthetic: sinh bằng thuật toán để mô phỏng thống kê của dữ liệu thật; rẻ, nhanh, bảo vệ quyền riêng tư, tạo được mốc chuẩn).</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 7: 22 bộ dữ liệu được dùng ở ít nhất 10 bài</caption>
+          <thead><tr><th>Bộ dữ liệu</th><th>Loại</th><th>Hướng</th><th class="num">Số nút</th><th class="num">Số cạnh</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td>Zachary’s Karate Club</td><td>Thật</td><td>Vô hướng</td><td class="num">34</td><td class="num">78</td><td class="num">65</td><td class="num">26.42</td></tr>
+            <tr><td>LFR</td><td>Tổng hợp</td><td>Vô hướng</td><td class="num">–</td><td class="num">–</td><td class="num">59</td><td class="num">23.98</td></tr>
+            <tr><td>American College Football</td><td>Thật</td><td>Vô hướng</td><td class="num">115</td><td class="num">613</td><td class="num">55</td><td class="num">22.35</td></tr>
+            <tr><td>Bottlenose Dolphin</td><td>Thật</td><td>Vô hướng</td><td class="num">62</td><td class="num">159</td><td class="num">51</td><td class="num">20.73</td></tr>
+            <tr><td>Facebook</td><td>Thật</td><td>Vô hướng</td><td class="num">4&nbsp;039</td><td class="num">88&nbsp;234</td><td class="num">47</td><td class="num">19.10</td></tr>
+            <tr><td>DBLP</td><td>Thật</td><td>Vô hướng</td><td class="num">317&nbsp;080</td><td class="num">1&nbsp;049&nbsp;866</td><td class="num">45</td><td class="num">18.29</td></tr>
+            <tr><td>Twitter</td><td>Thật</td><td>Có hướng</td><td class="num">81&nbsp;306</td><td class="num">1&nbsp;768&nbsp;149</td><td class="num">44</td><td class="num">17.88</td></tr>
+            <tr><td>Political books (polbooks)</td><td>Thật</td><td>Vô hướng</td><td class="num">105</td><td class="num">441</td><td class="num">42</td><td class="num">17.07</td></tr>
+            <tr><td>Cora</td><td>Thật</td><td>Có hướng</td><td class="num">2&nbsp;708</td><td class="num">5&nbsp;429</td><td class="num">35</td><td class="num">14.22</td></tr>
+            <tr><td>Amazon</td><td>Thật</td><td>Vô hướng</td><td class="num">334&nbsp;863</td><td class="num">925&nbsp;872</td><td class="num">28</td><td class="num">11.38</td></tr>
+            <tr><td>Citeseer</td><td>Thật</td><td>Vô hướng</td><td class="num">3&nbsp;312</td><td class="num">4&nbsp;715</td><td class="num">26</td><td class="num">10.56</td></tr>
+            <tr><td>Political Blogs</td><td>Thật</td><td>Có hướng</td><td class="num">1&nbsp;490</td><td class="num">16&nbsp;718</td><td class="num">21</td><td class="num">8.53</td></tr>
+            <tr><td>Email / Enron</td><td>Thật</td><td>Có hướng</td><td class="num">36&nbsp;692</td><td class="num">183&nbsp;831</td><td class="num">20</td><td class="num">8.13</td></tr>
+            <tr><td>Wikipedia</td><td>Thật</td><td>Vô hướng</td><td class="num">2&nbsp;277</td><td class="num">31&nbsp;421</td><td class="num">19</td><td class="num">7.72</td></tr>
+            <tr><td>YouTube</td><td>Thật</td><td>Vô hướng</td><td class="num">1&nbsp;134&nbsp;890</td><td class="num">2&nbsp;987&nbsp;624</td><td class="num">18</td><td class="num">7.31</td></tr>
+            <tr><td>LiveJournal</td><td>Thật</td><td>Có hướng</td><td class="num">3&nbsp;997&nbsp;962</td><td class="num">34&nbsp;681&nbsp;189</td><td class="num">17</td><td class="num">6.91</td></tr>
+            <tr><td>PubMed</td><td>Thật</td><td>Vô hướng</td><td class="num">19&nbsp;717</td><td class="num">44&nbsp;338</td><td class="num">16</td><td class="num">6.50</td></tr>
+            <tr><td>Email-Eu-Core</td><td>Thật</td><td>Có hướng</td><td class="num">1&nbsp;005</td><td class="num">25&nbsp;571</td><td class="num">13</td><td class="num">5.28</td></tr>
+            <tr><td>Power grid</td><td>Thật (bài gọi “real simulated”)</td><td>Vô hướng</td><td class="num">4&nbsp;941</td><td class="num">6&nbsp;594</td><td class="num">13</td><td class="num">5.28</td></tr>
+            <tr><td>Orkut</td><td>Thật</td><td>Vô hướng</td><td class="num">3&nbsp;072&nbsp;441</td><td class="num">117&nbsp;184&nbsp;899</td><td class="num">12</td><td class="num">4.87</td></tr>
+            <tr><td>NetScience</td><td>Thật</td><td>Vô hướng</td><td class="num">379</td><td class="num">914</td><td class="num">12</td><td class="num">4.87</td></tr>
+            <tr><td>Jazz musicians</td><td>Thật</td><td>Vô hướng</td><td class="num">198</td><td class="num">2&nbsp;742</td><td class="num">10</td><td class="num">4.06</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Ba bộ dùng nhiều nhất: <strong>Karate 26.42%</strong>, <strong>LFR 23.98%</strong>, <strong>Football 22.35%</strong>. Karate và Football là mạng thật; LFR là mạng tổng hợp. Bộ dữ liệu dùng ở dưới 10 bài: <strong>118</strong> bộ, xuất hiện tổng cộng 255 lượt, trung bình <strong>0.87%</strong> mỗi bộ (Phụ lục A, Bảng 3).</p>
+
+      <h3>Mô tả ngắn các bộ dữ liệu theo bài</h3>
+      <dl class="terms">
+        <dt>Karate Club</dt><dd>Wayne Zachary thu thập năm 1977 ở một câu lạc bộ karate đại học; nút là thành viên, cạnh là quan hệ.</dd>
+        <dt>LFR</dt><dd>Benchmark tổng hợp với nhiều tham số: số nút, bậc trung bình, bậc tối đa, tỉ lệ cạnh trong/ngoài cộng đồng, kích thước cộng đồng nhỏ nhất và lớn nhất; sinh được cộng đồng chồng lấn trên mạng có hướng và có trọng số. Bậc và kích thước cộng đồng theo luật lũy thừa, giống mạng thật.</dd>
+        <dt>College Football</dt><dd>Các trận bóng bầu dục Mỹ giữa các đội Division IA mùa thu 2000; 115 đội chia thành 12 liên đoàn, đội trong cùng liên đoàn đấu với nhau nhiều hơn (trừ một liên đoàn).</dd>
+        <dt>Dolphin</dt><dd>Mạng giao tiếp của 62 con cá heo mũi chai ở Doubtful Sound (New Zealand); tự nhiên tách thành hai cộng đồng, nhóm lớn còn chia nhỏ được.</dd>
+        <dt>Facebook</dt><dd>Dữ liệu dựa trên bài đăng: người dùng thích, chia sẻ, bình luận; trích mã người dùng và mã bài đăng.</dd>
+        <dt>DBLP</dt><dd>Mạng trích dẫn bài báo khoa học, có tóm tắt, tác giả, năm, nơi đăng, tiêu đề.</dd>
+        <dt>Twitter</dt><dd>Mạng tiểu blog; bài nêu khoảng 100 triệu người dùng hoạt động mỗi ngày, khoảng 6&nbsp;000 tweet mỗi giây.</dd>
+        <dt>Political books</dt><dd>105 sách về chính trị Mỹ quanh bầu cử 2004 bán trên Amazon; cạnh là sách hay được mua cùng nhau.</dd>
+        <dt>Cora, Citeseer, PubMed</dt><dd>Mạng trích dẫn bài báo (Citeseer: mỗi nút thuộc một trong 6 lớp; PubMed: y sinh).</dd>
+        <dt>Amazon</dt><dd>Mạng sản phẩm hay được mua cùng nhau.</dd>
+        <dt>Enron, Email-Eu-Core</dt><dd>Mạng thư điện tử của nhân viên Enron (Mỹ) và của một viện nghiên cứu lớn ở châu Âu.</dd>
+        <dt>PolBlogs</dt><dd>Siêu liên kết giữa các blog chính trị Mỹ (2005), nút gắn nhãn bảo thủ hoặc tự do.</dd>
+        <dt>YouTube, LiveJournal, Orkut</dt><dd>Mạng bạn bè; nhóm do người dùng lập được dùng làm cộng đồng thật (ground truth).</dd>
+        <dt>Wikipedia</dt><dd>Trang web bách khoa thư; quan hệ khá dày.</dd>
+        <dt>NetScience</dt><dd>Mạng đồng tác giả của các nhà nghiên cứu khoa học mạng.</dd>
+        <dt>Power grid</dt><dd>Bài mô tả là dữ liệu mô phỏng về độ ổn định lưới điện.</dd>
+        <dt>Jazz musicians</dt><dd>Mạng cộng tác giữa các nhạc công jazz.</dd>
+      </dl>
+      <div class="warn">
+        <ul>
+          <li>Bài viết LFR “do Girvan và Newman đề xuất” (tr. 7241). Thực ra LFR do <strong>Lancichinetti, Fortunato và Radicchi</strong> đề xuất năm 2008 (chính tên viết tắt nói lên điều đó); Girvan–Newman là một benchmark khác, cũ hơn, mà LFR cải tiến.</li>
+          <li>Số liệu Citeseer: Bảng 7 ghi 4&nbsp;715 cạnh, lời văn ghi 4&nbsp;732 cạnh (tr. 7232 và 7242). Wikipedia: Bảng 7 ghi 2&nbsp;277 nút, 31&nbsp;421 cạnh, lời văn ghi 2&nbsp;405 trang, 17&nbsp;981 cạnh (tr. 7233 và 7243). Có lẽ là các phiên bản dữ liệu khác nhau nhưng bài không nói.</li>
+          <li>Nhận xét thêm của người giải thích (không có trong bài): mạng Power grid 4&nbsp;941 nút, 6&nbsp;594 cạnh thường được biết là lưới điện miền Tây nước Mỹ (Watts và Strogatz 1998), một mạng thật; mô tả “electrical grid stability simulated dataset” của bài có vẻ lẫn với một bộ dữ liệu khác cùng tên.</li>
+        </ul>
+      </div>
+
+      <h3>Mạng thật hay mạng tổng hợp: Bảng 8</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 8 của bài, kèm dòng “dùng cả hai” lấy từ lời văn</caption>
+          <thead><tr><th>Loại dữ liệu</th><th>Ví dụ</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td>Chỉ mạng thật (136 bộ dữ liệu thật)</td><td>Karate, Facebook, Twitter, Dolphin, Football, DBLP, Political books, Enron, Cora, Citeseer, Amazon, Wikipedia, PolBlogs, YouTube, LiveJournal, Email-Eu-Core, SINA Weibo, BlogCatalog, PubMed, Les Misérables, Orkut, Epinions, WebKB…</td><td class="num">167</td><td class="num">67.88</td></tr>
+            <tr><td>Chỉ benchmark tổng hợp</td><td>LFR, Girvan–Newman (GN), SBM mô phỏng, môi trường mô phỏng HCMM</td><td class="num">5</td><td class="num">2.03</td></tr>
+            <tr><td>Dùng cả hai (từ lời văn)</td><td>—</td><td class="num">74</td><td class="num">30.08</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="warn"><p>Bài viết “phần lớn bài (67.88%) dùng dữ liệu thật, còn 2.03% dùng dữ liệu tổng hợp” (tr. 7243). Đọc nhanh dễ hiểu sai rằng dữ liệu tổng hợp hầu như không được dùng, mâu thuẫn với việc riêng LFR đã có mặt ở 59 bài (23.98%). Người giải thích kiểm tra: 167 + 5 + 74 = 246, nên ba nhóm trên là <strong>loại trừ nhau</strong>: 2.03% là “<em>chỉ</em> dùng dữ liệu tổng hợp”. Thực tế dữ liệu tổng hợp xuất hiện ở ít nhất 5 + 74 = 79 bài (32.11%), dữ liệu thật ở 167 + 74 = 241 bài (97.97%). Ngoài ra 136 bộ thật + 4 bộ tổng hợp được kể = 140 = 22 bộ trong Bảng 7 + 118 bộ ít dùng, khớp nhau.</p></div>
+    </section>
+
+    <section id="rq4">
+      <h2>RQ4: Mạng xã hội có những loại cộng đồng nào?</h2>
+      <p>Bài nói không có cách phân loại cộng đồng thống nhất. Dựa trên tài liệu, bài rút ra ba loại:</p>
+      <figure class="fig">
+        <svg viewBox="0 0 660 210" role="img" aria-label="Ba loại cộng đồng: không chồng lấn, chồng lấn, ẩn">
+          <!-- (a) disjoint -->
+          <circle cx="60" cy="80" r="44" class="f-none s-accent dash" stroke-width="1.5" />
+          <circle cx="160" cy="80" r="44" class="f-none s-alt dash" stroke-width="1.5" />
+          <line x1="45" y1="60" x2="75" y2="62" class="s-muted" stroke-width="1.2" />
+          <line x1="45" y1="60" x2="55" y2="100" class="s-muted" stroke-width="1.2" />
+          <line x1="75" y1="62" x2="55" y2="100" class="s-muted" stroke-width="1.2" />
+          <line x1="75" y1="62" x2="85" y2="92" class="s-muted" stroke-width="1.2" />
+          <line x1="145" y1="62" x2="175" y2="60" class="s-muted" stroke-width="1.2" />
+          <line x1="145" y1="62" x2="160" y2="100" class="s-muted" stroke-width="1.2" />
+          <line x1="175" y1="60" x2="160" y2="100" class="s-muted" stroke-width="1.2" />
+          <line x1="85" y1="92" x2="145" y2="62" class="s-muted dash" stroke-width="1" />
+          <circle cx="45" cy="60" r="7" class="f-accent" /><circle cx="75" cy="62" r="7" class="f-accent" /><circle cx="55" cy="100" r="7" class="f-accent" /><circle cx="85" cy="92" r="7" class="f-accent" />
+          <circle cx="145" cy="62" r="7" class="f-alt" /><circle cx="175" cy="60" r="7" class="f-alt" /><circle cx="160" cy="100" r="7" class="f-alt" />
+          <text x="110" y="160" text-anchor="middle" class="b">(a) Không chồng lấn</text>
+          <text x="110" y="180" text-anchor="middle" class="sm t-muted">mỗi nút đúng một nhóm</text>
+          <!-- (b) overlap -->
+          <circle cx="295" cy="80" r="48" class="f-none s-accent dash" stroke-width="1.5" />
+          <circle cx="365" cy="80" r="48" class="f-none s-alt dash" stroke-width="1.5" />
+          <line x1="270" y1="60" x2="275" y2="102" class="s-muted" stroke-width="1.2" />
+          <line x1="270" y1="60" x2="330" y2="80" class="s-muted" stroke-width="1.2" />
+          <line x1="275" y1="102" x2="330" y2="80" class="s-muted" stroke-width="1.2" />
+          <line x1="390" y1="60" x2="385" y2="102" class="s-muted" stroke-width="1.2" />
+          <line x1="390" y1="60" x2="330" y2="80" class="s-muted" stroke-width="1.2" />
+          <line x1="385" y1="102" x2="330" y2="80" class="s-muted" stroke-width="1.2" />
+          <circle cx="270" cy="60" r="7" class="f-accent" /><circle cx="275" cy="102" r="7" class="f-accent" />
+          <circle cx="390" cy="60" r="7" class="f-alt" /><circle cx="385" cy="102" r="7" class="f-alt" />
+          <circle cx="330" cy="80" r="9" class="f-ink" />
+          <text x="330" y="160" text-anchor="middle" class="b">(b) Chồng lấn</text>
+          <text x="330" y="180" text-anchor="middle" class="sm t-muted">nút giữa thuộc cả hai nhóm</text>
+          <!-- (c) hidden -->
+          <circle cx="510" cy="70" r="36" class="f-none s-accent" stroke-width="2" />
+          <circle cx="600" cy="70" r="36" class="f-none s-accent" stroke-width="2" />
+          <line x1="495" y1="58" x2="525" y2="58" class="s-muted" stroke-width="1.5" />
+          <line x1="495" y1="58" x2="510" y2="88" class="s-muted" stroke-width="1.5" />
+          <line x1="525" y1="58" x2="510" y2="88" class="s-muted" stroke-width="1.5" />
+          <line x1="585" y1="58" x2="615" y2="58" class="s-muted" stroke-width="1.5" />
+          <line x1="585" y1="58" x2="600" y2="88" class="s-muted" stroke-width="1.5" />
+          <line x1="615" y1="58" x2="600" y2="88" class="s-muted" stroke-width="1.5" />
+          <path d="M510 88 Q555 140 600 88" class="f-none s-alt dash" stroke-width="1.5" />
+          <path d="M525 58 Q555 30 585 58" class="f-none s-alt dash" stroke-width="1.5" />
+          <circle cx="495" cy="58" r="7" class="f-accent" /><circle cx="525" cy="58" r="7" class="f-alt" /><circle cx="510" cy="88" r="7" class="f-alt" />
+          <circle cx="585" cy="58" r="7" class="f-alt" /><circle cx="615" cy="58" r="7" class="f-accent" /><circle cx="600" cy="88" r="7" class="f-alt" />
+          <text x="555" y="160" text-anchor="middle" class="b">(c) Ẩn</text>
+          <text x="555" y="180" text-anchor="middle" class="sm t-muted">nhóm yếu, thưa (nét đứt) nằm</text>
+          <text x="555" y="196" text-anchor="middle" class="sm t-muted">lẫn trong các nhóm mạnh</text>
+        </svg>
+        <figcaption><strong>Ba loại cộng đồng</strong> (sơ đồ của người giải thích, theo ý Hình 6 của bài).</figcaption>
+      </figure>
+      <dl class="terms">
+        <dt>Không chồng lấn (disjoint)</dt><dd>Mạng được chia thành các vùng dày; mỗi nút thuộc đúng một cộng đồng.</dd>
+        <dt>Chồng lấn (overlapping)</dt><dd>Các cộng đồng chung một hay nhiều nút. Ví dụ: một người thuộc cả nhóm công việc, gia đình, bạn bè; đồng nghiệp cũng có thể là bạn ngoài giờ.</dd>
+        <dt>Ẩn (hidden)</dt><dd>Bên cạnh các cộng đồng mạnh (gia đình, đồng nghiệp), một người còn thuộc các cộng đồng <em>yếu</em>, ví dụ nhóm bệnh nhân gặp nhau ở phòng khám và ít liên lạc. Cấu trúc ẩn thưa hơn và khó tìm hơn; có thể xem là một dạng đặc biệt của chồng lấn. Thành viên có nhiều liên kết ngầm, có thể không quen nhau, ở các vùng khác nhau, nhưng chung sở thích thể hiện qua bài đăng.</dd>
+      </dl>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 9: loại cộng đồng được nghiên cứu</caption>
+          <thead><tr><th>Loại</th><th class="num">Số bài</th><th class="num">%</th></tr></thead>
+          <tbody>
+            <tr><td>Không chồng lấn</td><td class="num">167</td><td class="num">67.88</td></tr>
+            <tr><td>Chồng lấn</td><td class="num">73</td><td class="num">29.67</td></tr>
+            <tr><td>Ẩn</td><td class="num">6</td><td class="num">2.43</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Tổng đúng 246: mỗi bài được xếp vào một loại.</p>
+    </section>
+
+    <section id="thao-luan">
+      <h2>Thảo luận: các phát hiện chính và xu hướng</h2>
+      <h3>Loại học máy theo loại cộng đồng (Hình 7)</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 7 dạng bảng: số bài theo loại học máy và loại cộng đồng (đọc gần đúng từ biểu đồ)</caption>
+          <thead><tr><th>Loại học máy</th><th class="num">Không chồng lấn</th><th class="num">Chồng lấn</th><th class="num">Ẩn</th></tr></thead>
+          <tbody>
+            <tr><td>Không giám sát</td><td class="num">64*</td><td class="num">35*</td><td class="num">3*</td></tr>
+            <tr><td>Học sâu</td><td class="num">40*</td><td class="num">≈ 6</td><td class="num">≈ 1</td></tr>
+            <tr><td>Bán giám sát</td><td class="num">≈ 30</td><td class="num">18*</td><td class="num">0</td></tr>
+            <tr><td>Có giám sát</td><td class="num">≈ 17</td><td class="num">≈ 8</td><td class="num">≈ 1</td></tr>
+            <tr><td>Ensemble</td><td class="num">≈ 7</td><td class="num">≈ 3</td><td class="num">0</td></tr>
+            <tr><td>Học tăng cường</td><td class="num">≈ 5</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>Dựa trên mẫu</td><td class="num">0</td><td class="num">≈ 3</td><td class="num">≈ 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">* Số có ghi trong lời văn của bài. Các số “≈” do người giải thích đọc từ biểu đồ, có thể lệch 1–2.</p>
+      <ul>
+        <li>Không giám sát đứng đầu ở <strong>cả ba</strong> loại cộng đồng.</li>
+        <li>Với cộng đồng không chồng lấn, đứng thứ hai là <strong>học sâu</strong> (40 bài, sau 64 bài không giám sát).</li>
+        <li>Với cộng đồng chồng lấn, đứng thứ hai là <strong>bán giám sát</strong> (18 bài, sau 35 bài không giám sát).</li>
+        <li>Cộng đồng ẩn chỉ có 6 bài, trong đó 3 bài dùng không giám sát. Trong không giám sát, <strong>phân cụm</strong> là cách dùng nhiều nhất.</li>
+      </ul>
+
+      <h3>Xu hướng theo thời gian (Hình 8)</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 8 dạng bảng: số bài theo năm và loại cộng đồng (đọc gần đúng từ biểu đồ)</caption>
+          <thead><tr><th>Năm</th><th class="num">Không chồng lấn</th><th class="num">Chồng lấn</th><th class="num">Ẩn</th></tr></thead>
+          <tbody>
+            <tr><td>2005</td><td class="num">–</td><td class="num">0</td><td class="num">1</td></tr>
+            <tr><td>2007</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>2009</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
+            <tr><td>2010</td><td class="num">1</td><td class="num">1</td><td class="num">0</td></tr>
+            <tr><td>2011</td><td class="num">3</td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>2012</td><td class="num">2</td><td class="num">4</td><td class="num">0</td></tr>
+            <tr><td>2013</td><td class="num">5</td><td class="num">4</td><td class="num">1</td></tr>
+            <tr><td>2014</td><td class="num">8</td><td class="num">5</td><td class="num">1</td></tr>
+            <tr><td>2015</td><td class="num">5</td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>2016</td><td class="num">7</td><td class="num">4</td><td class="num">0</td></tr>
+            <tr><td>2017</td><td class="num">3</td><td class="num">8</td><td class="num">0</td></tr>
+            <tr><td>2018</td><td class="num">5</td><td class="num">9</td><td class="num">0</td></tr>
+            <tr><td>2019</td><td class="num">12</td><td class="num">6</td><td class="num">0</td></tr>
+            <tr><td>2020</td><td class="num">19</td><td class="num">6</td><td class="num">1</td></tr>
+            <tr><td>2021</td><td class="num">20</td><td class="num">9</td><td class="num">0</td></tr>
+            <tr><td>2022</td><td class="num">15</td><td class="num">4</td><td class="num">0</td></tr>
+            <tr><td>2023</td><td class="num">27</td><td class="num">8</td><td class="num">0</td></tr>
+            <tr><td>2024</td><td class="num">27</td><td class="num">2</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Ý chính của tác giả:</p>
+      <ul>
+        <li>Dùng học máy tăng sau 2016; cộng đồng không chồng lấn tăng mạnh từ 2017.</li>
+        <li>Học sâu dựa trên autoencoder xuất hiện cho cộng đồng không chồng lấn từ 2017; nhiều bài học sâu nhất rơi vào năm <strong>2020</strong> và tiếp tục tăng năm 2023 (chi tiết ở Phụ lục A, Bảng 4).</li>
+        <li>Ensemble/boosting: cộng đồng không chồng lấn từ 2013, chồng lấn từ 2016. Học sâu cho cộng đồng chồng lấn từ 2018.</li>
+        <li>Bán giám sát theo lý thuyết đồ thị dùng nhiều nhất cho chồng lấn năm 2018, và nhiều nhất năm 2022 cho cả hai loại.</li>
+        <li>Cộng đồng ẩn: chỉ 6 bài từ 2005 đến nay.</li>
+      </ul>
+      <div class="warn"><p>Số liệu Hình 8 (tr. 7245) không khớp với Hình 2 (tr. 7216), dù cả hai đều đếm cùng 246 bài theo năm. Ví dụ năm 2024: Hình 2 chỉ có 10 bài, nhưng Hình 8 cho khoảng 27 bài không chồng lấn và 2 bài chồng lấn. Năm 2022: Hình 2 có 31 bài, Hình 8 chỉ khoảng 19. Cộng các điểm Hình 8 thì tổng chồng lấn (khoảng 73) và ẩn (6) khớp Bảng 9, còn không chồng lấn chỉ khoảng 160 so với 167; nghĩa là tổng theo loại gần đúng nhưng <strong>phân bố theo năm</strong> lệch với Hình 2. Số đọc từ biểu đồ có sai số nhỏ, nhưng chênh lệch kiểu 29 so với 10 bài thì quá lớn để do đọc sai. Nên dùng Hình 8 để thấy xu hướng, không dùng làm số chính xác.</p></div>
+
+      <h3>Độ đo theo loại cộng đồng (Hình 9)</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 9 dạng bảng (đọc gần đúng; số có * được ghi trong lời văn)</caption>
+          <thead><tr><th>Độ đo</th><th class="num">Không chồng lấn</th><th class="num">Chồng lấn</th><th class="num">Ẩn</th></tr></thead>
+          <tbody>
+            <tr><td>NMI</td><td class="num">84*</td><td class="num">45*</td><td class="num">2*</td></tr>
+            <tr><td>Modularity</td><td class="num">66*</td><td class="num">≈ 21</td><td class="num">2*</td></tr>
+            <tr><td>F-measure</td><td class="num">41*</td><td class="num">24*</td><td class="num">0</td></tr>
+            <tr><td>Accuracy</td><td class="num">≈ 40</td><td class="num">≈ 16</td><td class="num">2*</td></tr>
+            <tr><td>Thời gian chạy</td><td class="num">≈ 33</td><td class="num">22*</td><td class="num">≈ 1</td></tr>
+            <tr><td>Precision</td><td class="num">≈ 22</td><td class="num">≈ 12</td><td class="num">0</td></tr>
+            <tr><td>Recall</td><td class="num">≈ 19</td><td class="num">≈ 10</td><td class="num">0</td></tr>
+            <tr><td>ARI</td><td class="num">≈ 20</td><td class="num">≈ 7</td><td class="num">0</td></tr>
+            <tr><td>AUC</td><td class="num">≈ 11</td><td class="num">≈ 5</td><td class="num">0</td></tr>
+            <tr><td>Jaccard</td><td class="num">≈ 8</td><td class="num">≈ 6</td><td class="num">0</td></tr>
+            <tr><td>Conductance</td><td class="num">≈ 5</td><td class="num">≈ 7</td><td class="num">0</td></tr>
+            <tr><td>Density</td><td class="num">≈ 5</td><td class="num">≈ 4</td><td class="num">≈ 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Không chồng lấn: NMI, modularity, F-measure. Chồng lấn: NMI, F-measure, thời gian chạy. Ẩn: NMI, modularity, accuracy (mỗi độ đo 2 bài).</li>
+        <li>Ý quan trọng: độ đo phổ biến nhất chung (NMI) không nhất thiết đứng cùng thứ hạng trong mọi loại; ví dụ modularity đứng thứ hai ở không chồng lấn nhưng tụt xuống ở chồng lấn.</li>
+        <li>Mọi độ đo đều được dùng nhiều ở bài không chồng lấn hơn bài chồng lấn, <strong>trừ conductance</strong>.</li>
+      </ul>
+
+      <h3>Bộ dữ liệu theo loại cộng đồng (Hình 10)</h3>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Hình 10 dạng bảng (đọc gần đúng; số có * được ghi trong lời văn)</caption>
+          <thead><tr><th>Bộ dữ liệu</th><th class="num">Không chồng lấn</th><th class="num">Chồng lấn</th><th class="num">Ẩn</th></tr></thead>
+          <tbody>
+            <tr><td>Karate</td><td class="num">46*</td><td class="num">19*</td><td class="num">0</td></tr>
+            <tr><td>LFR</td><td class="num">35*</td><td class="num">24*</td><td class="num">0</td></tr>
+            <tr><td>Football</td><td class="num">37*</td><td class="num">17*</td><td class="num">≈ 1</td></tr>
+            <tr><td>Dolphin</td><td class="num">37*</td><td class="num">≈ 14</td><td class="num">0</td></tr>
+            <tr><td>Facebook</td><td class="num">≈ 33</td><td class="num">≈ 14</td><td class="num">0</td></tr>
+            <tr><td>DBLP</td><td class="num">≈ 28</td><td class="num">≈ 16</td><td class="num">≈ 1</td></tr>
+            <tr><td>Twitter</td><td class="num">≈ 26</td><td class="num">17*</td><td class="num">≈ 1</td></tr>
+            <tr><td>Polbooks</td><td class="num">≈ 33</td><td class="num">≈ 9</td><td class="num">0</td></tr>
+            <tr><td>Cora</td><td class="num">≈ 30</td><td class="num">≈ 5</td><td class="num">0</td></tr>
+            <tr><td>Amazon</td><td class="num">≈ 15</td><td class="num">≈ 13</td><td class="num">0</td></tr>
+            <tr><td>Citeseer</td><td class="num">≈ 22</td><td class="num">≈ 4</td><td class="num">0</td></tr>
+            <tr><td>PolBlogs</td><td class="num">≈ 18</td><td class="num">≈ 3</td><td class="num">0</td></tr>
+            <tr><td>Enron</td><td class="num">≈ 13</td><td class="num">≈ 6</td><td class="num">≈ 1</td></tr>
+            <tr><td>Wikipedia</td><td class="num">≈ 12</td><td class="num">≈ 6</td><td class="num">≈ 1</td></tr>
+            <tr><td>YouTube</td><td class="num">≈ 10</td><td class="num">≈ 8</td><td class="num">0</td></tr>
+            <tr><td>LiveJournal</td><td class="num">≈ 9</td><td class="num">≈ 8</td><td class="num">0</td></tr>
+            <tr><td>PubMed</td><td class="num">≈ 13</td><td class="num">≈ 3</td><td class="num">0</td></tr>
+            <tr><td>Email-Eu</td><td class="num">≈ 10</td><td class="num">≈ 3</td><td class="num">0</td></tr>
+            <tr><td>Power grid</td><td class="num">≈ 11</td><td class="num">≈ 2</td><td class="num">0</td></tr>
+            <tr><td>Orkut</td><td class="num">≈ 4</td><td class="num">≈ 7</td><td class="num">0</td></tr>
+            <tr><td>NetScience</td><td class="num">≈ 7</td><td class="num">≈ 5</td><td class="num">0</td></tr>
+            <tr><td>Jazz</td><td class="num">≈ 5</td><td class="num">≈ 4</td><td class="num">≈ 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Không chồng lấn: Karate (46), Football và Dolphin (37), LFR (35).</li>
+        <li>Chồng lấn: <strong>LFR</strong> (24) đứng đầu, sau đó Karate (19), Football và Twitter (17). Điều này hợp lý vì LFR sinh được cộng đồng chồng lấn có đáp án.</li>
+        <li>Ẩn: bài [A21] dùng Football, Wikipedia, Jazz.</li>
+        <li>Mọi bộ dữ liệu đều được dùng nhiều hơn ở bài không chồng lấn, <strong>trừ Orkut</strong>.</li>
+      </ul>
+      <p class="note">Người giải thích đã cộng các cột Hình 9 và 10: hầu hết khớp với Bảng 6 và Bảng 7; lệch 1 bài ở Accuracy (≈ 58 so với 59) và Orkut (≈ 11 so với 12), có thể do đọc biểu đồ.</p>
+
+      <h3>Giải thích xu hướng: từ không giám sát sang bán giám sát và học sâu</h3>
+      <ul>
+        <li><strong>Đến 2022</strong>, không giám sát và phân cụm được dùng rộng rãi vì tự tìm mẫu, quan hệ, cấu trúc mà không cần nhãn; chúng có thể phát hiện nhóm mà con người chưa biết.</li>
+        <li>Về sau thấy rằng chúng <strong>chưa đủ hiệu quả</strong> với mạng rất lớn (khối lượng nội dung, tương tác quá lớn), khó xử lý dữ liệu không đồng nhất (văn bản, ảnh, liên kết), và chưa thích nghi tốt với mạng động. Vì vậy chúng thường được kết hợp với phương pháp khác.</li>
+        <li><strong>Từ 2022</strong>, bán giám sát tăng, và gần đây học sâu được dùng thường xuyên. Bán giám sát dùng được cả dữ liệu có và không nhãn, cho cái nhìn chính xác hơn về cấu trúc cộng đồng; học sâu trích được quan hệ phức tạp.</li>
+        <li>Các bài gần đây [A216], [A221], [A226], [A232], [A237], [A239], [A241]–[A244] được nêu làm ví dụ.</li>
+      </ul>
+      <div class="warn"><p>Nhận định “không giám sát chiếm ưu thế đến 2022, sau đó bán giám sát và học sâu dẫn đầu” (và câu trong tóm tắt về học sâu tăng mạnh từ 2020) không đi kèm bảng số theo năm × loại học máy trong bài chính; dữ liệu đó nằm ở Phụ lục trực tuyến A (Bảng 4). Người đọc chỉ bài chính không tự kiểm tra được. Cũng trong đoạn này (tr. 7248) bài viết “karate và LFR lần lượt là bộ dữ liệu <em>tổng hợp</em> và <em>thật</em> phổ biến nhất”, bị đảo ngược: Karate là mạng thật, LFR là mạng tổng hợp (chính bài nói đúng ở tr. 7241).</p></div>
+    </section>
+
+    <section id="do-phuc-tap">
+      <h2>Độ phức tạp tính toán theo từng loại học máy</h2>
+      <p>Độ phức tạp của thuật toán đồ thị thường phụ thuộc số nút và số cạnh. Bảng 10 tóm tắt các yếu tố làm tăng chi phí tính toán:</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <caption>Bảng 10: yếu tố ảnh hưởng độ phức tạp, lợi ích và hạn chế tiềm năng</caption>
+          <thead><tr><th>Loại</th><th>Yếu tố</th><th>Lợi ích</th><th>Hạn chế</th></tr></thead>
+          <tbody>
+            <tr><td>Có giám sát</td><td>Kích thước dữ liệu huấn luyện; số đặc trưng; tốc độ hội tụ</td><td>Chính xác cao khi đủ dữ liệu; hiệu năng cao</td><td>Tốn tài nguyên; phức tạp; hội tụ chậm; chi phí cao</td></tr>
+            <tr><td>Không giám sát</td><td>Số cộng đồng; cách đặt giá trị khởi đầu</td><td>Tìm mẫu ẩn; phân cụm chi tiết; kết quả chính xác</td><td>Chi phí cao; phụ thuộc giá trị khởi đầu; cần nhiều vòng lặp</td></tr>
+            <tr><td>Bán giám sát</td><td>Tỉ lệ dữ liệu có/không nhãn; độ tinh vi thuật toán</td><td>Cần ít nhãn; xử lý được việc phức tạp</td><td>Phức tạp; tốn bộ nhớ</td></tr>
+            <tr><td>Học sâu</td><td>Kích thước và độ phức tạp mạng nơ-ron; batch size</td><td>Chính xác, thích nghi; huấn luyện nhanh với batch lớn; tránh quá khớp</td><td>Hội tụ chậm; tốn bộ nhớ; khó mở rộng</td></tr>
+            <tr><td>Ensemble</td><td>Số mô hình nền</td><td>Hiệu năng cao; dự đoán bền vững; chính xác hơn</td><td>Chi phí xử lý cao; tốn tài nguyên; khó mở rộng</td></tr>
+            <tr><td>Dựa trên mẫu</td><td>Tính toán khi dự đoán</td><td>Đơn giản, trực quan; dự đoán nhanh</td><td>Quá khớp; chi phí tiền xử lý cao</td></tr>
+            <tr><td>Tăng cường</td><td>Kích thước không gian trạng thái và hành động; cân bằng khám phá/khai thác</td><td>Giải được việc phức tạp; học tối ưu</td><td>Tốn tài nguyên; mất cân bằng; hội tụ chậm; kém nhất quán</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>Có giám sát:</strong> dữ liệu huấn luyện và số đặc trưng (ví dụ thuộc tính nút) quyết định thời gian và bộ nhớ; tốc độ hội tụ của thuật toán huấn luyện như gradient descent cũng ảnh hưởng.</li>
+        <li><strong>Không giám sát:</strong> phụ thuộc mạnh vào thuật toán. Phân cụm phổ cần phân rã trị riêng, tốn kém hơn phân cụm thường. Số cụm mong muốn, cách khởi tạo và tiêu chí hội tụ quyết định số vòng lặp.</li>
+        <li><strong>Bán giám sát:</strong> tỉ lệ và cách trộn dữ liệu có/không nhãn; kỹ thuật dựa trên đồ thị hay dùng ma trận Jaccard nên tốn bộ nhớ.</li>
+        <li><strong>Học sâu:</strong> thiết kế mạng (GNN, GCN) quyết định chi phí; batch lớn tốn bộ nhớ nhưng có thể nhanh hơn; dropout thêm tính toán.</li>
+        <li><strong>Ensemble:</strong> chi phí tăng tuyến tính hoặc hơn theo số mô hình nền; cách gộp (bỏ phiếu, stacking) cũng tốn thêm.</li>
+        <li><strong>Dựa trên mẫu:</strong> KNN phải lưu mọi điểm và tính khoảng cách; tối ưu tìm kiếm cần tiền xử lý thêm.</li>
+        <li><strong>Tăng cường:</strong> không gian trạng thái/hành động lớn, cân bằng khám phá–khai thác, phần thưởng thưa hoặc trễ đều làm tăng số vòng lặp.</li>
+      </ul>
+      <p class="note">Bảng độ phức tạp của từng thuật toán cụ thể nằm ở Phụ lục trực tuyến A (Bảng 9), không có trong bài chính.</p>
+    </section>
+
+    <section id="han-che">
+      <h2>Hạn chế của nghiên cứu (đe dọa tính hợp lệ)</h2>
+      <ul>
+        <li><strong>Phạm vi:</strong> chỉ bài tạp chí và hội nghị hợp lệ. Nhiều kết quả tìm được không liên quan, trùng hoặc không hợp lệ; tác giả chủ động chọn ít bài nhưng khớp mục tiêu.</li>
+        <li><strong>Dữ liệu:</strong> khó tìm bộ dữ liệu mạng xã hội có đặc trưng phù hợp vì dữ liệu phi cấu trúc và không đồng nhất.</li>
+        <li><strong>Chọn CSDL và chuỗi tìm kiếm:</strong> đây là hạn chế quan trọng nhất theo tác giả, vì mỗi CSDL có khả năng tìm kiếm khác nhau. ScienceDirect bị loại. Springer, ACM, IEEE phải xử lý riêng (xem phần phương pháp).</li>
+        <li><strong>Chỉ tìm trong tiêu đề, tóm tắt, từ khóa:</strong> thông tin cần thiết có khi nằm ở phần khác của bài; giảm thiểu bằng cách hai tác giả đầu đọc độc lập mọi bài ở lần tìm đầu.</li>
+        <li><strong>Thiên lệch người chọn:</strong> chọn theo cặp, người thứ ba phân xử, ghi lại mọi lý do.</li>
+        <li><strong>Thiếu tiền lệ:</strong> hầu như chưa có SMS nào về phát hiện cộng đồng mạng xã hội; các nhà nghiên cứu chưa đồng thuận về cách phân loại cộng đồng.</li>
+      </ul>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): một số đe dọa khác đáng để ý khi trích dẫn số liệu của bài. (1) Chuỗi tìm kiếm bắt buộc có cụm “social network”, nên các bài phát hiện cộng đồng trên mạng nói chung (không ghi chữ social network) bị bỏ qua dù dùng chính Karate hay LFR. (2) Từ khóa “learning”, “clustering” rất rộng nên nhóm “không giám sát / phân cụm” có thể được lợi khi đếm. (3) Mỗi bài chỉ được xếp vào một loại học máy và một loại cộng đồng, nên phương pháp lai bị đơn giản hóa. (4) Tiêu chí chất lượng 12 (trích dẫn mỗi năm) làm bài mới đăng năm 2023–2024 dễ bị điểm thấp hơn.</p></div>
+    </section>
+
+    <section id="ket-luan">
+      <h2>Hàm ý, hướng mở và kết luận</h2>
+      <h3>Hàm ý cho nghiên cứu và thực hành</h3>
+      <ul>
+        <li><strong>Phân cụm</strong> xuất hiện ở hầu hết các bài. Phân cụm phân cấp dùng nhiều; kiểu gộp (agglomerative) không cần biết trước số nhóm, nhưng hay tạo nhiều nhóm nhỏ ít thông tin.</li>
+        <li><strong>k-means</strong> dùng thường xuyên, kể cả như thuật toán phụ: nhanh, dễ, chạy được với dữ liệu lớn; nhưng phụ thuộc tâm ban đầu và phải cho trước số cộng đồng. Heuristic tham lam được dùng để cải thiện chất lượng.</li>
+        <li><strong>DBSCAN</strong> chịu nhiễu nhưng kém khi mật độ cụm khác nhau; các biến thể SCAN nhanh nhưng phụ thuộc ngưỡng tương đồng tối thiểu.</li>
+        <li><strong>Phương pháp phổ</strong> ít dùng: tách cộng đồng tốt hơn phương pháp dựa trên tương đồng, tối thiểu hàm cắt, nhưng độ phức tạp cao nên chỉ hợp với mạng nhỏ.</li>
+        <li>Mô hình truyền thống ít phù hợp với cấu trúc phức tạp thực tế. Tác giả nhận định các phương pháp <strong>tối ưu modularity</strong> cho kết quả thành công hơn theo độ chính xác, và nhắc tới LPA, Node2vec, Infomap, Louvain.</li>
+        <li><strong>Học sâu</strong> mô hình hóa được cả dữ liệu nhiều chiều và ít chiều, đủ tốt với dữ liệu lớn nhờ nắm đặc trưng phức tạp, nhưng bị giới hạn bởi mẫu trong dữ liệu đầu vào.</li>
+        <li>Phương pháp truyền thống thường chỉ xét cấu trúc mạng, bỏ qua <strong>thuộc tính nút</strong> (tuổi, giới tính…). Cân bằng giữa thông tin cục bộ và góc nhìn toàn cục/ngữ nghĩa giúp tránh kẹt cực trị địa phương.</li>
+        <li><strong>NMI</strong> phổ biến vì so được hai cách chia có số cụm khác nhau; <strong>modularity</strong> được coi là thước đo độ phù hợp của cộng đồng được chấp nhận rộng rãi nhất.</li>
+        <li>Năm mạng thật có cấu trúc cộng đồng biết trước được dùng nhiều nhất: Karate, Football, Dolphin, Facebook, DBLP. Karate phổ biến vì không có cạnh bội, không có khuyên (loop) và có sẵn công khai. LFR là bộ tổng hợp dùng nhiều nhất vì có phân bố luật lũy thừa, bậc nút không đồng đều và kích thước cộng đồng khác nhau, giống mạng thật.</li>
+      </ul>
+      <div class="eli5"><p>Nhận xét thêm của người giải thích (không có trong bài): câu “tối ưu modularity thành công hơn theo độ chính xác” không có số liệu nào trong bài đi kèm; SMS chỉ đếm bài, không so sánh hiệu quả. Nên xem đó là nhận định của tác giả.</p></div>
+
+      <h3>Hướng nghiên cứu tương lai</h3>
+      <ul>
+        <li>Khả năng mở rộng: xử lý song song, tính toán phân tán.</li>
+        <li>Phát hiện cộng đồng <strong>thời gian thực</strong> (giám sát mạng xã hội, an ninh mạng).</li>
+        <li>Mạng <strong>động</strong>: theo dõi cộng đồng thay đổi theo thời gian.</li>
+        <li>Mạng <strong>nhiều lớp</strong> (multilayer, multiplex).</li>
+        <li>Kết hợp <strong>thuộc tính nút</strong> và metadata; mạng không đồng nhất.</li>
+        <li>Học máy, học sâu, GNN, phương pháp có giám sát và bán giám sát để tăng độ chính xác và khả năng mở rộng.</li>
+        <li><strong>Lý thuyết trò chơi</strong> cho cấu trúc cộng đồng ổn định và khai báo thành viên trung thực.</li>
+        <li>Độ đo và benchmark mạnh hơn cho mạng động, nhiều lớp, có thuộc tính.</li>
+        <li>Tổng quan về phương pháp lấy cảm hứng từ tự nhiên (nature-inspired) và trí tuệ nhân tạo.</li>
+        <li>Phân tích cấu trúc topo khi mạng <strong>thiếu cạnh</strong> hoặc có đồ thị con cô lập.</li>
+      </ul>
+
+      <h3>Kết luận của tác giả</h3>
+      <p>246 bài (2000–2024) trả lời bốn câu hỏi nghiên cứu. Không giám sát phổ biến nhất đến 2022, sau đó bán giám sát và học sâu dẫn đầu. Độ đo dùng nhiều nhất: NMI, modularity, F-measure. Bộ dữ liệu phổ biến nhất: Karate và LFR. Về độ phức tạp: có giám sát tăng theo dữ liệu và đặc trưng; phân cụm phổ nặng; bán giám sát và học sâu phức tạp vì phải tích hợp dữ liệu và chịu ảnh hưởng của kích thước mạng. Hai khoảng trống lớn: <strong>tính động cao</strong> của mạng xã hội và <strong>dữ liệu đa phương tiện</strong> (văn bản, ảnh, video, hành vi). Vì vậy các phương pháp gần đây chuyển sang <strong>lai ghép</strong> để cùng lúc xử lý độ chính xác, tính động và tính không đồng nhất. Ứng dụng: tiếp thị, chính trị, xã hội học, khoa học dữ liệu.</p>
+    </section>
+
+    <section id="loi">
+      <h2>Tổng hợp lỗi và điểm chưa khớp trong bài</h2>
+      <p>Người giải thích đã đối chiếu với file PDF. Số trang theo đánh số của tạp chí (trang PDF = trang tạp chí − 7204).</p>
+      <div class="table-wrap">
+        <table class="grid small">
+          <thead><tr><th>Trang</th><th>Vấn đề</th><th>Mức độ</th></tr></thead>
+          <tbody>
+            <tr><td>7215</td><td>Phần thu thập dữ liệu nói “năm câu hỏi nghiên cứu”, nhưng bài chỉ có bốn RQ (kết luận cũng nói “four RQs”).</td><td>Nhỏ</td></tr>
+            <tr><td>7215–7216</td><td>“USA (13.41%)” ở mức châu lục là 33 bài, trong khi Mỹ chỉ có 26 bài (10.56%); cột “USA” trong Hình 3 có lẽ là châu Mỹ.</td><td>Trung bình</td></tr>
+            <tr><td>7213 và 7217</td><td>Số tài liệu mỗi CSDL sau loại trùng: Bảng 2 ghi Scopus 104, IEEE 84, ACM 38, WoS 76, Springer 137; Hình 5 ghi 103, 84, 40, 74, 138. Tổng đều là 439.</td><td>Nhỏ</td></tr>
+            <tr><td>7218</td><td>Lời văn ghi không giám sát “1.46%” thay vì 41.46%.</td><td>Lỗi đánh máy</td></tr>
+            <tr><td>Nhiều bảng</td><td>Phần trăm bị <strong>cắt</strong> thay vì làm tròn: 26/246 = 10.569% ghi 10.56; 47/246 = 19.106% ghi 19.10; 15/246 = 6.098% ghi 6.09; 164/246 = 66.667% ghi 66.66. Sai lệch ≤ 0.01 điểm phần trăm, không ảnh hưởng kết luận.</td><td>Rất nhỏ</td></tr>
+            <tr><td>7239–7240</td><td>Công thức F, P, R thiếu ngoặc; gọi tên ARI nhưng ghi công thức Rand index; giải thích precision theo nghĩa đo lường.</td><td>Nhỏ</td></tr>
+            <tr><td>7241</td><td>LFR được ghi là “do Girvan và Newman đề xuất”; thực ra do Lancichinetti, Fortunato, Radicchi.</td><td>Trung bình</td></tr>
+            <tr><td>7241</td><td>Chú thích 2 (trung bình 0.87%) chép công thức của độ đo, thiếu “× 100” và vẫn ghi “metric”. “118 bộ dữ liệu trong 255 bài” là số <em>lượt dùng</em>, vì chỉ có 246 bài.</td><td>Nhỏ</td></tr>
+            <tr><td>7232/7242, 7233/7243</td><td>Số cạnh Citeseer và kích thước Wikipedia giữa bảng và lời văn khác nhau.</td><td>Nhỏ</td></tr>
+            <tr><td>7235, 7243</td><td>“2.03% dùng dữ liệu tổng hợp” thực chất là “chỉ dùng dữ liệu tổng hợp”; dữ liệu tổng hợp có mặt ở ít nhất 79 bài (32.11%).</td><td>Dễ gây hiểu sai</td></tr>
+            <tr><td>7245 và 7216</td><td>Hình 8 (năm × loại cộng đồng) không khớp Hình 2 (năm), ví dụ 2024: khoảng 29 so với 10 bài.</td><td>Trung bình</td></tr>
+            <tr><td>7245</td><td>Hình 7: bán giám sát không chồng lấn đọc được khoảng 30, cộng 18 chồng lấn ra khoảng 48, so với 52 ở Bảng 4; tổng không chồng lấn khoảng 163 so với 167 ở Bảng 9 (đọc từ biểu đồ, không chắc chắn).</td><td>Chưa chắc</td></tr>
+            <tr><td>7248</td><td>“Karate và LFR lần lượt là bộ tổng hợp và thật phổ biến nhất”: đảo ngược.</td><td>Nhỏ</td></tr>
+            <tr><td>7248, 7252</td><td>Nhận định về xu hướng theo năm của từng loại học máy dựa trên Phụ lục, không kiểm tra được từ bài chính.</td><td>Lưu ý</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Các phần đã kiểm tra và <strong>khớp</strong>: tổng hàng/cột Bảng 1 và 2; Bảng 3 (439 − 125 = 314); snowballing (221 + 20 + 5 = 246); Bảng 4 và Bảng 9 cộng đúng 246; các phân nhóm con Bảng 5 cộng đúng tổng từng loại; Hình 2 cộng ra 138 tạp chí và 108 hội nghị; Hình 4 cộng ra 246 bài và 42 nước; trung bình 0.94% của độ đo ít dùng.</p>
+    </section>
+
+    <section id="thuat-ngu">
+      <h2>Bảng thuật ngữ</h2>
+      <dl class="terms">
+        <dt>Systematic mapping study (SMS)</dt><dd>Nghiên cứu lập bản đồ hệ thống: phân loại và thống kê các bài trong một lĩnh vực để thấy xu hướng và khoảng trống.</dd>
+        <dt>Systematic literature review (SLR)</dt><dd>Tổng quan tài liệu có hệ thống: tổng hợp bằng chứng về hiệu quả cho câu hỏi hẹp.</dd>
+        <dt>Primary study</dt><dd>Nghiên cứu sơ cấp: các bài gốc được đưa vào bản đồ (ở đây A1–A246).</dd>
+        <dt>Inclusion / exclusion criteria</dt><dd>Tiêu chí chọn / loại bài.</dd>
+        <dt>Quality assessment</dt><dd>Đánh giá chất lượng bài theo bộ câu hỏi chấm điểm.</dd>
+        <dt>Snowballing</dt><dd>Tìm thêm bài qua danh mục tham khảo (ngược) hoặc qua bài trích dẫn (xuôi).</dd>
+        <dt>Community / community detection</dt><dd>Cộng đồng: nhóm nút liên kết dày bên trong, thưa với bên ngoài. Phát hiện cộng đồng: tìm các nhóm này.</dd>
+        <dt>Disjoint / overlapping / hidden</dt><dd>Cộng đồng không chồng lấn / chồng lấn / ẩn.</dd>
+        <dt>Static / dynamic network</dt><dd>Mạng tĩnh / mạng động (thay đổi theo thời gian).</dd>
+        <dt>Attributed network</dt><dd>Mạng có thuộc tính gắn với nút hoặc cạnh.</dd>
+        <dt>NP-hard</dt><dd>NP-khó: không có cách giải chính xác nhanh khi bài toán lớn.</dd>
+        <dt>Supervised / unsupervised / semi-supervised</dt><dd>Học có giám sát / không giám sát / bán giám sát.</dd>
+        <dt>Reinforcement learning</dt><dd>Học tăng cường: học qua thưởng và phạt.</dd>
+        <dt>Ensemble learning</dt><dd>Học kết hợp nhiều mô hình (bagging, boosting, stacking, random forest).</dd>
+        <dt>Instance-based learning, k-NN</dt><dd>Học dựa trên mẫu; k láng giềng gần nhất.</dd>
+        <dt>k-means, hierarchical clustering</dt><dd>Phân cụm theo k tâm; phân cụm phân cấp (gộp dần hoặc tách dần).</dd>
+        <dt>DBSCAN</dt><dd>Phân cụm theo mật độ, coi điểm thưa là nhiễu.</dd>
+        <dt>Spectral clustering</dt><dd>Phân cụm phổ: dùng vectơ riêng của ma trận đồ thị.</dd>
+        <dt>LPA</dt><dd>Label propagation algorithm: lan truyền nhãn theo đa số hàng xóm.</dd>
+        <dt>NMF</dt><dd>Nonnegative matrix factorization: phân rã ma trận không âm.</dd>
+        <dt>EM</dt><dd>Expectation maximization: ước lượng lặp hai bước cho mô hình có biến ẩn.</dd>
+        <dt>Representation / feature learning</dt><dd>Học biểu diễn: tự học vectơ đặc trưng cho nút.</dd>
+        <dt>Autoencoder</dt><dd>Mạng nơ-ron nén rồi giải nén dữ liệu; phần nén dùng làm đặc trưng.</dd>
+        <dt>GNN, GCN</dt><dd>Mạng nơ-ron đồ thị; mạng tích chập đồ thị.</dd>
+        <dt>RNN, RBM</dt><dd>Mạng nơ-ron hồi quy; máy Boltzmann hạn chế.</dd>
+        <dt>Q-learning, policy gradient</dt><dd>Hai họ thuật toán học tăng cường.</dd>
+        <dt>Ground truth</dt><dd>Cách chia cộng đồng thật, biết trước, dùng làm đáp án.</dd>
+        <dt>NMI</dt><dd>Normalized mutual information: mức giống giữa hai cách chia, từ 0 đến 1.</dd>
+        <dt>Modularity</dt><dd>Mức cạnh trong cộng đồng vượt hơn kỳ vọng ngẫu nhiên.</dd>
+        <dt>Precision, recall, F-measure</dt><dd>Độ chính xác của phần dự đoán dương; độ phủ; trung bình điều hòa của hai số này.</dd>
+        <dt>ARI</dt><dd>Adjusted Rand index: mức đồng ý theo cặp nút, đã trừ phần ngẫu nhiên.</dd>
+        <dt>AUC-ROC</dt><dd>Diện tích dưới đường ROC.</dd>
+        <dt>Jaccard, conductance, density</dt><dd>Độ giống hai tập; tỉ lệ cạnh rò ra ngoài; tỉ lệ cạnh có so với tối đa.</dd>
+        <dt>LFR, GN benchmark</dt><dd>Mạng tổng hợp có cộng đồng cài sẵn (Lancichinetti–Fortunato–Radicchi; Girvan–Newman).</dd>
+        <dt>Synthetic data</dt><dd>Dữ liệu tổng hợp, sinh bằng thuật toán.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer>
+    <p>Nguồn: M. Nooribakhsh, M. Fernández-Diego, F. González-Ladrón-De-Guevara, M. Mollamotalebi, “Community detection in social networks using machine learning: a systematic mapping study”, <em>Knowledge and Information Systems</em> 66 (2024) 7205–7259, <a href="https://doi.org/10.1007/s10115-024-02201-8">doi:10.1007/s10115-024-02201-8</a> (CC BY 4.0). Trang giải thích viết lại bằng lời dễ hiểu; không chép danh sách 246 bài và danh mục tài liệu tham khảo; số đọc từ biểu đồ được ghi rõ là gần đúng; nhận xét riêng được ghi rõ là của người giải thích.</p>
+    <div class="next-prev"><a href="xingsu2021.html">← Bài trước: Xing Su 2021</a><a href="index.html">Danh sách bài →</a></div>
+  </footer>
+  </div>
+
+  <script src="paper.js"></script>
+</body>
+</html>
