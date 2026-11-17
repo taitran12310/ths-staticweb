@@ -15,7 +15,7 @@ ths-staticweb/
 ├── sitemap.xml · robots.txt · llms.txt # (sinh tự động) SEO / GEO
 ├── 404.html                            # Trang lỗi (viết tay)
 ├── css/site.css                        # Giao diện clay pastel (light/dark)
-├── css/style.css                       # Style cũ, vẫn dùng cho DeAn_Plan.html
+├── css/style.css                       # Style cũ, hiện không trang nào dùng
 ├── js/site.js                          # Đổi theme + lọc tìm kiếm (không bắt buộc để xem nội dung)
 ├── assets/                             # Ảnh WebP: hero, mascot, icon môn, og-cover.jpg
 ├── favicon.svg / favicon.png / apple-touch-icon.png / logo.*
