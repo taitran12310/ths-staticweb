@@ -107,6 +107,7 @@ li{margin:2px 0}
 .back-link{position:fixed;top:14px;left:16px;z-index:30;display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:#fffefc;border:1px solid #d3ddeb;color:var(--head);font-weight:600;font-size:14px;text-decoration:none;box-shadow:0 2px 8px rgba(40,60,90,.14)}
 .back-link:hover{border-color:var(--accent);color:var(--accent)}
 body{padding-top:28px}
+[id]{scroll-margin-top:60px}
 @media print{.back-link{display:none}}
 </style>
 </head>
@@ -123,10 +124,10 @@ body{padding-top:28px}
 <a href="#s1">1. Tiêu đề</a><a href="#s2">2. Bối cảnh</a><a href="#s3">3. Bài gốc: bài toán</a><a href="#s4">4. Bài gốc: phương pháp</a><a href="#s5">5. Bài gốc: kết quả</a><a href="#s6">6. Bài gốc: hạn chế</a><a href="#s7">7. Hạn chế → RQ</a><a href="#s8">8. Câu hỏi nghiên cứu</a><a href="#s9">9. Phương pháp</a><a href="#s10">10. ExecOracle</a><a href="#s11">11. Ví dụ intent</a><a href="#s12">12. Dữ liệu</a><a href="#s13">13. Thiết lập</a>
 <b>La Hoàng Tú (slide 14–24)</b>
 <a href="#s14">14. RQ1 mở đầu</a><a href="#s15">15. RQ1 kết quả</a><a href="#s16">16. RQ2 mở đầu</a><a href="#s17">17. RQ2 đổi bộ viết lại</a><a href="#s18">18. RQ2 LLM-judge</a><a href="#s19">19. RQ3 mở đầu</a><a href="#s20">20. RQ3 so với API</a><a href="#s21">21. RQ3 bỏ cắt tóm tắt</a><a href="#s22">22. RQ3 loại, vị trí</a><a href="#s23">23. RQ3 thời gian, bộ nhớ</a><a href="#s24">24. RQ3 năm bộ viết lại</a>
-<b>Võ Văn Hải (slide 25–34)</b>
+<b>Võ Văn Hải (slide 25–35)</b>
 <a href="#s25">25. RQ4 mở đầu</a><a href="#s26">26. RQ4 prompt, Best-of-3</a><a href="#s27">27. RQ4 ExecRefine</a><a href="#s28">28. RQ4 gpt-4o-mini</a><a href="#s29">29. So sánh bài gốc</a><a href="#s30">30. Đề án bổ sung</a><a href="#s31">31. Trả lời RQ</a><a href="#s32">32. Đóng góp</a><a href="#s33">33. Hạn chế</a><a href="#s34">34. Hướng phát triển</a>
 <b>Cuối</b>
-<a href="#s35">35. Cảm ơn</a><a href="#hoi">Câu hỏi có thể gặp</a><a href="#phanbien">Câu hỏi phản biện</a><a href="#vitri">Vị trí trong tài liệu</a>
+<a href="#s35">35. Cảm ơn</a><a href="#phancong">Phân công: ai làm gì</a><a href="#hoi">Câu hỏi có thể gặp</a><a href="#phanbien">Câu hỏi phản biện</a><a href="#vitri">Vị trí trong tài liệu</a>
 </nav>
 
 <h2 id="thuatngu">Thuật ngữ cần nắm trước khi trình bày</h2>
@@ -422,7 +423,7 @@ def get_min(self):
 </div></section>
 
 <!-- ===================== HẢI ===================== -->
-<h2>Phần 3. Võ Văn Hải: RQ4, so sánh, kết luận (slide 25–34)</h2>
+<h2>Phần 3. Võ Văn Hải: RQ4, so sánh, kết luận (slide 25–35)</h2>
 
 <section class="slide" id="s25"><header><span class="no">Slide 25</span><span class="tt">RQ4: cải tiến tóm tắt của mô hình nhỏ</span><span class="who">Hải</span></header><div class="body">
 <span class="lbl">Trên slide</span><div class="onslide"><div class="rqq"><span>Câu hỏi nghiên cứu 4</span>Có làm tóm tắt của mô hình nhỏ trung thực hơn được không?</div>
@@ -508,11 +509,93 @@ def get_min(self):
 <span class="lbl">Bổ sung từ tài liệu</span><div class="add">Mục 6.1, 6.4. Hướng phát triển cụ thể: tinh chỉnh SLM trên dữ liệu (mã, mutant, tóm tắt faithful) do ExecOracle tạo, sinh được hoàn toàn cục bộ; chấm tay khoảng 100 mẫu bởi hai người theo cả hai tiêu chí; nhiều bộ viết lại khác họ; mở rộng sang chương trình nhiều lớp, đa luồng, ngôn ngữ khác và mutation giống lỗi thật. Nếu có ngân sách: chạy GPT-4 trên một tập con.</div>
 </div></section>
 
-<section class="slide" id="s35"><header><span class="no">Slide 35</span><span class="tt">Xin cảm ơn</span><span class="who">Cả nhóm</span></header><div class="body">
+<section class="slide" id="s35"><header><span class="no">Slide 35</span><span class="tt">Xin cảm ơn</span><span class="who">Hải</span></header><div class="body">
 <span class="lbl">Trên slide</span><p>“Xin cảm ơn. Câu hỏi và góp ý”, kèm hình minh hoạ LLM.</p>
 <span class="lbl">Nói gì</span><div class="say">“Nhóm xin cảm ơn thầy cô và các bạn đã lắng nghe. Nhóm sẵn sàng nhận câu hỏi và góp ý.”</div>
-<span class="lbl">Phân công trình bày (không có trên slide)</span><div class="add">Trần Tuấn Tài: slide 1–13 (bối cảnh, bài gốc, câu hỏi nghiên cứu, phương pháp). La Hoàng Tú: slide 14–24 (RQ1, RQ2, RQ3). Võ Văn Hải: slide 25–34 (RQ4, so sánh với bài gốc, kết luận). Cả nhóm: slide 35 và phần hỏi đáp.</div>
+<span class="lbl">Phân công trình bày (không có trên slide)</span><div class="add">Trần Tuấn Tài: slide 1–13 (tổng quan bài báo gốc, phương pháp nghiên cứu của đề án). La Hoàng Tú: slide 14–24 (RQ1 đến RQ3). Võ Văn Hải: slide 25–35 (RQ4, kết luận, demo). Cả nhóm: phần hỏi đáp. Ai làm phần nào: xem <a href="#phancong">mục Phân công</a>.</div>
 </div></section>
+
+<h2 id="phancong">Phân công: trả lời nếu được hỏi ai làm phần nào</h2>
+<p class="sub">Không có trên slide. Cả ba nói cùng một phiên bản, khớp với commit, tin nhắn và file kết quả thật của nhóm.</p>
+
+<div class="card">
+<h3>Nội dung trình bày</h3>
+<ul>
+<li><b>Tài:</b> slide 1–13 (tổng quan bài báo gốc, phương pháp nghiên cứu của đề án).</li>
+<li><b>Tú:</b> slide 14–24 (RQ1 đến RQ3).</li>
+<li><b>Hải:</b> slide 25–35 (RQ4, kết luận, demo).</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Quy trình làm việc chung</h3>
+<p>Mỗi người phát triển và thử phần của mình trên máy riêng, rồi đưa code lên repo chung. Mọi lượt chạy chính thức để lấy số liệu báo cáo đều chạy trên một máy M1 cố định, để thời gian, bộ nhớ và kết quả cùng một cấu hình và so sánh được với nhau.</p>
+</div>
+
+<div class="card">
+<h3>1. Trần Tuấn Tài: trưởng nhóm, phương pháp và hệ thống chấm (máy M1, slide 1–13)</h3>
+<ul>
+<li><b>Bài gốc:</b> đọc và phân tích bài của Khatib và cộng sự, rút ra hạn chế, đặt bốn câu hỏi nghiên cứu.</li>
+<li><b>Phương pháp:</b> thiết kế cách chấm bằng chạy mã (ExecOracle): tóm tắt → viết lại code từ tóm tắt → chạy test, so với bản gốc và bản đã sửa.</li>
+<li><b>Pipeline:</b>
+<ul><li>chuẩn bị dữ liệu 100 bài LBPP và sinh mutation tự động;</li>
+<li>viết khung gọi mô hình (MLX cục bộ và API), bộ nhớ đệm, sandbox chạy test.</li></ul></li>
+<li><b>Chạy chính thức:</b>
+<ul><li>quản lý máy M1 và chạy các lượt Qwen 3B cho RQ3 và RQ4;</li>
+<li>đo thời gian và bộ nhớ;</li>
+<li>kiểm tra code các bạn gửi về trước khi chạy.</li></ul></li>
+<li><b>Tổng hợp:</b> ghép tài liệu, bài báo và slide, thống nhất số liệu và văn phong.</li>
+</ul>
+<div class="say">“Em thiết kế phương pháp chấm và xây pipeline. Các thí nghiệm chính thức chạy trên máy M1 của em.”</div>
+</div>
+
+<div class="card">
+<h3>2. La Hoàng Tú: đánh giá và phân tích RQ1–RQ3 (máy M2, slide 14–24)</h3>
+<ul>
+<li><b>RQ1:</b> chạy gpt-4o-mini qua API làm mốc, so với GPT-4 của bài gốc (50,0% so với 49,3%).</li>
+<li><b>RQ2, độ tin cậy của cách chấm:</b>
+<ul><li>thử đổi bộ viết lại, rồi chấm bằng 5 bộ viết lại;</li>
+<li>so cách chấm bằng chạy mã với LLM-judge.</li></ul></li>
+<li><b>RQ3:</b>
+<ul><li>phát triển và chạy thử phần đánh giá Qwen 3B trên M2;</li>
+<li>viết phân tích theo loại và vị trí mutation, so Qwen 3B với API, kiểm định thống kê;</li>
+<li>lượt chạy chính thức thì gửi cấu hình để chạy trên M1.</li></ul></li>
+<li><b>Sản phẩm:</b> script thống kê, bảng và biểu đồ RQ1–RQ3, chương kết quả tương ứng trong tài liệu và bài báo.</li>
+</ul>
+<div class="say">“Em phụ trách đánh giá: mốc API, kiểm tra cách chấm có tin cậy không, và so mô hình nhỏ với API.”</div>
+</div>
+
+<div class="card">
+<h3>3. Võ Văn Hải: cải tiến tóm tắt, so sánh và kết luận (máy Windows, slide 25–35)</h3>
+<ul>
+<li><b>RQ4, thiết kế và cài đặt:</b> viết các biến thể prompt, cài Best-of-3 và ExecRefine (cho mô hình tự sửa tóm tắt dựa trên kết quả chạy).</li>
+<li><b>Chạy trên Windows:</b>
+<ul><li>chạy phần gpt-4o-mini của RQ4 qua API;</li>
+<li>kiểm tra sandbox và bản Docker chạy được ngoài Mac.</li></ul></li>
+<li><b>Phần Qwen của RQ4:</b> gửi code và cấu hình để chạy chính thức trên M1, sau đó phân tích kết quả.</li>
+<li><b>So sánh và kết luận:</b> so với bài gốc (cùng bức tranh, khác cách đo), nêu đóng góp, hạn chế và hướng phát triển.</li>
+</ul>
+<div class="say">“Em phụ trách cải tiến tóm tắt và phần so sánh, kết luận. Phần mô hình nhỏ chạy chính thức trên M1 cho cùng cấu hình.”</div>
+</div>
+
+<div class="card">
+<h3>Việc cả nhóm cùng làm</h3>
+<ul>
+<li><b>Văn bản:</b> mỗi người viết chương ứng với phần mình trong tài liệu và bài báo.</li>
+<li><b>Slide:</b> cùng làm.</li>
+<li><b>Rà soát số liệu chéo:</b> Tú kiểm tra số liệu của Hải, Hải kiểm tra của Tú, Tài kiểm tra cuối.</li>
+<li><b>Hỏi đáp:</b> cả nhóm cùng trả lời.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>Để trả lời vững</h3>
+<ul>
+<li>Mỗi người chỉ ra được 1–2 file code hoặc bảng kết quả cụ thể của mình.</li>
+<li>Ai cũng giải thích được ba bước của ExecOracle.</li>
+<li>Không ai nhận số liệu đo trên máy mình nếu không đo thật.</li>
+</ul>
+</div>
 
 <h2 id="hoi">Câu hỏi có thể gặp</h2>
 <details><summary>“Sao không dùng GPT-4 như bài gốc?”</summary><p>Chi phí khoảng 17 USD cho 259 mutant, vượt ngân sách nhóm có thể chi cho đề án. Dữ liệu công bố của bài gốc không có mutant LBPP và test để chấm lại tóm tắt GPT-4. Nhóm nói rõ RQ1 là tái lập khái niệm (xem <a href="#chuy-rq1">chú ý</a>).</p></details>
