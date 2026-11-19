@@ -21,8 +21,8 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 
 ## Công nghệ phần mềm tiên tiến
 
-- [Đọc hiểu đề án MutSum](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_DocHieu.html): DoAn_DocHieu.html, cập nhật 18/11/2026, 268.1 KB
-- [Đề án: Đánh giá độ trung thực của tóm tắt mã nguồn do mô hình ngôn ngữ nhỏ chạy cục bộ sinh ra bằng phân tích đột biến và oracle thực thi](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_Slide.html): DoAn_Slide.html, cập nhật 18/11/2026, 218.4 KB
+- [Đọc hiểu đề án MutSum](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_DocHieu.html): DoAn_DocHieu.html, cập nhật 18/11/2026, 289.6 KB
+- [Đề án: Đánh giá độ trung thực của tóm tắt mã nguồn do mô hình ngôn ngữ nhỏ chạy cục bộ sinh ra bằng phân tích đột biến và oracle thực thi](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_Slide.html): DoAn_Slide.html, cập nhật 18/11/2026, 238.1 KB
 - [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver2.html): TieuLuan_ver2.html, cập nhật 31/10/2026, 213.8 KB
 - [ERD Studio — Buổi 9](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/BaiTapBuoi9_ERD-viewer.html): BaiTapBuoi9_ERD-viewer.html, cập nhật 31/10/2026, 180.3 KB
 - [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver1.html): TieuLuan_ver1.html, cập nhật 23/10/2026, 209.6 KB
