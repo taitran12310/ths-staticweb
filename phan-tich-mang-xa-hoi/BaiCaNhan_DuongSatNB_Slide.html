@@ -257,7 +257,7 @@
     <div class="flow">
       <div class="step"><div class="no">01</div><div class="tt">Crawl HeartRails</div><div class="dd">646 request API: tỉnh → tuyến → ga</div></div>
       <div class="arr">→</div>
-      <div class="step"><div class="no">02</div><div class="tt">MLIT N02</div><div class="dd">Công ty vận hành, loại tuyến</div></div>
+      <div class="step"><div class="no">02</div><div class="tt">MLIT N02</div><div class="dd">Công ty vận hành, loại tuyến, km đường ray</div></div>
       <div class="arr">→</div>
       <div class="step"><div class="no">03</div><div class="tt">Crawl ODPT</div><div class="dd">Giờ tàu, giá vé (chờ key)</div></div>
       <div class="arr">→</div>
@@ -338,11 +338,11 @@
   <!-- 6. MLIT -->
   <section class="slide" data-title="MLIT N02">
     <p class="kicker"><i></i>Lấy dữ liệu · <code>src/02_fetch_mlit_n02.py</code></p>
-    <h2>MLIT N02: bổ sung công ty vận hành và loại tuyến</h2>
+    <h2>MLIT N02: công ty vận hành, loại tuyến, km đường ray</h2>
     <div class="grid g2 fill">
       <div class="card">
         <h3>Tải về và đọc</h3>
-        <p>Tải file <code>N02-25_GML.zip</code>, đọc lớp <b>Station</b> (GeoJSON). Các trường dùng:</p>
+        <p>Tải file <code>N02-25_GML.zip</code>, đọc lớp <b>Station</b> (ga) và <b>RailroadSection</b> (21.933 đoạn ray). Các trường dùng:</p>
         <table>
           <tbody>
             <tr><td><code>N02_001</code></td><td><span class="jp">鉄道区分</span> <span class="ro">tetsudō kubun</span> <span class="vi">(phân loại kỹ thuật: đường sắt thường, tàu điện mặt đường…)</span></td></tr>
@@ -360,7 +360,10 @@
           <li>Tuyến Shinkansen <span class="vi">(tàu cao tốc)</span> chỉ được ghép với Shinkansen, tránh lỗi 東海道新幹線 <span class="ro">Tōkaidō Shinkansen</span> bị ghép nhầm sang 東海道線 <span class="ro">Tōkaidō-sen</span>.</li>
           <li>Xử lý ngoại lệ: Osaka Metro (pháp lý là “軌道” <span class="ro">kidō</span> <span class="vi">(đường ray kiểu tàu điện)</span>), tàu điện ngầm Sapporo bánh cao su, tàu điện 都電荒川線 <span class="ro">Toden Arakawa</span>.</li>
         </ul>
-        <div class="stat" style="margin-top:12px"><div class="n">596 / 598</div><div class="l">tuyến ghép được công ty vận hành + loại tuyến</div></div>
+        <div class="grid g2" style="margin-top:12px;gap:12px">
+          <div class="stat"><div class="n">596 / 598</div><div class="l">tuyến ghép được công ty + loại tuyến</div></div>
+          <div class="stat"><div class="n">98,9%</div><div class="l">cặp ga kề có km đường ray thật (<code>02b_rail_geometry.py</code>)</div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -451,7 +454,7 @@
         <tr class="hl"><td colspan="2"><b>Tổng cạnh</b> · cộng 10.390 node = <b>52.440 bản ghi</b> (mục tiêu ≈ 50k)</td><td class="num"><b>42.050</b></td></tr>
       </tbody>
     </table>
-    <p class="small muted" style="margin-top:16px">Cột của cạnh: <code>source, target, edge_type, line, distance_km, run_time_min, time_source, train_types, trains_per_weekday, direction_terminal</code>. Khoảng cách là đường chim bay giữa hai tọa độ, ghi rõ không phải km theo đường ray.</p>
+    <p class="small muted" style="margin-top:16px">Cột của cạnh: <code>source, target, edge_type, line, distance_km, track_km, km_source, run_time_min, time_source, train_types, trains_per_weekday, direction_terminal</code>. <code>track_km</code> = km theo đường ray thật (MLIT N02, đo dọc ray giữa hai ga kề); <code>distance_km</code> = đường chim bay, dùng cho cạnh đi bộ và 1,1% cạnh tàu chưa ghép được ray.</p>
   </section>
 
   <!-- 10. Làm sạch + romaji -->
@@ -505,8 +508,8 @@
         <span class="tag g">Cấp B · <code>05b_station_metrics.py</code></span>
         <h3 style="margin-top:6px">Ga vật lý, có trọng số km</h3>
         <ul class="small">
-          <li>9.075 ga; <b>9.624 cạnh</b>; tổng chiều dài 25.866 km.</li>
-          <li>Trọng số = km đường chim bay; đường ngắn nhất bằng Dijkstra.</li>
+          <li>9.075 ga; <b>9.624 cạnh</b>; tổng chiều dài 27.635 km.</li>
+          <li>Trọng số = <b>km đường ray thật</b> (MLIT N02); đường ngắn nhất bằng Dijkstra.</li>
           <li>Độ đo: degree, betweenness theo <b>bước</b> và theo <b>km</b>, closeness theo bước và theo km.</li>
           <li>Lý do: một chặng Shinkansen 30 km ≠ một chặng tàu thường 1 km.</li>
         </ul>
@@ -532,8 +535,8 @@
       <div class="stat"><div class="n">1,0</div><div class="l">reciprocity (tỉ lệ cạnh có chiều ngược)</div></div>
       <div class="stat"><div class="n">0,031</div><div class="l">clustering trung bình</div></div>
       <div class="stat"><div class="n">0,959</div><div class="l">modularity · 122 cộng đồng Louvain</div></div>
-      <div class="stat"><div class="n">≈ 57</div><div class="l">chặng TB giữa hai ga · ≈ 590 km</div></div>
-      <div class="stat"><div class="n">≈ 241</div><div class="l">chặng đường kính · 2.541 km</div></div>
+      <div class="stat"><div class="n">≈ 57</div><div class="l">chặng TB giữa hai ga · ≈ 624 km</div></div>
+      <div class="stat"><div class="n">≈ 241</div><div class="l">chặng đường kính · 2.736 km</div></div>
     </div>
     <div class="grid g3" style="margin-top:20px">
       <div class="callout"><p><b>Thưa + đường đi dài</b>: mạng không gian dạng chuỗi, mỗi ga chỉ nối vài ga kề — trái ngược mạng xã hội “thế giới nhỏ”.</p></div>
@@ -592,21 +595,21 @@
         <p class="small muted" style="margin-top:10px">Toàn bộ là ga trên trục <b>Tokaido Shinkansen</b>: một chặng Shinkansen dài vài chục km chỉ tính 1 bước, nên đường “ngắn nhất” luôn đi tàu cao tốc.</p>
       </div>
       <div class="card accent">
-        <h3>Theo km (Dijkstra, trọng số km)</h3>
+        <h3>Theo km đường ray (Dijkstra)</h3>
         <div class="bars">
-          <div class="bar"><span class="nm"><b>Himeji</b> <span class="jp xs">姫路</span></span><span class="t"><i style="width:100%"></i></span><span class="v">.316</span></div>
-          <div class="bar"><span class="nm"><b>Okayama</b> <span class="jp xs">岡山</span></span><span class="t"><i style="width:97%"></i></span><span class="v">.307</span></div>
-          <div class="bar"><span class="nm"><b>Aioi</b> <span class="jp xs">相生</span></span><span class="t"><i style="width:93%"></i></span><span class="v">.294</span></div>
-          <div class="bar"><span class="nm"><b>Kyoto</b></span><span class="t"><i style="width:79%"></i></span><span class="v">.249</span></div>
-          <div class="bar"><span class="nm"><b>Nagoya</b></span><span class="t"><i style="width:77%"></i></span><span class="v">.243</span></div>
-          <div class="bar"><span class="nm"><b>Hiroshima</b></span><span class="t"><i style="width:76%"></i></span><span class="v">.239</span></div>
+          <div class="bar"><span class="nm"><b>Yamashina</b> <span class="jp xs">山科</span></span><span class="t"><i style="width:100%"></i></span><span class="v">.348</span></div>
+          <div class="bar"><span class="nm"><b>Okayama</b> <span class="jp xs">岡山</span></span><span class="t"><i style="width:92%"></i></span><span class="v">.320</span></div>
+          <div class="bar"><span class="nm"><b>Himeji</b> <span class="jp xs">姫路</span></span><span class="t"><i style="width:91%"></i></span><span class="v">.318</span></div>
+          <div class="bar"><span class="nm"><b>Nishi-Akashi</b> <span class="jp xs">西明石</span></span><span class="t"><i style="width:90%"></i></span><span class="v">.313</span></div>
+          <div class="bar"><span class="nm"><b>Kyoto</b></span><span class="t"><i style="width:89%"></i></span><span class="v">.310</span></div>
+          <div class="bar"><span class="nm"><b>Aioi</b> <span class="jp xs">相生</span></span><span class="t"><i style="width:87%"></i></span><span class="v">.304</span></div>
         </div>
-        <p class="small muted" style="margin-top:10px">Nút thắt thật trên hành lang <b>San'yo</b> nối Kansai với Chugoku – Kyushu: gần như mọi lộ trình Đông ↔ Tây đều phải qua.</p>
+        <p class="small muted" style="margin-top:10px">Nút thắt ở <b>cửa ngõ Kyoto</b> (Yamashina: Tokaido + Kosei nhập vào) và hành lang <b>San'yo</b> nối Kansai với Chugoku – Kyushu. Nơi Shinkansen song song tuyến thường, hạng từng ga nhạy với chênh lệch km nhỏ → đọc theo hành lang.</p>
       </div>
     </div>
     <div class="grid g3" style="margin-top:16px">
-      <div class="stat"><div class="n">0,61</div><div class="l">tương quan hạng Spearman giữa hai cách đo</div></div>
-      <div class="stat"><div class="n">6 / 20</div><div class="l">ga trùng nhau trong top 20</div></div>
+      <div class="stat"><div class="n">0,56</div><div class="l">tương quan hạng Spearman giữa hai cách đo</div></div>
+      <div class="stat"><div class="n">3 / 20</div><div class="l">ga trùng nhau trong top 20</div></div>
       <div class="stat"><div class="n">k = 300</div><div class="l">betweenness cấp A lấy mẫu 300 nguồn, seed 42</div></div>
     </div>
   </section>
@@ -621,11 +624,11 @@
         <table>
           <thead><tr><th>Ga</th><th class="num">Closeness</th><th class="num">km TB</th></tr></thead>
           <tbody>
-            <tr><td><b>Nagoya</b> <span class="jp xs">名古屋</span></td><td class="num">2,430</td><td class="num">≈ 411</td></tr>
-            <tr><td>Kokusai Center <span class="jp xs">国際センター</span></td><td class="num">2,427</td><td class="num">≈ 412</td></tr>
-            <tr><td>Fushimi <span class="jp xs">伏見</span></td><td class="num">2,427</td><td class="num">≈ 412</td></tr>
-            <tr><td>Sakae <span class="jp xs">栄</span></td><td class="num">2,426</td><td class="num">≈ 412</td></tr>
-            <tr><td class="muted">Shinjuku (so sánh)</td><td class="num muted">2,110</td><td class="num muted">≈ 474</td></tr>
+            <tr><td><b>Nagoya</b> <span class="jp xs">名古屋</span></td><td class="num">2,284</td><td class="num">≈ 438</td></tr>
+            <tr><td>Fushimi <span class="jp xs">伏見</span></td><td class="num">2,283</td><td class="num">≈ 438</td></tr>
+            <tr><td>Sakae <span class="jp xs">栄</span></td><td class="num">2,283</td><td class="num">≈ 438</td></tr>
+            <tr><td>Kokusai Center <span class="jp xs">国際センター</span></td><td class="num">2,283</td><td class="num">≈ 438</td></tr>
+            <tr><td class="muted">Shinjuku (so sánh)</td><td class="num muted">2,007</td><td class="num muted">≈ 498</td></tr>
           </tbody>
         </table>
         <p class="small muted" style="margin-top:10px">Top toàn là ga trung tâm Nagoya: tâm hình học của mạng nằm ở vùng Chubu. Tính trên thành phần lớn nhất.</p>
@@ -697,7 +700,7 @@
     <table>
       <thead><tr><th style="width:5%">#</th><th style="width:28%">Độ đo</th><th>Trả lời câu hỏi</th><th style="width:15%">Mức độ</th></tr></thead>
       <tbody>
-        <tr class="hl"><td>1</td><td><b>Betweenness theo km</b> (ga vật lý)</td><td>Q1 — ga cầu nối, điểm nghẽn giữa các vùng: Himeji, Okayama</td><td><span class="tag g">Quan trọng nhất</span></td></tr>
+        <tr class="hl"><td>1</td><td><b>Betweenness theo km</b> (ga vật lý)</td><td>Q1 — ga cầu nối, điểm nghẽn giữa các vùng: cửa ngõ Kyoto (Yamashina), Okayama, Himeji</td><td><span class="tag g">Quan trọng nhất</span></td></tr>
         <tr><td>2</td><td><b>Degree / số tuyến</b></td><td>Q2 — ga đầu mối trung chuyển: Tokyo, Omiya, Yokohama</td><td><span class="tag g">Quan trọng</span></td></tr>
         <tr><td>3</td><td><b>Closeness theo km</b></td><td>Ga ở “trung tâm” địa lý của mạng: Nagoya</td><td><span class="tag g">Quan trọng</span></td></tr>
         <tr><td>4</td><td><b>Louvain + SCC/WCC</b></td><td>Q3, Q4 — cụm vùng, mạng tách rời</td><td><span class="tag g">Quan trọng</span></td></tr>
@@ -734,9 +737,9 @@
     <p class="kicker"><i></i>Ứng dụng · <code>web/route.html</code></p>
     <h2>Tìm đường giữa hai ga</h2>
     <div class="grid g-6-4 fill">
-      <figure><img class="shot" src="slide-art/rail-web-route.jpg" width="800" height="500" alt="Lộ trình Tokyo đến Himeji: 19 chặng, 1 lần chuyển tuyến, 564,8 km" loading="lazy" /><figcaption>Tokyo → Himeji: 19 chặng, 1 lần chuyển tuyến tại Shin-Osaka, 564,8 km.</figcaption></figure>
+      <figure><img class="shot" src="slide-art/rail-web-route.jpg" width="800" height="500" alt="Lộ trình Tokyo đến Himeji: 19 chặng, 1 lần chuyển tuyến, 599,9 km theo đường ray" loading="lazy" /><figcaption>Tokyo → Himeji: 19 chặng, 1 lần chuyển tuyến tại Shin-Osaka, 599,9 km theo đường ray; lộ trình vẽ theo ray thật.</figcaption></figure>
       <div class="grid" style="align-content:start">
-        <div class="card"><h3>Dijkstra, 4 tiêu chí</h3><p class="small">Ít chặng nhất · ít chuyển tuyến nhất · ngắn nhất (km) · nhanh nhất (chỉ khi có thời gian chính thức).</p></div>
+        <div class="card"><h3>Dijkstra, 4 tiêu chí</h3><p class="small">Ít chặng nhất · ít chuyển tuyến nhất · ngắn nhất (km đường ray) · nhanh nhất (chỉ khi có thời gian chính thức).</p></div>
         <div class="card"><h3>Từng chặng</h3><p class="small">Tuyến, loại tuyến, công ty, hướng về terminal nào, số ga, thời gian, loại tàu, giá vé; vẽ lộ trình lên bản đồ.</p></div>
         <div class="card warn"><h3>Trung thực với dữ liệu</h3><p class="small">Chặng chưa có dữ liệu ODPT ghi “Chưa có dữ liệu chính thức” và không cộng vào tổng.</p></div>
       </div>
@@ -748,7 +751,7 @@
     <p class="kicker"><i></i>Ứng dụng · <code>web/graph.html</code></p>
     <h2>Trực quan hóa đồ thị mạng</h2>
     <div class="grid g2">
-      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Bố cục địa lý quanh Tokyo trên nền bản đồ, màu theo cộng đồng Louvain" loading="lazy" /><figcaption><b>Địa lý</b>: 9.075 ga trên nền bản đồ, màu = cộng đồng Louvain, kích thước = betweenness theo km.</figcaption></figure>
+      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Bố cục địa lý quanh Tokyo trên nền bản đồ, màu theo cộng đồng Louvain" loading="lazy" /><figcaption><b>Địa lý</b>: 9.075 ga trên nền bản đồ, cạnh vẽ theo hình dạng đường ray thật; màu = cộng đồng Louvain, kích thước = betweenness theo km.</figcaption></figure>
       <figure><img class="shot" src="slide-art/rail-web-graph-ego.jpg" width="800" height="500" alt="Đồ thị node–cạnh quanh ga Shinjuku, 3 bước" loading="lazy" /><figcaption><b>Đồ thị</b>: mạng con node–cạnh quanh Shinjuku (3 bước, 80 ga), kéo thả, bấm đúp đổi ga trung tâm.</figcaption></figure>
     </div>
     <p class="small muted" style="margin-top:14px">Ba bố cục: <b>Địa lý</b> (tọa độ thật, Web Mercator khớp bản đồ) · <b>Lực</b> (d3-force, chỉ theo cấu trúc kết nối) · <b>Đồ thị</b> (mạng con quanh một ga). Tô màu / kích thước theo cộng đồng, loại tuyến, betweenness, closeness, số tuyến.</p>
@@ -759,7 +762,7 @@
     <p class="kicker"><i></i>Ứng dụng · ý nghĩa thực tế</p>
     <h2>Các độ đo dùng để làm gì?</h2>
     <div class="grid g2 fill">
-      <div class="card"><h3>Khả năng chống chịu (resilience)</h3><p class="small">Ga betweenness theo km cao là <b>điểm nghẽn</b>: sự cố ở Himeji / Okayama cắt đứt liên lạc Kansai ↔ Chugoku – Kyushu. Dùng để ưu tiên tuyến dự phòng, phương án chạy vòng.</p></div>
+      <div class="card"><h3>Khả năng chống chịu (resilience)</h3><p class="small">Ga betweenness theo km cao là <b>điểm nghẽn</b>: sự cố ở cửa ngõ Kyoto hay Okayama / Himeji cắt đứt liên lạc Kansai ↔ Hokuriku, Chugoku – Kyushu. Dùng để ưu tiên tuyến dự phòng, phương án chạy vòng.</p></div>
       <div class="card"><h3>Quy hoạch trung chuyển</h3><p class="small">Degree / số tuyến chỉ ra ga đầu mối (Tokyo, Omiya, Shinjuku) — nơi cần sức chứa sân ga, lối chuyển tuyến, thông tin hành khách.</p></div>
       <div class="card"><h3>Phân vùng vận hành và du lịch</h3><p class="small">Cộng đồng Louvain gần khớp vùng đô thị → gợi ý phạm vi vé ngày / vé vùng, khu vực điều độ.</p></div>
       <div class="card"><h3>Vị trí đặt dịch vụ</h3><p class="small">Closeness theo km cho thấy Nagoya gần mọi nơi nhất trên mạng → hợp đặt trung tâm điều phối, kho, sự kiện toàn quốc.</p></div>
@@ -775,7 +778,7 @@
         <h3>Hạn chế</h3>
         <ul class="small">
           <li>Chưa có thời gian chạy, loại tàu, giá vé chính thức (chờ ODPT; ODPT cũng chủ yếu phủ Kanto).</li>
-          <li>Km là <b>đường chim bay</b> giữa hai ga, không phải km đường ray.</li>
+          <li>Km đường ray là km thực, khác km tính giá vé (営業キロ <span class="ro">eigyō kiro</span>); 1,1% cạnh tàu vẫn là đường chim bay.</li>
           <li>Mạng tĩnh gộp cả ngày → không thấy được chiều đi theo giờ.</li>
           <li>Betweenness cấp A lấy mẫu k = 300; romaji tự động có thể sai một số địa danh.</li>
         </ul>
@@ -786,7 +789,6 @@
           <li>Có key ODPT: chạy 03 → 06, thêm cạnh <code>service</code> (tàu nhanh), thời gian và giá vé thật.</li>
           <li>Mô hình có trọng số theo khung giờ và mạng theo thời gian (temporal): tìm đường theo giờ xuất phát.</li>
           <li>Mô phỏng chống chịu: lần lượt bỏ các ga betweenness cao, đo thành phần liên thông lớn nhất còn lại.</li>
-          <li>Km theo đường ray từ lớp RailroadSection của MLIT.</li>
         </ul>
       </div>
     </div>
@@ -797,9 +799,9 @@
     <p class="kicker"><i></i>Kết luận</p>
     <h1 style="font-size:50px">Mạng đường sắt Nhật Bản là <span class="grad">mạng không gian</span>:<br>thưa, dạng chuỗi, chia cụm theo vùng.</h1>
     <ul style="max-width:1050px">
-      <li><b>Q1:</b> Cầu nối Đông ↔ Tây là hành lang San'yo (Himeji, Okayama, Aioi) khi đo theo km; đo theo số chặng thì lệch sang Tokaido Shinkansen.</li>
+      <li><b>Q1:</b> Cầu nối Đông ↔ Tây là cửa ngõ Kyoto (Yamashina, Kyoto) và hành lang San'yo (Okayama, Himeji, Nishi-Akashi) khi đo theo km đường ray; đo theo số chặng thì lệch sang Tokaido Shinkansen.</li>
       <li><b>Q2:</b> Đầu mối trung chuyển: Tokyo (13 tuyến), Omiya, Yokohama, Shinjuku.</li>
-      <li><b>Q3:</b> 122 cộng đồng, modularity 0,96, khớp vùng đô thị. <b>Q4:</b> 94,7% ga liên thông; TB ≈ 57 chặng / 590 km.</li>
+      <li><b>Q3:</b> 122 cộng đồng, modularity 0,96, khớp vùng đô thị. <b>Q4:</b> 94,7% ga liên thông; TB ≈ 57 chặng / 624 km.</li>
     </ul>
     <p class="small muted" style="margin-top:20px">Nguồn: HeartRails Express · 国土数値情報 N02 <span class="ro">(Kokudo Sūchi Jōhō)</span>, MLIT, CC BY 4.0 · ODPT · OpenStreetMap. Độ đo tính bằng NetworkX và python-louvain.</p>
     <p style="font-size:30px;font-weight:800;margin-top:12px">Cảm ơn thầy và các bạn đã lắng nghe!</p>

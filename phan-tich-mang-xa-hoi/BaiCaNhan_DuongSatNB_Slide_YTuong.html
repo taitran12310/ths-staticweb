@@ -234,7 +234,7 @@
       <thead><tr><th style="width:27%">Nguồn</th><th style="width:37%">Lấy được gì</th><th>Cách lấy</th><th style="width:13%">Trạng thái</th></tr></thead>
       <tbody>
         <tr><td><b>HeartRails Express API</b><br><span class="xs muted">express.heartrails.com</span></td><td>Tên ga, tuyến, tỉnh, tọa độ, mã bưu chính, <b>ga trước / ga sau</b> trên tuyến</td><td class="small">Crawl 3 cấp: <code>getPrefectures</code> (1) → <code>getLines</code> (47) → <code>getStations</code> (598) = <b>646 request</b></td><td><span class="tag g">Đã crawl</span></td></tr>
-        <tr><td><b>MLIT N02</b> <span class="jp">国土数値情報</span><br><span class="xs ro">Kokudo Sūchi Jōhō</span> <span class="xs vi">(Dữ liệu số đất đai quốc gia, Bộ Giao thông NB)</span></td><td>Công ty vận hành, loại tuyến (JR / tư nhân / tàu điện ngầm / monorail / Shinkansen…)</td><td class="small">Tải bộ GeoJSON toàn quốc, giấy phép CC BY 4.0</td><td><span class="tag g">Đã tải</span></td></tr>
+        <tr><td><b>MLIT N02</b> <span class="jp">国土数値情報</span><br><span class="xs ro">Kokudo Sūchi Jōhō</span> <span class="xs vi">(Dữ liệu số đất đai quốc gia, Bộ Giao thông NB)</span></td><td>Công ty vận hành, loại tuyến (JR / tư nhân / tàu điện ngầm / Shinkansen…), <b>hình dạng đường ray</b> → km thật</td><td class="small">Tải bộ GeoJSON toàn quốc, giấy phép CC BY 4.0</td><td><span class="tag g">Đã tải</span></td></tr>
         <tr><td><b>ODPT</b><br><span class="xs muted">Open Data for Public Transportation</span></td><td>Giờ tàu thật (thời gian chạy từng chặng), loại tàu, giá vé chính thức giữa hai ga</td><td class="small">API <code>TrainTimetable</code>, <code>TrainType</code>, <code>RailwayFare</code>; chủ yếu vùng Kanto</td><td><span class="tag a">Chờ duyệt key</span></td></tr>
       </tbody>
     </table>
@@ -256,7 +256,7 @@
       <div class="arr">→</div>
       <div class="step"><div class="no">02 · Node</div><div class="tt">Ga @ tuyến</div><div class="dd"><code>新宿@JR山手線</code>; gộp node cùng tên + cùng tỉnh + ≤ 1 km thành <b>ga vật lý</b></div></div>
       <div class="arr">→</div>
-      <div class="step"><div class="no">03 · Cạnh</div><div class="tt">Cạnh có hướng</div><div class="dd">Từ <code>prev</code>/<code>next</code>: tàu chạy A → B và B → A, ghi ga cuối theo hướng chạy, khoảng cách km</div></div>
+      <div class="step"><div class="no">03 · Cạnh</div><div class="tt">Cạnh có hướng</div><div class="dd">Từ <code>prev</code>/<code>next</code>: tàu chạy A → B và B → A, ghi ga cuối theo hướng chạy, km theo đường ray thật (MLIT)</div></div>
       <div class="arr">→</div>
       <div class="step"><div class="no">04 · Romaji</div><div class="tt">Phiên âm</div><div class="dd">渋谷 → Shibuya, 米原 → Maibara (<code>pykakasi</code> + bảng sửa tay)</div></div>
       <div class="arr">→</div>
@@ -276,7 +276,7 @@
     <p class="kicker"><i></i>Trực quan hóa</p>
     <h2>Trực quan hóa đồ thị mạng ga</h2>
     <div class="grid g2">
-      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Đồ thị ga đặt theo tọa độ thật trên nền bản đồ" loading="lazy" /><figcaption><b>Theo địa lý:</b> mỗi chấm là một ga, đặt đúng tọa độ trên nền bản đồ; đường nối là cạnh tàu chạy. Thấy rõ mạng dày ở Tokyo, Osaka và các trục dài nối các vùng.</figcaption></figure>
+      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Đồ thị ga đặt theo tọa độ thật trên nền bản đồ" loading="lazy" /><figcaption><b>Theo địa lý:</b> mỗi chấm là một ga, đặt đúng tọa độ trên nền bản đồ; cạnh tàu chạy vẽ theo hình dạng đường ray thật. Thấy rõ mạng dày ở Tokyo, Osaka và các trục dài nối các vùng.</figcaption></figure>
       <figure><img class="shot" src="slide-art/rail-web-graph-ego.jpg" width="800" height="500" alt="Đồ thị node–cạnh quanh một ga" loading="lazy" /><figcaption><b>Dạng node – cạnh:</b> mạng con quanh một ga trong vài bước, bỏ bản đồ để thấy cấu trúc kết nối: ga đầu mối nhiều nhánh, ga chuyển tuyến.</figcaption></figure>
     </div>
     <p class="small muted" style="margin-top:14px">Dự kiến: màu node theo cộng đồng, kích thước theo độ quan trọng của ga, sau khi tính độ đo.</p>
@@ -315,7 +315,7 @@
     <div class="grid g-6-4 fill">
       <figure><img class="shot" src="slide-art/rail-web-route.jpg" width="800" height="500" alt="Trang tìm đường" loading="lazy" /></figure>
       <div class="grid" style="align-content:start">
-        <div class="card"><h3>Tiêu chí</h3><ul class="small"><li>Ít chặng nhất</li><li>Ít chuyển tuyến nhất</li><li>Ngắn nhất theo km</li><li>Nhanh nhất (khi có giờ tàu ODPT)</li></ul></div>
+        <div class="card"><h3>Tiêu chí</h3><ul class="small"><li>Ít chặng nhất</li><li>Ít chuyển tuyến nhất</li><li>Ngắn nhất theo km đường ray</li><li>Nhanh nhất (khi có giờ tàu ODPT)</li></ul></div>
         <div class="card"><h3>Kết quả</h3><p class="small">Từng chặng: tuyến, hướng chạy (về ga cuối nào), số ga, thời gian, giá vé; lộ trình vẽ trên bản đồ.</p></div>
         <div class="card warn"><p class="small">Thời gian, giá vé chỉ hiện khi có dữ liệu chính thức; thiếu thì ghi “chưa có dữ liệu”.</p></div>
       </div>
