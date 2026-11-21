@@ -9,7 +9,7 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 - [Giải thuật nâng cao](https://taitran12310.github.io/ths-staticweb/giai-thuat-nang-cao/): Bài tập, slide và đồ án môn học — Học kỳ 1 · Năm học 2026–2027 — 2 tài liệu
 - [Công nghệ phần mềm tiên tiến](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/): Đề án và bài tập môn học — Học kỳ 1 · Năm học 2026–2027 — 7 tài liệu
 - [Phương pháp nghiên cứu khoa học](https://taitran12310.github.io/ths-staticweb/phuong-phap-nghien-cuu-khoa-hoc/): Đề cương, đề án và ghi chú buổi học — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
-- [Phân tích mạng xã hội](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 14 tài liệu
+- [Phân tích mạng xã hội](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 16 tài liệu
 - [Thị giác máy tính và nhận dạng mẫu](https://taitran12310.github.io/ths-staticweb/thi-giac-may-tinh-va-nhan-dang-mau/): Bài tập, slide và ghi chú môn học — Học kỳ 1 · Năm học 2026–2027 — 1 tài liệu
 - [Triết học](https://taitran12310.github.io/ths-staticweb/triet-hoc/): Ghi chú buổi học và tài liệu tham khảo — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
 - [Toán cho tin học](https://taitran12310.github.io/ths-staticweb/toan-cho-tin-hoc/): Bài tập và tài liệu môn học — Học kỳ 1 · Năm học 2026–2027 — 0 tài liệu
@@ -21,8 +21,8 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 
 ## Công nghệ phần mềm tiên tiến
 
-- [Đọc hiểu đề án MutSum](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_DocHieu.html): DoAn_DocHieu.html, cập nhật 18/11/2026, 289.6 KB
-- [Đề án: Đánh giá độ trung thực của tóm tắt mã nguồn do mô hình ngôn ngữ nhỏ chạy cục bộ sinh ra bằng phân tích đột biến và oracle thực thi](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_Slide.html): DoAn_Slide.html, cập nhật 18/11/2026, 238.1 KB
+- [Đọc hiểu đề án MutSum](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_DocHieu.html): DoAn_DocHieu.html, cập nhật 19/11/2026, 294.5 KB
+- [Đề án: Đánh giá độ trung thực của tóm tắt mã nguồn do mô hình ngôn ngữ nhỏ chạy cục bộ sinh ra bằng phân tích đột biến và oracle thực thi](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/DoAn_Slide.html): DoAn_Slide.html, cập nhật 19/11/2026, 238.1 KB
 - [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver2.html): TieuLuan_ver2.html, cập nhật 31/10/2026, 213.8 KB
 - [ERD Studio — Buổi 9](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/BaiTapBuoi9_ERD-viewer.html): BaiTapBuoi9_ERD-viewer.html, cập nhật 31/10/2026, 180.3 KB
 - [Slide tiểu luận — Tóm tắt mã nguồn trong kỷ nguyên LLM](https://taitran12310.github.io/ths-staticweb/cong-nghe-phan-mem-tien-tien/TieuLuan_ver1.html): TieuLuan_ver1.html, cập nhật 23/10/2026, 209.6 KB
@@ -31,6 +31,8 @@ Trang tổng hợp tài liệu học tập. Mỗi môn có một trang danh sác
 
 ## Phân tích mạng xã hội
 
+- [Slide (ý tưởng & kế hoạch) — Mạng ga tàu Nhật Bản](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/BaiCaNhan_DuongSatNB_Slide_YTuong.html): BaiCaNhan_DuongSatNB_Slide_YTuong.html, cập nhật 21/11/2026, 28.9 KB
+- [Slide (bản đầy đủ) — Mạng ga tàu Nhật Bản: dữ liệu, độ đo SNA và ứng dụng](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/BaiCaNhan_DuongSatNB_Slide.html): BaiCaNhan_DuongSatNB_Slide.html, cập nhật 21/11/2026, 60.7 KB
 - [Giải thích bài báo — Xu hướng thuật toán phát hiện cộng đồng (Gupta & Singh 2020)](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Paper-20261113/gupta2020.html): Paper-20261113/gupta2020.html, cập nhật 14/11/2026, 77.6 KB
 - [Giải thích bài báo — Phát hiện cộng đồng (13/11/2026)](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Paper-20261113/index.html): Paper-20261113/index.html, cập nhật 14/11/2026, 5.2 KB
 - [Giải thích bài báo — So sánh thuật toán phát hiện cộng đồng (Mothe 2017)](https://taitran12310.github.io/ths-staticweb/phan-tich-mang-xa-hoi/Paper-20261113/mothe2017.html): Paper-20261113/mothe2017.html, cập nhật 14/11/2026, 28.3 KB

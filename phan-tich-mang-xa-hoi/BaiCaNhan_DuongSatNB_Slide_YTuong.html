@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Slide đề xuất bài cá nhân SNA: mạng ga tàu Nhật Bản — nguồn dữ liệu, cách xử lý, trực quan hóa đồ thị và ý tưởng ứng dụng web." />
+  <title>Slide (ý tưởng &amp; kế hoạch) — Mạng ga tàu Nhật Bản</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <script>
+    (function () {
+      document.documentElement.classList.add("js");
+      try {
+        var t = localStorage.getItem("rail-slide-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { /* bỏ qua */ }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" />
+  <style>
+    :root {
+      color-scheme: light;
+      --sans: "Be Vietnam Pro", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --jp: "Noto Sans JP", "Hiragino Sans", "Be Vietnam Pro", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+      --bg: #e9eef8;
+      --stage: #ffffff;
+      --panel: #f4f7fd;
+      --panel-2: #eaf0fb;
+      --ink: #0f172a;
+      --ink-2: #273449;
+      --muted: #5b6b86;
+      --line: rgba(15, 23, 42, .1);
+      --line-strong: #c3cee3;
+      --accent: #5b3fd9;
+      --accent-2: #0e8fb8;
+      --accent-tint: #ece8ff;
+      --pink: #d6336c;
+      --green: #2b8a3e;
+      --amber: #b45309;
+      --amber-tint: #fff4e0;
+      --red: #c8102e;
+      --code-bg: #f1f4fb;
+      --grad: linear-gradient(120deg, #5b3fd9 0%, #0e8fb8 55%, #13a36e 100%);
+      --shadow: 0 30px 80px rgba(30, 45, 90, .18), 0 4px 14px rgba(30, 45, 90, .06);
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #070b16;
+      --stage: #0f1526;
+      --panel: #161f37;
+      --panel-2: #1c2745;
+      --ink: #eef2ff;
+      --ink-2: #cdd6ee;
+      --muted: #94a3c4;
+      --line: rgba(255, 255, 255, .09);
+      --line-strong: #33416a;
+      --accent: #9d8bff;
+      --accent-2: #4cc9f0;
+      --accent-tint: #241f4a;
+      --pink: #f472b6;
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --amber-tint: #2b2210;
+      --red: #f87171;
+      --code-bg: #0b1122;
+      --grad: linear-gradient(120deg, #a78bfa 0%, #4cc9f0 55%, #4ade80 100%);
+      --shadow: 0 30px 80px rgba(0, 0, 0, .55);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #070b16; --stage: #0f1526; --panel: #161f37; --panel-2: #1c2745; --ink: #eef2ff; --ink-2: #cdd6ee;
+        --muted: #94a3c4; --line: rgba(255, 255, 255, .09); --line-strong: #33416a; --accent: #9d8bff; --accent-2: #4cc9f0;
+        --accent-tint: #241f4a; --pink: #f472b6; --green: #4ade80; --amber: #fbbf24; --amber-tint: #2b2210; --red: #f87171;
+        --code-bg: #0b1122; --grad: linear-gradient(120deg, #a78bfa 0%, #4cc9f0 55%, #4ade80 100%); --shadow: 0 30px 80px rgba(0, 0, 0, .55);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    .jp, :lang(ja) { font-family: var(--jp); }
+    code, .mono { font-family: var(--mono); font-size: .9em; }
+    code { background: var(--code-bg); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+    a { color: var(--accent); }
+
+    /* ---------- Sân khấu 16:9, co giãn theo cửa sổ ---------- */
+    .deck { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
+    .slide {
+      position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px;
+      transform: translate(-50%, -50%) scale(var(--s, 1));
+      background: var(--stage); border-radius: 22px; box-shadow: var(--shadow);
+      padding: 56px 72px 64px; overflow: hidden;
+      opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s;
+      display: flex; flex-direction: column;
+    }
+    .slide.on { opacity: 1; visibility: visible; transition: opacity .35s ease; }
+    .slide::before { /* vệt màu trang trí */
+      content: ""; position: absolute; right: -160px; top: -200px; width: 520px; height: 520px; border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%); pointer-events: none;
+    }
+    .slide > * { position: relative; }
+    html:not(.js) .deck { position: static; display: block; padding: 24px 0; }
+    html:not(.js) .slide { position: relative; left: auto; top: auto; transform: none; opacity: 1; visibility: visible; margin: 0 auto 24px; }
+
+    .kicker { font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
+    .kicker i { width: 26px; height: 3px; border-radius: 3px; background: var(--grad); display: inline-block; }
+    h1 { font-size: 64px; line-height: 1.08; margin: 0 0 18px; letter-spacing: -.02em; font-weight: 800; }
+    h2 { font-size: 40px; line-height: 1.15; margin: 0 0 22px; letter-spacing: -.015em; font-weight: 800; }
+    h3 { font-size: 21px; margin: 0 0 10px; font-weight: 700; }
+    p, li { font-size: 20px; line-height: 1.5; color: var(--ink-2); }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 24px; }
+    li { margin: 0 0 8px; }
+    li::marker { color: var(--accent); }
+    .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .muted { color: var(--muted); }
+    .small { font-size: 16px; }
+    .xs { font-size: 14px; }
+    b, strong { color: var(--ink); }
+    .ro { color: var(--muted); font-style: italic; font-weight: 500; }
+    .vi { color: var(--muted); }
+
+    .grid { display: grid; gap: 20px; }
+    .g2 { grid-template-columns: 1fr 1fr; }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    .g-6-4 { grid-template-columns: 1.5fr 1fr; }
+    .g-4-6 { grid-template-columns: 1fr 1.5fr; }
+    .fill { flex: 1; min-height: 0; }
+
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+    .card p, .card li { font-size: 17.5px; }
+    .card h3 { font-size: 19px; }
+    .card.accent { background: var(--accent-tint); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+    .card.warn { background: var(--amber-tint); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+    .tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-tint); color: var(--accent); margin: 0 6px 6px 0; }
+    .tag.g { background: color-mix(in srgb, var(--green) 14%, transparent); color: var(--green); }
+    .tag.a { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); }
+    .tag.r { background: color-mix(in srgb, var(--red) 13%, transparent); color: var(--red); }
+
+    .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+    .stat .n { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+    .stat .l { font-size: 15px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 17px; }
+    th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+    th { font-size: 13.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; border-bottom: 2px solid var(--line-strong); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.hl td { background: var(--accent-tint); }
+
+    pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-family: var(--mono); font-size: 14.5px; line-height: 1.55; color: var(--ink-2); overflow: hidden; white-space: pre; }
+    pre .c { color: var(--muted); }
+    pre .k { color: var(--accent); font-weight: 600; }
+    pre .s { color: var(--green); }
+
+    .bars { display: grid; gap: 7px; }
+    .bar { display: grid; grid-template-columns: 150px 1fr 54px; align-items: center; gap: 10px; font-size: 16px; }
+    .bar .t { height: 16px; border-radius: 8px; background: var(--panel-2); overflow: hidden; }
+    .bar .t i { display: block; height: 100%; border-radius: 8px; background: var(--grad); }
+    .bar.alt .t i { background: linear-gradient(90deg, #d6336c, #f59f00); }
+    .bar .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 15px; }
+    .bar .nm b { font-weight: 700; }
+
+    .shot { border-radius: 14px; border: 1px solid var(--line-strong); box-shadow: 0 12px 30px rgba(20, 30, 70, .14); width: 100%; height: auto; display: block; }
+    figure { margin: 0; }
+    figcaption { font-size: 14.5px; color: var(--muted); margin-top: 8px; }
+
+    .flow { display: flex; align-items: stretch; gap: 10px; }
+    .flow .step { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px; }
+    .flow .step .no { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600; }
+    .flow .step .tt { font-weight: 700; font-size: 16.5px; margin: 2px 0 4px; color: var(--ink); }
+    .flow .step .dd { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+    .flow .arr { align-self: center; color: var(--muted); font-size: 20px; }
+    .flow .step.web { background: var(--accent-tint); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+    .section { justify-content: center; }
+    .section .big { font-size: 120px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .section h1 { font-size: 58px; }
+
+    .callout { border-left: 4px solid var(--accent); padding: 10px 16px; background: var(--panel); border-radius: 0 12px 12px 0; }
+    .callout p { margin: 0; font-size: 18px; }
+
+    .foot { position: absolute; left: 72px; right: 72px; bottom: 22px; display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+    svg text { font-family: var(--sans); }
+
+    /* ---------- Thanh điều khiển ---------- */
+    .hud { position: fixed; right: 16px; bottom: 14px; display: flex; gap: 6px; align-items: center; z-index: 10; }
+    .hud button { font: 600 13px var(--sans); color: var(--ink); background: var(--stage); border: 1px solid var(--line-strong); border-radius: 10px; padding: 7px 11px; cursor: pointer; }
+    .hud button:hover { border-color: var(--accent); }
+    .hud .cnt { font: 600 13px var(--mono); color: var(--muted); background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; min-width: 64px; text-align: center; }
+    .progress { position: fixed; left: 0; top: 0; height: 3px; background: var(--grad); z-index: 10; transition: width .3s ease; }
+    .back { position: fixed; left: 16px; bottom: 14px; z-index: 10; font: 600 13px var(--sans); color: var(--muted); text-decoration: none; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 7px 11px; }
+    html:not(.js) .hud, html:not(.js) .progress { display: none; }
+
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      body { background: #fff; }
+      .deck { position: static; display: block; }
+      .slide { position: relative; left: 0; top: 0; transform: none !important; opacity: 1; visibility: visible; box-shadow: none; border-radius: 0; page-break-after: always; break-after: page; }
+      .hud, .progress, .back { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .slide, .progress { transition: none; } }
+  </style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main class="deck" id="deck">
+  <style>
+    .hyp { font-size: 15px; color: var(--muted); }
+  </style>
+
+  <!-- 1. Tên đề tài -->
+  <section class="slide section" data-title="Tên đề tài">
+    <p class="kicker"><i></i>Phân tích mạng xã hội · Bài cá nhân · Ý tưởng &amp; kế hoạch</p>
+    <h1>Mạng lưới <span class="grad">ga tàu Nhật Bản</span><br>dưới góc nhìn SNA</h1>
+    <p style="font-size:24px;max-width:980px">Mô hình hóa mạng đường sắt toàn Nhật Bản thành <b>đồ thị có hướng</b>: mỗi ga là một node, có tàu chạy từ ga này sang ga kế tiếp là một cạnh. Từ đó phân tích bằng các độ đo mạng và làm web tra cứu ga, tìm đường.</p>
+    <div class="grid g4" style="margin-top:26px;max-width:980px">
+      <div class="stat"><div class="n">3</div><div class="l">nguồn dữ liệu chính thức</div></div>
+      <div class="stat"><div class="n">10.390</div><div class="l">dòng ga – tuyến đã crawl</div></div>
+      <div class="stat"><div class="n">598</div><div class="l">tuyến · 47 tỉnh</div></div>
+      <div class="stat"><div class="n">≈ 50k</div><div class="l">bản ghi đồ thị dự kiến</div></div>
+    </div>
+    <p class="small muted" style="margin-top:28px">Phím ← → để chuyển slide · F toàn màn hình · T đổi sáng/tối · tên tiếng Nhật kèm romaji (phiên âm) và nghĩa tiếng Việt.</p>
+  </section>
+
+  <!-- 2. Nguồn dữ liệu -->
+  <section class="slide" data-title="Nguồn dữ liệu">
+    <p class="kicker"><i></i>Dữ liệu · <span class="tag g" style="margin:0">Đã thực hiện</span></p>
+    <h2>Nguồn dữ liệu: ba nguồn chính thức, không ước tính</h2>
+    <table>
+      <thead><tr><th style="width:27%">Nguồn</th><th style="width:37%">Lấy được gì</th><th>Cách lấy</th><th style="width:13%">Trạng thái</th></tr></thead>
+      <tbody>
+        <tr><td><b>HeartRails Express API</b><br><span class="xs muted">express.heartrails.com</span></td><td>Tên ga, tuyến, tỉnh, tọa độ, mã bưu chính, <b>ga trước / ga sau</b> trên tuyến</td><td class="small">Crawl 3 cấp: <code>getPrefectures</code> (1) → <code>getLines</code> (47) → <code>getStations</code> (598) = <b>646 request</b></td><td><span class="tag g">Đã crawl</span></td></tr>
+        <tr><td><b>MLIT N02</b> <span class="jp">国土数値情報</span><br><span class="xs ro">Kokudo Sūchi Jōhō</span> <span class="xs vi">(Dữ liệu số đất đai quốc gia, Bộ Giao thông NB)</span></td><td>Công ty vận hành, loại tuyến (JR / tư nhân / tàu điện ngầm / monorail / Shinkansen…)</td><td class="small">Tải bộ GeoJSON toàn quốc, giấy phép CC BY 4.0</td><td><span class="tag g">Đã tải</span></td></tr>
+        <tr><td><b>ODPT</b><br><span class="xs muted">Open Data for Public Transportation</span></td><td>Giờ tàu thật (thời gian chạy từng chặng), loại tàu, giá vé chính thức giữa hai ga</td><td class="small">API <code>TrainTimetable</code>, <code>TrainType</code>, <code>RailwayFare</code>; chủ yếu vùng Kanto</td><td><span class="tag a">Chờ duyệt key</span></td></tr>
+      </tbody>
+    </table>
+    <div class="grid g-4-6" style="margin-top:18px">
+      <div class="stat"><div class="n">10.390</div><div class="l">dòng ga – tuyến thu được từ HeartRails, phủ 598 tuyến ở 47 tỉnh</div></div>
+<pre style="font-size:13.5px"><span class="c"># getStations?line=JR山手線  (tuyến JR Yamanote)</span>
+{ <span class="k">"name"</span>: <span class="s">"渋谷"</span>, <span class="c">// Shibuya</span>   <span class="k">"x"</span>: 139.7012, <span class="k">"y"</span>: 35.6589,
+  <span class="k">"prev"</span>: <span class="s">"恵比寿"</span>, <span class="c">// Ebisu</span>   <span class="k">"next"</span>: <span class="s">"原宿"</span> <span class="c">// Harajuku</span> }</pre>
+    </div>
+    <p class="small muted" style="margin-top:12px">Cột nào nguồn chính thức không có thì để <b>trống</b>. Mỗi phản hồi API được lưu cache để chạy lại không phải gọi lại.</p>
+  </section>
+
+  <!-- 3. Xử lý dữ liệu -->
+  <section class="slide" data-title="Xử lý dữ liệu">
+    <p class="kicker"><i></i>Xử lý dữ liệu</p>
+    <h2>Từ dữ liệu crawl thành đồ thị</h2>
+    <div class="flow">
+      <div class="step"><div class="no">01 · Ghép nguồn</div><div class="tt">HeartRails + MLIT</div><div class="dd">Cùng tên ga, cách nhau ≤ 1 km, tên tuyến giống nhất → gán công ty, loại tuyến. <b style="color:var(--green)">596 / 598 tuyến khớp</b></div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">02 · Node</div><div class="tt">Ga @ tuyến</div><div class="dd"><code>新宿@JR山手線</code>; gộp node cùng tên + cùng tỉnh + ≤ 1 km thành <b>ga vật lý</b></div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">03 · Cạnh</div><div class="tt">Cạnh có hướng</div><div class="dd">Từ <code>prev</code>/<code>next</code>: tàu chạy A → B và B → A, ghi ga cuối theo hướng chạy, khoảng cách km</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">04 · Romaji</div><div class="tt">Phiên âm</div><div class="dd">渋谷 → Shibuya, 米原 → Maibara (<code>pykakasi</code> + bảng sửa tay)</div></div>
+      <div class="arr">→</div>
+      <div class="step web"><div class="no">05 · Xuất</div><div class="tt">File CSV</div><div class="dd">nodes, edges, lines… cho bước tính độ đo và web</div></div>
+    </div>
+    <div class="grid g4" style="margin-top:22px">
+      <div class="card"><span class="tag">rail</span><p class="small" style="margin-top:6px">Tàu chạy sang ga kế tiếp, mỗi chiều là một cạnh.</p></div>
+      <div class="card"><span class="tag">transfer</span><p class="small" style="margin-top:6px">Chuyển tuyến trong cùng một ga vật lý.</p></div>
+      <div class="card"><span class="tag">walk</span><p class="small" style="margin-top:6px">Đi bộ giữa hai ga khác tên ở gần nhau.</p></div>
+      <div class="card"><span class="tag a">service</span><p class="small" style="margin-top:6px">Tàu nhanh bỏ qua ga, có giờ thật (khi có ODPT).</p></div>
+    </div>
+    <div class="callout" style="margin-top:18px"><p><b>Kiểm tra:</b> không có cạnh trỏ tới node không tồn tại, mỗi cạnh <code>rail</code> có cạnh ngược, ghi số dòng sau từng bước làm sạch.</p></div>
+  </section>
+
+  <!-- 4. Trực quan hóa đồ thị -->
+  <section class="slide" data-title="Trực quan hóa đồ thị">
+    <p class="kicker"><i></i>Trực quan hóa</p>
+    <h2>Trực quan hóa đồ thị mạng ga</h2>
+    <div class="grid g2">
+      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Đồ thị ga đặt theo tọa độ thật trên nền bản đồ" loading="lazy" /><figcaption><b>Theo địa lý:</b> mỗi chấm là một ga, đặt đúng tọa độ trên nền bản đồ; đường nối là cạnh tàu chạy. Thấy rõ mạng dày ở Tokyo, Osaka và các trục dài nối các vùng.</figcaption></figure>
+      <figure><img class="shot" src="slide-art/rail-web-graph-ego.jpg" width="800" height="500" alt="Đồ thị node–cạnh quanh một ga" loading="lazy" /><figcaption><b>Dạng node – cạnh:</b> mạng con quanh một ga trong vài bước, bỏ bản đồ để thấy cấu trúc kết nối: ga đầu mối nhiều nhánh, ga chuyển tuyến.</figcaption></figure>
+    </div>
+    <p class="small muted" style="margin-top:14px">Dự kiến: màu node theo cộng đồng, kích thước theo độ quan trọng của ga, sau khi tính độ đo.</p>
+  </section>
+
+  <!-- 5. Ứng dụng: tổng quan -->
+  <section class="slide" data-title="Ý tưởng ứng dụng">
+    <p class="kicker"><i></i>Ý tưởng ứng dụng</p>
+    <h2>Web tra cứu mạng ga tàu</h2>
+    <p style="max-width:1050px">Một trang web tĩnh, đọc trực tiếp các file CSV sau bước xử lý, không cần server. Người không đọc được tiếng Nhật vẫn dùng được nhờ romaji.</p>
+    <div class="grid g3" style="margin-top:8px">
+      <div class="card accent"><h3>1. Tra cứu ga</h3><p>Gõ tên ga (romaji hoặc chữ Nhật) → ga này nối tới những ga nào, theo chiều tàu chạy, thuộc tuyến nào, đi về ga cuối nào.</p></div>
+      <div class="card accent"><h3>2. Tìm đường A → B</h3><p>Nhập hai ga → lộ trình từng chặng: tuyến, hướng chạy, chỗ chuyển tuyến; thời gian, giá vé khi có dữ liệu ODPT.</p></div>
+      <div class="card accent"><h3>3. Xem đồ thị</h3><p>Xem cả mạng trên bản đồ hoặc mạng con quanh một ga; chọn một ga để xem thông tin và kết quả phân tích của ga đó.</p></div>
+    </div>
+    <div class="callout" style="margin-top:18px"><p>Công nghệ dự kiến: HTML + JavaScript, đọc CSV bằng PapaParse, bản đồ Leaflet + OpenStreetMap, vẽ đồ thị bằng canvas + d3.</p></div>
+  </section>
+
+  <!-- 6. Tra cứu ga -->
+  <section class="slide" data-title="Ý tưởng: tra cứu ga">
+    <p class="kicker"><i></i>Ý tưởng ứng dụng</p>
+    <h2>Tra cứu ga: ga A nối với những ga nào?</h2>
+    <div class="grid g-6-4 fill">
+      <figure><img class="shot" src="slide-art/rail-web-station.jpg" width="800" height="500" alt="Trang tra cứu ga" loading="lazy" /></figure>
+      <div class="grid" style="align-content:start">
+        <div class="card"><h3>Nhập</h3><p>Tên ga bằng romaji (<i>Shinjuku</i>) hoặc chữ Nhật (新宿), có gợi ý khi gõ.</p></div>
+        <div class="card"><h3>Hiển thị</h3><ul class="small"><li>Các tuyến đi qua ga, công ty vận hành</li><li>Ga kế tiếp theo từng chiều chạy và ga cuối của chiều đó</li><li>Ga chuyển tuyến, ga đi bộ được</li><li>Vị trí trên bản đồ</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Tìm đường -->
+  <section class="slide" data-title="Ý tưởng: tìm đường">
+    <p class="kicker"><i></i>Ý tưởng ứng dụng</p>
+    <h2>Tìm đường: đi từ ga A đến ga B</h2>
+    <div class="grid g-6-4 fill">
+      <figure><img class="shot" src="slide-art/rail-web-route.jpg" width="800" height="500" alt="Trang tìm đường" loading="lazy" /></figure>
+      <div class="grid" style="align-content:start">
+        <div class="card"><h3>Tiêu chí</h3><ul class="small"><li>Ít chặng nhất</li><li>Ít chuyển tuyến nhất</li><li>Ngắn nhất theo km</li><li>Nhanh nhất (khi có giờ tàu ODPT)</li></ul></div>
+        <div class="card"><h3>Kết quả</h3><p class="small">Từng chặng: tuyến, hướng chạy (về ga cuối nào), số ga, thời gian, giá vé; lộ trình vẽ trên bản đồ.</p></div>
+        <div class="card warn"><p class="small">Thời gian, giá vé chỉ hiện khi có dữ liệu chính thức; thiếu thì ghi “chưa có dữ liệu”.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Ý nghĩa & bước tiếp theo -->
+  <section class="slide" data-title="Ý nghĩa & bước tiếp theo">
+    <p class="kicker"><i></i>Ý tưởng ứng dụng</p>
+    <h2>Ý nghĩa và bước tiếp theo</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Ứng dụng có thể dùng để</h3>
+        <ul class="small">
+          <li>Tìm <b>ga đầu mối</b> trung chuyển, ga <b>cầu nối</b> giữa các vùng.</li>
+          <li>Thấy <b>điểm nghẽn</b>: sự cố ở ga nào có thể cắt liên lạc giữa các vùng.</li>
+          <li>Xem mạng tự chia thành những <b>cụm vùng</b> nào.</li>
+          <li>Hỗ trợ người đi tàu tra cứu, tìm đường bằng romaji.</li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <h3>Bước tiếp theo</h3>
+        <ul class="small">
+          <li>Hoàn thiện đồ thị, chỉnh để tổng ≈ 50k bản ghi.</li>
+          <li>Tính các độ đo: degree, betweenness, closeness, cộng đồng Louvain, liên thông.</li>
+          <li>Khi có key ODPT: thêm giờ tàu, loại tàu, giá vé.</li>
+          <li>Hoàn thiện web từ bản mẫu, viết báo cáo.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Kết -->
+  <section class="slide section" data-title="Cảm ơn">
+    <p class="kicker"><i></i>Tóm tắt</p>
+    <h1 style="font-size:50px">Đã có dữ liệu ga, tuyến <span class="grad">toàn Nhật Bản</span>;<br>tiếp theo là tính độ đo và hoàn thiện web.</h1>
+    <p class="small muted" style="margin-top:20px">Nguồn: HeartRails Express · 国土数値情報 N02 <span class="ro">(Kokudo Sūchi Jōhō)</span>, MLIT, CC BY 4.0 · ODPT · OpenStreetMap.</p>
+    <p style="font-size:30px;font-weight:800;margin-top:12px">Cảm ơn thầy và các bạn đã lắng nghe!</p>
+  </section>
+</main>
+
+<a class="back" href="index.html">← Danh sách tài liệu</a>
+<div class="hud" aria-label="Điều khiển slide">
+  <button type="button" id="prev" aria-label="Slide trước">←</button>
+  <span class="cnt" id="cnt">1 / 1</span>
+  <button type="button" id="next" aria-label="Slide sau">→</button>
+  <button type="button" id="fs" aria-label="Toàn màn hình" title="Toàn màn hình (F)">⛶</button>
+  <button type="button" id="theme" aria-label="Đổi giao diện sáng / tối" title="Sáng / tối (T)">◐</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var cnt = document.getElementById("cnt"), bar = document.getElementById("progress");
+  var i = 0;
+
+  function fit() {
+    var s = Math.min(window.innerWidth / 1340, window.innerHeight / 770);
+    document.documentElement.style.setProperty("--s", String(Math.max(0.2, s)));
+    slides.forEach(function (el) { el.style.setProperty("--s", String(Math.max(0.2, s))); });
+  }
+  function show(n, push) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (el, k) { el.classList.toggle("on", k === i); el.setAttribute("aria-hidden", String(k !== i)); });
+    cnt.textContent = (i + 1) + " / " + slides.length;
+    bar.style.width = ((i + 1) / slides.length * 100) + "%";
+    var title = slides[i].getAttribute("data-title");
+    if (title) document.title = title + " · Mạng ga tàu Nhật Bản";
+    if (push !== false) { try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) { /* file:// */ } }
+  }
+  function fromHash() { var n = parseInt(location.hash.slice(1), 10); return isNaN(n) ? 0 : n - 1; }
+
+  document.getElementById("prev").onclick = function () { show(i - 1); };
+  document.getElementById("next").onclick = function () { show(i + 1); };
+  document.getElementById("fs").onclick = toggleFs;
+  document.getElementById("theme").onclick = toggleTheme;
+
+  function toggleFs() {
+    if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+  function isDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function toggleTheme() {
+    var next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("rail-slide-theme", next); } catch (e) { /* bỏ qua */ }
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === "ArrowRight" || k === "PageDown" || k === " " || k === "Enter") { e.preventDefault(); show(i + 1); }
+    else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") { e.preventDefault(); show(i - 1); }
+    else if (k === "Home") show(0);
+    else if (k === "End") show(slides.length - 1);
+    else if (k === "f" || k === "F") toggleFs();
+    else if (k === "t" || k === "T") toggleTheme();
+  });
+  var x0 = null;
+  document.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+  window.addEventListener("resize", fit);
+  window.addEventListener("hashchange", function () { show(fromHash(), false); });
+  fit();
+  show(fromHash(), false);
+})();
+</script>
+</body>
+</html>

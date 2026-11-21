@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Slide bài cá nhân SNA: mạng lưới ga tàu Nhật Bản — cách lấy dữ liệu (HeartRails, MLIT, ODPT), xử lý thành đồ thị có hướng, các độ đo SNA và ứng dụng web." />
+  <title>Slide (bản đầy đủ) — Mạng ga tàu Nhật Bản: dữ liệu, độ đo SNA và ứng dụng</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <script>
+    (function () {
+      document.documentElement.classList.add("js");
+      try {
+        var t = localStorage.getItem("rail-slide-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) { /* bỏ qua */ }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" />
+  <style>
+    :root {
+      color-scheme: light;
+      --sans: "Be Vietnam Pro", "Noto Sans JP", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --jp: "Noto Sans JP", "Hiragino Sans", "Be Vietnam Pro", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+      --bg: #e9eef8;
+      --stage: #ffffff;
+      --panel: #f4f7fd;
+      --panel-2: #eaf0fb;
+      --ink: #0f172a;
+      --ink-2: #273449;
+      --muted: #5b6b86;
+      --line: rgba(15, 23, 42, .1);
+      --line-strong: #c3cee3;
+      --accent: #5b3fd9;
+      --accent-2: #0e8fb8;
+      --accent-tint: #ece8ff;
+      --pink: #d6336c;
+      --green: #2b8a3e;
+      --amber: #b45309;
+      --amber-tint: #fff4e0;
+      --red: #c8102e;
+      --code-bg: #f1f4fb;
+      --grad: linear-gradient(120deg, #5b3fd9 0%, #0e8fb8 55%, #13a36e 100%);
+      --shadow: 0 30px 80px rgba(30, 45, 90, .18), 0 4px 14px rgba(30, 45, 90, .06);
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #070b16;
+      --stage: #0f1526;
+      --panel: #161f37;
+      --panel-2: #1c2745;
+      --ink: #eef2ff;
+      --ink-2: #cdd6ee;
+      --muted: #94a3c4;
+      --line: rgba(255, 255, 255, .09);
+      --line-strong: #33416a;
+      --accent: #9d8bff;
+      --accent-2: #4cc9f0;
+      --accent-tint: #241f4a;
+      --pink: #f472b6;
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --amber-tint: #2b2210;
+      --red: #f87171;
+      --code-bg: #0b1122;
+      --grad: linear-gradient(120deg, #a78bfa 0%, #4cc9f0 55%, #4ade80 100%);
+      --shadow: 0 30px 80px rgba(0, 0, 0, .55);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #070b16; --stage: #0f1526; --panel: #161f37; --panel-2: #1c2745; --ink: #eef2ff; --ink-2: #cdd6ee;
+        --muted: #94a3c4; --line: rgba(255, 255, 255, .09); --line-strong: #33416a; --accent: #9d8bff; --accent-2: #4cc9f0;
+        --accent-tint: #241f4a; --pink: #f472b6; --green: #4ade80; --amber: #fbbf24; --amber-tint: #2b2210; --red: #f87171;
+        --code-bg: #0b1122; --grad: linear-gradient(120deg, #a78bfa 0%, #4cc9f0 55%, #4ade80 100%); --shadow: 0 30px 80px rgba(0, 0, 0, .55);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body { background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    .jp, :lang(ja) { font-family: var(--jp); }
+    code, .mono { font-family: var(--mono); font-size: .9em; }
+    code { background: var(--code-bg); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+    a { color: var(--accent); }
+
+    /* ---------- Sân khấu 16:9, co giãn theo cửa sổ ---------- */
+    .deck { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
+    .slide {
+      position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px;
+      transform: translate(-50%, -50%) scale(var(--s, 1));
+      background: var(--stage); border-radius: 22px; box-shadow: var(--shadow);
+      padding: 56px 72px 64px; overflow: hidden;
+      opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s;
+      display: flex; flex-direction: column;
+    }
+    .slide.on { opacity: 1; visibility: visible; transition: opacity .35s ease; }
+    .slide::before { /* vệt màu trang trí */
+      content: ""; position: absolute; right: -160px; top: -200px; width: 520px; height: 520px; border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 16%, transparent), transparent 65%); pointer-events: none;
+    }
+    .slide > * { position: relative; }
+    html:not(.js) .deck { position: static; display: block; padding: 24px 0; }
+    html:not(.js) .slide { position: relative; left: auto; top: auto; transform: none; opacity: 1; visibility: visible; margin: 0 auto 24px; }
+
+    .kicker { font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; display: flex; align-items: center; gap: 10px; }
+    .kicker i { width: 26px; height: 3px; border-radius: 3px; background: var(--grad); display: inline-block; }
+    h1 { font-size: 64px; line-height: 1.08; margin: 0 0 18px; letter-spacing: -.02em; font-weight: 800; }
+    h2 { font-size: 40px; line-height: 1.15; margin: 0 0 22px; letter-spacing: -.015em; font-weight: 800; }
+    h3 { font-size: 21px; margin: 0 0 10px; font-weight: 700; }
+    p, li { font-size: 20px; line-height: 1.5; color: var(--ink-2); }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 24px; }
+    li { margin: 0 0 8px; }
+    li::marker { color: var(--accent); }
+    .grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .muted { color: var(--muted); }
+    .small { font-size: 16px; }
+    .xs { font-size: 14px; }
+    b, strong { color: var(--ink); }
+    .ro { color: var(--muted); font-style: italic; font-weight: 500; }
+    .vi { color: var(--muted); }
+
+    .grid { display: grid; gap: 20px; }
+    .g2 { grid-template-columns: 1fr 1fr; }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    .g-6-4 { grid-template-columns: 1.5fr 1fr; }
+    .g-4-6 { grid-template-columns: 1fr 1.5fr; }
+    .fill { flex: 1; min-height: 0; }
+
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; }
+    .card p, .card li { font-size: 17.5px; }
+    .card h3 { font-size: 19px; }
+    .card.accent { background: var(--accent-tint); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+    .card.warn { background: var(--amber-tint); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+    .tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--accent-tint); color: var(--accent); margin: 0 6px 6px 0; }
+    .tag.g { background: color-mix(in srgb, var(--green) 14%, transparent); color: var(--green); }
+    .tag.a { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); }
+    .tag.r { background: color-mix(in srgb, var(--red) 13%, transparent); color: var(--red); }
+
+    .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+    .stat .n { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+    .stat .l { font-size: 15px; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 17px; }
+    th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+    th { font-size: 13.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; border-bottom: 2px solid var(--line-strong); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.hl td { background: var(--accent-tint); }
+
+    pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; font-family: var(--mono); font-size: 14.5px; line-height: 1.55; color: var(--ink-2); overflow: hidden; white-space: pre; }
+    pre .c { color: var(--muted); }
+    pre .k { color: var(--accent); font-weight: 600; }
+    pre .s { color: var(--green); }
+
+    .bars { display: grid; gap: 7px; }
+    .bar { display: grid; grid-template-columns: 150px 1fr 54px; align-items: center; gap: 10px; font-size: 16px; }
+    .bar .t { height: 16px; border-radius: 8px; background: var(--panel-2); overflow: hidden; }
+    .bar .t i { display: block; height: 100%; border-radius: 8px; background: var(--grad); }
+    .bar.alt .t i { background: linear-gradient(90deg, #d6336c, #f59f00); }
+    .bar .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 15px; }
+    .bar .nm b { font-weight: 700; }
+
+    .shot { border-radius: 14px; border: 1px solid var(--line-strong); box-shadow: 0 12px 30px rgba(20, 30, 70, .14); width: 100%; height: auto; display: block; }
+    figure { margin: 0; }
+    figcaption { font-size: 14.5px; color: var(--muted); margin-top: 8px; }
+
+    .flow { display: flex; align-items: stretch; gap: 10px; }
+    .flow .step { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px; }
+    .flow .step .no { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600; }
+    .flow .step .tt { font-weight: 700; font-size: 16.5px; margin: 2px 0 4px; color: var(--ink); }
+    .flow .step .dd { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+    .flow .arr { align-self: center; color: var(--muted); font-size: 20px; }
+    .flow .step.web { background: var(--accent-tint); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+    .section { justify-content: center; }
+    .section .big { font-size: 120px; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .section h1 { font-size: 58px; }
+
+    .callout { border-left: 4px solid var(--accent); padding: 10px 16px; background: var(--panel); border-radius: 0 12px 12px 0; }
+    .callout p { margin: 0; font-size: 18px; }
+
+    .foot { position: absolute; left: 72px; right: 72px; bottom: 22px; display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+    svg text { font-family: var(--sans); }
+
+    /* ---------- Thanh điều khiển ---------- */
+    .hud { position: fixed; right: 16px; bottom: 14px; display: flex; gap: 6px; align-items: center; z-index: 10; }
+    .hud button { font: 600 13px var(--sans); color: var(--ink); background: var(--stage); border: 1px solid var(--line-strong); border-radius: 10px; padding: 7px 11px; cursor: pointer; }
+    .hud button:hover { border-color: var(--accent); }
+    .hud .cnt { font: 600 13px var(--mono); color: var(--muted); background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; min-width: 64px; text-align: center; }
+    .progress { position: fixed; left: 0; top: 0; height: 3px; background: var(--grad); z-index: 10; transition: width .3s ease; }
+    .back { position: fixed; left: 16px; bottom: 14px; z-index: 10; font: 600 13px var(--sans); color: var(--muted); text-decoration: none; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 7px 11px; }
+    html:not(.js) .hud, html:not(.js) .progress { display: none; }
+
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      body { background: #fff; }
+      .deck { position: static; display: block; }
+      .slide { position: relative; left: 0; top: 0; transform: none !important; opacity: 1; visibility: visible; box-shadow: none; border-radius: 0; page-break-after: always; break-after: page; }
+      .hud, .progress, .back { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .slide, .progress { transition: none; } }
+  </style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main class="deck" id="deck">
+
+  <!-- 1. Bìa -->
+  <section class="slide section" data-title="Bìa">
+    <p class="kicker"><i></i>Phân tích mạng xã hội · Bài cá nhân · Bản đầy đủ</p>
+    <h1>Mạng lưới <span class="grad">ga tàu Nhật Bản</span><br>dưới góc nhìn SNA</h1>
+    <p style="font-size:24px;max-width:900px">Từ dữ liệu ga, tuyến thật → đồ thị có hướng ≈ 52 nghìn bản ghi → độ đo mạng → web tra cứu ga, tìm đường và trực quan hóa.</p>
+    <div class="grid g4" style="margin-top:26px;max-width:980px">
+      <div class="stat"><div class="n">10.390</div><div class="l">node (ga theo tuyến)</div></div>
+      <div class="stat"><div class="n">42.050</div><div class="l">cạnh có hướng</div></div>
+      <div class="stat"><div class="n">9.075</div><div class="l">ga vật lý</div></div>
+      <div class="stat"><div class="n">598</div><div class="l">tuyến · 47 tỉnh</div></div>
+    </div>
+    <p class="small muted" style="margin-top:28px">Phím ← → để chuyển slide · F toàn màn hình · T đổi sáng/tối · tên tiếng Nhật kèm romaji (phiên âm) và nghĩa tiếng Việt.</p>
+  </section>
+
+  <!-- 2. Câu hỏi -->
+  <section class="slide" data-title="Mục tiêu">
+    <p class="kicker"><i></i>Mục tiêu</p>
+    <h2>Bài toán và câu hỏi nghiên cứu</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Đề bài</h3>
+        <ul>
+          <li><b>Node</b> = ga tàu; <b>cạnh có hướng</b> = có tàu chạy từ ga này sang ga kế tiếp.</li>
+          <li>Thông tin thêm: tuyến, ga cuối (terminal) theo hướng chạy, công ty vận hành, loại tuyến, thời gian chạy, loại tàu, giá vé.</li>
+          <li>Quy mô ≈ <b>50.000 bản ghi</b> (node + cạnh).</li>
+          <li>Web HTML đọc CSV: tra cứu ga A nối với ga nào; nhập A, B → lộ trình.</li>
+          <li><b>Chỉ dùng dữ liệu thật</b>, không ước tính; thiếu thì để trống.</li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <h3>Câu hỏi nghiên cứu</h3>
+        <ul>
+          <li><b>Q1.</b> Ga nào là <b>cầu nối</b> giữa các vùng? Có khác nhau khi đo theo số chặng và theo km không?</li>
+          <li><b>Q2.</b> Ga nào là <b>đầu mối trung chuyển</b> lớn nhất?</li>
+          <li><b>Q3.</b> Mạng tự chia thành những <b>cộng đồng</b> nào, có khớp vùng địa lý / hệ thống tuyến không?</li>
+          <li><b>Q4.</b> Mạng có liên thông không, đường đi giữa hai ga dài bao nhiêu?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Pipeline -->
+  <section class="slide" data-title="Quy trình">
+    <p class="kicker"><i></i>Tổng quan</p>
+    <h2>Quy trình: crawl → xử lý → tính độ đo → web</h2>
+    <div class="flow">
+      <div class="step"><div class="no">01</div><div class="tt">Crawl HeartRails</div><div class="dd">646 request API: tỉnh → tuyến → ga</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">02</div><div class="tt">MLIT N02</div><div class="dd">Công ty vận hành, loại tuyến</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">03</div><div class="tt">Crawl ODPT</div><div class="dd">Giờ tàu, giá vé (chờ key)</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">04 · 04b</div><div class="tt">Dựng đồ thị</div><div class="dd">Node, 4 loại cạnh, romaji</div></div>
+      <div class="arr">→</div>
+      <div class="step"><div class="no">05 · 05b</div><div class="tt">Độ đo SNA</div><div class="dd">NetworkX, có / không trọng số</div></div>
+      <div class="arr">→</div>
+      <div class="step web"><div class="no">06</div><div class="tt">Web tĩnh</div><div class="dd">Xuất CSV/JSON, 3 trang</div></div>
+    </div>
+    <div class="grid g3" style="margin-top:26px">
+      <div class="card"><h3>Ngôn ngữ & thư viện</h3><p>Python: <code>requests</code>, <code>pandas</code>, <code>networkx</code>, <code>python-louvain</code>, <code>scipy</code>, <code>pykakasi</code>.</p></div>
+      <div class="card"><h3>Lưu trữ</h3><p>Phản hồi API thô lưu cache trong <code>data/raw/</code>; kết quả xử lý là các file CSV trong <code>data/</code>.</p></div>
+      <div class="card"><h3>Web</h3><p>HTML tĩnh đọc CSV bằng PapaParse; bản đồ Leaflet + OpenStreetMap; đồ thị vẽ canvas + d3.</p></div>
+    </div>
+  </section>
+
+  <!-- Phần 1 -->
+  <section class="slide section" data-title="Phần 1">
+    <div class="big grad">01</div>
+    <h1>Lấy dữ liệu</h1>
+    <p style="font-size:24px">Ba nguồn chính thức, mỗi nguồn bổ sung phần còn thiếu của nguồn kia.</p>
+  </section>
+
+  <!-- 4. Nguồn dữ liệu -->
+  <section class="slide" data-title="Nguồn dữ liệu">
+    <p class="kicker"><i></i>Lấy dữ liệu</p>
+    <h2>Ba nguồn dữ liệu chính thức</h2>
+    <table>
+      <thead><tr><th style="width:24%">Nguồn</th><th style="width:40%">Lấy được gì</th><th>Phạm vi</th><th>Trạng thái</th></tr></thead>
+      <tbody>
+        <tr><td><b>HeartRails Express API</b><br><span class="xs muted">express.heartrails.com</span></td><td>Tên ga, tuyến, tỉnh, tọa độ, mã bưu chính, ga trước / ga sau (thứ tự trên tuyến)</td><td>Toàn quốc</td><td><span class="tag g">Đã crawl</span></td></tr>
+        <tr><td><b>MLIT N02</b> <span class="jp">国土数値情報</span><br><span class="xs ro">Kokudo Sūchi Jōhō</span> <span class="xs vi">(Dữ liệu số đất đai quốc gia, Bộ Đất đai – Hạ tầng – Giao thông NB)</span></td><td>Công ty vận hành, loại tuyến (JR / tư nhân / tàu điện ngầm / monorail…)</td><td>Toàn quốc, giấy phép CC BY 4.0</td><td><span class="tag g">Đã tải & ghép</span></td></tr>
+        <tr><td><b>ODPT</b><br><span class="xs muted">Open Data for Public Transportation</span></td><td>Giờ tàu thật (thời gian chạy từng chặng), loại tàu, giá vé chính thức giữa hai ga</td><td>Chủ yếu vùng Kanto</td><td><span class="tag a">Code xong · chờ key</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:22px">
+      <p><b>Nguyên tắc:</b> cột nào nguồn chính thức không có thì để <b>trống</b>; web hiển thị “Chưa có dữ liệu chính thức” thay vì tự ước tính. Yahoo! 乗換案内 <span class="ro">(Norikae Annai)</span> <span class="vi">(dịch vụ tìm đường chuyển tàu)</span> không có API công khai và robots.txt chặn crawl, nên không dùng.</p>
+    </div>
+  </section>
+
+  <!-- 5. Crawl HeartRails -->
+  <section class="slide" data-title="Crawl HeartRails">
+    <p class="kicker"><i></i>Lấy dữ liệu · <code>src/01_crawl_heartrails.py</code></p>
+    <h2>Crawl HeartRails theo 3 cấp API</h2>
+    <div class="grid g-4-6 fill">
+      <div>
+        <table>
+          <thead><tr><th>API</th><th class="num">Số request</th></tr></thead>
+          <tbody>
+            <tr><td><code>getPrefectures</code><br><span class="xs muted">danh sách 47 tỉnh</span></td><td class="num">1</td></tr>
+            <tr><td><code>getLines?prefecture=</code><br><span class="xs muted">tuyến theo từng tỉnh, gộp trùng</span></td><td class="num">47</td></tr>
+            <tr><td><code>getStations?line=</code><br><span class="xs muted">ga theo từng tuyến</span></td><td class="num">598</td></tr>
+            <tr class="hl"><td><b>Tổng</b></td><td class="num"><b>646</b></td></tr>
+          </tbody>
+        </table>
+        <ul style="margin-top:16px">
+          <li class="small">Giới hạn tốc độ, tự thử lại khi lỗi mạng.</li>
+          <li class="small">Mỗi phản hồi lưu cache (tên file = MD5 của URL); <code>--resume</code> chạy tiếp, không gọi lại.</li>
+          <li class="small">Kết quả: <b>10.390 dòng</b> ga–tuyến.</li>
+        </ul>
+      </div>
+      <div>
+<pre><span class="c"># GET /api/json?method=getStations&amp;line=JR山手線</span>
+{ <span class="k">"response"</span>: { <span class="k">"station"</span>: [
+  { <span class="k">"name"</span>: <span class="s">"渋谷"</span>,          <span class="c">// Shibuya</span>
+    <span class="k">"prefecture"</span>: <span class="s">"東京都"</span>,  <span class="c">// Tokyo</span>
+    <span class="k">"line"</span>: <span class="s">"JR山手線"</span>,      <span class="c">// tuyến JR Yamanote</span>
+    <span class="k">"x"</span>: 139.701238, <span class="k">"y"</span>: 35.658871,
+    <span class="k">"postal"</span>: <span class="s">"1500043"</span>,
+    <span class="k">"prev"</span>: <span class="s">"恵比寿"</span>,        <span class="c">// ga trước: Ebisu</span>
+    <span class="k">"next"</span>: <span class="s">"原宿"</span> },       <span class="c">// ga sau: Harajuku</span>
+  ... ] } }</pre>
+        <p class="small muted" style="margin-top:12px"><code>prev</code> / <code>next</code> chính là thông tin dùng để dựng <b>cạnh có hướng</b> giữa hai ga kề nhau. Ga có <code>prev</code> hoặc <code>next</code> rỗng là <b>ga đầu/cuối tuyến</b> (terminal).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. MLIT -->
+  <section class="slide" data-title="MLIT N02">
+    <p class="kicker"><i></i>Lấy dữ liệu · <code>src/02_fetch_mlit_n02.py</code></p>
+    <h2>MLIT N02: bổ sung công ty vận hành và loại tuyến</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Tải về và đọc</h3>
+        <p>Tải file <code>N02-25_GML.zip</code>, đọc lớp <b>Station</b> (GeoJSON). Các trường dùng:</p>
+        <table>
+          <tbody>
+            <tr><td><code>N02_001</code></td><td><span class="jp">鉄道区分</span> <span class="ro">tetsudō kubun</span> <span class="vi">(phân loại kỹ thuật: đường sắt thường, tàu điện mặt đường…)</span></td></tr>
+            <tr><td><code>N02_002</code></td><td><span class="jp">事業者種別</span> <span class="ro">jigyōsha shubetsu</span> <span class="vi">(loại doanh nghiệp: JR, tư nhân, công lập…)</span></td></tr>
+            <tr><td><code>N02_003</code></td><td>Tên tuyến</td></tr>
+            <tr><td><code>N02_004</code></td><td>Công ty vận hành</td></tr>
+            <tr><td><code>N02_005</code></td><td>Tên ga</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Ghép với HeartRails</h3>
+        <ul>
+          <li>Cùng tên ga và cách nhau <b>≤ 1 km</b>, rồi chọn tuyến có tên giống nhất.</li>
+          <li>Tuyến Shinkansen <span class="vi">(tàu cao tốc)</span> chỉ được ghép với Shinkansen, tránh lỗi 東海道新幹線 <span class="ro">Tōkaidō Shinkansen</span> bị ghép nhầm sang 東海道線 <span class="ro">Tōkaidō-sen</span>.</li>
+          <li>Xử lý ngoại lệ: Osaka Metro (pháp lý là “軌道” <span class="ro">kidō</span> <span class="vi">(đường ray kiểu tàu điện)</span>), tàu điện ngầm Sapporo bánh cao su, tàu điện 都電荒川線 <span class="ro">Toden Arakawa</span>.</li>
+        </ul>
+        <div class="stat" style="margin-top:12px"><div class="n">596 / 598</div><div class="l">tuyến ghép được công ty vận hành + loại tuyến</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. ODPT -->
+  <section class="slide" data-title="ODPT">
+    <p class="kicker"><i></i>Lấy dữ liệu · <code>src/03_crawl_odpt.py</code></p>
+    <h2>ODPT: giờ tàu, loại tàu, giá vé thật</h2>
+    <div class="grid g-6-4 fill">
+      <div class="card">
+        <h3>Các API sẽ crawl (cần <code>ODPT_CONSUMER_KEY</code>)</h3>
+        <table>
+          <tbody>
+            <tr><td><code>odpt:TrainTimetable</code></td><td>Giờ đi từng chuyến → thời gian chạy giữa hai ga dừng liên tiếp = trung vị của mọi chuyến; số chuyến/ngày</td></tr>
+            <tr><td><code>odpt:TrainType</code></td><td>Loại tàu: 各停 <span class="ro">kakutei</span> <span class="vi">(dừng mọi ga)</span>, 快速 <span class="ro">kaisoku</span> <span class="vi">(nhanh)</span>, 急行 <span class="ro">kyūkō</span> <span class="vi">(tốc hành)</span>…</td></tr>
+            <tr><td><code>odpt:RailwayFare</code></td><td>Giá vé IC / vé giấy chính thức giữa hai ga</td></tr>
+            <tr><td><code>odpt:Railway</code>, <code>odpt:Station</code></td><td>Thứ tự ga, ghép ga ODPT ↔ HeartRails theo tên + tọa độ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card warn">
+          <h3>Trạng thái hiện tại</h3>
+          <p>Tài khoản ODPT <b>đang chờ duyệt</b>. Script đã viết sẵn: thiếu key thì in thông báo và thoát, pipeline vẫn chạy.</p>
+        </div>
+        <div class="card">
+          <h3>Ảnh hưởng</h3>
+          <p>Cột <code>run_time_min</code>, <code>train_types</code>, <code>fares.csv</code> đang trống; cạnh <code>service</code> (tàu nhanh bỏ ga) = 0. Khi có key: chạy 03 → 04 → 05 → 06, web tự hiện dữ liệu mà không sửa code.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phần 2 -->
+  <section class="slide section" data-title="Phần 2">
+    <div class="big grad">02</div>
+    <h1>Xử lý thành đồ thị</h1>
+    <p style="font-size:24px">Định nghĩa node, cạnh, làm sạch và phiên âm romaji.</p>
+  </section>
+
+  <!-- 8. Node -->
+  <section class="slide" data-title="Định nghĩa node">
+    <p class="kicker"><i></i>Xử lý · <code>src/04_build_graph.py</code></p>
+    <h2>Node: “ga trên một tuyến” và “ga vật lý”</h2>
+    <div class="grid g-6-4 fill">
+      <div>
+        <svg viewBox="0 0 640 330" width="100%" role="img" aria-label="Ga Shinjuku gồm nhiều node ga-theo-tuyến gộp thành một ga vật lý">
+          <rect x="150" y="20" width="340" height="290" rx="26" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="8 6"/>
+          <text x="320" y="50" text-anchor="middle" font-size="17" font-weight="700" fill="var(--accent)">group_id = 新宿|東京都 (Shinjuku)</text>
+          <g font-size="15" fill="var(--ink)">
+            <circle cx="225" cy="110" r="13" fill="#2b8a3e"/><text x="245" y="115">新宿@JR山手線 <tspan fill="var(--muted)">Yamanote</tspan></text>
+            <circle cx="225" cy="160" r="13" fill="#2b8a3e"/><text x="245" y="165">新宿@JR中央線 <tspan fill="var(--muted)">Chuo</tspan></text>
+            <circle cx="225" cy="210" r="13" fill="#1c7ed6"/><text x="245" y="215">新宿@小田急小田原線 <tspan fill="var(--muted)">Odakyu</tspan></text>
+            <circle cx="225" cy="260" r="13" fill="#7048e8"/><text x="245" y="265">新宿@都営新宿線 <tspan fill="var(--muted)">Toei</tspan></text>
+          </g>
+          <g stroke="var(--pink)" stroke-width="2.2" fill="none">
+            <path d="M212 118 Q190 135 212 152"/><path d="M212 168 Q190 185 212 202"/><path d="M212 218 Q190 235 212 252"/>
+          </g>
+          <text x="140" y="190" text-anchor="end" font-size="14" fill="var(--pink)" font-weight="600">cạnh chuyển tuyến</text>
+          <text x="140" y="208" text-anchor="end" font-size="14" fill="var(--pink)">(transfer, 2 chiều)</text>
+          <g stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ar)">
+            <line x1="490" y1="110" x2="600" y2="85"/><line x1="600" y1="130" x2="495" y2="118"/>
+          </g>
+          <text x="545" y="70" text-anchor="middle" font-size="14" fill="var(--muted)">代々木 Yoyogi</text>
+          <text x="560" y="155" text-anchor="middle" font-size="13" fill="var(--muted)">cạnh tàu (rail)</text>
+          <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="var(--muted)"/></marker></defs>
+        </svg>
+      </div>
+      <div class="grid" style="align-content:start">
+        <div class="card"><h3>Node = ga@tuyến</h3><p><code>station_id = 新宿@JR山手線</code>. Giữ được tuyến, hướng chạy và chuyển tuyến. <b>10.390 node.</b></p></div>
+        <div class="card"><h3>Ga vật lý (group_id)</h3><p>Gộp các node <b>cùng tên + cùng tỉnh + cách nhau ≤ 1 km</b>. <b>9.075 ga.</b> Dùng để hiển thị và tính độ đo theo km.</p></div>
+        <div class="card"><h3>Thuộc tính node</h3><p class="small">tên, tuyến, tỉnh, tọa độ, mã bưu chính, ga trước/sau, là terminal?, công ty vận hành, loại tuyến (MLIT).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Cạnh -->
+  <section class="slide" data-title="Định nghĩa cạnh">
+    <p class="kicker"><i></i>Xử lý · <code>edges.csv</code></p>
+    <h2>Bốn loại cạnh có hướng</h2>
+    <table>
+      <thead><tr><th style="width:16%">Loại</th><th>Ý nghĩa và cách tạo</th><th class="num" style="width:13%">Số cạnh</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag">rail</span></td><td>Tàu chạy từ ga sang ga kế tiếp (từ <code>prev</code>/<code>next</code>), tạo <b>cả hai chiều</b>; mỗi cạnh ghi ga cuối theo hướng chạy (<code>direction_terminal</code>) và khoảng cách km. Nhánh chỉ có một chiều trong dữ liệu được bổ sung cạnh ngược.</td><td class="num">19.594</td></tr>
+        <tr><td><span class="tag">transfer</span></td><td>Chuyển tuyến trong cùng một ga vật lý (giữa các node cùng <code>group_id</code>), 2 chiều.</td><td class="num">4.398</td></tr>
+        <tr><td><span class="tag">walk</span></td><td>Đi bộ giữa hai ga <b>khác tên</b> cách nhau ≤ 1 km (tính từ tọa độ).</td><td class="num">18.058</td></tr>
+        <tr><td><span class="tag a">service</span></td><td>Tàu nhanh chạy thẳng A → C bỏ qua ga giữa, có thời gian thật — lấy từ ODPT.</td><td class="num">0 <span class="xs muted">(chờ ODPT)</span></td></tr>
+        <tr class="hl"><td colspan="2"><b>Tổng cạnh</b> · cộng 10.390 node = <b>52.440 bản ghi</b> (mục tiêu ≈ 50k)</td><td class="num"><b>42.050</b></td></tr>
+      </tbody>
+    </table>
+    <p class="small muted" style="margin-top:16px">Cột của cạnh: <code>source, target, edge_type, line, distance_km, run_time_min, time_source, train_types, trains_per_weekday, direction_terminal</code>. Khoảng cách là đường chim bay giữa hai tọa độ, ghi rõ không phải km theo đường ray.</p>
+  </section>
+
+  <!-- 10. Làm sạch + romaji -->
+  <section class="slide" data-title="Làm sạch & romaji">
+    <p class="kicker"><i></i>Xử lý · <code>clean_counts.csv</code> · <code>src/04b_romaji.py</code></p>
+    <h2>Làm sạch dữ liệu và phiên âm romaji</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Các bước làm sạch</h3>
+        <table>
+          <tbody>
+            <tr><td>Dòng HeartRails</td><td class="num">10.390</td></tr>
+            <tr><td>Sau bỏ trống / trùng</td><td class="num">10.390</td></tr>
+            <tr><td>Ga vật lý (group_id)</td><td class="num">9.075</td></tr>
+            <tr><td>Tuyến có thông tin MLIT</td><td class="num">596 / 598</td></tr>
+            <tr><td>Cạnh có thời gian chính thức</td><td class="num">0 <span class="xs muted">(chờ ODPT)</span></td></tr>
+            <tr><td>Cặp ga có giá vé chính thức</td><td class="num">0 <span class="xs muted">(chờ ODPT)</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:10px">Kiểm tra: không có cạnh trỏ tới node không tồn tại; mọi cạnh <code>rail</code> đều có cạnh ngược.</p>
+      </div>
+      <div class="card">
+        <h3>Romaji cho người không đọc tiếng Nhật</h3>
+        <ul class="small">
+          <li>Thư viện <code>pykakasi</code> phiên âm Hepburn tự động.</li>
+          <li>Bảng sửa tay ~150 tên hay gặp và 47 tỉnh: 米原 → <b>Maibara</b> (không phải “Yonehara”), 拝島 → <b>Haijima</b>.</li>
+          <li>Quy tắc 新 <span class="ro">shin</span> <span class="vi">(mới)</span> + tên ga khác: 新下関 → <b>Shin-Shimonoseki</b>.</li>
+          <li>Từ mượn katakana → tiếng Anh: モノレール → Monorail.</li>
+          <li>Kết quả <code>romaji.csv</code> có cột <code>source</code> = manual / pykakasi; web tìm được bằng cả romaji lẫn chữ Nhật.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. Hai cấp đồ thị -->
+  <section class="slide" data-title="Hai cấp đồ thị">
+    <p class="kicker"><i></i>Xử lý · đồ thị đem đi tính độ đo</p>
+    <h2>Hai cấp đồ thị dùng để tính độ đo</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <span class="tag">Cấp A · <code>05_calculate_sna.py</code></span>
+        <h3 style="margin-top:6px">Ga theo tuyến, có hướng, không trọng số</h3>
+        <ul class="small">
+          <li>10.390 node; <b>23.992 cạnh</b> = rail + transfer.</li>
+          <li>Bỏ 18.058 cạnh đi bộ (không phải tàu chạy).</li>
+          <li>Độ đo: in/out-degree, betweenness, closeness, PageRank, HITS, clustering, SCC/WCC, Louvain.</li>
+          <li>Kết quả <code>metrics_nodes.csv</code>, <code>metrics_global.json</code>.</li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <span class="tag g">Cấp B · <code>05b_station_metrics.py</code></span>
+        <h3 style="margin-top:6px">Ga vật lý, có trọng số km</h3>
+        <ul class="small">
+          <li>9.075 ga; <b>9.624 cạnh</b>; tổng chiều dài 25.866 km.</li>
+          <li>Trọng số = km đường chim bay; đường ngắn nhất bằng Dijkstra.</li>
+          <li>Độ đo: degree, betweenness theo <b>bước</b> và theo <b>km</b>, closeness theo bước và theo km.</li>
+          <li>Lý do: một chặng Shinkansen 30 km ≠ một chặng tàu thường 1 km.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phần 3 -->
+  <section class="slide section" data-title="Phần 3">
+    <div class="big grad">03</div>
+    <h1>Các độ đo SNA</h1>
+    <p style="font-size:24px">Kết quả, ý nghĩa với mạng đường sắt và độ đo nào phù hợp nhất.</p>
+  </section>
+
+  <!-- 12. Toàn cục -->
+  <section class="slide" data-title="Độ đo toàn cục">
+    <p class="kicker"><i></i>Độ đo toàn mạng</p>
+    <h2>Mạng thưa, chia cụm rõ, đường đi rất dài</h2>
+    <div class="grid g4">
+      <div class="stat"><div class="n">0,0002</div><div class="l">mật độ (density)</div></div>
+      <div class="stat"><div class="n">49</div><div class="l">thành phần liên thông (SCC = WCC)</div></div>
+      <div class="stat"><div class="n">94,7%</div><div class="l">node thuộc thành phần lớn nhất (9.842)</div></div>
+      <div class="stat"><div class="n">1,0</div><div class="l">reciprocity (tỉ lệ cạnh có chiều ngược)</div></div>
+      <div class="stat"><div class="n">0,031</div><div class="l">clustering trung bình</div></div>
+      <div class="stat"><div class="n">0,959</div><div class="l">modularity · 122 cộng đồng Louvain</div></div>
+      <div class="stat"><div class="n">≈ 57</div><div class="l">chặng TB giữa hai ga · ≈ 590 km</div></div>
+      <div class="stat"><div class="n">≈ 241</div><div class="l">chặng đường kính · 2.541 km</div></div>
+    </div>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="callout"><p><b>Thưa + đường đi dài</b>: mạng không gian dạng chuỗi, mỗi ga chỉ nối vài ga kề — trái ngược mạng xã hội “thế giới nhỏ”.</p></div>
+      <div class="callout"><p><b>49 thành phần</b>: các đảo, monorail Okinawa, tuyến cáp kéo… tách khỏi mạng chính.</p></div>
+      <div class="callout"><p><b>Modularity 0,96</b>: cụm rất rõ, gần khớp đô thị / vùng.</p></div>
+    </div>
+    <p class="xs muted" style="margin-top:12px">Đường đi TB và đường kính ước lượng bằng BFS từ 400 nguồn ngẫu nhiên trong thành phần lớn nhất (cấp A); số km lấy từ cấp B.</p>
+  </section>
+
+  <!-- 13. Degree -->
+  <section class="slide" data-title="Degree">
+    <p class="kicker"><i></i>Độ đo node · Degree</p>
+    <h2>Degree và số tuyến: ga đầu mối trung chuyển (Q2)</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Số tuyến đi qua ga</h3>
+        <div class="bars">
+          <div class="bar"><span class="nm"><b>Tokyo</b> <span class="jp xs">東京</span></span><span class="t"><i style="width:100%"></i></span><span class="v">13</span></div>
+          <div class="bar"><span class="nm"><b>Omiya</b> <span class="jp xs">大宮</span></span><span class="t"><i style="width:92%"></i></span><span class="v">12</span></div>
+          <div class="bar"><span class="nm"><b>Yokohama</b> <span class="jp xs">横浜</span></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar"><span class="nm"><b>Ueno</b> <span class="jp xs">上野</span></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar"><span class="nm"><b>Shinjuku</b> <span class="jp xs">新宿</span></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar"><span class="nm"><b>Shibuya</b> <span class="jp xs">渋谷</span></span><span class="t"><i style="width:77%"></i></span><span class="v">10</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Degree ga vật lý (số ga kề trực tiếp)</h3>
+        <div class="bars">
+          <div class="bar alt"><span class="nm"><b>Yokohama</b></span><span class="t"><i style="width:100%"></i></span><span class="v">13</span></div>
+          <div class="bar alt"><span class="nm"><b>Nagoya</b></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar alt"><span class="nm"><b>Ikebukuro</b></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar alt"><span class="nm"><b>Sendai</b></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+          <div class="bar alt"><span class="nm"><b>Omiya</b></span><span class="t"><i style="width:85%"></i></span><span class="v">11</span></div>
+        </div>
+        <p class="small muted" style="margin-top:12px">Ở cấp A (ga@tuyến, tính cả cạnh chuyển tuyến), các node của ga Tokyo có in/out-degree cao nhất: 28.</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:16px"><p><b>Ý nghĩa:</b> degree đo <b>quy mô cục bộ</b> — ga có nhiều hướng đi trực tiếp. Dễ giải thích, đúng trực giác, nhưng không cho biết ga có quan trọng với toàn mạng hay không.</p></div>
+  </section>
+
+  <!-- 14. Betweenness -->
+  <section class="slide" data-title="Betweenness">
+    <p class="kicker"><i></i>Độ đo node · Betweenness (Q1)</p>
+    <h2>Betweenness theo bước vs theo km</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Theo số chặng (bước)</h3>
+        <div class="bars">
+          <div class="bar alt"><span class="nm"><b>Nagoya</b></span><span class="t"><i style="width:100%"></i></span><span class="v">.465</span></div>
+          <div class="bar alt"><span class="nm"><b>Shin-Osaka</b></span><span class="t"><i style="width:95%"></i></span><span class="v">.443</span></div>
+          <div class="bar alt"><span class="nm"><b>Kyoto</b></span><span class="t"><i style="width:94%"></i></span><span class="v">.440</span></div>
+          <div class="bar alt"><span class="nm"><b>Maibara</b></span><span class="t"><i style="width:93%"></i></span><span class="v">.434</span></div>
+          <div class="bar alt"><span class="nm"><b>Mikawa-Anjo</b></span><span class="t"><i style="width:89%"></i></span><span class="v">.412</span></div>
+          <div class="bar alt"><span class="nm"><b>Toyohashi</b></span><span class="t"><i style="width:88%"></i></span><span class="v">.410</span></div>
+        </div>
+        <p class="small muted" style="margin-top:10px">Toàn bộ là ga trên trục <b>Tokaido Shinkansen</b>: một chặng Shinkansen dài vài chục km chỉ tính 1 bước, nên đường “ngắn nhất” luôn đi tàu cao tốc.</p>
+      </div>
+      <div class="card accent">
+        <h3>Theo km (Dijkstra, trọng số km)</h3>
+        <div class="bars">
+          <div class="bar"><span class="nm"><b>Himeji</b> <span class="jp xs">姫路</span></span><span class="t"><i style="width:100%"></i></span><span class="v">.316</span></div>
+          <div class="bar"><span class="nm"><b>Okayama</b> <span class="jp xs">岡山</span></span><span class="t"><i style="width:97%"></i></span><span class="v">.307</span></div>
+          <div class="bar"><span class="nm"><b>Aioi</b> <span class="jp xs">相生</span></span><span class="t"><i style="width:93%"></i></span><span class="v">.294</span></div>
+          <div class="bar"><span class="nm"><b>Kyoto</b></span><span class="t"><i style="width:79%"></i></span><span class="v">.249</span></div>
+          <div class="bar"><span class="nm"><b>Nagoya</b></span><span class="t"><i style="width:77%"></i></span><span class="v">.243</span></div>
+          <div class="bar"><span class="nm"><b>Hiroshima</b></span><span class="t"><i style="width:76%"></i></span><span class="v">.239</span></div>
+        </div>
+        <p class="small muted" style="margin-top:10px">Nút thắt thật trên hành lang <b>San'yo</b> nối Kansai với Chugoku – Kyushu: gần như mọi lộ trình Đông ↔ Tây đều phải qua.</p>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="stat"><div class="n">0,61</div><div class="l">tương quan hạng Spearman giữa hai cách đo</div></div>
+      <div class="stat"><div class="n">6 / 20</div><div class="l">ga trùng nhau trong top 20</div></div>
+      <div class="stat"><div class="n">k = 300</div><div class="l">betweenness cấp A lấy mẫu 300 nguồn, seed 42</div></div>
+    </div>
+  </section>
+
+  <!-- 15. Closeness + Louvain -->
+  <section class="slide" data-title="Closeness & Louvain">
+    <p class="kicker"><i></i>Độ đo node · Closeness · Cộng đồng (Q3)</p>
+    <h2>Closeness theo km và cộng đồng Louvain</h2>
+    <div class="grid g2 fill">
+      <div class="card">
+        <h3>Closeness theo km = 1000 / km TB tới mọi ga</h3>
+        <table>
+          <thead><tr><th>Ga</th><th class="num">Closeness</th><th class="num">km TB</th></tr></thead>
+          <tbody>
+            <tr><td><b>Nagoya</b> <span class="jp xs">名古屋</span></td><td class="num">2,430</td><td class="num">≈ 411</td></tr>
+            <tr><td>Kokusai Center <span class="jp xs">国際センター</span></td><td class="num">2,427</td><td class="num">≈ 412</td></tr>
+            <tr><td>Fushimi <span class="jp xs">伏見</span></td><td class="num">2,427</td><td class="num">≈ 412</td></tr>
+            <tr><td>Sakae <span class="jp xs">栄</span></td><td class="num">2,426</td><td class="num">≈ 412</td></tr>
+            <tr><td class="muted">Shinjuku (so sánh)</td><td class="num muted">2,110</td><td class="num muted">≈ 474</td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:10px">Top toàn là ga trung tâm Nagoya: tâm hình học của mạng nằm ở vùng Chubu. Tính trên thành phần lớn nhất.</p>
+      </div>
+      <div class="card">
+        <h3>Louvain: 122 cộng đồng, modularity 0,959</h3>
+        <table>
+          <thead><tr><th>Cụm</th><th class="num">Số node</th><th>Tỉnh chiếm đa số</th></tr></thead>
+          <tbody>
+            <tr><td>#12</td><td class="num">306</td><td>Tokyo (303)</td></tr>
+            <tr><td>#47</td><td class="num">265</td><td>Osaka (241), Nara (24)</td></tr>
+            <tr><td>#41</td><td class="num">254</td><td>Fukuoka (245)</td></tr>
+            <tr><td>#61</td><td class="num">246</td><td>Chiba (167), Tokyo (43)</td></tr>
+            <tr><td>#24</td><td class="num">241</td><td>Hyogo (170), Osaka (71)</td></tr>
+            <tr><td>#13</td><td class="num">230</td><td>Tokyo (180), Saitama (37)</td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:10px">Cộng đồng khớp với <b>vùng đô thị</b> và <b>hệ thống tuyến</b>; vùng lớn như Tokyo bị chia thành nhiều cụm theo hướng tuyến tỏa ra.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. Ít ý nghĩa -->
+  <section class="slide" data-title="Độ đo ít ý nghĩa">
+    <p class="kicker"><i></i>Độ đo node · đánh giá</p>
+    <h2>Những độ đo ít ý nghĩa với mạng này</h2>
+    <div class="grid g3 fill">
+      <div class="card">
+        <h3>PageRank</h3>
+        <p>Top: Yokohama, Sendai, Hakata, Nagoya (các node có nhiều cạnh chuyển tuyến).</p>
+        <p class="small muted">Trên đồ thị đối xứng, PageRank gần như tỉ lệ với degree → không cho thông tin mới.</p>
+      </div>
+      <div class="card">
+        <h3>HITS (hub / authority)</h3>
+        <p>Hub = authority cho mọi ga.</p>
+        <p class="small muted">Mọi cạnh đều có chiều ngược nên “ga phát” và “ga nhận” trùng nhau.</p>
+      </div>
+      <div class="card">
+        <h3>Clustering</h3>
+        <p>Trung bình chỉ 0,031.</p>
+        <p class="small muted">Đường sắt có dạng chuỗi, rất ít tam giác; chỉ dùng để chứng minh cấu trúc chuỗi, không để xếp hạng ga.</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:18px"><p>Vẫn tính và báo cáo đủ để so sánh, nhưng <b>không dùng để kết luận</b> về vai trò của ga.</p></div>
+  </section>
+
+  <!-- 17. Có hướng? -->
+  <section class="slide" data-title="Có hướng hay vô hướng">
+    <p class="kicker"><i></i>Thảo luận</p>
+    <h2>Đồ thị có hướng — vì sao reciprocity = 1?</h2>
+    <table>
+      <thead><tr><th style="width:24%">Mô hình</th><th>Cạnh A → B nghĩa là</th><th style="width:24%">Đối xứng?</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td><b>1. Tĩnh</b> <span class="xs muted">(bài hiện tại)</span></td><td>“Trong ngày có ít nhất một chuyến từ A sang B”</td><td>Gần như luôn đối xứng</td></tr>
+        <tr><td><b>2. Có trọng số theo khung giờ</b></td><td>“Khung 7h–9h có n chuyến A → B, mất t phút”</td><td><b>Không</b>: sáng nhiều tàu vào trung tâm hơn chiều ra</td></tr>
+        <tr><td><b>3. Mạng theo thời gian</b> <span class="xs muted">(temporal)</span></td><td>Node = (ga, thời điểm); cạnh = “tàu rời A lúc 7:30, tới B lúc 7:34” + cạnh chờ tại ga</td><td><b>Có hướng tuyệt đối</b> (không đi ngược thời gian)</td></tr>
+      </tbody>
+    </table>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card"><h3>Kết luận đúng</h3><p class="small">Đồ thị được định nghĩa <b>có hướng</b>. Khi gộp cả ngày, tuyến nào có tàu A→B cũng có tàu B→A, nên reciprocity = 1 và độ đo có hướng trùng bản vô hướng. Đây là <b>phát hiện về dữ liệu</b>, không phải bỏ qua hướng.</p></div>
+      <div class="card warn"><h3>Muốn hướng có ý nghĩa</h3><p class="small">Cần giờ tàu thật (<code>odpt:TrainTimetable</code>) để làm mô hình 2–3: hub/authority theo giờ cao điểm, “đến sớm nhất nếu đi lúc 7:30”, temporal closeness.</p></div>
+    </div>
+  </section>
+
+  <!-- 18. Độ đo phù hợp nhất -->
+  <section class="slide" data-title="Độ đo phù hợp nhất">
+    <p class="kicker"><i></i>Đánh giá</p>
+    <h2>Độ đo nào phù hợp nhất với mạng ga?</h2>
+    <table>
+      <thead><tr><th style="width:5%">#</th><th style="width:28%">Độ đo</th><th>Trả lời câu hỏi</th><th style="width:15%">Mức độ</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>1</td><td><b>Betweenness theo km</b> (ga vật lý)</td><td>Q1 — ga cầu nối, điểm nghẽn giữa các vùng: Himeji, Okayama</td><td><span class="tag g">Quan trọng nhất</span></td></tr>
+        <tr><td>2</td><td><b>Degree / số tuyến</b></td><td>Q2 — ga đầu mối trung chuyển: Tokyo, Omiya, Yokohama</td><td><span class="tag g">Quan trọng</span></td></tr>
+        <tr><td>3</td><td><b>Closeness theo km</b></td><td>Ga ở “trung tâm” địa lý của mạng: Nagoya</td><td><span class="tag g">Quan trọng</span></td></tr>
+        <tr><td>4</td><td><b>Louvain + SCC/WCC</b></td><td>Q3, Q4 — cụm vùng, mạng tách rời</td><td><span class="tag g">Quan trọng</span></td></tr>
+        <tr><td>5</td><td>Betweenness / closeness theo bước</td><td>Dùng để <b>so sánh</b>, cho thấy trọng số km quan trọng</td><td><span class="tag">Bổ trợ</span></td></tr>
+        <tr><td>6</td><td>PageRank, HITS, clustering, reciprocity</td><td>Lặp lại degree hoặc trùng nhau do mạng đối xứng, dạng chuỗi</td><td><span class="tag r">Ít ý nghĩa</span></td></tr>
+      </tbody>
+    </table>
+    <p class="small muted" style="margin-top:14px">Lý do chính: mạng đường sắt là <b>mạng không gian</b> — độ dài cạnh khác nhau rất nhiều, nên độ đo có trọng số km phản ánh thực tế tốt hơn đếm số chặng.</p>
+  </section>
+
+  <!-- Phần 4 -->
+  <section class="slide section" data-title="Phần 4">
+    <div class="big grad">04</div>
+    <h1>Ứng dụng</h1>
+    <p style="font-size:24px">Web tĩnh đọc CSV đã xử lý, và ý nghĩa thực tế của các độ đo.</p>
+  </section>
+
+  <!-- 19. Web tra cứu -->
+  <section class="slide" data-title="Web: tra cứu ga">
+    <p class="kicker"><i></i>Ứng dụng · <code>web/index.html</code></p>
+    <h2>Tra cứu ga</h2>
+    <div class="grid g-6-4 fill">
+      <figure><img class="shot" src="slide-art/rail-web-station.jpg" width="800" height="500" alt="Trang tra cứu ga Shinjuku: tuyến đi qua, bản đồ và độ đo SNA" loading="lazy" /><figcaption>Ga Shinjuku: 11 tuyến, bản đồ và độ đo theo ga vật lý.</figcaption></figure>
+      <div class="grid" style="align-content:start">
+        <div class="card"><h3>Tìm ga</h3><p class="small">Gõ romaji hoặc chữ Nhật (<i>shinjuku</i>, 新宿); gợi ý theo số tuyến.</p></div>
+        <div class="card"><h3>Ga A nối với ga nào</h3><p class="small">Bảng cạnh đi ra / đi vào: ga kế, tuyến, chiều về terminal nào; ga chuyển tuyến; ga đi bộ ≤ 1 km.</p></div>
+        <div class="card"><h3>Độ đo của ga</h3><p class="small">Betweenness theo km / bước kèm thứ hạng, closeness (km TB), degree, cộng đồng.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20. Web tìm đường -->
+  <section class="slide" data-title="Web: tìm đường">
+    <p class="kicker"><i></i>Ứng dụng · <code>web/route.html</code></p>
+    <h2>Tìm đường giữa hai ga</h2>
+    <div class="grid g-6-4 fill">
+      <figure><img class="shot" src="slide-art/rail-web-route.jpg" width="800" height="500" alt="Lộ trình Tokyo đến Himeji: 19 chặng, 1 lần chuyển tuyến, 564,8 km" loading="lazy" /><figcaption>Tokyo → Himeji: 19 chặng, 1 lần chuyển tuyến tại Shin-Osaka, 564,8 km.</figcaption></figure>
+      <div class="grid" style="align-content:start">
+        <div class="card"><h3>Dijkstra, 4 tiêu chí</h3><p class="small">Ít chặng nhất · ít chuyển tuyến nhất · ngắn nhất (km) · nhanh nhất (chỉ khi có thời gian chính thức).</p></div>
+        <div class="card"><h3>Từng chặng</h3><p class="small">Tuyến, loại tuyến, công ty, hướng về terminal nào, số ga, thời gian, loại tàu, giá vé; vẽ lộ trình lên bản đồ.</p></div>
+        <div class="card warn"><h3>Trung thực với dữ liệu</h3><p class="small">Chặng chưa có dữ liệu ODPT ghi “Chưa có dữ liệu chính thức” và không cộng vào tổng.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21. Web đồ thị -->
+  <section class="slide" data-title="Web: đồ thị mạng">
+    <p class="kicker"><i></i>Ứng dụng · <code>web/graph.html</code></p>
+    <h2>Trực quan hóa đồ thị mạng</h2>
+    <div class="grid g2">
+      <figure><img class="shot" src="slide-art/rail-web-graph-geo.jpg" width="800" height="500" alt="Bố cục địa lý quanh Tokyo trên nền bản đồ, màu theo cộng đồng Louvain" loading="lazy" /><figcaption><b>Địa lý</b>: 9.075 ga trên nền bản đồ, màu = cộng đồng Louvain, kích thước = betweenness theo km.</figcaption></figure>
+      <figure><img class="shot" src="slide-art/rail-web-graph-ego.jpg" width="800" height="500" alt="Đồ thị node–cạnh quanh ga Shinjuku, 3 bước" loading="lazy" /><figcaption><b>Đồ thị</b>: mạng con node–cạnh quanh Shinjuku (3 bước, 80 ga), kéo thả, bấm đúp đổi ga trung tâm.</figcaption></figure>
+    </div>
+    <p class="small muted" style="margin-top:14px">Ba bố cục: <b>Địa lý</b> (tọa độ thật, Web Mercator khớp bản đồ) · <b>Lực</b> (d3-force, chỉ theo cấu trúc kết nối) · <b>Đồ thị</b> (mạng con quanh một ga). Tô màu / kích thước theo cộng đồng, loại tuyến, betweenness, closeness, số tuyến.</p>
+  </section>
+
+  <!-- 22. Ứng dụng thực tế -->
+  <section class="slide" data-title="Ứng dụng thực tế">
+    <p class="kicker"><i></i>Ứng dụng · ý nghĩa thực tế</p>
+    <h2>Các độ đo dùng để làm gì?</h2>
+    <div class="grid g2 fill">
+      <div class="card"><h3>Khả năng chống chịu (resilience)</h3><p class="small">Ga betweenness theo km cao là <b>điểm nghẽn</b>: sự cố ở Himeji / Okayama cắt đứt liên lạc Kansai ↔ Chugoku – Kyushu. Dùng để ưu tiên tuyến dự phòng, phương án chạy vòng.</p></div>
+      <div class="card"><h3>Quy hoạch trung chuyển</h3><p class="small">Degree / số tuyến chỉ ra ga đầu mối (Tokyo, Omiya, Shinjuku) — nơi cần sức chứa sân ga, lối chuyển tuyến, thông tin hành khách.</p></div>
+      <div class="card"><h3>Phân vùng vận hành và du lịch</h3><p class="small">Cộng đồng Louvain gần khớp vùng đô thị → gợi ý phạm vi vé ngày / vé vùng, khu vực điều độ.</p></div>
+      <div class="card"><h3>Vị trí đặt dịch vụ</h3><p class="small">Closeness theo km cho thấy Nagoya gần mọi nơi nhất trên mạng → hợp đặt trung tâm điều phối, kho, sự kiện toàn quốc.</p></div>
+    </div>
+  </section>
+
+  <!-- 23. Hạn chế -->
+  <section class="slide" data-title="Hạn chế & hướng phát triển">
+    <p class="kicker"><i></i>Tổng kết</p>
+    <h2>Hạn chế và hướng phát triển</h2>
+    <div class="grid g2 fill">
+      <div class="card warn">
+        <h3>Hạn chế</h3>
+        <ul class="small">
+          <li>Chưa có thời gian chạy, loại tàu, giá vé chính thức (chờ ODPT; ODPT cũng chủ yếu phủ Kanto).</li>
+          <li>Km là <b>đường chim bay</b> giữa hai ga, không phải km đường ray.</li>
+          <li>Mạng tĩnh gộp cả ngày → không thấy được chiều đi theo giờ.</li>
+          <li>Betweenness cấp A lấy mẫu k = 300; romaji tự động có thể sai một số địa danh.</li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <h3>Hướng phát triển</h3>
+        <ul class="small">
+          <li>Có key ODPT: chạy 03 → 06, thêm cạnh <code>service</code> (tàu nhanh), thời gian và giá vé thật.</li>
+          <li>Mô hình có trọng số theo khung giờ và mạng theo thời gian (temporal): tìm đường theo giờ xuất phát.</li>
+          <li>Mô phỏng chống chịu: lần lượt bỏ các ga betweenness cao, đo thành phần liên thông lớn nhất còn lại.</li>
+          <li>Km theo đường ray từ lớp RailroadSection của MLIT.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 24. Kết luận -->
+  <section class="slide section" data-title="Kết luận">
+    <p class="kicker"><i></i>Kết luận</p>
+    <h1 style="font-size:50px">Mạng đường sắt Nhật Bản là <span class="grad">mạng không gian</span>:<br>thưa, dạng chuỗi, chia cụm theo vùng.</h1>
+    <ul style="max-width:1050px">
+      <li><b>Q1:</b> Cầu nối Đông ↔ Tây là hành lang San'yo (Himeji, Okayama, Aioi) khi đo theo km; đo theo số chặng thì lệch sang Tokaido Shinkansen.</li>
+      <li><b>Q2:</b> Đầu mối trung chuyển: Tokyo (13 tuyến), Omiya, Yokohama, Shinjuku.</li>
+      <li><b>Q3:</b> 122 cộng đồng, modularity 0,96, khớp vùng đô thị. <b>Q4:</b> 94,7% ga liên thông; TB ≈ 57 chặng / 590 km.</li>
+    </ul>
+    <p class="small muted" style="margin-top:20px">Nguồn: HeartRails Express · 国土数値情報 N02 <span class="ro">(Kokudo Sūchi Jōhō)</span>, MLIT, CC BY 4.0 · ODPT · OpenStreetMap. Độ đo tính bằng NetworkX và python-louvain.</p>
+    <p style="font-size:30px;font-weight:800;margin-top:12px">Cảm ơn thầy và các bạn đã lắng nghe!</p>
+  </section>
+
+</main>
+
+<a class="back" href="index.html">← Danh sách tài liệu</a>
+<div class="hud" aria-label="Điều khiển slide">
+  <button type="button" id="prev" aria-label="Slide trước">←</button>
+  <span class="cnt" id="cnt">1 / 1</span>
+  <button type="button" id="next" aria-label="Slide sau">→</button>
+  <button type="button" id="fs" aria-label="Toàn màn hình" title="Toàn màn hình (F)">⛶</button>
+  <button type="button" id="theme" aria-label="Đổi giao diện sáng / tối" title="Sáng / tối (T)">◐</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var cnt = document.getElementById("cnt"), bar = document.getElementById("progress");
+  var i = 0;
+
+  function fit() {
+    var s = Math.min(window.innerWidth / 1340, window.innerHeight / 770);
+    document.documentElement.style.setProperty("--s", String(Math.max(0.2, s)));
+    slides.forEach(function (el) { el.style.setProperty("--s", String(Math.max(0.2, s))); });
+  }
+  function show(n, push) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (el, k) { el.classList.toggle("on", k === i); el.setAttribute("aria-hidden", String(k !== i)); });
+    cnt.textContent = (i + 1) + " / " + slides.length;
+    bar.style.width = ((i + 1) / slides.length * 100) + "%";
+    var title = slides[i].getAttribute("data-title");
+    if (title) document.title = title + " · Mạng ga tàu Nhật Bản";
+    if (push !== false) { try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) { /* file:// */ } }
+  }
+  function fromHash() { var n = parseInt(location.hash.slice(1), 10); return isNaN(n) ? 0 : n - 1; }
+
+  document.getElementById("prev").onclick = function () { show(i - 1); };
+  document.getElementById("next").onclick = function () { show(i + 1); };
+  document.getElementById("fs").onclick = toggleFs;
+  document.getElementById("theme").onclick = toggleTheme;
+
+  function toggleFs() {
+    if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+  function isDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function toggleTheme() {
+    var next = isDark() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("rail-slide-theme", next); } catch (e) { /* bỏ qua */ }
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === "ArrowRight" || k === "PageDown" || k === " " || k === "Enter") { e.preventDefault(); show(i + 1); }
+    else if (k === "ArrowLeft" || k === "PageUp" || k === "Backspace") { e.preventDefault(); show(i - 1); }
+    else if (k === "Home") show(0);
+    else if (k === "End") show(slides.length - 1);
+    else if (k === "f" || k === "F") toggleFs();
+    else if (k === "t" || k === "T") toggleTheme();
+  });
+  var x0 = null;
+  document.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+  window.addEventListener("resize", fit);
+  window.addEventListener("hashchange", function () { show(fromHash(), false); });
+  fit();
+  show(fromHash(), false);
+})();
+</script>
+</body>
+</html>
